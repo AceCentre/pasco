@@ -1,0 +1,5 @@
+#!/bin/sh
+DIR=$(dirname $(dirname $0))
+DIST=$1
+
+cp -r $DIR/html/* $DIST && sed -i "" -e "s%<!-- INJECT SCRIPTS -->%<script src=\"cordova.js\"></script>%" $DIST/index.html
