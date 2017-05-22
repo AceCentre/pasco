@@ -15,6 +15,14 @@ Promise.all([
   .then(start)
   .catch(handle_error);
 
+// Cordova specific
+window.addEventListener('deviceready', function() { 
+  if(window.device) {
+    document.querySelector('html').classList
+      .add(window.device.platform.toLowerCase());
+  }
+});
+
 window.addEventListener('unload', function() {
   if(speak_ctx && speak_ctx.is_native && speak_ctx.synthesizer) {
     speak_ctx.api.release_synthesizer(speak_ctx.synthesizer);
@@ -153,7 +161,7 @@ function _on_new_move(node) {
   state._highlighted_elements.push(node.dom_element);
   var running_move = state._running_move = start_speaking(node.text)
       .then(function(hdl) {
-        return utterance_finish(hdl)
+        return speak_finish(hdl)
           .then(function() {
             return utterance_release(hdl);
           });
@@ -259,7 +267,7 @@ function init_speak() {
           is_native: true,
           api: api
         };
-        return speak_ctx.init_synthesizer()
+        return speak_ctx.api.init_synthesizer()
           .then(function(synthesizer) {
             speak_ctx.synthesizer = synthesizer;
           });
@@ -300,6 +308,7 @@ function start_speaking(speech) {
     return speak_ctx.api.init_utterance(speech)
       .then(function(utterance) {
         return speak_ctx.api.speak_utterance(speak_ctx.synthesizer, utterance)
+          .then(function(){ return utterance; });
       });
   } else {
     speak_ctx.responsiveVoice.speak(speech);
@@ -309,13 +318,13 @@ function start_speaking(speech) {
 
 function utterance_release(utterance_hdl) {
   if(speak_ctx.is_native) {
-    return speak_ctx.api.release_utterance(utterance);
+    return speak_ctx.api.release_utterance(utterance_hdl);
   } else {
     return Promise.resolve();
   }
 }
 
-function utterance_finish(utterance_hdl) {
+function speak_finish(utterance_hdl) {
   if(speak_ctx.is_native) {
     return speak_ctx.api.speak_finish(speak_ctx.synthesizer, utterance_hdl);
   } else {

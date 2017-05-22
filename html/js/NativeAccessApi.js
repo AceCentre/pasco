@@ -28,7 +28,7 @@
 
   function mk_direct_delegate(action) {
     return function() {
-      this._exec(action, slice.call(arguments));
+      return this._exec(action, slice.call(arguments));
     };
   }
   

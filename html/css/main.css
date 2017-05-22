@@ -1,3 +1,8 @@
+html.ios,
+html.ios body{
+  padding: 0;
+  marigin: 0;
+}
 .highlight {
   color: darkorange;
 }
