@@ -139,10 +139,7 @@ function _on_keyhit(ev) {
 }
 
 function _before_new_move() {
-  if(state._active_utterance) {
-    stop_speaking(state._active_utterance);
-    state._active_utterance = null;
-  }
+  stop_speaking();
   var el;
   while((el = state._highlighted_elements.pop()))
     el.classList.remove('highlight' || config.highlight_class);
@@ -156,10 +153,8 @@ function _on_new_move(node) {
   state._highlighted_elements.push(node.dom_element);
   var running_move = state._running_move = start_speaking(node.text)
       .then(function(hdl) {
-        state._active_utterance = hdl;
         return utterance_finish(hdl)
           .then(function() {
-            state._active_speech = null;
             return utterance_release(hdl);
           });
       })
@@ -304,7 +299,7 @@ function start_speaking(speech) {
   if(speak_ctx.is_native) {
     return speak_ctx.api.init_utterance(speech)
       .then(function(utterance) {
-        return speak_ctx.api.speak_utterance(utterance)
+        return speak_ctx.api.speak_utterance(speak_ctx.synthesizer, utterance)
       });
   } else {
     speak_ctx.responsiveVoice.speak(speech);
@@ -322,7 +317,7 @@ function utterance_release(utterance_hdl) {
 
 function utterance_finish(utterance_hdl) {
   if(speak_ctx.is_native) {
-    return speak_ctx.api.speak_finish(utterance_hdl);
+    return speak_ctx.api.speak_finish(speak_ctx.synthesizer, utterance_hdl);
   } else {
     return new Promise(function(resolve, reject) {
       var ref = [null, resolve];
@@ -344,9 +339,9 @@ function utterance_finish(utterance_hdl) {
   }
 }
 
-function stop_speaking(utterance_hdl) {
+function stop_speaking() {
   if(speak_ctx.is_native) {
-    return speak_ctx.api.stop_speaking(utterance_hdl);
+    return speak_ctx.api.stop_speaking(speak_ctx.synthesizer);
   } else {
     responsiveVoice.cancel();
     var call_list = [];
@@ -372,8 +367,8 @@ function load_tree(fn) {
     return Promise.resolve();
   }
   return ajaxcall(fn)
-    .then(function(xhr) {
-      tree_element.innerHTML = markdown.toHTML(xhr.responseText);
+    .then(function(data) {
+      tree_element.innerHTML = markdown.toHTML(data);
       tree = parse_dom_tree(tree_element);
     })
     .catch(handle_error_checkpoint());
@@ -382,8 +377,8 @@ function load_tree(fn) {
 function load_config(fn) {
   // ready to start, load config
   return ajaxcall(fn)
-    .then(function(xhr) {
-      config = JSON.parse(xhr.responseText);
+    .then(function(data) {
+      config = JSON.parse(data);
       if(!config)
         throw new Error("No input config!");
     })
@@ -463,19 +458,41 @@ function handle_error(err) {
 function ajaxcall(url, options) {
   return new Promise(function(resolve, reject) {
     options = options || {};
-    var xhr = new XMLHttpRequest();
-    xhr.open(options.method || 'GET', url);
-    xhr.onreadystatechange = function() {
-      if(xhr.readyState === XMLHttpRequest.DONE) {
-        if(xhr.status >= 200 && xhr.status < 300) {
-          resolve(xhr)
-        } else {
-          var err = new Error(xhr.statusText || 'unknown status ' + xhr.satus);
-          err.xhr = xhr;
-          reject(err)
+    if(!/^(https?):\/\//.test(url) && window.cordova &&
+       window.resolveLocalFileSystemURL) {
+      var newurl = cordova.file.applicationDirectory + "www/" + url
+      function onSuccess(fileEntry) {
+        fileEntry.file(function(file) {
+          var reader = new FileReader();
+
+          reader.onloadend = function(e) {
+            console.log("did load file" +this.result)
+            resolve(this.result)
+          }
+
+          reader.readAsText(file);
+        });
+
+      }
+      function onFail(err) {
+        reject("Fail to load `" + newurl + "` -- " + err+'')
+      }
+      window.resolveLocalFileSystemURL(newurl, onSuccess, onFail);
+    } else {
+      var xhr = new XMLHttpRequest();
+      xhr.open(options.method || 'GET', url);
+      xhr.onreadystatechange = function() {
+        if(xhr.readyState === XMLHttpRequest.DONE) {
+          if(xhr.status >= 200 && xhr.status < 300) {
+            resolve(xhr.responseText)
+          } else {
+            var err = new Error(xhr.statusText || 'unknown status ' + xhr.satus);
+            err.xhr = xhr;
+            reject(err)
+          }
         }
       }
+      xhr.send(options.data || null);
     }
-    xhr.send(options.data || null);
   });
 }
