@@ -1,0 +1,2 @@
+// scripts
+"dist-cordova": "rm -rf ./dist/ && mkdir ./dist && cp -r ./html/* ./dist/ && sed -i -e \"s%<!-- INJECT SCRIPTS -->%<script src=\\\"cordova.js\\\"></script>%\" ./dist/index.html"

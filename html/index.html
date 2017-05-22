@@ -3,7 +3,10 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
 
     <title>Auditory Scanning</title>
 
@@ -14,6 +17,7 @@
   <body>
     <div id="tree">
     </div>
+    <!-- INJECT SCRIPTS -->
     <script src="bower_components/markdown-js/dist/markdown.js"></script>
     <script src="js/native_access_api.js"></script>
     <script src="js/main.js"></script>
