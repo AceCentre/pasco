@@ -1,0 +1,26 @@
+{
+  "name": "audscan",
+  "version": "0.0.1",
+  "description": "Auditory Scanning, Intended to be cross-platform",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "browser-sync start -c bs-config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hosseinamin/audscan.git"
+  },
+  "author": "Hossein Amin <hossein@aminbros.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hosseinamin/audscan/issues"
+  },
+  "homepage": "https://github.com/hosseinamin/audscan#readme",
+  "dependencies": {
+    "browser-sync": "^2.18.12"
+  }
+}

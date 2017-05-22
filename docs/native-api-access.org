@@ -1,0 +1,11 @@
+* Functions
+
+** has_synthesizer
+** has_audio_device
+** init_synthesizer
+** init_utterance
+** release_synthesizer
+** release_utterance
+** speak_utterance
+** stop_speaking
+** speak_finish
