@@ -15,3 +15,13 @@ Run the following
 # Config
 
 configuration file is at `html/config.json`. modes are `auto` and `switch`.
+
+
+# Keyboard actions
+
+```
+ArrowUp -> Previous # on switch mode
+ArrowDown -> Next # on switch mode
+ArrowRight -> Go into or select
+ArrowLeft -> Go out
+```
