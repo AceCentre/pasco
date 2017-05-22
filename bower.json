@@ -6,5 +6,8 @@
     "Hossein Amin <hossein@aminbros.com>"
   ],
   "license": "ISC",
-  "homepage": ""
+  "homepage": "",
+  "dependencies": {
+    "markdown-js": "^0.6.2"
+  }
 }
