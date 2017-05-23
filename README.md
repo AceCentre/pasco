@@ -20,8 +20,8 @@ configuration file is at `html/config.json`. modes are `auto` and `switch`.
 # Keyboard actions
 
 ```
-ArrowUp -> Previous # on switch mode
-ArrowDown -> Next # on switch mode
-ArrowRight -> Go into or select
-ArrowLeft -> Go out
+ArrowUp or W -> Previous # on switch mode
+ArrowDown or S -> Next # on switch mode
+ArrowRight or D -> Go into or select
+ArrowLeft or A -> Go out
 ```
