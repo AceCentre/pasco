@@ -5,6 +5,8 @@ Promise.all([
   new Promise(function(resolve) { // domready
     document.addEventListener('DOMContentLoaded', function() {
       document.removeEventListener('DOMContentLoaded', arguments.callee, false);
+      if(_needs_theinput())
+        _handle_theinput();
       resolve();
     }, false);
   })
@@ -36,12 +38,18 @@ var _modes = ['auto', 'switch'],
       auto: {
         39: { preventDefault: true, func: _tree_go_in }, // ArrowRight
         37: { preventDefault: true, func: _tree_go_out }, // ArrowLeft
+        68: { preventDefault: true, func: _tree_go_in }, // D
+        65: { preventDefault: true, func: _tree_go_out }, // A
       },
       'switch': {
         39: { preventDefault: true, func: _tree_go_in }, // ArrowRight
         37: { preventDefault: true, func: _tree_go_out }, // ArrowLeft
         38: { preventDefault: true, func: _tree_go_previous }, // ArrowUp
         40: { preventDefault: true, func: _tree_go_next }, // ArrowDown
+        87: { preventDefault: true, func: _tree_go_previous }, // W
+        68: { preventDefault: true, func: _tree_go_in }, // D
+        83: { preventDefault: true, func: _tree_go_next }, // S
+        65: { preventDefault: true, func: _tree_go_out }, // A
       }
     };
 
@@ -119,12 +127,22 @@ function stop() {
     delete state._active_timeout;
   }
   state._stopped = true;
+  var theinput = document.getElementById('theinput');
+  if(theinput && _needs_theinput()) {
+    theinput.removeEventListener('blur', _theinput_refocus, false);
+  }
 }
 
 function _on_mode_change() {
   stop();
   state = renew_state(state)
   start(state);
+}
+function _theinput_refocus() {
+  var theinput = this;
+  setTimeout(function() {
+    theinput.focus();
+  }, 100);
 }
 
 function renew_state(_state) {
@@ -475,7 +493,6 @@ function ajaxcall(url, options) {
           var reader = new FileReader();
 
           reader.onloadend = function(e) {
-            console.log("did load file" +this.result)
             resolve(this.result)
           }
 
@@ -504,4 +521,26 @@ function ajaxcall(url, options) {
       xhr.send(options.data || null);
     }
   });
+}
+
+function _needs_theinput() {
+  return /iP(hone|od|ad)/.test(navigator.userAgent);
+}
+
+function _handle_theinput() {
+  var theinputwrp = document.getElementById('theinput-wrp');
+  var theinput = document.getElementById('theinput');
+  function preventdefault(evt) {
+    evt.preventDefault();
+  }
+  if(theinput) {
+    theinput.addEventListener('blur', _theinput_refocus, false);
+    theinput.focus();
+    theinput.addEventListener('keydown', preventdefault, false);
+    theinput.addEventListener('keyup', preventdefault, false);
+    document.addEventListener('scroll', function() {
+      theinputwrp.style.top = window.scrollY + 'px';
+      theinputwrp.style.left = window.scrollX + 'px';
+    }, false);
+  }
 }
