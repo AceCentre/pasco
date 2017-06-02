@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "browser-sync start -c bs-config.js"
+    "dev": "concurrently \"npm run dev-bs\" \"gulp less-watch\"",
+    "dev-bs": "browser-sync start -c bs-config.js"
   },
   "repository": {
     "type": "git",
@@ -21,6 +22,10 @@
   },
   "homepage": "https://github.com/hosseinamin/audscan#readme",
   "dependencies": {
-    "browser-sync": "^2.18.12"
+    "browser-sync": "^2.18.12",
+    "concurrently": "^3.4.0",
+    "gulp": "^3.9.1",
+    "gulp-less": "^3.3.0",
+    "gulp-sourcemaps": "^2.6.0"
   }
 }

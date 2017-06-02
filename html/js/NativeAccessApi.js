@@ -41,7 +41,8 @@
     'release_utterance',
     'speak_utterance',
     'stop_speaking',
-    'speak_finish'
+    'speak_finish',
+    'get_voices'
   ];
 
   for(var i = 0, len = direct_delegates.length; i < len; ++i)

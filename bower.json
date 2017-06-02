@@ -8,6 +8,7 @@
   "license": "ISC",
   "homepage": "",
   "dependencies": {
-    "markdown-js": "^0.6.2"
+    "markdown-js": "^0.6.2",
+    "underscore": "^1.8.3"
   }
 }

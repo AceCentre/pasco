@@ -1,3 +1,4 @@
+var newEl = document.createElement.bind(document);
 var default_config = 'config.json', default_tree = 'tree.md', config, tree,
     state = null, tree_element, speak_ctx;
 Promise.all([
@@ -33,25 +34,48 @@ window.addEventListener('unload', function() {
 
 /* execution code start */
 
-var _modes = ['auto', 'switch'],
-    _keyhit_delegates = {
-      auto: {
-        39: { preventDefault: true, func: _tree_go_in }, // ArrowRight
-        37: { preventDefault: true, func: _tree_go_out }, // ArrowLeft
-        68: { preventDefault: true, func: _tree_go_in }, // D
-        65: { preventDefault: true, func: _tree_go_out }, // A
-      },
-      'switch': {
-        39: { preventDefault: true, func: _tree_go_in }, // ArrowRight
-        37: { preventDefault: true, func: _tree_go_out }, // ArrowLeft
-        38: { preventDefault: true, func: _tree_go_previous }, // ArrowUp
-        40: { preventDefault: true, func: _tree_go_next }, // ArrowDown
-        87: { preventDefault: true, func: _tree_go_previous }, // W
-        68: { preventDefault: true, func: _tree_go_in }, // D
-        83: { preventDefault: true, func: _tree_go_next }, // S
-        65: { preventDefault: true, func: _tree_go_out }, // A
+function keys_from_config(mode, _default) {
+  return typeof config[mode + '_keys'] == 'object' ?
+    _.mapObject(config[mode + '_keys'], function(val, key) {
+      if(val.func in _all_delegates) {
+        val.func = _all_delegates[val.func]
+      } else {
+        throw new Error("key has no func!, " + JSON.stringify(val))
       }
+      return val;
+    }) : _default;
+}
+var _alt_voice_rate_by_name = { 'default': 1.0, 'max': 2.0, 'min': 0.5 },
+    _modes = ['auto', 'switch'],
+    _all_delegates = {
+      "tree_go_in": _tree_go_in, "tree_go_out": _tree_go_out,
+      "tree_go_previous": _tree_go_previous, "tree_go_next": _tree_go_next,
+    },
+    _debug_keys = {
+      80: { func: function() { // P (toggle play)
+        if(state._stopped) {
+          state = renew_state(state)
+          start(state);
+          console.log(state)
+        } else {
+          stop();
+        }
+      } }
     };
+
+window.addEventListener('keydown', function(ev) {
+  var code = ev.charCode || ev.keyCode;
+  // look for delegate calls
+  var delegate = _debug_keys[code];
+  if(delegate) {
+    if(delegate.preventDefault === undefined ||
+       delegate.preventDefault)
+      ev.preventDefault();
+    var ret = delegate.func(ev);
+    if(ret && ret.catch)
+      ret.catch(handle_error);
+  }
+}, false);
 
 
 function start(_state) {
@@ -62,20 +86,24 @@ function start(_state) {
   if(tree.nodes.length == 0)
     throw new Error("Tree has zero length");
   state = _state = _state || {
+    can_move: true,
     mode: config.mode || 'auto',
     positions: [ {
       tree: tree,
       index: -1
     } ],
+    _active_elements: [],
     _highlighted_elements: []
   };
   if(_modes.indexOf(state.mode) == -1)
     throw new Error("Unknown mode " + state.mode);
   tree_element.addEventListener('x-mode-change', _on_mode_change, false);
   window.addEventListener('keydown', _on_keyhit, false);
+  window.addEventListener('resize', _tree_needs_resize, false);
   if(state.mode == 'auto') {
     auto_next();
   }
+  _update_active_positions();
   function auto_next() {
     if(_state._stopped)
       return; // stop the loop
@@ -121,6 +149,7 @@ function start(_state) {
 function stop() {
   tree_element.removeEventListener('x-mode-change', _on_mode_change, false);
   window.removeEventListener('keydown', _on_keyhit, false);
+  window.removeEventListener('resize', _tree_needs_resize, false);
   _before_new_move(); // stop speech and highlights
   if(state._active_timeout) {
     clearTimeout(state._active_timeout);
@@ -151,15 +180,19 @@ function renew_state(_state) {
   return _state;
 }
 
+function _clean_state(_state) {
+  _update_active_positions(_state, []);
+}
+
 function _on_keyhit(ev) {
   var code = ev.charCode || ev.keyCode;
   // look for delegate calls
-  var delegate = _keyhit_delegates[state.mode][code];
+  var delegate = config._keyhit_delegates[state.mode][code+''];
   if(delegate) {
     if(delegate.preventDefault)
       ev.preventDefault();
     var ret = delegate.func(ev);
-    if(ret.catch)
+    if(ret && ret.catch)
       ret.catch(handle_error);
   }
 }
@@ -171,25 +204,141 @@ function _before_new_move() {
     el.classList.remove('highlight' || config.highlight_class);
 }
 
-function _on_new_move(node) {
-  node = node || _get_current_node();
-  node.dom_element.classList.add('highlight' || config.highlight_class);
-  if(node.dom_element.scrollIntoView)
-    node.dom_element.scrollIntoView();
-  state._highlighted_elements.push(node.dom_element);
-  var running_move = state._running_move = start_speaking(node.text)
-      .then(function(hdl) {
-        return speak_finish(hdl)
+function _new_move_start(moveobj) {
+  return new Promise(function(retResolve, retReject) {
+    var promise = new Promise(function(resolve) {
+      setTimeout(function() {
+        var running_move;
+        _.each(moveobj.steps, function(astep) {
+          promise = promise
+            .then(function() {
+              if(running_move == state._running_move)
+                return astep(moveobj);
+              // otherwise move has stopped....
+            });
+        });
+        running_move = state._running_move = promise
           .then(function() {
-            return utterance_release(hdl);
-          });
-      })
-      .then(function() {
-        if(running_move == state._running_move)
-          state._running_move = null;
-      });
-  node.dom_element.dispatchEvent(new CustomEvent("x-new-move"));
-  return running_move;
+            if(running_move == state._running_move)
+              state._running_move = null;
+          })
+          .then(retResolve, retReject);
+        resolve();
+      }, 0);
+    });
+  });
+}
+
+function _new_move_init(node) {
+  return {
+    steps: [],
+    node: node
+  };
+}
+
+function _update_active_positions(_state, positions) {
+  _state = _state || state
+  positions = positions || _state.positions
+  var dom_elements = _.map(positions, function(pos) { return pos.tree.dom_element; });
+  for(var i = 0; i < _state._active_elements.length; ) {
+    var ael = _state._active_elements[i];
+    if(dom_elements.indexOf(ael) == -1) {
+      ael.classList.remove('active');
+      _state._active_elements.splice(i, 1);
+    } else {
+      i++;
+    }
+  }
+  for(var i = 0, len = dom_elements.length; i < len; ++i) {
+    var ael = dom_elements[i];
+    if(!ael.classList.contains('active')) {
+      // new element
+      ael.classList.add('no-transition');
+      ael.classList.add('active');
+      _state._active_elements.push(ael);
+    } else {
+      if(ael.classList.contains('no-transition'))
+         ael.classList.remove('no-transition');
+    }
+  }
+  _update_active_positions_top();
+}
+
+function _update_active_positions_top() {
+  // center all
+  var topSum = 0;
+  for(var i = 0, len = state.positions.length; i < len; ++i) {
+    var pos = state.positions[i],
+        node = pos.index == -1 ?
+               (pos.tree.nodes.length > 0 ?
+                pos.tree.nodes[0] : null) : _get_current_node(pos),
+        ul = pos.tree.dom_element.querySelector(':scope > .children'),
+        el = node ? node.dom_element : null,
+        height = el ? el.offsetHeight : 0,
+        offY = el ? el.offsetTop : 0,
+        pheight = tree_element.tree_height,
+        top = ((pheight / 2.0 - height / 2.0) - offY - topSum);
+    console.log(node ? node.text : 'null', top)
+    if(ul)
+      ul.style.top = top + 'px';
+    topSum += top;
+  }
+}
+
+function _tree_needs_resize() {
+  tree_element.tree_height = window.innerHeight;
+  _update_active_positions_top();
+}
+
+function _move_sub_highlight() {
+  var node = this
+  if(node.txt_dom_element) {
+    node.txt_dom_element.classList.add('highlight' || config.highlight_class);
+    state._highlighted_elements.push(node.txt_dom_element);
+  }
+  _update_active_positions();
+}
+
+function _move_sub_speak(voice_options) {
+  var node = this
+  return start_speaking(node.text, voice_options)
+    .then(function(hdl) {
+      return speak_finish(hdl)
+        .then(function() {
+          return utterance_release(hdl);
+        });
+    });
+}
+
+function _scan_move(node) {
+  node = node || _get_current_node();
+  var moveobj = _new_move_init(node)
+  moveobj.steps.push(_move_sub_highlight.bind(node))
+  moveobj.steps.push(_move_sub_speak.bind(node, config.auditory_voice_options))
+  _before_new_move()
+  moveobj.node.dom_element.dispatchEvent(new CustomEvent("x-new-move"));
+  return _new_move_start(moveobj);
+}
+
+function _cue_move(node, cuenode) {
+  var moveobj = _new_move_init(node)
+  moveobj.steps.push(_move_sub_speak.bind(cuenode, config.auditory_cue_voice_options))
+  moveobj.steps.push(un_can_move)
+  if(node) {
+    moveobj.steps.push(function() {
+      _before_new_move()
+      moveobj.node.dom_element.dispatchEvent(new CustomEvent("x-new-move"));
+    });
+    moveobj.steps.push(_move_sub_highlight.bind(node))
+    moveobj.steps.push(_move_sub_speak.bind(node, config.auditory_voice_options))
+  }
+  stop_speaking();
+  state.can_move = false;
+  function un_can_move() {
+    state.can_move = true;
+  }
+  return _new_move_start(moveobj)
+    .then(un_can_move);
 }
 
 function _get_current_position() {
@@ -200,10 +349,10 @@ function _get_current_position() {
   }
 }
 
-function _get_current_node() {
+function _get_current_node(position) {
   try {
-    var position = _get_current_position(),
-        node = position.tree.nodes[position.index];
+    position = position || _get_current_position();
+    var node = position.tree.nodes[position.index];
     if(!node)
       throw new Error("Current node is null!, " +
                       state.positions.length + ", " +  position.index);
@@ -214,16 +363,19 @@ function _get_current_node() {
 }
 
 function _tree_go_out() {
-  _before_new_move();
+  if(!state.can_move)
+    return Promise.resolve();
   if(state.positions.length > 1) {
     state.positions.pop();
   } else {
     // no more way, start at top (reset)
     state.positions[0].index = 0;
   }
-  return _on_new_move();
+  return _scan_move();
 }
 function _tree_go_in() {
+  if(!state.can_move)
+    return Promise.resolve();
   var position = _get_current_position();
   if(position.index == -1) // not started yet, do nothing
     return Promise.resolve();
@@ -232,43 +384,56 @@ function _tree_go_in() {
     // is leaf node
     // on auto mode stop iteration and on any key restart
     stop();
-    atree.dom_element.classList.add('selected' || config.selected_class);
-    window.addEventListener('keydown', function(ev) {
-      atree.dom_element.classList.remove('selected' || config.selected_class);
-      ev.preventDefault();
-      window.removeEventListener('keydown', arguments.callee, false);
-      start(); // start over
-    }, false);
+    if(atree.txt_dom_element)
+      atree.txt_dom_element.classList.add('selected' || config.selected_class);
+    // speak it
+    start_speaking(atree.text, config.auditory_cue_voice_options)
+      .then(function(hdl) {
+        return speak_finish(hdl).then(function() {
+          return utterance_release(hdl);
+        });
+      })
+      .then(function() { // start again, on demand
+        window.addEventListener('keydown', function(ev) {
+          if(atree.txt_dom_element)
+            atree.txt_dom_element.classList.remove('selected' || config.selected_class);
+          ev.preventDefault();
+          window.removeEventListener('keydown', arguments.callee, false);
+          _clean_state(state)
+          start(); // start over
+        }, false);
+      });
     return Promise.resolve();
   } else {
     if(atree.nodes.length == 0)
       return Promise.resolve(); // has no leaf, nothing to do
-    _before_new_move();
     state.positions.push({
       tree: atree,
       index: 0
     });
-    return _on_new_move(); // first child!
+    return _cue_move(_get_current_node(), atree);
   }
 }
 function _tree_go_previous() {
-  _before_new_move();
+  if(!state.can_move)
+    return Promise.resolve();
   var position = _get_current_position();
   position.index -= 1;
   if(position.index < 0) {
     position.index = (position.tree.nodes.length + position.index) %
       position.tree.nodes.length;
   }
-  return _on_new_move();
+  return _scan_move()
 }
 function _tree_go_next() {
-  _before_new_move();
+  if(!state.can_move)
+    return Promise.resolve();
   var position = _get_current_position();
   position.index += 1;
   if(position.index >= position.tree.nodes.length) {
     position.index = position.index % position.tree.nodes.length;
   }
-  return _on_new_move();
+  return _scan_move()
 }
 
 /* execution code end */
@@ -288,7 +453,7 @@ function init_speak() {
         return speak_ctx.api.init_synthesizer()
           .then(function(synthesizer) {
             speak_ctx.synthesizer = synthesizer;
-          });
+          })
       } else { // alternative approach
         return new Promise(function(resolve, reject) {
           var script = document.createElement('script');
@@ -321,15 +486,32 @@ function init_speak() {
 
 var _alt_finish_queue = [];
 
-function start_speaking(speech) {
+function start_speaking(speech, opts) {
+  opts = Object.assign({}, opts)
   if(speak_ctx.is_native) {
+    for(var key in opts)
+      if(key.indexOf('alt_') == 0)
+        delete opts[key];
     return speak_ctx.api.init_utterance(speech)
       .then(function(utterance) {
         return speak_ctx.api.speak_utterance(speak_ctx.synthesizer, utterance)
           .then(function(){ return utterance; });
       });
   } else {
-    speak_ctx.responsiveVoice.speak(speech);
+    for(var key in opts)
+      if(key.indexOf('alt_') == 0) {
+        opts[key.substr(4)] = opts[key]
+        delete opts[key];
+      }
+    if(opts.rate) {
+      if(opts.rate in _alt_voice_rate_by_name)
+        opts.rate = _alt_voice_rate_by_name[opts.rate]
+      opts.rate = opts.rate * (opts.rateMul || 1.0)
+    }
+    delete opts.rateMul
+    var voiceId = opts.voiceId;
+    delete opts.voiceId;
+    speak_ctx.responsiveVoice.speak(speech, voiceId, opts);
     return Promise.resolve(1);
   }
 }
@@ -397,6 +579,9 @@ function load_tree(fn) {
     .then(function(data) {
       tree_element.innerHTML = markdown.toHTML(data);
       tree = parse_dom_tree(tree_element);
+      tree_element.innerHTML = ''; // clear all
+      tree_mk_list_base(tree, tree_element, 'dom_element', 'txt_dom_element'); // re-create
+      tree_element.tree_height = window.innerHeight;
     })
     .catch(handle_error_checkpoint());
 }
@@ -405,11 +590,82 @@ function load_config(fn) {
   // ready to start, load config
   return ajaxcall(fn)
     .then(function(data) {
+      // remove previous config
+      if(config) {
+        for(var i = 0, len = config._styles.length; i < len; ++i) {
+          document.body.removeChild(config._styles[i]);
+        }
+      }  
       config = JSON.parse(data);
       if(!config)
         throw new Error("No input config!");
+      config._keyhit_delegates = {
+        auto: keys_from_config('auto', {
+          "39": { func: _tree_go_in }, // ArrowRight
+          "37": { func: _tree_go_out }, // ArrowLeft
+          "68": { func: _tree_go_in }, // D
+          "65": { func: _tree_go_out }, // A
+        }),
+        'switch': keys_from_config('switch', {
+          "39": { func: _tree_go_in }, // ArrowRight
+          "37": { func: _tree_go_out }, // ArrowLeft
+          "38": { func: _tree_go_previous }, // ArrowUp
+          "40": { func: _tree_go_next }, // ArrowDown
+          "87": { func: _tree_go_previous }, // W
+          "68": { func: _tree_go_in }, // D
+          "83": { func: _tree_go_next }, // S
+          "65": { func: _tree_go_out }, // A
+        })
+      };
+      // add styles
+      var styles = Array.isArray(config.style) ? config.style :
+          (config.style ? [ config.style ] : []),
+          style_vars = {
+            "__PLATFORM__": window.device ?
+              window.device.platform.toLowerCase() : "default"
+          };
+      config._styles = [];
+      for(var i = 0, len = styles.length; i < len; ++i) {
+        var el = newEl("link"),
+            href = styles[i];
+        for(var key in style_vars)
+          href = href.replace(key, style_vars[key]);
+        el.setAttribute("rel", "stylesheet");
+        el.setAttribute("href", href);
+        document.body.appendChild(el);
+        config._styles.push(el);
+      }
     })
     .catch(handle_error_checkpoint());
+}
+
+function tree_mk_list_base(tree, el, linkname, txtlinkname) {
+  tree[linkname] = el;
+  el.classList.add('level-' + tree.level);
+  if(tree.is_leaf) {
+    el.classList.add('leaf')
+  } else {
+    el.classList.add('node')
+  }
+  if(tree.text) {
+    var txtel = newEl('p');
+    txtel.classList.add('text');
+    txtel.textContent = tree.text;
+    el.appendChild(txtel);
+    tree[txtlinkname] = txtel;
+  }
+  if(!tree.is_leaf) {
+    var nodes = tree.nodes,
+        ul = newEl('ul');
+    ul.classList.add('children');
+    for(var i = 0, len = nodes.length; i < len; ++i) {
+      var node = nodes[i],
+          li = newEl('li');
+      tree_mk_list_base(node, li, linkname, txtlinkname);
+      ul.appendChild(li);
+    }
+    el.appendChild(ul);
+  }
 }
 
 var _parse_dom_tree_pttrn01 = /^H([0-9])$/,
@@ -426,13 +682,14 @@ function parse_dom_tree(el, continue_at, tree) {
       var level = match ? parseInt(match[1]) : tree.level + 1,
           is_list = !match;
       if(level > tree.level) {
-        var dom_el = is_list ? cnode.querySelector(":scope > p") : cnode;
-        if(!dom_el)
-          dom_el = cnode;
+        var txt_dom_el = is_list ? cnode.querySelector(":scope > p") : cnode;
+        if(!txt_dom_el)
+          txt_dom_el = cnode;
         var anode = {
-          dom_element: dom_el,
+          txt_dom_element: txt_dom_el,
+          dom_element: cnode,
           level: level,
-          text: dom_el.textContent.trim()
+          text: txt_dom_el.textContent.trim()
         };
         if(is_list) {
           tree.nodes.push(parse_dom_tree(cnode, null, anode));

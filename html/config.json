@@ -1,5 +1,38 @@
 {
-  "mode": "auto",
+  "mode": "switch",
   "auto_next_delay": 200,
-  "auto_next_recycle_delay": 1000
+  "auto_next_recycle_delay": 1000,
+  "auditory_cue_voice_options": {
+    "volume": 1.0,
+    "rate": "default",
+    "rateMul": 1.0,
+    "alt_voiceId": "UK English Male",
+    "pitch": 1.0,
+    "delay": 0.2
+  },
+  "auditory_voice_options": {
+    "volume": 0.5,
+    "rate": "default",
+    "rateMul": 0.9,
+    "alt_voiceId": "UK English Female",
+    "pitch": 1.0
+  },
+  "auto_keys": {
+    "39": { "func": "tree_go_in", "comment": "ArrowRight" },
+    "37": { "func": "tree_go_out", "comment": "ArrowLeft" },
+    "68": { "func": "tree_go_in", "comment": "D" },
+    "65": { "func": "tree_go_out", "comment": "A" }
+  },
+  "switch_keys": {
+    "39": { "func": "tree_go_in", "comment": "ArrowRight" },
+    "37": { "func": "tree_go_out", "comment": "ArrowLeft" },
+    "38": { "func": "tree_go_previous", "comment": "ArrowUp" },
+    "40": { "func": "tree_go_next", "comment": "ArrowDown" },
+    "87": { "func": "tree_go_previous", "comment": "W" },
+    "68": { "func": "tree_go_in", "comment": "D" },
+    "83": { "func": "tree_go_next", "comment": "S" },
+    "65": { "func": "tree_go_out", "comment": "A" }
+  },
+  "style": [ ],
+  "highlight_behavior": "center"
 }
