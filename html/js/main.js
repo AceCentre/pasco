@@ -367,11 +367,14 @@ function _get_node_attr_inherits_full(name) {
       continue;
     var node = pos.tree.nodes[pos.index],
         val = node.meta[name]
-    if(val && val != 'inherit') {
+    if(val !== undefined && val != 'inherit') {
       return [ val, pos, node ];
     }
   }
   return null;
+}
+function _meta_true_check(v) {
+  return v == 'true' || v == '';
 }
 
 function _tree_go_out() {
@@ -397,7 +400,7 @@ function _tree_go_in() {
     // is leaf node, select
     // check for specific case
     var tmp = _get_node_attr_inherits_full('onselect-restart-here');
-    if(tmp && tmp[0] == 'true') {
+    if(tmp && _meta_true_check(tmp[0])) {
       var idx = state.positions.indexOf(tmp[1]);
       state.positions = state.positions.slice(0, idx + 1);
       state.positions.push({
@@ -739,8 +742,7 @@ function parse_dom_tree(el, continue_at, tree) {
         for(var i = 0, len = cnode.attributes.length; i < len; ++i) {
           var attr = cnode.attributes[i];
           if(attr.name.indexOf('data-') == 0) {
-            thenode.meta[attr.name.substr(5)] =
-              attr.value === "" ? 'true' : attr.value;
+            thenode.meta[attr.name.substr(5)] = attr.value;
           }
         }
       } else { // go deeper
