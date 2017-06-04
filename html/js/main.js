@@ -54,9 +54,8 @@ var _alt_voice_rate_by_name = { 'default': 1.0, 'max': 2.0, 'min': 0.5 },
     _debug_keys = {
       80: { func: function() { // P (toggle play)
         if(state._stopped) {
-          state = renew_state(state)
+          state = renzew_state(state)
           start(state);
-          console.log(state)
         } else {
           stop();
         }
@@ -278,7 +277,6 @@ function _update_active_positions_top() {
         offY = el ? el.offsetTop : 0,
         pheight = tree_element.tree_height,
         top = ((pheight / 2.0 - height / 2.0) - offY - topSum);
-    console.log(node ? node.text : 'null', top)
     if(ul)
       ul.style.top = top + 'px';
     topSum += top;
@@ -362,6 +360,20 @@ function _get_current_node(position) {
   }
 }
 
+function _get_node_attr_inherits_full(name) {
+  for(var i = state.positions.length - 1; i >= 0; i--) {
+    var pos = state.positions[i];
+    if(pos.index == -1)
+      continue;
+    var node = pos.tree.nodes[pos.index],
+        val = node.meta[name]
+    if(val && val != 'inherit') {
+      return [ val, pos, node ];
+    }
+  }
+  return null;
+}
+
 function _tree_go_out() {
   if(!state.can_move)
     return Promise.resolve();
@@ -373,6 +385,7 @@ function _tree_go_out() {
   }
   return _scan_move();
 }
+
 function _tree_go_in() {
   if(!state.can_move)
     return Promise.resolve();
@@ -381,29 +394,41 @@ function _tree_go_in() {
     return Promise.resolve();
   var atree = _get_current_node();
   if(atree.is_leaf) {
-    // is leaf node
-    // on auto mode stop iteration and on any key restart
-    stop();
-    if(atree.txt_dom_element)
-      atree.txt_dom_element.classList.add('selected' || config.selected_class);
-    // speak it
-    start_speaking(atree.text, config.auditory_cue_voice_options)
-      .then(function(hdl) {
-        return speak_finish(hdl).then(function() {
-          return utterance_release(hdl);
-        });
-      })
-      .then(function() { // start again, on demand
-        window.addEventListener('keydown', function(ev) {
-          if(atree.txt_dom_element)
-            atree.txt_dom_element.classList.remove('selected' || config.selected_class);
-          ev.preventDefault();
-          window.removeEventListener('keydown', arguments.callee, false);
-          _clean_state(state)
-          start(); // start over
-        }, false);
+    // is leaf node, select
+    // check for specific case
+    var tmp = _get_node_attr_inherits_full('onselect-restart-here');
+    if(tmp && tmp[0] == 'true') {
+      var idx = state.positions.indexOf(tmp[1]);
+      state.positions = state.positions.slice(0, idx + 1);
+      state.positions.push({
+        tree: tmp[2],
+        index: 0
       });
-    return Promise.resolve();
+      return _cue_move(_get_current_node(), atree);
+    } else {
+      // on auto mode stop iteration and on any key restart
+      stop();
+      if(atree.txt_dom_element)
+        atree.txt_dom_element.classList.add('selected' || config.selected_class);
+      // speak it
+      return start_speaking(atree.text, config.auditory_cue_voice_options)
+        .then(function(hdl) {
+          return speak_finish(hdl).then(function() {
+            return utterance_release(hdl);
+          });
+        })
+        .then(function() {
+          // start again, on demand
+          window.addEventListener('keydown', function(ev) {
+            if(atree.txt_dom_element)
+              atree.txt_dom_element.classList.remove('selected' || config.selected_class);
+            ev.preventDefault();
+            window.removeEventListener('keydown', arguments.callee, false);
+            _clean_state(state)
+            start(); // start over
+          }, false);
+        });
+    }
   } else {
     if(atree.nodes.length == 0)
       return Promise.resolve(); // has no leaf, nothing to do
@@ -577,7 +602,7 @@ function load_tree(fn) {
   }
   return ajaxcall(fn)
     .then(function(data) {
-      tree_element.innerHTML = markdown.toHTML(data);
+      tree_element.innerHTML = new showdown.Converter().makeHtml(data);
       tree = parse_dom_tree(tree_element);
       tree_element.innerHTML = ''; // clear all
       tree_mk_list_base(tree, tree_element, 'dom_element', 'txt_dom_element'); // re-create
@@ -672,42 +697,55 @@ var _parse_dom_tree_pttrn01 = /^H([0-9])$/,
     _parse_dom_tree_pttrn02 = /^LI$/;
 function parse_dom_tree(el, continue_at, tree) {
   continue_at = continue_at || { i: 0 };
-  tree = tree || { level: 0 };
+  tree = tree || { level: 0, meta: {} };
   tree.nodes = tree.nodes || [];
   for(var len = el.childNodes.length; continue_at.i < len; ++continue_at.i) {
     var cnode = el.childNodes[continue_at.i],
         match;
-    if((match = cnode.nodeName.match(_parse_dom_tree_pttrn01)) ||
-       _parse_dom_tree_pttrn02.test(cnode.nodeName)) { // branch
-      var level = match ? parseInt(match[1]) : tree.level + 1,
-          is_list = !match;
-      if(level > tree.level) {
-        var txt_dom_el = is_list ? cnode.querySelector(":scope > p") : cnode;
-        if(!txt_dom_el)
-          txt_dom_el = cnode;
-        var anode = {
-          txt_dom_element: txt_dom_el,
-          dom_element: cnode,
-          level: level,
-          text: txt_dom_el.textContent.trim()
-        };
-        if(is_list) {
-          tree.nodes.push(parse_dom_tree(cnode, null, anode));
+    if(cnode.nodeType == Node.ELEMENT_NODE) {
+      if((match = cnode.nodeName.match(_parse_dom_tree_pttrn01)) ||
+         _parse_dom_tree_pttrn02.test(cnode.nodeName)) { // branch
+          var level = match ? parseInt(match[1]) : tree.level + 1,
+              is_list = !match;
+        if(level > tree.level) {
+          var txt_dom_el = is_list ? cnode.querySelector(":scope > p") : cnode;
+          if(!txt_dom_el)
+            txt_dom_el = cnode;
+          var anode = {
+            txt_dom_element: txt_dom_el,
+            dom_element: cnode,
+            level: level,
+            text: txt_dom_el.textContent.trim(),
+            meta: {}
+          };
+          if(is_list) {
+            tree.nodes.push(parse_dom_tree(cnode, null, anode));
+          } else {
+            continue_at.i += 1;
+            tree.nodes.push(parse_dom_tree(el, continue_at, anode));
+          }
+          if(anode.nodes.length == 0) { // is a leaf
+            anode.is_leaf = true;
+            delete anode.nodes;
+          }
         } else {
-          continue_at.i += 1;
-          tree.nodes.push(parse_dom_tree(el, continue_at, anode));
+          if(continue_at.i > 0)
+            continue_at.i -= 1;
+          break; // return to parent call
         }
-        if(anode.nodes.length == 0) { // is a leaf
-          anode.is_leaf = true;
-          delete anode.nodes;
+      } if(cnode.nodeName == 'META') {
+        var thenode = tree.nodes.length > 0 ?
+                      tree.nodes[tree.nodes.length - 1] : tree;
+        for(var i = 0, len = cnode.attributes.length; i < len; ++i) {
+          var attr = cnode.attributes[i];
+          if(attr.name.indexOf('data-') == 0) {
+            thenode.meta[attr.name.substr(5)] =
+              attr.value === "" ? 'true' : attr.value;
+          }
         }
-      } else {
-        if(continue_at.i > 0)
-          continue_at.i -= 1;
-        break; // return to parent call
+      } else { // go deeper
+        parse_dom_tree(cnode, null, tree);
       }
-    } else { // go deeper
-      parse_dom_tree(cnode, null, tree);
     }
   }
   return tree;
