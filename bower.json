@@ -9,6 +9,8 @@
   "homepage": "",
   "dependencies": {
     "underscore": "^1.8.3",
-    "showdown": "^1.7.1"
+    "showdown": "^1.7.1",
+    "bootstrap": "^3.3.7",
+    "jquery": "^3.2.1"
   }
 }

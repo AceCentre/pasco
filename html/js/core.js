@@ -1,0 +1,385 @@
+window.newEl = document.createElement.bind(document);
+window.default_config = 'config.json';
+window.default_tree = 'tree.md';
+function tree_mk_list_base(tree, el, linkname, txtlinkname) {
+  tree[linkname] = el;
+  el.classList.add('level-' + tree.level);
+  if(tree.is_leaf) {
+    el.classList.add('leaf')
+  } else {
+    el.classList.add('node')
+  }
+  if(tree.text) {
+    var txtel = newEl('p');
+    txtel.classList.add('text');
+    txtel.textContent = tree.text;
+    el.appendChild(txtel);
+    tree[txtlinkname] = txtel;
+  }
+  if(!tree.is_leaf) {
+    var nodes = tree.nodes,
+        ul = newEl('ul');
+    ul.classList.add('children');
+    for(var i = 0, len = nodes.length; i < len; ++i) {
+      var node = nodes[i],
+          li = newEl('li');
+      tree_mk_list_base(node, li, linkname, txtlinkname);
+      ul.appendChild(li);
+    }
+    el.appendChild(ul);
+  }
+}
+
+var _parse_dom_tree_pttrn01 = /^H([0-9])$/,
+    _parse_dom_tree_pttrn02 = /^LI$/;
+function parse_dom_tree(el, continue_at, tree) {
+  continue_at = continue_at || { i: 0 };
+  tree = tree || { level: 0, meta: {} };
+  tree.nodes = tree.nodes || [];
+  for(var len = el.childNodes.length; continue_at.i < len; ++continue_at.i) {
+    var cnode = el.childNodes[continue_at.i],
+        match;
+    if(cnode.nodeType == Node.ELEMENT_NODE) {
+      if((match = cnode.nodeName.match(_parse_dom_tree_pttrn01)) ||
+         _parse_dom_tree_pttrn02.test(cnode.nodeName)) { // branch
+          var level = match ? parseInt(match[1]) : tree.level + 1,
+              is_list = !match;
+        if(level > tree.level) {
+          var txt_dom_el = is_list ? cnode.querySelector(":scope > p") : cnode;
+          if(!txt_dom_el)
+            txt_dom_el = cnode;
+          var anode = {
+            txt_dom_element: txt_dom_el,
+            dom_element: cnode,
+            level: level,
+            text: txt_dom_el.textContent.trim(),
+            meta: {}
+          };
+          if(is_list) {
+            tree.nodes.push(parse_dom_tree(cnode, null, anode));
+          } else {
+            continue_at.i += 1;
+            tree.nodes.push(parse_dom_tree(el, continue_at, anode));
+          }
+          if(anode.nodes.length == 0) { // is a leaf
+            anode.is_leaf = true;
+            delete anode.nodes;
+          }
+        } else {
+          if(continue_at.i > 0)
+            continue_at.i -= 1;
+          break; // return to parent call
+        }
+      } if(cnode.nodeName == 'META') {
+        var thenode = tree.nodes.length > 0 ?
+                      tree.nodes[tree.nodes.length - 1] : tree;
+        for(var i = 0, len = cnode.attributes.length; i < len; ++i) {
+          var attr = cnode.attributes[i];
+          if(attr.name.indexOf('data-') == 0) {
+            thenode.meta[attr.name.substr(5)] = attr.value;
+          }
+        }
+      } else { // go deeper
+        parse_dom_tree(cnode, null, tree);
+      }
+    }
+  }
+  return tree;
+}
+
+function handle_error_checkpoint() {
+  var stack = new Error().stack;
+  return function(err) {
+    if(err.withcheckpoint)
+      throw err;
+    throw {
+      withcheckpoint: true,
+      checkpoint_stack: stack.split("\n").slice(2).join("\n"),
+      error: err
+    };
+  }
+}
+
+function handle_error(err) {
+  if(err.withcheckpoint) {
+    console.error("checkpoint:", err.checkpoint_stack);
+    alert(err.error+'');
+    console.error(err.error)
+    throw err.error;
+  } else {
+    alert(err);
+    console.error(err);
+    throw err;
+  }
+}
+
+function write_file(url, data, options) {
+  options = options || { method: 'POST' }
+  // cordova specific
+  if(!/^(https?):\/\//.test(url) && window.cordova &&
+     window.resolveLocalFileSystemURL) {
+    return new Promise(function(resolve, reject) {
+      var newurl = cordova.file.applicationDirectory + "www/" + url
+      function onEntry(fileEntry) {
+        // Create a FileWriter object for our FileEntry (log.txt).
+        fileEntry.createWriter(function (fileWriter) {
+
+          fileWriter.onwriteend = function() {
+            resolve()
+          };
+
+          fileWriter.onerror = function(err) {
+            reject("Fail to write `" + newurl + "` -- " + err+'')
+          };
+
+          if(!(data instanceof Blob)) {
+            if(typeof data != 'string')
+              throw new Error("Unexpected input data, string or Blob accepted");
+            data = new Blob([data], { type: options.contentType || 'application/octet-stream' });
+          }
+
+          fileWriter.write(data);
+        });
+      }
+      function onFail(err) {
+        reject("Fail to write `" + newurl + "` -- " + err+'')
+      }
+      window.resolveLocalFileSystemURL(newurl, onEntry, onFail);
+    });
+  } else {
+    // post otherwise
+    options.data = data
+    return read_file(url, options);
+  }
+}
+
+function read_file(url, options) {
+  return new Promise(function(resolve, reject) {
+    options = options || {};
+    if(!/^(https?):\/\//.test(url) && window.cordova &&
+       window.resolveLocalFileSystemURL) {
+      var newurl = cordova.file.applicationDirectory + "www/" + url
+      function onSuccess(fileEntry) {
+        fileEntry.file(function(file) {
+          var reader = new FileReader();
+
+          reader.onloadend = function(e) {
+            resolve(this.result)
+          }
+
+          reader.readAsText(file);
+        });
+
+      }
+      function onFail(err) {
+        reject("Fail to load `" + newurl + "` -- " + err+'')
+      }
+      window.resolveLocalFileSystemURL(newurl, onSuccess, onFail);
+    } else {
+      var xhr = new XMLHttpRequest();
+      xhr.open(options.method || 'GET', url);
+      xhr.onreadystatechange = function() {
+        if(xhr.readyState === XMLHttpRequest.DONE) {
+          if(xhr.status >= 200 && xhr.status < 300) {
+            resolve(xhr.responseText)
+          } else {
+            var err = new Error(xhr.statusText || 'unknown status ' + xhr.satus);
+            err.xhr = xhr;
+            reject(err)
+          }
+        }
+      }
+      xhr.send(options.data || null);
+    }
+  });
+}
+
+function keyevents_needs_theinput() {
+  return /iP(hone|od|ad)/.test(navigator.userAgent);
+}
+
+function keyevents_handle_theinput() {
+  var theinputwrp = document.getElementById('theinput-wrp');
+  var theinput = document.getElementById('theinput');
+  function preventdefault(evt) {
+    evt.preventDefault();
+  }
+  if(theinput) {
+    theinput.addEventListener('blur', _theinput_refocus, false);
+    theinput.focus();
+    theinput.addEventListener('keydown', preventdefault, false);
+    theinput.addEventListener('keyup', preventdefault, false);
+    document.addEventListener('scroll', function() {
+      theinputwrp.style.top = window.scrollY + 'px';
+      theinputwrp.style.left = window.scrollX + 'px';
+    }, false);
+  }
+}
+
+function SpeakUnit() {
+  this._alt_finish_queue = [];
+}
+var proto = SpeakUnit.prototype;
+
+proto.init = function() {
+  var api = new NativeAccessApi();
+  var self = this;
+  return Promise.all([
+    api.has_synthesizer(),
+    api.has_audio_device()
+  ])
+    .then(function(results) {
+      if(results[0] && results[1]) {
+        self.is_native = true
+        self.api = api
+        return self.api.init_synthesizer()
+          .then(function(synthesizer) {
+            self.synthesizer = synthesizer;
+            return self;
+          })
+      } else { // alternative approach
+        return new Promise(function(resolve, reject) {
+          var script = document.createElement('script');
+          script.type = 'text/javascript';
+          script.async = true;
+          script.onload = function() {
+            try {
+              self.is_native = false
+              self.responsiveVoice = responsiveVoice
+              if(responsiveVoice.voiceSupport()) {
+                resolve(self);
+              } else {
+                reject("No supported speaker found!");
+              }
+            } catch(err) {
+              reject(err);
+            }
+          };
+          script.onerror = function() {
+            reject("Could not load responsivevoice code");
+          };
+          script.src = "http://code.responsivevoice.org/responsivevoice.js";
+          document.body.appendChild(script);
+        });
+      }
+    });
+}
+
+proto.simple_speak = function(speech, opts) {
+  return speaku.start_speaking(speech, opts)
+    .then(function(hdl) {
+      return speaku.speak_finish(hdl)
+        .then(function() {
+          return speaku.utterance_release(hdl);
+        });
+    });
+}
+
+proto.start_speaking = function(speech, opts) {
+  opts = Object.assign({}, opts)
+  var self = this;
+  if(self.is_native) {
+    for(var key in opts)
+      if(key.indexOf('alt_') == 0)
+        delete opts[key];
+    return self.api.init_utterance(self, speech)
+      .then(function(utterance) {
+        return self.api
+          .speak_utterance(self, self.synthesizer, utterance)
+          .then(function(){ return utterance; });
+      });
+  } else {
+    for(var key in opts)
+      if(key.indexOf('alt_') == 0) {
+        opts[key.substr(4)] = opts[key]
+        delete opts[key];
+      }
+    if(opts.rate) {
+      if(opts.rate in _alt_voice_rate_by_name)
+        opts.rate = _alt_voice_rate_by_name[opts.rate]
+      opts.rate = opts.rate * (opts.rateMul || 1.0)
+    }
+    delete opts.rateMul
+    var voiceId = opts.voiceId;
+    delete opts.voiceId;
+    self.responsiveVoice.speak(speech, voiceId, opts);
+    return Promise.resolve(1);
+  }
+}
+
+proto.utterance_release = function(utterance_hdl) {
+  if(this.is_native) {
+    return this.api.release_utterance(utterance_hdl);
+  } else {
+    return Promise.resolve();
+  }
+}
+
+proto.speak_finish = function(utterance_hdl) {
+  var self = this
+  if(self.is_native) {
+    return self.api.speak_finish(self.synthesizer, utterance_hdl);
+  } else {
+    var self = this;
+    return new Promise(function(resolve, reject) {
+      var ref = [null, resolve];
+      self._alt_finish_queue.push(ref)
+      function check() {
+        ref[0] = setTimeout(function() {
+          if(self.responsiveVoice.isPlaying())
+            check();
+          else {
+            var idx = self._alt_finish_queue.indexOf(ref);
+            if(idx != -1)
+              self._alt_finish_queue.splice(idx, 1);
+            resolve();
+          }
+        }, 50); // check resolution
+      }
+      check();
+    });
+  }
+}
+
+proto.stop_speaking = function() {
+  var self = this
+  if(self.is_native) {
+    return self.api.stop_speaking(self.synthesizer);
+  } else {
+    responsiveVoice.cancel();
+    var call_list = [];
+    var ref;
+    var _alt_finish_queue = this._alt_finish_queue;
+    while((ref = _alt_finish_queue.pop())) {
+      clearTimeout(ref[0]);
+      call_list.push(ref[1]);
+    }
+    for(var i = 0, len = call_list.length; i < len; ++i)
+      call_list[i]();
+    return Promise.resolve();
+  }
+}
+
+proto.get_voices = function() {
+  if(this.is_native) {
+    return this.api.get_voices();
+  } else {
+    return Promise.resolve(_.map(this.responsiveVoice.getVoices(),function(v) {
+      return {
+        id: v.name,
+        label: v.name
+      };
+    }));
+  }
+}
+
+
+function read_json(url, options) {
+  return read_file(url, options)
+    .then(function(data) {
+      var config = JSON.parse(data);
+      if(!config)
+        throw new Error("No input config!");
+      return config;
+    });
+}
