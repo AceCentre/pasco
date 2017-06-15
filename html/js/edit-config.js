@@ -34,8 +34,12 @@ function start() {
   _.each(['_voice_id', '_cue_voice_id'], function(name) {
     var $inp = $form.find('select[name='+name+']')
     $inp.on('change', function() {
-      speaku.simple_speak(this.value, { voiceId: this.value })
+      speaku.simple_speak(this.textContent, { voiceId: this.value })
     })
+    var opt = newEl('option')
+    opt.value = ''
+    opt.textContent = 'Default'
+    $inp.append(opt)
     _.each(voices, function(voice) {
       var opt = newEl('option')
       opt.value = voice.id
@@ -142,8 +146,8 @@ function insert_config() {
     cue_voiceId = config.auditory_cue_voice_options ?
       config.auditory_cue_voice_options.alt_voiceId : null;
   }
-  $form.find('[name=_voice_id]').val(voiceId)
-  $form.find('[name=_cue_voice_id]').val(cue_voiceId)
+  $form.find('[name=_voice_id]').val(voiceId || '')
+  $form.find('[name=_cue_voice_id]').val(cue_voiceId || '')
 }
 
 function insert_tree_data() {
@@ -211,7 +215,8 @@ function save_config(evt) {
     }
     if(keys)
       _config.auto_keys = Object.assign((_config.auto_keys || {}), keys);
-    $inp = $form.find('[name=_switch_forward_key]')
+    $inp = $form.find('[name=_switch_forward_key]:checked');
+    keys = null;
     switch($inp.val()) {
     case 'enter':
       keys = {
@@ -229,15 +234,31 @@ function save_config(evt) {
     if(keys)
       _config.switch_keys = Object.assign((_config.switch_keys || {}), keys);
     if(speaku.is_native) {
-      _config.auditory_voice_options.voiceId = $form.find('[name=_voice_id]').val()
-      _config.auditory_cue_voice_options.voiceId = $form.find('[name=_cue_voice_id]').val()
+      var str = $form.find('[name=_voice_id]').val()
+      if(str)
+        _config.auditory_voice_options.voiceId = str
+      else
+        delete _config.auditory_voice_options.voiceId
+      str = $form.find('[name=_cue_voice_id]').val()
+      if(str)
+        _config.auditory_cue_voice_options.voiceId = str
+      else
+        delete _config.auditory_cue_voice_options.voiceId
     } else {
-      _config.auditory_voice_options.alt_voiceId = $form.find('[name=_voice_id]').val()
-      _config.auditory_cue_voice_options.alt_voiceId = $form.find('[name=_cue_voice_id]').val()
+      var str = $form.find('[name=_voice_id]').val()
+      if(str)
+        _config.auditory_voice_options.alt_voiceId = str
+      else
+        delete _config.auditory_voice_options.alt_voiceId
+      str = $form.find('[name=_cue_voice_id]').val()
+      if(str)
+        _config.auditory_cue_voice_options.alt_voiceId = str
+      else
+        delete _config.auditory_cue_voice_options.alt_voiceId
     }
   } catch(err) {
     $form.find('.save-section .alert-danger')
-      .html('<strong>Error!</strong> ' + err)
+      .html(error_to_html(err))
       .toggleClass('alert-hidden', false);
     return;
   }
@@ -253,7 +274,7 @@ function save_config(evt) {
     })
     .catch(function(err) {
       $form.find('.save-section .alert-danger')
-        .html('<strong>Error!</strong> ' + err)
+        .html(error_to_html(err))
         .toggleClass('alert-hidden', false);
     })
 }
@@ -265,7 +286,7 @@ function save_tree(evt) {
   tree_data = $form.find('[name=tree-input]').val()
   // then save
   $form.find('.save-section .alert').html('').toggleClass('alert-hidden', true)
-  write_file(config_fn, tree_data)
+  write_file(tree_fn, tree_data)
     .then(function() {
       $form.find('.save-section .alert-success')
         .html('<strong>Success!</strong>')
@@ -273,9 +294,13 @@ function save_tree(evt) {
     })
     .catch(function(err) {
       $form.find('.save-section .alert-danger')
-        .html('<strong>Error!</strong> ' + err)
+        .html(error_to_html(err))
         .toggleClass('alert-hidden', false);
-    })
+    });
+}
+
+function error_to_html(err) {
+  return '<strong>Error:</strong> ' + (err+'').replace(/^error:\s*/i, "")
 }
 
 // basic editing features (driven with markup)

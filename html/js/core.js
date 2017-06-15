@@ -1,3 +1,12 @@
+
+// Cordova specific
+document.addEventListener('deviceready', function() { 
+  if(window.device) {
+    document.querySelector('html').classList
+      .add(window.device.platform.toLowerCase());
+  }
+}, false);
+
 window.newEl = document.createElement.bind(document);
 window.default_config = 'config.json';
 window.default_tree = 'tree.md';
@@ -183,7 +192,7 @@ function read_file(url, options) {
           if(xhr.status >= 200 && xhr.status < 300) {
             resolve(xhr.responseText)
           } else {
-            var err = new Error(xhr.statusText || 'unknown status ' + xhr.satus);
+            var err = new Error(xhr.statusText || 'unknown status ' + xhr.status + ' for `' + url + '`');
             err.xhr = xhr;
             reject(err)
           }
@@ -282,10 +291,10 @@ proto.start_speaking = function(speech, opts) {
     for(var key in opts)
       if(key.indexOf('alt_') == 0)
         delete opts[key];
-    return self.api.init_utterance(self, speech)
+    return self.api.init_utterance(speech, opts)
       .then(function(utterance) {
         return self.api
-          .speak_utterance(self, self.synthesizer, utterance)
+          .speak_utterance(self.synthesizer, utterance)
           .then(function(){ return utterance; });
       });
   } else {

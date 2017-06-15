@@ -42,7 +42,8 @@
     'speak_utterance',
     'stop_speaking',
     'speak_finish',
-    'get_voices'
+    'get_voices',
+    'is_software_keyboard_visible'
   ];
 
   for(var i = 0, len = direct_delegates.length; i < len; ++i)
@@ -53,8 +54,8 @@
       return Promise.resolve();
     } else {
       return new Promise(function(resolve, reject) {
-        window.addEventListener('deviceready', function() {
-          window.removeEventListener('deviceready', arguments.callee);
+        document.addEventListener('deviceready', function() {
+          document.removeEventListener('deviceready', arguments.callee);
           resolve();
         }, true);
       });

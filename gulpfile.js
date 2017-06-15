@@ -3,7 +3,7 @@ const path = require('path')
 const gulp = require('gulp')
 const sourcemaps = require('gulp-sourcemaps')
  
-let lessfiles = ['main'];
+let lessfiles = ['main','edit-config'];
 
 [...lessfiles,'all'].forEach((name) => {
   let files = (name == 'all' ? lessfiles : [name])
@@ -23,10 +23,12 @@ gulp.task('less-watch', ['lessc-all'], () => {
   var watcher = gulp.watch('html/less/**/*.less');
   watcher.on('change', function(event) {
     var name = lessfiles
-        .find((s) => event.path.indexOf(s+'.less') != -1 ||
+        .find((s) => event.path.endsWith(s+'.less') ||
               event.path.indexOf(s+'/') != -1);
     if(name) {
       gulp.run('lessc-'+name);
+    } else {
+      gulp.run('lessc-all');
     }
   })
 });

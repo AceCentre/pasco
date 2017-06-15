@@ -1,8 +1,13 @@
+@import "util";
+
 html.ios,
 html.ios body {
   padding: 0;
-  marigin: 0;
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
 }
+
 #theinput-wrp {
   width: 1px;
   height: 1px; 
@@ -45,6 +50,10 @@ html.ios body {
   left: 0px;
   top: 0px;
   bottom: 0px;
+  transition: left 0.3s;
+  &.no-transition {
+    transition: none;
+  }
   &.active > ul.children,
   .active > ul.children {
     display: block;
@@ -81,37 +90,3 @@ html.ios body {
   }
 }
 
-/* help bootstrap */
-.alert-hidden {
-  display: none;
-}
-.navbar-brand-simplified {
-  height: auto;
-}
-.m-b-10 {
-  margin-bottom: 10px;
-}
-
-/* edit config specific */
-.edit-config-container {
-  h3 {
-    margin-top: 10px;
-  }
-}
-.visibility-dependant {
-  overflow: hidden;
-  max-height: 0px;
-  transition: max-height 0.3s ease-out;
-}
-.visibility-dependant-visible {
-  max-height: 500px;
-  transition: max-height 0.3s ease-in;
-  &.visibility-dependant-mh-xs {
-    max-height: 300px;
-  }
-  @media (min-width: 768px) {
-    &.visibility-dependant-mh-xs {
-      max-height: 150px;
-    }
-  }
-}

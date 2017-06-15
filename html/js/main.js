@@ -1,11 +1,10 @@
-var config, tree, state = null, tree_element, speaku;
+var config, tree, state = null, tree_element, speaku,
+    _is_software_keyboard_visible = false;
 Promise.all([
   NativeAccessApi.onready(),
   new Promise(function(resolve) { // domready
     document.addEventListener('DOMContentLoaded', function() {
       document.removeEventListener('DOMContentLoaded', arguments.callee, false);
-      if(keyevents_needs_theinput())
-        keyevents_handle_theinput();
       resolve();
     }, false);
   })
@@ -26,16 +25,13 @@ Promise.all([
     return load_tree(tree_element, config.tree || default_tree)
       .then(function(_tree) { tree = _tree; });
   })
+  .then(function() {
+    // iOS needs this
+    if(keyevents_needs_theinput())
+      keyevents_handle_theinput();
+  })
   .then(start)
   .catch(handle_error);
-
-// Cordova specific
-window.addEventListener('deviceready', function() { 
-  if(window.device) {
-    document.querySelector('html').classList
-      .add(window.device.platform.toLowerCase());
-  }
-});
 
 window.addEventListener('unload', function() {
   if(speaku && speaku.is_native && speaku.synthesizer) {
@@ -189,6 +185,7 @@ function _theinput_refocus() {
 
 function renew_state(_state) {
   _state = Object.assign({}, _state); // copy own props
+  _state._auto_next_rem_loops = config.auto_next_loops || 0
   delete _state._stopped;
   return _state;
 }
@@ -197,7 +194,15 @@ function _clean_state(_state) {
   _update_active_positions(_state, []);
 }
 
-function _on_keydown(ev) {
+function _update_software_keyboard() {
+  if(speaku && speaku.api) {
+    speaku.api.is_software_keyboard_visible()
+      .then(function(v) { _is_software_keyboard_visible = v; });
+  }
+}
+
+
+function _on_keydown(down_ev) {
   curtime = new Date().getTime()
   if(config.ignore_second_hits_time > 0 && state._last_keydown_time &&
      curtime - state._last_keydown_time < config.ignore_second_hits_time) {
@@ -205,21 +210,25 @@ function _on_keydown(ev) {
   }
   state._last_keydown_time = curtime
   state._keydown_time = curtime
-  var downcode = ev.charCode || ev.keyCode;
-  if(!config.ignore_key_release_time) { // no need to wait for release
-    _on_keyhit(ev);
+  var downcode = down_ev.charCode || down_ev.keyCode;
+  _update_software_keyboard()
+  // software keyboards do not trigger down/up at the correct time
+  // simple fix, ignore it
+  if(!config.ignore_key_release_time || _is_software_keyboard_visible) {
+    // no need to wait for release
+    _on_keyhit(down_ev);
   } else {
     // follow delegate rules
     var delegate = config._keyhit_delegates[state.mode][downcode+''];
     if(delegate) {
       if(delegate.preventDefault)
-        ev.preventDefault();
+        down_ev.preventDefault();
     }
     if(state._next_keyup)
       window.removeEventListener('keyup', state._next_keyup, false);
     state._next_keyup = function(ev) {
       var upcode = ev.charCode || ev.keyCode;
-      if(upcode != downcode) {
+      if(upcode != 0 && upcode != downcode) {
         return; // LIMIT:: single key at a time
       }
       var keyup_time = new Date().getTime(),
@@ -230,7 +239,7 @@ function _on_keydown(ev) {
       if(keyup_time - keydown_time < config.ignore_key_release_time) {
         return; // ignore it, release time should be more
       }
-      _on_keyhit(ev)
+      _on_keyhit(down_ev)
     }
   }
   window.addEventListener('keyup', state._next_keyup, false);
@@ -240,7 +249,6 @@ function _on_keyhit(ev) {
   var code = ev.charCode || ev.keyCode;
   // look for delegate calls
   var delegate = config._keyhit_delegates[state.mode][code+''];
-  console.log(code, config._keyhit_delegates, state.mode)
   if(delegate) {
     if(delegate.preventDefault)
       ev.preventDefault();
@@ -319,11 +327,12 @@ function _update_active_positions(_state, positions) {
          ael.classList.remove('no-transition');
     }
   }
-  _update_active_positions_top();
+  _update_active_positions_topleft();
 }
 
-function _update_active_positions_top() {
+function _update_active_positions_topleft() {
   // center all
+  var widthSum = 0;
   var topSum = 0;
   for(var i = 0, len = state.positions.length; i < len; ++i) {
     var pos = state.positions[i],
@@ -339,12 +348,18 @@ function _update_active_positions_top() {
     if(ul)
       ul.style.top = top + 'px';
     topSum += top;
+    widthSum += ul.offsetWidth
+  }
+  if(widthSum - window.innerWidth > 0) {
+    tree_element.style.left = (-widthSum + window.innerWidth) + "px";
+  } else {
+    tree_element.style.left = 0;
   }
 }
 
 function _tree_needs_resize() {
   tree_element.tree_height = window.innerHeight;
-  _update_active_positions_top();
+  _update_active_positions_topleft();
 }
 
 function _move_sub_highlight() {
@@ -531,6 +546,7 @@ function _tree_go_previous() {
 function _tree_go_next() {
   if(!state.can_move)
     return Promise.resolve();
+  console.log("goto next")
   var position = _get_current_position();
   position.index += 1;
   if(position.index >= position.tree.nodes.length) {
