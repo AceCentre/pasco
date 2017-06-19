@@ -387,7 +387,7 @@ function _scan_move(node) {
   node = node || _get_current_node();
   var moveobj = _new_move_init(node)
   moveobj.steps.push(_move_sub_highlight.bind(node))
-  moveobj.steps.push(_move_sub_speak.bind(node, config.auditory_voice_options))
+  moveobj.steps.push(_move_sub_speak.bind(node, config.auditory_cue_voice_options))
   _before_new_move()
   moveobj.node.dom_element.dispatchEvent(new CustomEvent("x-new-move"));
   return _new_move_start(moveobj);
@@ -395,7 +395,7 @@ function _scan_move(node) {
 
 function _cue_move(node, cuenode, delay) {
   var moveobj = _new_move_init(node || cuenode)
-  moveobj.steps.push(_move_sub_speak.bind(cuenode, config.auditory_cue_voice_options))
+  moveobj.steps.push(_move_sub_speak.bind(cuenode, config.auditory_main_voice_options))
   if(node) {
     moveobj.steps.push(function() {
       _before_new_move()
@@ -410,7 +410,7 @@ function _cue_move(node, cuenode, delay) {
   }
   moveobj.steps.push(un_can_move)
   if(node) {
-    moveobj.steps.push(_move_sub_speak.bind(node, config.auditory_voice_options))
+    moveobj.steps.push(_move_sub_speak.bind(node, config.auditory_cue_voice_options))
   }
   speaku.stop_speaking();
   state.can_move = false;
@@ -504,7 +504,7 @@ function _tree_go_in() {
       if(atree.txt_dom_element)
         atree.txt_dom_element.classList.add('selected' || config.selected_class);
       // speak it
-      return speaku.start_speaking(atree.text, config.auditory_cue_voice_options)
+      return speaku.start_speaking(atree.text, config.auditory_main_voice_options)
         .then(function(hdl) {
           return speaku.speak_finish(hdl).then(function() {
             return speaku.utterance_release(hdl);
@@ -561,7 +561,7 @@ function _tree_go_next() {
 
 function load_config(fn) {
   // ready to start, load config
-  return read_json(fn)
+  return get_file_json(fn)
     .then(function(config) {
       function keys_from_config(mode, _default) {
         return typeof config[mode + '_keys'] == 'object' ?
@@ -621,7 +621,7 @@ function load_tree(tree_element, fn) {
     tree_element.innerText = "Tree given in config";
     return Promise.resolve();
   }
-  return read_file(fn)
+  return get_file_data(fn)
     .then(function(data) {
       var html_data = new showdown.Converter().makeHtml(data);
       html_data = sanitizeHtml(html_data, {

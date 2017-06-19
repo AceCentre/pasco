@@ -24,11 +24,11 @@ Promise.all([
   })
   // load data
   .then(function() {
-    return read_json(config_fn)
+    return get_file_json(config_fn)
       .then(function(_config) { config = _config; config_data = JSON.stringify(config) });
   })
   .then(function() {
-    return read_file(tree_fn)
+    return get_file_data(tree_fn)
       .then(function(_data) { tree_data = _data; orig_tree_data = _data; });
   })
   .then(start);
@@ -96,10 +96,10 @@ var config_validator = Object.assign({
 }, _.object(_.map( // numbers
   [ 'ignore_second_hits_time', 'ignore_key_release_time', 'auto_next_loops',
     'auto_next_atfirst_delay', 'auto_next_delay',
-    'auditory_voice_options.volume', 'auditory_voice_options.pitch',
-    'auditory_voice_options.rateMul',
     'auditory_cue_voice_options.volume', 'auditory_cue_voice_options.pitch',
-    'auditory_cue_voice_options.rateMul' ],
+    'auditory_cue_voice_options.rateMul',
+    'auditory_main_voice_options.volume', 'auditory_main_voice_options.pitch',
+    'auditory_main_voice_options.rateMul' ],
   function(v) { return [ v, validate_number ] })))
     
 
@@ -151,15 +151,15 @@ function insert_config() {
   }
   var voiceId, cue_voiceId;
   if(speaku.is_native) {
-    voiceId = config.auditory_voice_options ?
-      config.auditory_voice_options.voiceId : null;
-    cue_voiceId = config.auditory_cue_voice_options ?
+    voiceId = config.auditory_cue_voice_options ?
       config.auditory_cue_voice_options.voiceId : null;
+    cue_voiceId = config.auditory_main_voice_options ?
+      config.auditory_main_voice_options.voiceId : null;
   } else {
-    voiceId = config.auditory_voice_options ?
-      config.auditory_voice_options.alt_voiceId : null;
-    cue_voiceId = config.auditory_cue_voice_options ?
+    voiceId = config.auditory_cue_voice_options ?
       config.auditory_cue_voice_options.alt_voiceId : null;
+    cue_voiceId = config.auditory_main_voice_options ?
+      config.auditory_main_voice_options.alt_voiceId : null;
   }
   $form.find('[name=_voice_id]').val(voiceId || '')
   $form.find('[name=_cue_voice_id]').val(cue_voiceId || '')
@@ -251,25 +251,25 @@ function save_config(evt) {
     if(speaku.is_native) {
       var str = $form.find('[name=_voice_id]').val()
       if(str)
-        _config.auditory_voice_options.voiceId = str
-      else
-        delete _config.auditory_voice_options.voiceId
-      str = $form.find('[name=_cue_voice_id]').val()
-      if(str)
         _config.auditory_cue_voice_options.voiceId = str
       else
         delete _config.auditory_cue_voice_options.voiceId
+      str = $form.find('[name=_cue_voice_id]').val()
+      if(str)
+        _config.auditory_main_voice_options.voiceId = str
+      else
+        delete _config.auditory_main_voice_options.voiceId
     } else {
       var str = $form.find('[name=_voice_id]').val()
-      if(str)
-        _config.auditory_voice_options.alt_voiceId = str
-      else
-        delete _config.auditory_voice_options.alt_voiceId
-      str = $form.find('[name=_cue_voice_id]').val()
       if(str)
         _config.auditory_cue_voice_options.alt_voiceId = str
       else
         delete _config.auditory_cue_voice_options.alt_voiceId
+      str = $form.find('[name=_cue_voice_id]').val()
+      if(str)
+        _config.auditory_main_voice_options.alt_voiceId = str
+      else
+        delete _config.auditory_main_voice_options.alt_voiceId
     }
   } catch(err) {
     $form.find('.save-section .alert-danger')
@@ -280,7 +280,7 @@ function save_config(evt) {
   // then save
   // console.log(_config)
   $form.find('.save-section .alert').html('').toggleClass('alert-hidden', true)
-  write_file(config_fn, JSON.stringify(_config, null, "  "))
+  set_file_data(config_fn, JSON.stringify(_config, null, "  "))
     .then(function() {
       config = _config
       $form.find('.save-section .alert-success')
@@ -301,7 +301,7 @@ function save_tree(evt) {
   tree_data = $form.find('[name=tree-input]').val()
   // then save
   $form.find('.save-section .alert').html('').toggleClass('alert-hidden', true)
-  write_file(tree_fn, tree_data)
+  set_file_data(tree_fn, tree_data)
     .then(function() {
       $form.find('.save-section .alert-success')
         .html('<strong>Success!</strong>')

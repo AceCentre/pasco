@@ -12,10 +12,10 @@ window.default_config = 'config.json';
 window.default_tree = 'tree.md';
 
 function initialize_app() {
+  var replaceFileKeys = ['default_config', 'default_tree'];
   // for cordova
   if(window.cordova) {
-    var replaceFileKeys = ['default_config', 'default_tree'],
-        promises = [];
+    var promises = [];
     _.each(replaceFileKeys, function(key) {
       var path = window[key],
           newpath = 'documentsDirectory:' + window[key];
@@ -39,7 +39,46 @@ function initialize_app() {
     });
     return Promise.all(promises);
   } else {
-    return Promise.resolve();
+    // change read to localStorage
+    var promises = [];
+    _.each(replaceFileKeys, function(key) {
+      var path = window[key];
+      promises.push(
+        localStorage.getItem('file_'+path) ?
+          Promise.resolve() :
+          read_file(path)
+            .then(function(data) {
+              localStorage.setItem('file_'+path, data);
+            })
+      );
+    });
+    Promise.all(promises)
+      .then(function() {
+        console.log(localStorage)
+        function new_read(key) {
+          var result = localStorage.getItem('file_'+key);
+          if(result == null) {
+            return Promise.reject(new Error("Not found!"));
+          } else {
+            return Promise.resolve(result);
+          }
+        }
+        function new_write(key, data) {
+          localStorage.setItem('file_'+key, data);
+          return Promise.resolve();
+        }
+        window.get_file_json = function(key) {
+          return new_read(key) 
+            .then(function(data) {
+              var config = JSON.parse(data);
+              if(!config)
+                throw new Error("No input json!, " + key);
+              return config;
+            });
+        }
+        window.get_file_data = new_read
+        window.set_file_data = new_write
+      });
   }
 }
 
@@ -204,6 +243,8 @@ function write_file(url, data, options) {
   } else {
     // post otherwise
     options.data = data
+    if(!options.method)
+      options.method = 'POST'
     return read_file(url, options);
   }
 }
@@ -441,7 +482,11 @@ function read_json(url, options) {
     .then(function(data) {
       var config = JSON.parse(data);
       if(!config)
-        throw new Error("No input config!");
+        throw new Error("No input json!, " + url);
       return config;
     });
 }
+
+window.get_file_json = read_json
+window.get_file_data = read_file
+window.set_file_data = write_file
