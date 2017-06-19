@@ -50,16 +50,12 @@
     proto[direct_delegates[i]] = mk_direct_delegate(direct_delegates[i]);
 
   NativeAccessApi.onready = function() {
-    if(!window.cordova) {
-      return Promise.resolve();
-    } else {
-      return new Promise(function(resolve, reject) {
-        document.addEventListener('deviceready', function() {
-          document.removeEventListener('deviceready', arguments.callee);
-          resolve();
-        }, true);
-      });
-    }
+    return new Promise(function(resolve, reject) {
+      document.addEventListener('deviceready', function() {
+        document.removeEventListener('deviceready', arguments.callee);
+        resolve();
+      }, true);
+    });
   }
 
   window.NativeAccessApi = NativeAccessApi;

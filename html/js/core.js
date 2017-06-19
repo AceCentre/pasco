@@ -10,6 +10,39 @@ document.addEventListener('deviceready', function() {
 window.newEl = document.createElement.bind(document);
 window.default_config = 'config.json';
 window.default_tree = 'tree.md';
+
+function initialize_app() {
+  // for cordova
+  if(window.cordova) {
+    var replaceFileKeys = ['default_config', 'default_tree'],
+        promises = [];
+    _.each(replaceFileKeys, function(key) {
+      var path = window[key],
+          newpath = 'documentsDirectory:' + window[key];
+      promises.push(
+        new Promise(function(resolve, reject) {
+          window.resolveLocalFileSystemURL(
+            cordova.file.documentsDirectory + path, resolve, continue_proc);
+          function continue_proc(err) {
+            // if not found
+            read_file(path)
+              .then(function(data) {
+                return write_file(newpath, data)
+              })
+              .then(resolve, reject);
+          }
+        })
+          .then(function() {
+            window[key] = newpath;
+          })
+      );
+    });
+    return Promise.all(promises);
+  } else {
+    return Promise.resolve();
+  }
+}
+
 function tree_mk_list_base(tree, el, linkname, txtlinkname) {
   tree[linkname] = el;
   el.classList.add('level-' + tree.level);
@@ -128,32 +161,45 @@ function write_file(url, data, options) {
   if(!/^(https?):\/\//.test(url) && window.cordova &&
      window.resolveLocalFileSystemURL) {
     return new Promise(function(resolve, reject) {
-      var newurl = cordova.file.applicationDirectory + "www/" + url
-      function onEntry(fileEntry) {
-        // Create a FileWriter object for our FileEntry (log.txt).
-        fileEntry.createWriter(function (fileWriter) {
+      var parts = url.split(':')
+      var newurl, filename, dirname;
+      if(parts.length > 1 && parts[0] in cordova.file) {
+        newurl = cordova.file[parts[0]] + parts.slice(1).join(':');
+      } else {
+        newurl = cordova.file.applicationDirectory + "www/" + url;
+      }
+      parts = newurl.split('/');
+      filename = parts[parts.length - 1];
+      dirname = parts.slice(0, parts.length - 1).join("/");
+      function onEntry(dirEntry) {
+        dirEntry.getFile(filename, { create: true }, function (fileEntry) {
+          // Create a FileWriter object for our FileEntry
+          fileEntry.createWriter(function (fileWriter) {
 
-          fileWriter.onwriteend = function() {
-            resolve()
-          };
+            fileWriter.onwriteend = function() {
+              resolve()
+            };
 
-          fileWriter.onerror = function(err) {
-            reject("Fail to write `" + newurl + "` -- " + err+'')
-          };
+            fileWriter.onerror = function(err) {
+              console.error(err);
+              reject("Fail to write `" + newurl + "` -- " + err+'')
+            };
 
-          if(!(data instanceof Blob)) {
-            if(typeof data != 'string')
-              throw new Error("Unexpected input data, string or Blob accepted");
-            data = new Blob([data], { type: options.contentType || 'application/octet-stream' });
-          }
+            if(!(data instanceof Blob)) {
+              if(typeof data != 'string')
+                throw new Error("Unexpected input data, string or Blob accepted");
+              data = new Blob([data], { type: options.contentType || 'application/octet-stream' });
+            }
 
-          fileWriter.write(data);
-        });
+            fileWriter.write(data);
+          });
+        }, onFail);
       }
       function onFail(err) {
+        console.error(err);
         reject("Fail to write `" + newurl + "` -- " + err+'')
       }
-      window.resolveLocalFileSystemURL(newurl, onEntry, onFail);
+      window.resolveLocalFileSystemURL(dirname, onEntry, onFail);
     });
   } else {
     // post otherwise
@@ -167,7 +213,13 @@ function read_file(url, options) {
     options = options || {};
     if(!/^(https?):\/\//.test(url) && window.cordova &&
        window.resolveLocalFileSystemURL) {
-      var newurl = cordova.file.applicationDirectory + "www/" + url
+      var parts = url.split(':')
+      var newurl;
+      if(parts.length > 1 && parts[0] in cordova.file) {
+        newurl = cordova.file[parts[0]] + parts.slice(1).join(':');
+      } else {
+        newurl = cordova.file.applicationDirectory + "www/" + url;
+      }
       function onSuccess(fileEntry) {
         fileEntry.file(function(file) {
           var reader = new FileReader();
@@ -181,6 +233,7 @@ function read_file(url, options) {
 
       }
       function onFail(err) {
+        console.error(err);
         reject("Fail to load `" + newurl + "` -- " + err+'')
       }
       window.resolveLocalFileSystemURL(newurl, onSuccess, onFail);

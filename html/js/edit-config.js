@@ -1,8 +1,8 @@
-var config_fn = default_config, tree_fn = default_tree;
+var config_fn, tree_fn;
 var speaku, config, config_data, orig_tree_data, tree_data, voices;
 // start
 Promise.all([
-  NativeAccessApi.onready(),
+  window.cordova ? NativeAccessApi.onready() : Promise.resolve(),
   new Promise(function(resolve) { // domready
     document.addEventListener('DOMContentLoaded', function() {
       document.removeEventListener('DOMContentLoaded', arguments.callee, false);
@@ -10,6 +10,11 @@ Promise.all([
     }, false);
   })
 ])
+  .then(initialize_app)
+  .then(function() {
+    config_fn = default_config;
+    tree_fn = default_tree;
+  })
   .then(function() {
     speaku = new SpeakUnit()
     return speaku.init()
@@ -30,11 +35,21 @@ Promise.all([
 
 function start() {
   // insert voice options
-  var $form = $('form[name=edit-config]').first()
+  var $form = $('form[name=edit-config]').first(),
+      voices_by_id = _.object(_.map(voices, function(voice) { return [voice.id,voice] }));
   _.each(['_voice_id', '_cue_voice_id'], function(name) {
     var $inp = $form.find('select[name='+name+']')
     $inp.on('change', function() {
-      speaku.simple_speak(this.textContent, { voiceId: this.value })
+      var text;
+      if(this.value in voices_by_id) {
+        text = voices_by_id[this.value].label
+      } else {
+        text = "Default"
+      }
+      var opts = {};
+      if(this.value)
+        opts.voiceId = this.value
+      speaku.simple_speak(text, opts)
     })
     var opt = newEl('option')
     opt.value = ''

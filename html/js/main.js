@@ -1,7 +1,7 @@
 var config, tree, state = null, tree_element, speaku,
     _is_software_keyboard_visible = false;
 Promise.all([
-  NativeAccessApi.onready(),
+  window.cordova ? NativeAccessApi.onready() : Promise.resolve(),
   new Promise(function(resolve) { // domready
     document.addEventListener('DOMContentLoaded', function() {
       document.removeEventListener('DOMContentLoaded', arguments.callee, false);
@@ -9,6 +9,7 @@ Promise.all([
     }, false);
   })
 ])
+  .then(initialize_app)
   .then(function() {
     speaku = new SpeakUnit()
     return speaku.init()
