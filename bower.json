@@ -1,5 +1,5 @@
 {
-  "name": "audscan",
+  "name": "pasco",
   "description": "Auditory Scanning, Intended to be cross-platform",
   "main": "index.js",
   "authors": [
