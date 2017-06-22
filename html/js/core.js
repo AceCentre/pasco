@@ -54,7 +54,6 @@ function initialize_app() {
     });
     Promise.all(promises)
       .then(function() {
-        console.log(localStorage)
         function new_read(key) {
           var result = localStorage.getItem('file_'+key);
           if(result == null) {
@@ -361,7 +360,7 @@ proto.init = function() {
           script.onerror = function() {
             reject("Could not load responsivevoice code");
           };
-          script.src = "http://code.responsivevoice.org/responsivevoice.js";
+          script.src = "//code.responsivevoice.org/responsivevoice.js";
           document.body.appendChild(script);
         });
       }
