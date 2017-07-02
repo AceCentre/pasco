@@ -90,3 +90,41 @@ html.ios body {
   }
 }
 
+body:not(.debug-mode) .on-debug-mode {
+  display: none;
+}
+body.debug-mode .on-debug-mode {
+  display: block;
+}
+@media (min-width: 768px) {
+  .navbar-nav > li button {
+    padding-top: 15px;
+    padding-bottom: 15px;
+  }
+}
+
+/** Navigation Buttons **/
+
+#navbtns-wrp {
+  z-index: 1;
+  position: fixed;
+  top: 50px;
+  right: 25px;
+  width: 25%;
+  height: auto;
+  display: none;
+  &.navbtns-enable {
+    display: block;
+  }
+  @media (max-width: 500px) {
+    & {
+      width: 55%;
+      height: auto;
+    }
+  }
+}
+#navbtns {
+  width: 100%;
+  height: auto;
+  cursor: pointer;
+}

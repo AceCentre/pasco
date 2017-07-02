@@ -39,45 +39,29 @@ function initialize_app() {
     });
     return Promise.all(promises);
   } else {
-    // change read to localStorage
-    var promises = [];
-    _.each(replaceFileKeys, function(key) {
-      var path = window[key];
-      promises.push(
-        localStorage.getItem('file_'+path) ?
-          Promise.resolve() :
-          read_file(path)
-            .then(function(data) {
-              localStorage.setItem('file_'+path, data);
-            })
-      );
-    });
-    Promise.all(promises)
-      .then(function() {
-        function new_read(key) {
-          var result = localStorage.getItem('file_'+key);
-          if(result == null) {
-            return Promise.reject(new Error("Not found!"));
-          } else {
-            return Promise.resolve(result);
-          }
-        }
-        function new_write(key, data) {
-          localStorage.setItem('file_'+key, data);
-          return Promise.resolve();
-        }
-        window.get_file_json = function(key) {
-          return new_read(key) 
-            .then(function(data) {
-              var config = JSON.parse(data);
-              if(!config)
-                throw new Error("No input json!, " + key);
-              return config;
-            });
-        }
-        window.get_file_data = new_read
-        window.set_file_data = new_write
-      });
+    function new_read(key) {
+      var result = localStorage.getItem('file_'+key);
+      if(result == null) {
+        return read_file(key);
+      } else {
+        return Promise.resolve(result);
+      }
+    }
+    function new_write(key, data) {
+      localStorage.setItem('file_'+key, data);
+      return Promise.resolve();
+    }
+    window.get_file_json = function(key) {
+      return new_read(key) 
+        .then(function(data) {
+          var config = JSON.parse(data);
+          if(!config)
+            throw new Error("No input json!, " + key);
+          return config;
+        });
+    }
+    window.get_file_data = new_read
+    window.set_file_data = new_write
   }
 }
 
@@ -303,6 +287,7 @@ function keyevents_needs_theinput() {
 function keyevents_handle_theinput() {
   var theinputwrp = document.getElementById('theinput-wrp');
   var theinput = document.getElementById('theinput');
+  var docscroll_handler;
   function preventdefault(evt) {
     evt.preventDefault();
   }
@@ -311,12 +296,22 @@ function keyevents_handle_theinput() {
     theinput.focus();
     theinput.addEventListener('keydown', preventdefault, false);
     theinput.addEventListener('keyup', preventdefault, false);
-    document.addEventListener('scroll', function() {
+    document.addEventListener('scroll', docscroll_handler = function() {
       theinputwrp.style.top = window.scrollY + 'px';
       theinputwrp.style.left = window.scrollX + 'px';
     }, false);
+    window.keyevents_handle_theinput_off = function() {
+      theinput.removeEventListener('blur', _theinput_refocus, false);
+      theinput.blur();
+      theinput.removeEventListener('keydown', preventdefault, false);
+      theinput.removeEventListener('keyup', preventdefault, false);
+      document.removeEventListener('scroll', docscroll_handler, false);
+      window.keyevents_handle_theinput_off = function() { } //dummy func
+    }
   }
 }
+
+window.keyevents_handle_theinput_off = function() { } // dummy func
 
 function SpeakUnit() {
   this._alt_finish_queue = [];
@@ -479,10 +474,10 @@ proto.get_voices = function() {
 function read_json(url, options) {
   return read_file(url, options)
     .then(function(data) {
-      var config = JSON.parse(data);
-      if(!config)
+      var data = JSON.parse(data);
+      if(!data)
         throw new Error("No input json!, " + url);
-      return config;
+      return data;
     });
 }
 

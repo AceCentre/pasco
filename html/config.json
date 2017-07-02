@@ -1,5 +1,6 @@
 {
   "mode": "switch",
+  "onscreen_navigation": "auto",
   "ignore_second_hits_time": 100,
   "ignore_key_release_time": 50,
   "auto_next_delay": 200,
@@ -27,7 +28,9 @@
     "39": { "func": "tree_go_in", "comment": "ArrowRight" },
     "37": { "func": "tree_go_out", "comment": "ArrowLeft" },
     "68": { "func": "tree_go_in", "comment": "D" },
-    "65": { "func": "tree_go_out", "comment": "A" }
+    "65": { "func": "tree_go_out", "comment": "A" },
+    "51": { "func": "tree_go_out", "comment": "num 3" },
+    "52": { "func": "tree_go_in", "comment": "num 4" }
   },
   "switch_keys": {
     "13": { "func": "tree_go_in", "comment": "enter" },
@@ -39,7 +42,11 @@
     "87": { "func": "tree_go_previous", "comment": "W" },
     "68": { "func": "tree_go_in", "comment": "D" },
     "83": { "func": "tree_go_next", "comment": "S" },
-    "65": { "func": "tree_go_out", "comment": "A" }
+    "65": { "func": "tree_go_out", "comment": "A" },
+    "49": { "func": "tree_go_previous", "comment": "num 1" },
+    "50": { "func": "tree_go_next", "comment": "num 2" },
+    "51": { "func": "tree_go_out", "comment": "num 3" },
+    "52": { "func": "tree_go_in", "comment": "num 4" }
   },
   "style": [ ],
   "highlight_behavior": "center"

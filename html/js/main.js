@@ -9,6 +9,15 @@ Promise.all([
     }, false);
   })
 ])
+  .then(function() {
+    // some hooks
+    var el = document.querySelector('#debug-clear-storage')
+    if(el) {
+      el.addEventListener('click', function() {
+        localStorage.clear()
+      }, false);
+    }
+  })
   .then(initialize_app)
   .then(function() {
     speaku = new SpeakUnit()
@@ -27,9 +36,40 @@ Promise.all([
       .then(function(_tree) { tree = _tree; });
   })
   .then(function() {
-    // iOS needs this
-    if(keyevents_needs_theinput())
-      keyevents_handle_theinput();
+    // prepare onscreen_navigation -> boolean
+    // theinput thing, iOS needs this
+    var _default_case = false;
+    keyevents_handle_theinput_off()
+    if(keyevents_needs_theinput() && speaku && speaku.api &&
+       config.onscreen_navigation == 'auto') {
+      return new Promise(function(resolve, reject) {
+        keyevents_handle_theinput();
+        setTimeout(function() { // give time to bring keyboard
+          speaku.api.is_software_keyboard_visible()
+            .then(function(issoft) {
+              if(!('_onscreen_navigation' in config))
+                config._onscreen_navigation = issoft;
+              if(issoft) {
+                keyevents_handle_theinput_off();
+              }
+            })
+            .then(resolve, reject);
+        }, 1000);
+      });
+    } else {
+      // assuming keyboard is available, then auto is false
+      if(!('_onscreen_navigation' in config))
+        config._onscreen_navigation = config.onscreen_navigation == 'enable';
+      if(keyevents_needs_theinput() && !config._onscreen_navigation)
+        keyevents_handle_theinput();
+    }
+  })
+  .then(function() {
+    // deal with on-screen navigation
+    var elem = document.querySelector('#navbtns-wrp');
+    if(elem && config._onscreen_navigation) {
+      elem.classList.add('navbtns-enable');
+    }
   })
   .then(start)
   .catch(handle_error);
@@ -49,12 +89,23 @@ var _alt_voice_rate_by_name = { 'default': 1.0, 'max': 2.0, 'min': 0.5 },
       "tree_go_previous": _tree_go_previous, "tree_go_next": _tree_go_next,
     },
     _debug_keys = {
-      80: { func: function() { // P (toggle play)
+      '80': { func: function() { // P (toggle play)
         if(state._stopped) {
           state = renew_state(state)
           start(state);
         } else {
           stop();
+        }
+      } },
+      '67': { func: function(ev) { // c + ctrl + alt (toggle debug mode)
+        console.log("c,", ev.ctrlKey, ev.altKey)
+        if(ev.ctrlKey && ev.altKey) {
+          state.debug_mode = !state.debug_mode
+          if(state.debug_mode) {
+            document.body.classList.add('debug-mode')
+          } else {
+            document.body.classList.remove('debug-mode')
+          }
         }
       } }
     };
@@ -72,7 +123,6 @@ window.addEventListener('keydown', function(ev) {
       ret.catch(handle_error);
   }
 }, false);
-
 
 function start(_state) {
   // start if _state is given acts as continue
@@ -97,6 +147,9 @@ function start(_state) {
   tree_element.addEventListener('x-mode-change', _on_mode_change, false);
   window.addEventListener('keydown', _on_keydown, false);
   window.addEventListener('resize', _tree_needs_resize, false);
+  var tmp = document.querySelector('#navbtns')
+  if(tmp && config._onscreen_navigation)
+    tmp.addEventListener('click', _on_navbtns_click, false)
   if(state.mode == 'auto') {
     _state.auto_next_start = auto_next
     _state.auto_next_dead = false
@@ -164,6 +217,9 @@ function stop() {
   }
   window.removeEventListener('keydown', _on_keydown, false);
   window.removeEventListener('resize', _tree_needs_resize, false);
+  var tmp = document.querySelector('#navbtns')
+  if(tmp && config._onscreen_navigation)
+    tmp.removeEventListener('click', _on_navbtns_click, false)
   _before_new_move(); // stop speech and highlights
   if(state._active_timeout) {
     clearTimeout(state._active_timeout);
@@ -202,6 +258,23 @@ function _update_software_keyboard() {
   }
 }
 
+function _on_navbtns_click(ev) {
+  var elem = ev.target;
+  switch(elem.id) {
+  case 'nav-upbtn':
+    _tree_go_previous();
+    break;
+  case 'nav-downbtn':
+    _tree_go_next();
+    break;
+  case 'nav-leftbtn':
+    _tree_go_out();
+    break;
+  case 'nav-rightbtn':
+    _tree_go_in();
+    break;
+  }
+}
 
 function _on_keydown(down_ev) {
   curtime = new Date().getTime()
@@ -547,7 +620,6 @@ function _tree_go_previous() {
 function _tree_go_next() {
   if(!state.can_move)
     return Promise.resolve();
-  console.log("goto next")
   var position = _get_current_position();
   position.index += 1;
   if(position.index >= position.tree.nodes.length) {
