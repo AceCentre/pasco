@@ -177,6 +177,36 @@ function handle_error(err) {
   }
 }
 
+function delete_file(url, options) {
+  options = options || { method: 'DELETE' }
+  // cordova specific
+  if(!/^(https?):\/\//.test(url) && window.cordova &&
+     window.resolveLocalFileSystemURL) {
+    return new Promise(function(resolve, reject) {
+      var parts = url.split(':')
+      var newurl;
+      if(parts.length > 1 && parts[0] in cordova.file) {
+        newurl = cordova.file[parts[0]] + parts.slice(1).join(':');
+      } else {
+        newurl = cordova.file.applicationDirectory + "www/" + url;
+      }
+      function onEntry(entry) {
+        entry.remove(resolve, onFail);
+      }
+      function onFail(err) {
+        console.error(err);
+        reject("Fail to delete `" + newurl + "` -- " + err+'')
+      }
+      window.resolveLocalFileSystemURL(newurl, onEntry, function() { resolve(); });
+    });
+  } else {
+    // post otherwise
+    if(!options.method)
+      options.method = 'DELETE'
+    return read_file(url, options);
+  }  
+}
+
 function write_file(url, data, options) {
   options = options || { method: 'POST' }
   // cordova specific
@@ -278,6 +308,13 @@ function read_file(url, options) {
       xhr.send(options.data || null);
     }
   });
+}
+
+function _theinput_refocus() {
+  var theinput = this;
+  setTimeout(function() {
+    theinput.focus();
+  }, 100);
 }
 
 function keyevents_needs_theinput() {

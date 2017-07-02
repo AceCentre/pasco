@@ -14,7 +14,19 @@ Promise.all([
     var el = document.querySelector('#debug-clear-storage')
     if(el) {
       el.addEventListener('click', function() {
-        localStorage.clear()
+        // for cordova
+        if(window.cordova) {
+          Promise.all([
+            delete_file(default_config),
+            delete_file(default_tree)
+          ])
+            .then(function() {
+              location.reload();
+            })
+            .catch(handle_error);
+        } else {
+          localStorage.clear()
+        }
       }, false);
     }
   })
@@ -38,11 +50,9 @@ Promise.all([
   .then(function() {
     // prepare onscreen_navigation -> boolean
     // theinput thing, iOS needs this
-    var _default_case = false;
-    keyevents_handle_theinput_off()
-    if(keyevents_needs_theinput() && speaku && speaku.api &&
-       config.onscreen_navigation == 'auto') {
-      return new Promise(function(resolve, reject) {
+    return new Promise(function(resolve, reject) {
+      if(keyevents_needs_theinput() && speaku && speaku.api &&
+         config.onscreen_navigation == 'auto') {
         keyevents_handle_theinput();
         setTimeout(function() { // give time to bring keyboard
           speaku.api.is_software_keyboard_visible()
@@ -52,17 +62,24 @@ Promise.all([
               if(issoft) {
                 keyevents_handle_theinput_off();
               }
+              _is_software_keyboard_visible = issoft;
             })
             .then(resolve, reject);
         }, 1000);
-      });
-    } else {
-      // assuming keyboard is available, then auto is false
-      if(!('_onscreen_navigation' in config))
-        config._onscreen_navigation = config.onscreen_navigation == 'enable';
-      if(keyevents_needs_theinput() && !config._onscreen_navigation)
-        keyevents_handle_theinput();
-    }
+      } else {
+        // assuming keyboard is available, then auto is false
+        if(!('_onscreen_navigation' in config))
+          config._onscreen_navigation = config.onscreen_navigation == 'enable';
+        if(keyevents_needs_theinput() && !config._onscreen_navigation) {
+          keyevents_handle_theinput();
+          setTimeout(function() {
+            _update_software_keyboard().then(resolve, reject)
+          }, 1000)
+        } else {
+          resolve()
+        }
+      }
+    });
   })
   .then(function() {
     // deal with on-screen navigation
@@ -97,15 +114,12 @@ var _alt_voice_rate_by_name = { 'default': 1.0, 'max': 2.0, 'min': 0.5 },
           stop();
         }
       } },
-      '67': { func: function(ev) { // c + ctrl + alt (toggle debug mode)
-        console.log("c,", ev.ctrlKey, ev.altKey)
-        if(ev.ctrlKey && ev.altKey) {
-          state.debug_mode = !state.debug_mode
-          if(state.debug_mode) {
-            document.body.classList.add('debug-mode')
-          } else {
-            document.body.classList.remove('debug-mode')
-          }
+      '190': { func: function(ev) { // . dot (toggle debug mode)
+        state.debug_mode = !state.debug_mode
+        if(state.debug_mode) {
+          document.body.classList.add('debug-mode')
+        } else {
+          document.body.classList.remove('debug-mode')
         }
       } }
     };
@@ -233,12 +247,6 @@ function _on_mode_change() {
   state = renew_state(state)
   start(state);
 }
-function _theinput_refocus() {
-  var theinput = this;
-  setTimeout(function() {
-    theinput.focus();
-  }, 100);
-}
 
 function renew_state(_state) {
   _state = Object.assign({}, _state); // copy own props
@@ -253,9 +261,10 @@ function _clean_state(_state) {
 
 function _update_software_keyboard() {
   if(speaku && speaku.api) {
-    speaku.api.is_software_keyboard_visible()
+    return speaku.api.is_software_keyboard_visible()
       .then(function(v) { _is_software_keyboard_visible = v; });
   }
+  return Promise.resolve();
 }
 
 function _on_navbtns_click(ev) {

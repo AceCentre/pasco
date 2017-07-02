@@ -7,6 +7,11 @@ html.ios body {
   height: 100%;
   overflow: hidden;
 }
+html.ios {
+  #navbtns-wrp {
+    top: 70px;
+  }
+}
 
 #theinput-wrp {
   width: 1px;
@@ -111,20 +116,21 @@ body.debug-mode .on-debug-mode {
   top: 50px;
   right: 25px;
   width: 25%;
-  height: auto;
+  height: 25%;
   display: none;
   &.navbtns-enable {
     display: block;
   }
-  @media (max-width: 500px) {
+  @media (max-width: 767px) {
     & {
-      width: 55%;
+      width: 35%;
+      height: 35%;
       height: auto;
     }
   }
 }
 #navbtns {
   width: 100%;
-  height: auto;
+  height: 100%;
   cursor: pointer;
 }
