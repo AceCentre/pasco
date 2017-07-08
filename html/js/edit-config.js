@@ -99,7 +99,8 @@ var config_validator = Object.assign({
     'auditory_cue_voice_options.volume', 'auditory_cue_voice_options.pitch',
     'auditory_cue_voice_options.rateMul',
     'auditory_main_voice_options.volume', 'auditory_main_voice_options.pitch',
-    'auditory_main_voice_options.rateMul' ],
+    'auditory_main_voice_options.rateMul',
+    'tree_content_size_percentage' ],
   function(v) { return [ v, validate_number ] })))
     
 

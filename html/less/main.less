@@ -99,18 +99,54 @@ html.ios {
     transition: none;
   }
   &.level-0 > ul.children {
-    width: 150px;
+    width: 170px;
   }
+  &.contentsize-1_5x {
+    &.level-0 > ul.children {
+      width: 240px;
+    }
+    ul.children {
+      width: 350px;
+    }
+  }
+  &.contentsize-2x {
+    &.level-0 > ul.children {
+      width: 300px;
+    }
+    ul.children {
+      width: 350px;
+    }
+  }
+  &.contentsize-2_5x {
+    &.level-0 > ul.children {
+      width: 340px;
+    }
+    ul.children {
+      width: 400px;
+    }
+  }
+  &.contentsize-3x {
+    &.level-0 > ul.children {
+      width: 360px;
+    }
+    ul.children {
+      width: 450px;
+    }
+  }
+  
   .active > .text,
   .text.highlight,
   .text.selected {
     padding: 30px 10px;
+    // padding: 2.14em 0.71em;
   }
   .text {
     display: block;
     padding: 15px 10px;
+    // padding: 1.07em 0.71em;
     margin: 0px;
-    font-size: 24px;
+    font-size: 1.6em;
+    line-height: 1.3;
   }
 }
 

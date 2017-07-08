@@ -49,5 +49,6 @@
     "52": { "func": "tree_go_in", "comment": "num 4" }
   },
   "style": [ ],
-  "highlight_behavior": "center"
+  "highlight_behavior": "center",
+  "tree_content_size_percentage": 100
 }

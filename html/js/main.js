@@ -1,5 +1,6 @@
 var config, tree, state = null, tree_element, speaku,
-    _is_software_keyboard_visible = false;
+    _is_software_keyboard_visible = false,
+    tree_contentsize_xstep = 50;
 Promise.all([
   window.cordova ? NativeAccessApi.onready() : Promise.resolve(),
   new Promise(function(resolve) { // domready
@@ -48,6 +49,9 @@ Promise.all([
       .then(function(_tree) { tree = _tree; });
   })
   .then(function() {
+    // set tree font-size
+    if(config.tree_content_size_percentage)
+      _tree_set_contentsize(config.tree_content_size_percentage)
     // prepare onscreen_navigation -> boolean
     // theinput thing, iOS needs this
     return new Promise(function(resolve, reject) {
@@ -452,6 +456,23 @@ function _tree_needs_resize() {
   _update_active_positions_topleft();
 }
 
+function _tree_set_contentsize(percentage) {
+  if(!tree_element)
+    return;
+  tree_element.style.fontSize = percentage + '%';
+  // re-set xscale
+  var xscale = xscale_from_percentage_floor(percentage, tree_contentsize_xstep)
+  for(var i = 0; i < tree_element.classList.length;) {
+    var name = tree_element.classList.item(i);
+    if(name.startsWith('contentsize-')) {
+      tree_element.classList.remove(name)
+    } else {
+      i++;
+    }
+  }
+  tree_element.classList.add('contentsize-'+xscale+'x')
+}
+
 function _node_cue_text(node) {
   return node.meta['auditory-cue'] || node.text;
 }
@@ -739,5 +760,17 @@ function clear_config(config) {
     for(var i = 0, len = config._styles.length; i < len; ++i) {
       document.body.removeChild(config._styles[i]);
     }
+  }
+}
+
+// percentage to x-scale for class name
+function xscale_from_percentage_floor(percentage, step, decres) {
+  decres = decres == undefined ? 1 : decres
+  var v = Math.floor(percentage / step) * step / 100.0;
+  if(decres > 0) {
+    return v.toFixed(decres || 1).replace(/0+$/, "")
+      .replace(/\.$/, "").replace('.', '_')
+  } else {
+    return v+'';
   }
 }
