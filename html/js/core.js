@@ -93,9 +93,23 @@ function tree_mk_list_base(tree, el, linkname, txtlinkname) {
     el.appendChild(ul);
   }
 }
-
 var _parse_dom_tree_pttrn01 = /^H([0-9])$/,
-    _parse_dom_tree_pttrn02 = /^LI$/;
+    _parse_dom_tree_pttrn02 = /^LI$/,
+    _parse_dom_tree_pttrn03 = /\(([^\)]*)\)$/;
+function parse_dom_tree_subrout_parse_text(text) {
+  text = text.trim()
+  var meta = {}, match;
+  // special format for auditory-cue meta (#8)
+  if((match = text.match(_parse_dom_tree_pttrn03)) != null) {
+    text = text.substr(0, text.length - (match[1].length + 2))
+    if(match[1].length > 0)
+      meta['auditory-cue'] = match[1]
+  }
+  return {
+    text: text,
+    meta: meta
+  }
+}
 function parse_dom_tree(el, continue_at, tree) {
   continue_at = continue_at || { i: 0 };
   tree = tree || { level: 0, meta: {} };
@@ -112,12 +126,13 @@ function parse_dom_tree(el, continue_at, tree) {
           var txt_dom_el = is_list ? cnode.querySelector(":scope > p") : cnode;
           if(!txt_dom_el)
             txt_dom_el = cnode;
+          var td = parse_dom_tree_subrout_parse_text(txt_dom_el.textContent);
           var anode = {
             txt_dom_element: txt_dom_el,
             dom_element: cnode,
             level: level,
-            text: txt_dom_el.textContent.trim(),
-            meta: {}
+            text: td.text,
+            meta: td.meta
           };
           if(is_list) {
             tree.nodes.push(parse_dom_tree(cnode, null, anode));

@@ -9,8 +9,27 @@ html.ios body {
 }
 html.ios {
   #navbtns-wrp {
-    top: 70px;
+    top: 74px;
   }
+}
+
+.non-selectable { // by default no select
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                        supported by Chrome and Opera */
+}
+.selectable {
+  -webkit-touch-callout: auto; /* iOS Safari */
+  -webkit-user-select: auto; /* Safari */
+  -khtml-user-select: auto; /* Konqueror HTML */
+  -moz-user-select: auto; /* Firefox */
+  -ms-user-select: auto; /* Internet Explorer/Edge */
+  user-select: auto; /* Non-prefixed version, currently
+                        supported by Chrome and Opera */
 }
 
 #theinput-wrp {
@@ -113,24 +132,35 @@ body.debug-mode .on-debug-mode {
 #navbtns-wrp {
   z-index: 1;
   position: fixed;
-  top: 50px;
+  top: 54px;
   right: 25px;
-  width: 25%;
-  height: 25%;
   display: none;
   &.navbtns-enable {
     display: block;
   }
-  @media (max-width: 767px) {
-    & {
-      width: 35%;
-      height: 35%;
-      height: auto;
-    }
-  }
 }
 #navbtns {
-  width: 100%;
-  height: 100%;
+  width: auto;
+  height: auto;
   cursor: pointer;
+  max-width: 200px;
+  max-height: 200px;
+  max-width: 40vw;
+  max-height: 40vh;
+  @media (max-width: 767px) {
+    & {
+      max-width: 150px;
+      max-height: 150px;
+      max-width: 40vw;
+      max-height: 40vh;
+    }
+  }
+  .main-stroke-outline {
+    stroke: #606060 !important;
+    stroke-width: 20 !important;
+  }
+  .stroke-outline {
+    stroke: #606060 !important;
+    stroke-width: 15 !important;
+  }
 }

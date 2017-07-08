@@ -445,6 +445,10 @@ function _tree_needs_resize() {
   _update_active_positions_topleft();
 }
 
+function _node_cue_text(node) {
+  return node.meta['auditory-cue'] || node.text;
+}
+
 function _move_sub_highlight() {
   var node = this
   if(node.txt_dom_element) {
@@ -454,9 +458,8 @@ function _move_sub_highlight() {
   _update_active_positions();
 }
 
-function _move_sub_speak(voice_options) {
-  var node = this
-  return speaku.start_speaking(node.text, voice_options)
+function _move_sub_speak(text, voice_options) {
+  return speaku.start_speaking(text, voice_options)
     .then(function(hdl) {
       return speaku.speak_finish(hdl)
         .then(function() {
@@ -469,15 +472,15 @@ function _scan_move(node) {
   node = node || _get_current_node();
   var moveobj = _new_move_init(node)
   moveobj.steps.push(_move_sub_highlight.bind(node))
-  moveobj.steps.push(_move_sub_speak.bind(node, config.auditory_cue_voice_options))
+  moveobj.steps.push(_move_sub_speak.bind(node, _node_cue_text(node), config.auditory_cue_voice_options))
   _before_new_move()
   moveobj.node.dom_element.dispatchEvent(new CustomEvent("x-new-move"));
   return _new_move_start(moveobj);
 }
 
-function _cue_move(node, cuenode, delay) {
-  var moveobj = _new_move_init(node || cuenode)
-  moveobj.steps.push(_move_sub_speak.bind(cuenode, config.auditory_main_voice_options))
+function _notify_move(node, notifynode, delay) {
+  var moveobj = _new_move_init(node || notifynode)
+  moveobj.steps.push(_move_sub_speak.bind(notifynode, notifynode.text, config.auditory_main_voice_options))
   if(node) {
     moveobj.steps.push(function() {
       _before_new_move()
@@ -492,7 +495,7 @@ function _cue_move(node, cuenode, delay) {
   }
   moveobj.steps.push(un_can_move)
   if(node) {
-    moveobj.steps.push(_move_sub_speak.bind(node, config.auditory_cue_voice_options))
+    moveobj.steps.push(_move_sub_speak.bind(node, _node_cue_text(node), config.auditory_cue_voice_options))
   }
   speaku.stop_speaking();
   state.can_move = false;
@@ -579,7 +582,7 @@ function _tree_go_in() {
         tree: tmp[2],
         index: 0
       });
-      return _cue_move(_get_current_node(), atree);
+      return _notify_move(_get_current_node(), atree);
     } else {
       // on auto mode stop iteration and on any key restart
       stop();
@@ -612,7 +615,7 @@ function _tree_go_in() {
       index: 0
     });
     var delay = state.mode == 'auto' ? config.auto_next_atfirst_delay || 0 : 0;
-    return _cue_move(_get_current_node(), atree, delay);
+    return _notify_move(_get_current_node(), atree, delay);
   }
 }
 function _tree_go_previous() {
@@ -707,9 +710,7 @@ function load_tree(tree_element, fn) {
       var html_data = new showdown.Converter().makeHtml(data);
       html_data = sanitizeHtml(html_data, {
         allowedTags:
-          sanitizeHtml.defaults.allowedTags.concat([ 'h1', 'h2' ]),
-        selfClosing:
-          sanitizeHtml.defaults.selfClosing.concat([ 'meta' ]),
+          sanitizeHtml.defaults.allowedTags.concat([ 'h1', 'h2', 'meta' ]),
         allowedAttributes:
            Object.assign({}, sanitizeHtml.defaults.allowedAttributes, {
              meta: [ 'data-*' ]
