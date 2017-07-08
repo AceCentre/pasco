@@ -97,6 +97,13 @@ window.addEventListener('unload', function() {
   }
 }, false);
 
+document.addEventListener('touchmove', function(evt) {
+  if(document.querySelector('html').classList.contains('ios')) {
+    // prevent scrolling
+    evt.preventDefault();
+  }
+}, false);
+
 /* execution code start */
 
 var _alt_voice_rate_by_name = { 'default': 1.0, 'max': 2.0, 'min': 0.5 },
