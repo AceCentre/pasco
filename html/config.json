@@ -1,4 +1,5 @@
 {
+  "theme": "light",
   "mode": "switch",
   "onscreen_navigation": "auto",
   "ignore_second_hits_time": 100,

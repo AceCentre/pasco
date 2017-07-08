@@ -52,6 +52,9 @@ Promise.all([
     // set tree font-size
     if(config.tree_content_size_percentage)
       _tree_set_contentsize(config.tree_content_size_percentage)
+    // set theme class
+    if(config.theme)
+      document.body.classList.add('theme-' + config.theme);
     // prepare onscreen_navigation -> boolean
     // theinput thing, iOS needs this
     return new Promise(function(resolve, reject) {
