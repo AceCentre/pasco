@@ -203,7 +203,7 @@ function start(_state) {
       } else {
         run()
       }
-    }, (is_first_run(_state) ? config.auto_next_first_run_delay : null) ||
+    }, (config.mode == 'auto' &&  is_first_run(_state) ? config.auto_next_first_run_delay : null) ||
        config.auto_next_delay || 500);
     function run() {
       if(_state._stopped)
@@ -510,7 +510,7 @@ function _scan_move(node) {
   node = node || _get_current_node();
   var moveobj = _new_move_init(node)
   moveobj.steps.push(_move_sub_highlight.bind(node))
-  var opts = (is_first_run() ? config.auditory_cue_first_run_voice_options : null) || config.auditory_cue_voice_options;
+  var opts = (config.mode == 'auto' && is_first_run() ? config.auditory_cue_first_run_voice_options : null) || config.auditory_cue_voice_options;
   moveobj.steps.push(_move_sub_speak.bind(node, _node_cue_text(node), opts))
   _before_new_move()
   moveobj.node.dom_element.dispatchEvent(new CustomEvent("x-new-move"));
@@ -534,7 +534,7 @@ function _notify_move(node, notifynode, delay) {
   }
   moveobj.steps.push(un_can_move)
   if(node) {
-    var opts = (is_first_run() ? config.auditory_cue_first_run_voice_options : null) || config.auditory_cue_voice_options;
+    var opts = (config.mode == 'auto' && is_first_run() ? config.auditory_cue_first_run_voice_options : null) || config.auditory_cue_voice_options;
     moveobj.steps.push(_move_sub_speak.bind(node, _node_cue_text(node), opts))
   }
   speaku.stop_speaking();
