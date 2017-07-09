@@ -451,6 +451,8 @@ proto.start_speaking = function(speech, opts) {
     delete opts.rateMul
     var voiceId = opts.voiceId;
     delete opts.voiceId;
+    // TODO:: control audio playback,
+    // delay can be implemented if access to audio playback is at this level
     self.responsiveVoice.speak(speech, voiceId, opts);
     return Promise.resolve(1);
   }

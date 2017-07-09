@@ -37,8 +37,8 @@ function start() {
   // insert voice options
   var $form = $('form[name=edit-config]').first(),
       voices_by_id = _.object(_.map(voices, function(voice) { return [voice.id,voice] }));
-  _.each(['_voice_id', '_cue_voice_id'], function(name) {
-    var $inp = $form.find('select[name='+name+']')
+  _.each(_voice_id_links, function(alink) {
+    var $inp = $form.find('select[name='+alink[1]+']')
     $inp.on('change', function() {
       var text;
       if(this.value in voices_by_id) {
@@ -91,18 +91,14 @@ function validate_number(v, name) {
     throw new Error(name + " should be a number");
   return ret;
 }
-
-var config_validator = Object.assign({
-}, _.object(_.map( // numbers
-  [ 'ignore_second_hits_time', 'ignore_key_release_time', 'auto_next_loops',
-    'auto_next_atfirst_delay', 'auto_next_delay',
-    'auditory_cue_voice_options.volume', 'auditory_cue_voice_options.pitch',
-    'auditory_cue_voice_options.rateMul',
-    'auditory_main_voice_options.volume', 'auditory_main_voice_options.pitch',
-    'auditory_main_voice_options.rateMul',
-    'tree_content_size_percentage' ],
-  function(v) { return [ v, validate_number ] })))
-    
+var config_validators = {
+  'number': validate_number
+};
+var _voice_id_links = [
+  [ 'auditory_main_voice_options', '_main_voice_id' ],
+  [ 'auditory_cue_voice_options', '_cue_voice_id' ],
+  [ 'auditory_cue_first_run_voice_options', '_cue_first_run_voice_id' ],
+]; 
 
 function insert_config() {
   var $form = $('form[name=edit-config]').first()
@@ -150,20 +146,11 @@ function insert_config() {
       this.checked = this.value == forward_key
     })
   }
-  var voiceId, cue_voiceId;
-  if(speaku.is_native) {
-    voiceId = config.auditory_cue_voice_options ?
-      config.auditory_cue_voice_options.voiceId : null;
-    cue_voiceId = config.auditory_main_voice_options ?
-      config.auditory_main_voice_options.voiceId : null;
-  } else {
-    voiceId = config.auditory_cue_voice_options ?
-      config.auditory_cue_voice_options.alt_voiceId : null;
-    cue_voiceId = config.auditory_main_voice_options ?
-      config.auditory_main_voice_options.alt_voiceId : null;
-  }
-  $form.find('[name=_voice_id]').val(voiceId || '')
-  $form.find('[name=_cue_voice_id]').val(cue_voiceId || '')
+  _.each(_voice_id_links, function(alink) {
+    var propname = (speaku.is_native ? '' : 'alt_') + 'voiceId',
+        vid = config[alink[0]] ? config[alink[0]][propname] : null;
+    $form.find('[name='+alink[1]+']').val(vid || '')
+  });
 }
 
 function insert_tree_data() {
@@ -180,9 +167,11 @@ function save_config(evt) {
     $form.find('input,select,textarea').each(function() {
       if(this.name.length > 0 && this.name[0] != '_') {
         var path = this.name.split('.'),
-            value = (this.name in config_validator ?
-                     config_validator[this.name](this.value, this.name) : 
-                     this.value);
+            validator_attr = this.getAttribute('data-validator'),
+            validator = validator_attr ? config_validators[validator_attr] : null;
+        if(validator_attr && !validator)
+          throw new Error("Validator not found " + validator_attr + " for " + this.name);
+        var value = validator ? validator(this.value, this.name) : this.value;
         var tmp = _config;
         for(var i = 0, len = path.length; i < len; ++i) {
           var key = path[i];
@@ -249,29 +238,17 @@ function save_config(evt) {
     }
     if(keys)
       _config.switch_keys = Object.assign((_config.switch_keys || {}), keys);
-    if(speaku.is_native) {
-      var str = $form.find('[name=_voice_id]').val()
+    
+    _.each(_voice_id_links, function(alink) {
+      var propname = (speaku.is_native ? '' : 'alt_') + 'voiceId',
+          str = $form.find('[name='+alink[1]+']').val()
+      if(!config[alink[0]])
+        config[alink[0]] = {}
       if(str)
-        _config.auditory_cue_voice_options.voiceId = str
+        config[alink[0]][propname] = str
       else
-        delete _config.auditory_cue_voice_options.voiceId
-      str = $form.find('[name=_cue_voice_id]').val()
-      if(str)
-        _config.auditory_main_voice_options.voiceId = str
-      else
-        delete _config.auditory_main_voice_options.voiceId
-    } else {
-      var str = $form.find('[name=_voice_id]').val()
-      if(str)
-        _config.auditory_cue_voice_options.alt_voiceId = str
-      else
-        delete _config.auditory_cue_voice_options.alt_voiceId
-      str = $form.find('[name=_cue_voice_id]').val()
-      if(str)
-        _config.auditory_main_voice_options.alt_voiceId = str
-      else
-        delete _config.auditory_main_voice_options.alt_voiceId
-    }
+        delete config[alink[0]][propname]
+    });
   } catch(err) {
     $form.find('.save-section .alert-danger')
       .html(error_to_html(err))

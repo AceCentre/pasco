@@ -203,7 +203,8 @@ function start(_state) {
       } else {
         run()
       }
-    }, config.auto_next_delay || 500);
+    }, (is_first_run(_state) ? config.auto_next_first_run_delay : null) ||
+       config.auto_next_delay || 500);
     function run() {
       if(_state._stopped)
         return; // stop the loop
@@ -254,6 +255,12 @@ function stop() {
     delete state._active_timeout;
   }
   state._stopped = true;
+}
+
+function is_first_run(_state) {
+  // check if the current cycle is the first one
+  _state = _state || state
+  return state._auto_next_rem_loops == config.auto_next_loops
 }
 
 function _on_mode_change() {
@@ -503,7 +510,8 @@ function _scan_move(node) {
   node = node || _get_current_node();
   var moveobj = _new_move_init(node)
   moveobj.steps.push(_move_sub_highlight.bind(node))
-  moveobj.steps.push(_move_sub_speak.bind(node, _node_cue_text(node), config.auditory_cue_voice_options))
+  var opts = (is_first_run() ? config.auditory_cue_first_run_voice_options : null) || config.auditory_cue_voice_options;
+  moveobj.steps.push(_move_sub_speak.bind(node, _node_cue_text(node), opts))
   _before_new_move()
   moveobj.node.dom_element.dispatchEvent(new CustomEvent("x-new-move"));
   return _new_move_start(moveobj);
@@ -526,7 +534,8 @@ function _notify_move(node, notifynode, delay) {
   }
   moveobj.steps.push(un_can_move)
   if(node) {
-    moveobj.steps.push(_move_sub_speak.bind(node, _node_cue_text(node), config.auditory_cue_voice_options))
+    var opts = (is_first_run() ? config.auditory_cue_first_run_voice_options : null) || config.auditory_cue_voice_options;
+    moveobj.steps.push(_move_sub_speak.bind(node, _node_cue_text(node), opts))
   }
   speaku.stop_speaking();
   state.can_move = false;
