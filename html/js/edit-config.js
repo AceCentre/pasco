@@ -242,12 +242,12 @@ function save_config(evt) {
     _.each(_voice_id_links, function(alink) {
       var propname = (speaku.is_native ? '' : 'alt_') + 'voiceId',
           str = $form.find('[name='+alink[1]+']').val()
-      if(!config[alink[0]])
-        config[alink[0]] = {}
+      if(!_config[alink[0]])
+        _config[alink[0]] = {}
       if(str)
-        config[alink[0]][propname] = str
+        _config[alink[0]][propname] = str
       else
-        delete config[alink[0]][propname]
+        delete _config[alink[0]][propname]
     });
   } catch(err) {
     $form.find('.save-section .alert-danger')
