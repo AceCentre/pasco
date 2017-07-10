@@ -130,7 +130,7 @@ function insert_config() {
     var forward_key = (config.auto_keys['13'] &&
                        config.auto_keys['13'].func == 'tree_go_in' ? 'enter' :
                        (config.auto_keys['32'] &&
-                        config.auto_keys['32'].func == 'tree_go_out' ? 'space':
+                        config.auto_keys['32'].func == 'tree_go_in' ? 'space':
                         null))
     $form.find('[name=_auto_forward_key]').each(function() {
       this.checked = this.value == forward_key
@@ -140,7 +140,7 @@ function insert_config() {
     var forward_key = (config.switch_keys['13'] &&
                        config.switch_keys['13'].func == 'tree_go_in'?'enter':
                        (config.switch_keys['32'] &&
-                        config.switch_keys['32'].func == 'tree_go_out'?'space':
+                        config.switch_keys['32'].func == 'tree_go_in'?'space':
                         null))
     $form.find('[name=_switch_forward_key]').each(function() {
       this.checked = this.value == forward_key
