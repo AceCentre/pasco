@@ -469,18 +469,21 @@ function _tree_needs_resize() {
 function _tree_set_contentsize(percentage) {
   if(!tree_element)
     return;
-  tree_element.style.fontSize = percentage + '%';
-  // re-set xscale
-  var xscale = xscale_from_percentage_floor(percentage, tree_contentsize_xstep)
-  for(var i = 0; i < tree_element.classList.length;) {
-    var name = tree_element.classList.item(i);
-    if(name.startsWith('contentsize-')) {
-      tree_element.classList.remove(name)
-    } else {
-      i++;
+  var elms = document.querySelectorAll(".resizable-content");
+  _.each(elms, function(elm) {
+    elm.style.fontSize = percentage + '%';
+    // re-set xscale
+    var xscale = xscale_from_percentage_floor(percentage, tree_contentsize_xstep)
+    for(var i = 0; i < elm.classList.length;) {
+      var name = elm.classList.item(i);
+      if(name.startsWith('contentsize-')) {
+        elm.classList.remove(name)
+      } else {
+        i++;
+      }
     }
-  }
-  tree_element.classList.add('contentsize-'+xscale+'x')
+    elm.classList.add('contentsize-'+xscale+'x')
+  });
 }
 
 function _node_cue_text(node) {
@@ -606,6 +609,7 @@ function _tree_go_out() {
 function _tree_go_in() {
   if(!state.can_move)
     return Promise.resolve();
+  var tmp;
   var position = _get_current_position();
   if(position.index == -1) // not started yet, do nothing
     return Promise.resolve();
@@ -615,7 +619,6 @@ function _tree_go_in() {
     // is leaf node, select
     // check for specific case
     // explicit finish check
-    var tmp;
     if(!_meta_true_check(atree.meta['onselect-finish'])) {
       // continue check
       tmp = _get_node_attr_inherits_full('onselect-continue-in-branch');
@@ -657,7 +660,6 @@ function _tree_go_in() {
       }
       delete tmp[2]._continue_concat;
     }
-    
     // speak it
     return speaku.start_speaking(atree.text, config.auditory_main_voice_options)
       .then(function(hdl) {
@@ -667,11 +669,7 @@ function _tree_go_in() {
       })
       .then(function() {
         // start again, on demand
-        window.addEventListener('keydown', function(ev) {
-          if(atree.txt_dom_element)
-            atree.txt_dom_element.classList.remove('selected' || config.selected_class);
-          ev.preventDefault();
-          window.removeEventListener('keydown', arguments.callee, false);
+        function finish() {
           _clean_state(state)
           if(popup_visible) {
             popup.classList.remove('visible');
@@ -681,7 +679,30 @@ function _tree_go_in() {
             }, 500); // wait for hide transition 
           }
           start(); // start over
-        }, false);
+        }
+        function clear() {
+          if(atree.txt_dom_element)
+            atree.txt_dom_element.classList.remove('selected' || config.selected_class);
+          tmp = document.querySelector('#navbtns')
+          if(tmp && config._onscreen_navigation) {
+            tmp.removeEventListener('click', onscreen_nav_click, false)
+          }
+          window.removeEventListener('keydown', onkeydown, false);
+        }
+        function onscreen_nav_click() {
+          clear()
+          finish()
+        }
+        function onkeydown(ev) {
+          ev.preventDefault();
+          clear()
+          finish()
+        }
+        tmp = document.querySelector('#navbtns')
+        if(tmp && config._onscreen_navigation) {
+          tmp.addEventListener('click', onscreen_nav_click, false)
+        }
+        window.addEventListener('keydown', onkeydown, false);
       });
   } else {
     if(atree.nodes.length == 0)
