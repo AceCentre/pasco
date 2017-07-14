@@ -655,8 +655,10 @@ function _tree_go_in() {
       if(popup && popup_mtext) {
         popup_mtext.textContent = tmp[2]._continue_concat.join(tmp[0])
         popup.style.display = 'block';
-        popup.classList.add('visible');
-        popup_visible = true;
+        popup_visible = true; 
+        setTimeout(function() {
+          popup.classList.add('visible');
+        }, 10);
       }
       delete tmp[2]._continue_concat;
     }
