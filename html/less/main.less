@@ -12,6 +12,9 @@ html.ios {
   #navbtns-wrp {
     top: 74px;
   }
+  #popup-message-wrp {
+    top: 70px;
+  }
 }
 
 .non-selectable { // by default no select
@@ -169,7 +172,7 @@ body.debug-mode .on-debug-mode {
 /** Navigation Buttons **/
 
 #navbtns-wrp {
-  z-index: 1;
+  z-index: 5;
   position: fixed;
   top: 54px;
   right: 25px;
@@ -201,5 +204,42 @@ body.debug-mode .on-debug-mode {
   .stroke-outline {
     stroke: #606060 !important;
     stroke-width: 15 !important;
+  }
+}
+
+/* popup message */
+#popup-message-wrp {
+  &.visible {
+    opacity: 1;
+  }
+  opacity: 0;
+  transition: opacity 0.5s;
+  position: fixed;
+  top: 50px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  background-color: rgba(0, 0, 0, 0.4);
+  #popup-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 15px;
+    overflow: hidden;
+    overflow-y: auto;
+    width: 80%;
+    @media (min-width: 468px) {
+      & {
+        width: 400px
+      }
+    }
+    max-height: 80%;
+    background-color: white;
+    border-radius: 3px;
+  }
+  .main-text {
+    text-align: center;
   }
 }

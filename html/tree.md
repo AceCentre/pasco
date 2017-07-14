@@ -235,7 +235,7 @@
 
 ### I’ll spell it
 
-## I shall spell it (spell)<meta data-onselect-restart-here>
+## I shall spell it (spell)<meta data-onselect-continue-in-branch data-onselect-continue-concat>
 
 ### a
 
@@ -288,6 +288,8 @@
 ### y
 
 ### z
+
+### Finish <meta data-onselect-finish>
 
 
 # Categories

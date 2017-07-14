@@ -614,39 +614,75 @@ function _tree_go_in() {
   if(atree.is_leaf) {
     // is leaf node, select
     // check for specific case
-    var tmp = _get_node_attr_inherits_full('onselect-restart-here');
-    if(tmp && _meta_true_check(tmp[0])) {
-      var idx = state.positions.indexOf(tmp[1]);
-      state.positions = state.positions.slice(0, idx + 1);
-      state.positions.push({
-        tree: tmp[2],
-        index: 0
-      });
-      return _notify_move(_get_current_node(), atree);
-    } else {
-      // on auto mode stop iteration and on any key restart
-      stop();
-      if(atree.txt_dom_element)
-        atree.txt_dom_element.classList.add('selected' || config.selected_class);
-      // speak it
-      return speaku.start_speaking(atree.text, config.auditory_main_voice_options)
-        .then(function(hdl) {
-          return speaku.speak_finish(hdl).then(function() {
-            return speaku.utterance_release(hdl);
-          });
-        })
-        .then(function() {
-          // start again, on demand
-          window.addEventListener('keydown', function(ev) {
-            if(atree.txt_dom_element)
-              atree.txt_dom_element.classList.remove('selected' || config.selected_class);
-            ev.preventDefault();
-            window.removeEventListener('keydown', arguments.callee, false);
-            _clean_state(state)
-            start(); // start over
-          }, false);
+    // explicit finish check
+    var tmp;
+    if(!_meta_true_check(atree.meta['onselect-finish'])) {
+      // continue check
+      tmp = _get_node_attr_inherits_full('onselect-continue-in-branch');
+      if(tmp && _meta_true_check(tmp[0])) {
+        // continue it
+        var idx = state.positions.indexOf(tmp[1]);
+        state.positions = state.positions.slice(0, idx + 1);
+        state.positions.push({
+          tree: tmp[2],
+          index: 0
         });
+        // concat check
+        tmp = _get_node_attr_inherits_full('onselect-continue-concat');
+        if(tmp) {
+          if(!tmp[2]._continue_concat)
+            tmp[2]._continue_concat = []
+          tmp[2]._continue_concat.push(atree.text)
+        }
+        return _notify_move(_get_current_node(), atree);
+      }
     }
+    // finish it
+    // on auto mode stop iteration and on any key restart
+    stop();
+    if(atree.txt_dom_element)
+      atree.txt_dom_element.classList.add('selected' || config.selected_class);
+
+    // display continue-concat if any
+    var popup = document.querySelector('#popup-message-wrp'),
+        popup_mtext = popup ? popup.querySelector('.main-text') : null,
+        popup_visible = false;
+    tmp = _get_node_attr_inherits_full('onselect-continue-concat');
+    if(tmp && tmp[2]._continue_concat) {
+      if(popup && popup_mtext) {
+        popup_mtext.textContent = tmp[2]._continue_concat.join(tmp[0])
+        popup.style.display = 'block';
+        popup.classList.add('visible');
+        popup_visible = true;
+      }
+      delete tmp[2]._continue_concat;
+    }
+    
+    // speak it
+    return speaku.start_speaking(atree.text, config.auditory_main_voice_options)
+      .then(function(hdl) {
+        return speaku.speak_finish(hdl).then(function() {
+          return speaku.utterance_release(hdl);
+        });
+      })
+      .then(function() {
+        // start again, on demand
+        window.addEventListener('keydown', function(ev) {
+          if(atree.txt_dom_element)
+            atree.txt_dom_element.classList.remove('selected' || config.selected_class);
+          ev.preventDefault();
+          window.removeEventListener('keydown', arguments.callee, false);
+          _clean_state(state)
+          if(popup_visible) {
+            popup.classList.remove('visible');
+            setTimeout(function() {
+              popup_mtext.textContent = "";
+              popup.style.display = 'none';
+            }, 500); // wait for hide transition 
+          }
+          start(); // start over
+        }, false);
+      });
   } else {
     if(atree.nodes.length == 0)
       return Promise.resolve(); // has no leaf, nothing to do
