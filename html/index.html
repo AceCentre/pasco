@@ -11,14 +11,15 @@
 
     <title>Auditory Scanning</title>
 
-    <link rel="stylesheet" href="css/main.css">
-    <!-- <link rel="icon" href="images/favicon.png"> -->
-
     <!-- bootstrap includes -->
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <!-- bootstrap includes end -->
+    
+
+    <link rel="stylesheet" href="css/main.css">
+    <!-- <link rel="icon" href="images/favicon.png"> -->
     
   </head>
 
@@ -41,7 +42,10 @@
           <ul class="nav navbar-nav">
             <li><a href="edit-config.html">Configure</a></li>
             <li><a href="https://pasco.chat/#help">Help</a></li>
-            <li><a href="credits.html">Credits</a></li>
+            <li class="separate-after"><a href="credits.html">Credits</a></li>
+            <li><button class="btn btn-default" id="edit-mode-btn" type="button">Edit Mode</button></li>
+            <li><button class="btn btn-success hide" id="edit-mode-save-btn" type="button">Save</button></li>
+            <li><button class="btn btn-default hide" id="edit-mode-cancel-btn" type="button">Cancel</button></li>
             <li class="on-debug-mode"><button class="btn btn-default" id="debug-clear-storage" type="button">Clear Storage</button></li>
           </ul>
 
@@ -55,7 +59,17 @@
       <div id="tree" class="resizable-content">
       </div>
     </div>
-    <div id="popup-message-wrp" class="resizable-content">
+    <script type="x-template/text" id="node-edit-overlay">
+      <!-- should get wrap with div class="node-edit-overlay" -->
+      <button class="add-node-before btn btn-transparent"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button>
+      <button class="add-node-after btn btn-transparent"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button>
+      <button class="add-child-node btn btn-transparent"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button>
+      <button class="remove-node btn btn-transparent"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></button>
+      <div class="text-input-wrp">
+        <textarea class="text-input" name="text"></textarea>
+      </div>
+    </script>
+    <div id="popup-message-wrp" class="resizable-content hide">
       <div id="popup-message">
         <div class="main-text">
         </div>

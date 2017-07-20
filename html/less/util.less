@@ -8,7 +8,61 @@
 .m-b-10 {
   margin-bottom: 10px;
 }
+.nav {
+  position: relative;
+  @media (max-width: 767px) {
+    .separate-after {
+      margin-bottom: 10px;
+    }
+    .separate-after:after {
+      content: "";
+      position: absolute;
+      left: 5px;
+      right: 5px;
+      bottom: -5px;
+      border-bottom: 1px solid #333;
+    }
+  }
+  @media (min-width: 768px) {
+    .separate-after {
+      margin-right: 10px;
+    }
+    .separate-after:after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      bottom: 2px;
+      right: -5px;
+      border-right: 1px solid #333;
+    }
+  }
+}
+.navbar-nav > li button {
+  padding: 10px 15px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+@media (max-width: 767px) {
+  .navbar-nav > li button {
+    margin-left: 15px;
+    margin-right: 15px;
+  }
+}
+@media (min-width: 768px) {
+  .navbar-nav > li button {
+    margin-top: 5px;
+  }
+}
+.btn-transparent {
+  background-color: transparent;
+  background-image: none;
+  &:active,
+  &.active {
+    box-shadow: none;
+  }
+}
 
+/* common */
 html.ios {
   body {
     margin-top: 20px !important;

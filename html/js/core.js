@@ -65,20 +65,21 @@ function initialize_app() {
   }
 }
 
-function tree_mk_list_base(tree, el, linkname, txtlinkname) {
-  tree[linkname] = el;
+function tree_mk_list_base(tree, el) {
+  el.target_node = tree
+  tree.dom_element = el;
   el.classList.add('level-' + tree.level);
-  if(tree.is_leaf) {
-    el.classList.add('leaf')
-  } else {
-    el.classList.add('node')
-  }
+  el.classList.add('node')
   if(tree.text) {
+    var cel = newEl('div');
+    cel.classList.add('content');
+    el.appendChild(cel);
+    tree.content_element = cel;
     var txtel = newEl('p');
     txtel.classList.add('text');
     txtel.textContent = tree.text;
-    el.appendChild(txtel);
-    tree[txtlinkname] = txtel;
+    cel.appendChild(txtel);
+    tree.txt_dom_element = txtel;
   }
   if(!tree.is_leaf) {
     var nodes = tree.nodes,
@@ -87,7 +88,7 @@ function tree_mk_list_base(tree, el, linkname, txtlinkname) {
     for(var i = 0, len = nodes.length; i < len; ++i) {
       var node = nodes[i],
           li = newEl('li');
-      tree_mk_list_base(node, li, linkname, txtlinkname);
+      tree_mk_list_base(node, li);
       ul.appendChild(li);
     }
     el.appendChild(ul);
@@ -98,21 +99,24 @@ var _parse_dom_tree_pttrn01 = /^H([0-9])$/,
     _parse_dom_tree_pttrn03 = /\(([^\)]*)\)$/;
 function parse_dom_tree_subrout_parse_text(text) {
   text = text.trim()
-  var meta = {}, match;
+  var meta = {}, match, _more_meta = {};
   // special format for auditory-cue meta (#8)
   if((match = text.match(_parse_dom_tree_pttrn03)) != null) {
     text = text.substr(0, text.length - (match[1].length + 2))
-    if(match[1].length > 0)
+    if(match[1].length > 0) {
       meta['auditory-cue'] = match[1]
+      _more_meta['auditory-cue-in-text'] = true;
+    }
   }
   return {
     text: text,
-    meta: meta
+    meta: meta,
+    _more_meta: _more_meta
   }
 }
 function parse_dom_tree(el, continue_at, tree) {
   continue_at = continue_at || { i: 0 };
-  tree = tree || { level: 0, meta: {} };
+  tree = tree || { level: 0, meta: {}, _more_meta: {} };
   tree.nodes = tree.nodes || [];
   for(var len = el.childNodes.length; continue_at.i < len; ++continue_at.i) {
     var cnode = el.childNodes[continue_at.i],
@@ -132,7 +136,9 @@ function parse_dom_tree(el, continue_at, tree) {
             dom_element: cnode,
             level: level,
             text: td.text,
-            meta: td.meta
+            meta: td.meta,
+            _more_meta: td._more_meta,
+            parent: tree
           };
           if(is_list) {
             tree.nodes.push(parse_dom_tree(cnode, null, anode));
@@ -337,6 +343,7 @@ function keyevents_needs_theinput() {
 }
 
 function keyevents_handle_theinput() {
+  keyevents_handle_theinput_off();
   var theinputwrp = document.getElementById('theinput-wrp');
   var theinput = document.getElementById('theinput');
   var docscroll_handler;
@@ -354,11 +361,11 @@ function keyevents_handle_theinput() {
     }, false);
     window.keyevents_handle_theinput_off = function() {
       theinput.removeEventListener('blur', _theinput_refocus, false);
-      theinput.blur();
       theinput.removeEventListener('keydown', preventdefault, false);
       theinput.removeEventListener('keyup', preventdefault, false);
       document.removeEventListener('scroll', docscroll_handler, false);
       window.keyevents_handle_theinput_off = function() { } //dummy func
+      theinput.blur();
     }
   }
 }
