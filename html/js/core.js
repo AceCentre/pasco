@@ -460,8 +460,19 @@ proto.start_speaking = function(speech, opts) {
     delete opts.voiceId;
     // TODO:: control audio playback,
     // delay can be implemented if access to audio playback is at this level
+    var retobj = {};
+    function onend() {
+      console.log("onend", retobj)
+      if(retobj.onend)
+        retobj.onend.apply(this, arguments)
+      retobj.didend = true;
+    }
+    opts.onend = onend
+    // bugfix for responsiveVoice not calling onend
+    // when cancel called before speak
+    self.responsiveVoice.cancelled = false;
     self.responsiveVoice.speak(speech, voiceId, opts);
-    return Promise.resolve(1);
+    return Promise.resolve(retobj);
   }
 }
 
@@ -480,8 +491,16 @@ proto.speak_finish = function(utterance_hdl) {
   } else {
     var self = this;
     return new Promise(function(resolve, reject) {
-      var ref = [null, resolve];
-      self._alt_finish_queue.push(ref)
+      if(utterance_hdl.didend)
+        return resolve();
+      self._alt_finish_queue.push(resolve)
+      utterance_hdl.onend = function() {
+        var idx = self._alt_finish_queue.indexOf(resolve);
+        if(idx != -1)
+          self._alt_finish_queue.splice(idx, 1);
+        resolve();
+      }
+      /*
       function check() {
         ref[0] = setTimeout(function() {
           if(self.responsiveVoice.isPlaying())
@@ -495,6 +514,7 @@ proto.speak_finish = function(utterance_hdl) {
         }, 50); // check resolution
       }
       check();
+      */
     });
   }
 }
@@ -504,16 +524,9 @@ proto.stop_speaking = function() {
   if(self.is_native) {
     return self.api.stop_speaking(self.synthesizer);
   } else {
-    responsiveVoice.cancel();
-    var call_list = [];
-    var ref;
-    var _alt_finish_queue = this._alt_finish_queue;
-    while((ref = _alt_finish_queue.pop())) {
-      clearTimeout(ref[0]);
-      call_list.push(ref[1]);
-    }
-    for(var i = 0, len = call_list.length; i < len; ++i)
-      call_list[i]();
+    self.responsiveVoice.cancel();
+    while((resolve = this._alt_finish_queue.shift()))
+      resolve();
     return Promise.resolve();
   }
 }

@@ -207,6 +207,7 @@ function start(_state) {
   function auto_next() {
     if(_state._stopped)
       return; // stop the loop
+    _state.auto_next_dead = false
     _state._active_timeout = setTimeout(function() {
       delete _state._active_timeout;
       var position = _get_current_position();
@@ -214,12 +215,6 @@ function start(_state) {
         // delay auto_next for next entry
         delayrun(config.auto_next_atfirst_delay)
       } else if(position.index + 1 == position.tree.nodes.length) {
-        // at re-cycle wait more
-        if(Math.abs(--_state._auto_next_rem_loops) < 1) {
-          // stop the loop
-          _state.auto_next_dead = true
-          return;
-        }
         delayrun(config.auto_next_recycle_delay || 0)
       } else {
         run()
@@ -232,6 +227,16 @@ function start(_state) {
       if(_state._running_move != null) {
         _state._running_move.then(auto_next);
       } else {
+        var position = _get_current_position();
+        if(position.index + 1 == position.tree.nodes.length) {
+          // at re-cycle
+          if(Math.abs(--_state._auto_next_rem_loops) < 1) {
+            // stop the loop
+            _state.auto_next_dead = true
+            console.log('dead')
+            return;
+          }
+        }
         _tree_go_next()
           .then(auto_next)
           .catch(handle_error);
@@ -778,13 +783,7 @@ function _move_sub_speak(text, voice_options) {
   if(state.silent_mode) {
     return Promise.resolve();
   }
-  return speaku.start_speaking(text, voice_options)
-    .then(function(hdl) {
-      return speaku.speak_finish(hdl)
-        .then(function() {
-          return speaku.utterance_release(hdl);
-        });
-    });
+  return speaku.simple_speak(text, voice_options);
 }
 
 function _scan_move(node) {
