@@ -233,7 +233,6 @@ function start(_state) {
           if(Math.abs(--_state._auto_next_rem_loops) < 1) {
             // stop the loop
             _state.auto_next_dead = true
-            console.log('dead')
             return;
           }
         }
@@ -783,7 +782,11 @@ function _move_sub_speak(text, voice_options) {
   if(state.silent_mode) {
     return Promise.resolve();
   }
-  return speaku.simple_speak(text, voice_options);
+  if(this.meta['audio']) {
+    return speaku.play_audio(this.meta['audio'], voice_options)
+  } else {
+    return speaku.simple_speak(text, voice_options);
+  }
 }
 
 function _scan_move(node) {
@@ -948,12 +951,8 @@ function _tree_go_in() {
       delete tmp[2]._continue_concat;
     }
     // speak it
-    return speaku.start_speaking(atree.text, config.auditory_main_voice_options)
-      .then(function(hdl) {
-        return speaku.speak_finish(hdl).then(function() {
-          return speaku.utterance_release(hdl);
-        });
-      })
+    return _move_sub_speak
+      .call(atree, atree.text, config.auditory_main_voice_options)
       .then(function() {
         // start again, on demand
         function finish() {

@@ -432,6 +432,10 @@ proto.simple_speak = function(speech, opts) {
 }
 
 proto.start_speaking = function(speech, opts) {
+  if(this._audio_tag) {
+    // prevent multiple audio running at same time
+    this._audio_stop()
+  }
   opts = Object.assign({}, opts)
   var self = this;
   if(self.is_native) {
@@ -462,7 +466,6 @@ proto.start_speaking = function(speech, opts) {
     // delay can be implemented if access to audio playback is at this level
     var retobj = {};
     function onend() {
-      console.log("onend", retobj)
       if(retobj.onend)
         retobj.onend.apply(this, arguments)
       retobj.didend = true;
@@ -520,14 +523,18 @@ proto.speak_finish = function(utterance_hdl) {
 }
 
 proto.stop_speaking = function() {
-  var self = this
-  if(self.is_native) {
-    return self.api.stop_speaking(self.synthesizer);
-  } else {
-    self.responsiveVoice.cancel();
-    while((resolve = this._alt_finish_queue.shift()))
-      resolve();
+  if(this._audio_tag) {
+    this._audio_stop()
     return Promise.resolve();
+  } else {
+    if(this.is_native) {
+      return this.api.stop_speaking(this.synthesizer);
+    } else {
+      this.responsiveVoice.cancel();
+      while((resolve = this._alt_finish_queue.shift()))
+        resolve();
+      return Promise.resolve();
+    }
   }
 }
 
@@ -544,6 +551,58 @@ proto.get_voices = function() {
   }
 }
 
+proto._audio_stop = function() {
+  if(this._audio_tag) {
+    this._audio_tag.pause()
+    if(this._audio_tag.parentNode)
+      this._audio_tag.parentNode.removeChild(this._audio_tag);
+    if(this._audio_onstop_callback) {
+      this._audio_onstop_callback()
+      this._audio_onstop_callback = null
+    }
+    this._audio_tag = null
+  }
+}
+
+proto.play_audio = function(src, opts) {
+  var self = this;
+  self._audio_stop()
+  var audio = self._audio_tag = newEl('audio')
+  document.body.appendChild(audio)
+  return new Promise(function(resolve, reject) {
+    if(!audio.parentNode) {
+      // stopped
+      return resolve();
+    }
+    if(opts.volume)
+      audio.setAttribute('volume', opts.volume+'');
+    audio.setAttribute('preload', 'auto')
+    var src_el = newEl('source');
+    src_el.setAttribute('src', src)
+    audio.appendChild(src_el);
+    var stime = new Date().getTime()
+    audio.addEventListener('canplay', function() {
+      var diff = new Date().getTime() - stime;
+      if(diff >= opts.delay * 1000) {
+        audio.play()
+      } else {
+        setTimeout(function() {
+          audio.play()
+        }, opts.delay * 1000 - diff);
+      }
+    }, false);
+    audio.addEventListener('error', function() {
+      reject(audio.error);
+    }, false);
+    audio.addEventListener('ended', function() {
+      audio.pause()
+      if(audio.parentNode)
+        audio.parentNode.removeChild(audio);
+      resolve()
+    }, false);
+    self._audio_onstop_callback = resolve
+  });
+}
 
 function read_json(url, options) {
   return read_file(url, options)
