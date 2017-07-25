@@ -963,7 +963,7 @@ function _tree_go_in() {
               popup.classList.add('hide');
             }, 500); // wait for hide transition 
           }
-          renew_state(state)
+          _clean_state()
           start(); // start over
         }
         function clear() {
@@ -1175,7 +1175,7 @@ function _tree_to_markdown_subrout_meta_html(anode) {
   for(var key in anode.meta) {
     if(anode.meta.hasOwnProperty(key) &&
        (!auditory_cue_in_text || key != 'auditory-cue')) {
-      tmp_meta.setAttribute(key, anode.meta[key]);
+      tmp_meta.setAttribute('data-' + key, anode.meta[key]);
       len++;
     }
   }
@@ -1190,7 +1190,8 @@ function _tree_to_markdown_subrout_node(node, level, md_lines) {
   var auditory_cue_in_text = node._more_meta['auditory-cue-in-text'],
       text = level > 0 ?
              (node.text +
-              (auditory_cue_in_text ? node.meta['auditory-cue'] : '')) : null,
+              (auditory_cue_in_text ?
+               '('+node.meta['auditory-cue']+')' : '')) : null,
       meta_html = _tree_to_markdown_subrout_meta_html(node);
   md_lines.push((text != null ? '#'.repeat(level) + ' ' + text : '') +
                 (meta_html ? ' ' + meta_html : ''))
