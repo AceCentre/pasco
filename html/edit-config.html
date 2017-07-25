@@ -139,23 +139,26 @@
       </div> <!-- /row -->
       <hr class="tinyhr"/>
       <div class="row">
+        <div class="col-xs-12">
+          <h3>Speech</h3>
+        </div>
         <div class="col-sm-6">
-          <h3>Cue Voice</h3>
+          <h4>Cue Voice</h4>
           <div class="row">
-            <div class="col-sm-4">
+            <div class="col-sm-6">
               <div class="form-group">
                 <label for="_cue_voice_id">Voice</label>
                 <select class="form-control" id="_cue_voice_id" name="_cue_voice_id">
                 </select>
               </div>
             </div>
-            <div class="col-sm-4">
+            <div class="col-sm-6">
               <div class="form-group">
                 <label for="auditory_cue_voice_options.volume">Volume</label>
-                <input type="range" step="any" min="0" max="1" id="auditory_cue_voice_options.volume" name="auditory_cue_voice_options.volume" data-validator="number">
+                <input class="form-control" type="range" step="any" min="0" max="1" id="auditory_cue_voice_options.volume" name="auditory_cue_voice_options.volume" data-validator="number">
               </div>
             </div>
-            <div class="col-sm-4">
+            <div class="col-sm-6">
               <div class="form-group">
                 <label for="auditory_cue_voice_options.pitch">Pitch</label>
                 <input class="form-control" type="number" step="any" id="auditory_cue_voice_options.pitch" name="auditory_cue_voice_options.pitch" data-validator="number">
@@ -174,7 +177,7 @@
               </div>
             </div>
             -->
-            <div class="col-sm-4">
+            <div class="col-sm-6">
               <div class="form-group">
                 <label for="auditory_cue_voice_options.rateMul">Rate</label>
                 <input class="form-control" type="number" step="any" id="auditory_cue_voice_options.rateMul" name="auditory_cue_voice_options.rateMul" data-validator="number">
@@ -183,22 +186,22 @@
           </div>
         </div>
         <div class="col-sm-6">
-          <h3>Main Voice</h3>
+          <h4>Main Voice</h4>
           <div class="row">
-            <div class="col-sm-4">
+            <div class="col-sm-6">
               <div class="form-group">
                 <label for="_main_voice_id">Voice</label>
                 <select class="form-control" id="_main_voice_id" name="_main_voice_id">
                 </select>
               </div>
             </div>
-            <div class="col-sm-4">
+            <div class="col-sm-6">
               <div class="form-group">
                 <label for="auditory_main_voice_options.volume">Volume</label>
-                <input type="range" step="any" min="0" max="1" id="auditory_main_voice_options.volume" name="auditory_main_voice_options.volume" data-validator="number">
+                <input class="form-control" type="range" step="any" min="0" max="1" id="auditory_main_voice_options.volume" name="auditory_main_voice_options.volume" data-validator="number">
               </div>
             </div>
-            <div class="col-sm-4">
+            <div class="col-sm-6">
               <div class="form-group">
                 <label for="auditory_main_voice_options.pitch">Pitch</label>
                 <input class="form-control" type="number" step="any" id="auditory_main_voice_options.pitch" name="auditory_main_voice_options.pitch" data-validator="number">
@@ -217,7 +220,7 @@
               </div>
             </div>
             -->
-            <div class="col-sm-4">
+            <div class="col-sm-6">
               <div class="form-group">
                 <label for="auditory_main_voice_options.rateMul">Rate</label>
                 <input class="form-control" type="number" step="any" id="auditory_main_voice_options.rateMul" name="auditory_main_voice_options.rateMul" data-validator="number">
@@ -226,28 +229,35 @@
           </div>
         </div>
         <div class="col-sm-6">
-          <h3>First Time Run (Cue Voice)</h3>
-          <div class="row">
-            <div class="col-sm-4">
+          <div class="row m-b-10">
+            <div class="col-sm-9">
+              <h4>First Time Run (Cue Voice)</h4>
+            </div>
+            <div class="col-sm-3">
+              <label class="m-t-10 m-b-10 checkbox-inline"><input type="checkbox" name="_cue_first_active" data-toggle-visibility="#auditory-cue-first-run-params">On</label>
+            </div>
+          </div>
+          <div id="auditory-cue-first-run-params" class="row visibility-dependant">
+            <div class="col-sm-12" >
               <div class="form-group">
                 <label for="auto_next_first_run_delay">Auto-scanning delay (ms)</label>
                 <input type="number" id="auto_next_first_run_delay" name="auto_next_first_run_delay" class="form-control" value="0" data-validator="number">
               </div>
             </div>
-            <div class="col-sm-4">
+            <div class="col-sm-6">
               <div class="form-group">
                 <label for="_cue_first_run_voice_id">Voice</label>
                 <select class="form-control" id="_cue_voice_id" name="_cue_first_run_voice_id">
                 </select>
               </div>
             </div>
-            <div class="col-sm-4">
+            <div class="col-sm-6">
               <div class="form-group">
                 <label for="auditory_cue_first_run_voice_options.volume">Volume</label>
-                <input type="range" step="any" min="0" max="1" id="auditory_cue_first_run_voice_options.volume" name="auditory_cue_first_run_voice_options.volume" data-validator="number">
+                <input class="form-control" type="range" step="any" min="0" max="1" id="auditory_cue_first_run_voice_options.volume" name="auditory_cue_first_run_voice_options.volume" data-validator="number">
               </div>
             </div>
-            <div class="col-sm-4">
+            <div class="col-sm-6">
               <div class="form-group">
                 <label for="auditory_cue_first_run_voice_options.pitch">Pitch</label>
                 <input class="form-control" type="number" step="any" id="auditory_cue_first_run_voice_options.pitch" name="auditory_cue_first_run_voice_options.pitch" data-validator="number">
@@ -266,7 +276,7 @@
               </div>
             </div>
             -->
-            <div class="col-sm-4">
+            <div class="col-sm-6">
               <div class="form-group">
                 <label for="auditory_cue_first_run_voice_options.rateMul">Rate</label>
                 <input class="form-control" type="number" step="any" id="auditory_cue_first_run_voice_options.rateMul" name="auditory_cue_first_run_voice_options.rateMul" data-validator="number">

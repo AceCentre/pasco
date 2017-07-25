@@ -106,6 +106,12 @@ function insert_config() {
     if(this.name.length > 0 && this.name[0] != '_') {
       var path = this.name.split('.');
       var tmp = config;
+      // special case for voice_options, load prefixed data if not avail
+      var vo_suffix = 'voice_options';
+      if(path[0].indexOf(vo_suffix) == path[0].length - vo_suffix.length) {
+        if(!config[path[0]] && config['_'+path[0]])
+          path[0] = '_' + path[0];
+      }
       for(var i = 0, len = path.length; tmp != null && i < len; ++i) {
         var key = path[i];
         if(i + 1 == len && tmp[key]) {
@@ -148,9 +154,13 @@ function insert_config() {
   }
   _.each(_voice_id_links, function(alink) {
     var propname = (speaku.is_native ? '' : 'alt_') + 'voiceId',
-        vid = config[alink[0]] ? config[alink[0]][propname] : null;
+        part = config[alink[0]] || config['_' + alink[0]],
+        vid = part ? part[propname] : null;
     $form.find('[name='+alink[1]+']').val(vid || '')
   });
+  $form.find('[name=_cue_first_active]')
+    .prop('checked', !!config.auditory_cue_first_run_voice_options)
+    .trigger('change');
 }
 
 function insert_tree_data() {
@@ -238,7 +248,6 @@ function save_config(evt) {
     }
     if(keys)
       _config.switch_keys = Object.assign((_config.switch_keys || {}), keys);
-    
     _.each(_voice_id_links, function(alink) {
       var propname = (speaku.is_native ? '' : 'alt_') + 'voiceId',
           str = $form.find('[name='+alink[1]+']').val()
@@ -249,6 +258,13 @@ function save_config(evt) {
       else
         delete _config[alink[0]][propname]
     });
+    if(!$form.find('[name=_cue_first_active]').prop('checked')) {
+      _config._auditory_cue_first_run_voice_options =
+        _config.auditory_cue_first_run_voice_options;
+      delete _config.auditory_cue_first_run_voice_options;
+    } else {
+      delete _config._auditory_cue_first_run_voice_options;
+    }
   } catch(err) {
     $form.find('.save-section .alert-danger')
       .html(error_to_html(err))
