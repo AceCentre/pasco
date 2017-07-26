@@ -121,9 +121,6 @@ function parse_dom_tree(el, continue_at, tree) {
   for(var len = el.childNodes.length; continue_at.i < len; continue_at.i++) {
     var cnode = el.childNodes[continue_at.i],
         match;
-    if(cnode == undefined) {
-      console.log(el.childNodes.length, continue_at.i, continue_at.i - len)
-    }
     if(cnode.nodeType == Node.ELEMENT_NODE) {
       if((match = cnode.nodeName.match(_parse_dom_tree_pttrn01)) ||
          _parse_dom_tree_pttrn02.test(cnode.nodeName)) { // branch
