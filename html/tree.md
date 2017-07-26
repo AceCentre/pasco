@@ -471,4 +471,4 @@
 
 ### dark
 
-# Audio from horse <meta data-audio="test-assets/horse.ogg">
+# Audio from horse/cat <meta data-audio="test-assets/horse.ogg" data-cue-audio="test-assets/horse.ogg" data-main-audio="test-assets/cat.mp3">

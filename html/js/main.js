@@ -789,12 +789,36 @@ function _move_sub_speak(text, voice_options) {
   }
 }
 
+function _move_sub_speak2(type) {
+  if(state.silent_mode) {
+    return Promise.resolve();
+  }
+  var opts, audio, text;
+  switch(type) {
+  case 'cue':
+    opts = (config.mode == 'auto' && is_first_run() ? config.auditory_cue_first_run_voice_options : null) || config.auditory_cue_voice_options;
+    audio = this.meta['cue-audio'] || this.meta['audio'];
+    text = _node_cue_text(this);
+    break;
+  case 'main':
+    opts = config.auditory_main_voice_options;
+    audio = this.meta['main-audio'] || this.meta['audio'];
+    text = this.text;
+    break;
+  }
+  if(audio) {
+    return speaku.play_audio(audio, opts)
+  } else if(text) {
+    return speaku.simple_speak(text, opts);
+  }
+  return Promise.resolve();
+}
+
 function _scan_move(node) {
   node = node || _get_current_node();
   var moveobj = _new_move_init(node)
   moveobj.steps.push(_move_sub_highlight.bind(node))
-  var opts = (config.mode == 'auto' && is_first_run() ? config.auditory_cue_first_run_voice_options : null) || config.auditory_cue_voice_options;
-  moveobj.steps.push(_move_sub_speak.bind(node, _node_cue_text(node), opts))
+  moveobj.steps.push(_move_sub_speak2.bind(node, 'cue'))
   _before_new_move();
   moveobj.node.dom_element.dispatchEvent(new CustomEvent("x-new-move", {
     detail: {
@@ -806,7 +830,7 @@ function _scan_move(node) {
 
 function _notify_move(node, notifynode, delay) {
   var moveobj = _new_move_init(node || notifynode)
-  moveobj.steps.push(_move_sub_speak.bind(notifynode, notifynode.text, config.auditory_main_voice_options))
+  moveobj.steps.push(_move_sub_speak2.bind(notifynode, 'main'))
   if(node) {
     moveobj.steps.push(function() {
       _before_new_move()
@@ -825,8 +849,7 @@ function _notify_move(node, notifynode, delay) {
   }
   moveobj.steps.push(un_can_move)
   if(node) {
-    var opts = (config.mode == 'auto' && is_first_run() ? config.auditory_cue_first_run_voice_options : null) || config.auditory_cue_voice_options;
-    moveobj.steps.push(_move_sub_speak.bind(node, _node_cue_text(node), opts))
+    moveobj.steps.push(_move_sub_speak2.bind(node, 'cue'))
   }
   speaku.stop_speaking();
   state.can_move = false;
@@ -951,8 +974,8 @@ function _tree_go_in() {
       delete tmp[2]._continue_concat;
     }
     // speak it
-    return _move_sub_speak
-      .call(atree, atree.text, config.auditory_main_voice_options)
+    return _move_sub_speak2
+      .call(atree, 'main')
       .then(function() {
         // start again, on demand
         function finish() {
