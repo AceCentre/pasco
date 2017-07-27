@@ -1055,8 +1055,13 @@ function _tree_go_previous() {
   var position = _get_current_position();
   position.index -= 1;
   if(position.index < 0) {
+    /*
     position.index = (position.tree.nodes.length + position.index) %
       position.tree.nodes.length;
+    */
+    if(position.tree.nodes.length == 0)
+      return Promise.resolve();
+    position.index = position.tree.nodes.length - 1;
   }
   return _scan_move()
 }

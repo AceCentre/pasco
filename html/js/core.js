@@ -18,11 +18,10 @@ function initialize_app() {
     var promises = [];
     _.each(replaceFileKeys, function(key) {
       var path = window[key],
-          newpath = 'documentsDirectory:' + window[key];
+          newpath = 'cdvfile://localhost/persistent/' + window[key];
       promises.push(
         new Promise(function(resolve, reject) {
-          window.resolveLocalFileSystemURL(
-            cordova.file.documentsDirectory + path, resolve, continue_proc);
+          window.resolveLocalFileSystemURL(newpath, resolve, continue_proc);
           function continue_proc(err) {
             // if not found
             read_file(path)
@@ -203,22 +202,16 @@ function delete_file(url, options) {
   // cordova specific
   if(!/^(https?):\/\//.test(url) && window.cordova &&
      window.resolveLocalFileSystemURL) {
+    url = _cordova_fix_url(url)
     return new Promise(function(resolve, reject) {
-      var parts = url.split(':')
-      var newurl;
-      if(parts.length > 1 && parts[0] in cordova.file) {
-        newurl = cordova.file[parts[0]] + parts.slice(1).join(':');
-      } else {
-        newurl = cordova.file.applicationDirectory + "www/" + url;
-      }
       function onEntry(entry) {
         entry.remove(resolve, onFail);
       }
       function onFail(err) {
         console.error(err);
-        reject("Fail to delete `" + newurl + "` -- " + err+'')
+        reject("Fail to delete `" + url + "` -- " + err+'')
       }
-      window.resolveLocalFileSystemURL(newurl, onEntry, function() { resolve(); });
+      window.resolveLocalFileSystemURL(url, onEntry, function(){ resolve(); });
     });
   } else {
     // post otherwise
@@ -234,16 +227,10 @@ function write_file(url, data, options) {
   if(!/^(https?):\/\//.test(url) && window.cordova &&
      window.resolveLocalFileSystemURL) {
     return new Promise(function(resolve, reject) {
-      var parts = url.split(':')
-      var newurl, filename, dirname;
-      if(parts.length > 1 && parts[0] in cordova.file) {
-        newurl = cordova.file[parts[0]] + parts.slice(1).join(':');
-      } else {
-        newurl = cordova.file.applicationDirectory + "www/" + url;
-      }
-      parts = newurl.split('/');
-      filename = parts[parts.length - 1];
-      dirname = parts.slice(0, parts.length - 1).join("/");
+      url = _cordova_fix_url(url);
+      var parts = url.split('/'),
+          filename = parts[parts.length - 1],
+          dirname = parts.slice(0, parts.length - 1).join("/");
       function onEntry(dirEntry) {
         dirEntry.getFile(filename, { create: true }, function (fileEntry) {
           // Create a FileWriter object for our FileEntry
@@ -255,7 +242,7 @@ function write_file(url, data, options) {
 
             fileWriter.onerror = function(err) {
               console.error(err);
-              reject("Fail to write `" + newurl + "` -- " + err+'')
+              reject("Fail to write `" + url + "` -- " + err.message)
             };
 
             if(!(data instanceof Blob)) {
@@ -270,7 +257,7 @@ function write_file(url, data, options) {
       }
       function onFail(err) {
         console.error(err);
-        reject("Fail to write `" + newurl + "` -- " + err+'')
+        reject("Fail to write `" + url + "` -- " + err.message)
       }
       window.resolveLocalFileSystemURL(dirname, onEntry, onFail);
     });
@@ -283,18 +270,17 @@ function write_file(url, data, options) {
   }
 }
 
+function _cordova_fix_url(url) {
+  return ((/^[a-z]+:\/\//i).test(url) ?
+          '' : 'cdvfile://localhost/bundle/www/') + url;
+}
+
 function read_file(url, options) {
   return new Promise(function(resolve, reject) {
     options = options || {};
     if(!/^(https?):\/\//.test(url) && window.cordova &&
        window.resolveLocalFileSystemURL) {
-      var parts = url.split(':')
-      var newurl;
-      if(parts.length > 1 && parts[0] in cordova.file) {
-        newurl = cordova.file[parts[0]] + parts.slice(1).join(':');
-      } else {
-        newurl = cordova.file.applicationDirectory + "www/" + url;
-      }
+      url = _cordova_fix_url(url)
       function onSuccess(fileEntry) {
         fileEntry.file(function(file) {
           var reader = new FileReader();
@@ -309,9 +295,9 @@ function read_file(url, options) {
       }
       function onFail(err) {
         console.error(err);
-        reject("Fail to load `" + newurl + "` -- " + err+'')
+        reject("Fail to load `" + url + "` -- " + err.message)
       }
-      window.resolveLocalFileSystemURL(newurl, onSuccess, onFail);
+      window.resolveLocalFileSystemURL(url, onSuccess, onFail);
     } else {
       var xhr = new XMLHttpRequest();
       xhr.open(options.method || 'GET', url);
@@ -434,7 +420,7 @@ proto.simple_speak = function(speech, opts) {
 proto.start_speaking = function(speech, opts) {
   if(this._audio_tag) {
     // prevent multiple audio running at same time
-    this._audio_stop()
+    this.stop_audio()
   }
   opts = Object.assign({}, opts)
   var self = this;
@@ -524,7 +510,7 @@ proto.speak_finish = function(utterance_hdl) {
 
 proto.stop_speaking = function() {
   if(this._audio_tag) {
-    this._audio_stop()
+    this.stop_audio()
     return Promise.resolve();
   } else {
     if(this.is_native) {
@@ -551,7 +537,39 @@ proto.get_voices = function() {
   }
 }
 
-proto._audio_stop = function() {
+proto._cordova_stop_audio = function() {
+  if(this._cordova_media) {
+    this._cordova_media.pause();
+    this._cordova_media = null;
+  }
+}
+
+proto._cordova_play_audio = function(src, opts) {
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    self._cordova_stop_audio()
+    src = _cordova_fix_url(src)
+    var media = self._cordova_media = 
+        new Media(src,
+                  function() {
+                    resolve()
+                  },
+                  function(err) {
+                    reject("Error loading media: " + src +
+                           ", error: " + err.message);
+                  });
+    if(opts.volume)
+      media.setVolume(opts.volume)
+    media.play();
+  });
+  
+}
+
+proto.stop_audio = function() {
+  if(window.cordova && window.Media) {
+    // alternative approach
+    return this._cordova_stop_audio()
+  }
   if(this._audio_tag) {
     this._audio_tag.pause()
     if(this._audio_tag.parentNode)
@@ -565,8 +583,12 @@ proto._audio_stop = function() {
 }
 
 proto.play_audio = function(src, opts) {
+  if(window.cordova && window.Media) {
+    // alternative approach
+    return this._cordova_play_audio(src, opts)
+  }
   var self = this;
-  self._audio_stop()
+  self.stop_audio()
   var audio = self._audio_tag = newEl('audio')
   document.body.appendChild(audio)
   return new Promise(function(resolve, reject) {
