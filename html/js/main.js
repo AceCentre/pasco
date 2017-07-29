@@ -195,6 +195,8 @@ function start(_state) {
     document.querySelector('#edit-mode-cancel-btn')
       .addEventListener('click', _on_edit_cancel, false);
   }
+  _edit_mode_toggle(!!_state.edit_mode, false)
+  // operation starts
   if(state.mode == 'auto') {
     _state.auto_next_start = auto_next
     _state.auto_next_dead = false
@@ -374,6 +376,7 @@ function _edit_mode_toggle(b, restart) {
   if(!b) {
     // remove previously selected
     if(state._selected_node) {
+      state._selected_node.dom_element.classList.remove('selected')
       state._selected_node.content_element
         .removeChild(state._selected_node._edit_overlay)
       delete state._selected_node._edit_overlay
@@ -387,6 +390,7 @@ function _edit_mode_toggle(b, restart) {
   }
   state.silent_mode = b
   state.mode = b ? 'switch' : config.mode || 'auto'
+  state.edit_mode = b
   delete state._changing_edit_mode;
 }
 
@@ -436,12 +440,14 @@ function _edit_mode_select(node) {
     return; // already selected
   // remove previously selected
   if(state._selected_node) {
+    state._selected_node.dom_element.classList.remove('selected')
     state._selected_node.content_element
       .removeChild(state._selected_node._edit_overlay)
     delete state._selected_node._edit_overlay
   }
   if(!node.content_element)
     return; // no good
+  node.dom_element.classList.add('selected')
   var edit_overlay = newEl('div');
   edit_overlay.innerHTML = document.querySelector('#node-edit-overlay').innerHTML
   edit_overlay.classList.add("node-edit-overlay");
@@ -522,7 +528,7 @@ function _edit_mode_on_tree_click(evt) {
         throw new Error("Corrupt tree!");
       var parent = node.parent;
       _remove_child_node(parent, idx);
-      var anode = idx >= parent.nodes.length || !parent.nodes ||
+      var anode = !parent.nodes || idx >= parent.nodes.length ||
           parent.nodes.length == 0 ? parent : parent.nodes[idx]
       _tree_move(anode) // is silent move
     }
@@ -535,8 +541,8 @@ function _edit_mode_on_tree_click(evt) {
   }
 }
 function _on_edit_mode() {
-  _edit_mode_toggle(true, true)
   state._orig_snapshot = _take_snapshot()
+  _edit_mode_toggle(true, true)
 }
 function _on_edit_save() {
   var save_btn = document.querySelector('#edit-mode-save-btn'),
@@ -561,7 +567,8 @@ function _on_edit_save() {
     });
 }
 function _on_edit_cancel() {
-  _edit_mode_toggle(false);
+  // restore will stop => auto toggle off
+  // _edit_mode_toggle(false);
   _restore_snapshot(state._orig_snapshot);
   delete state._orig_snapshot;
 }
@@ -691,9 +698,12 @@ function _update_active_positions(_state, positions) {
   var dom_elements = _.map(positions, function(pos) { return pos.tree.dom_element; });
   for(var i = 0; i < _state._active_elements.length; ) {
     var ael = _state._active_elements[i];
+    ael.classList.remove('current');
     if(dom_elements.indexOf(ael) == -1) {
       ael.classList.remove('active');
       _state._active_elements.splice(i, 1);
+      if(ael.classList.contains('no-transition'))
+        ael.classList.remove('no-transition');
     } else {
       i++;
     }
@@ -708,6 +718,9 @@ function _update_active_positions(_state, positions) {
     } else {
       if(ael.classList.contains('no-transition'))
          ael.classList.remove('no-transition');
+    }
+    if(i + 1 == len && !ael.classList.contains('current')) {
+      ael.classList.add('current');
     }
   }
   _update_active_positions_topleft();
@@ -929,6 +942,11 @@ function _tree_go_in() {
   if(atree.is_leaf) {
     // is leaf node, select
     // check for specific case
+
+    // for edit_mode do nothing
+    if(state.edit_mode)
+      return Promise.resolve();
+    
     // explicit finish check
     if(!_meta_true_check(atree.meta['onselect-finish'])) {
       // continue check

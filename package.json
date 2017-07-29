@@ -9,7 +9,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "concurrently \"npm run dev-bs\" \"gulp less-watch\"",
-    "dev-bs": "browser-sync start -c bs-config.js"
+    "dev-bs": "browser-sync start -c bs-config.js",
+    "build": "gulp lessc-all"
   },
   "repository": {
     "type": "git",
