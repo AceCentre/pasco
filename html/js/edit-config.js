@@ -14,10 +14,9 @@ Promise.all([
   .then(function() {
     config_fn = default_config;
     tree_fn = default_tree;
-  })
-  .then(function() {
-    speaku = new SpeakUnit()
-    return speaku.init()
+    
+    return SpeakUnit.getInstance()
+      .then(function(_speaku) { speaku = _speaku });
   })
   .then(function() {
     return speaku.get_voices().then(function(v) { voices = v })
@@ -31,7 +30,8 @@ Promise.all([
     return get_file_data(tree_fn)
       .then(function(_data) { tree_data = _data; orig_tree_data = _data; });
   })
-  .then(start);
+  .then(start)
+  .catch(handle_error);
 
 function start() {
   // insert voice options

@@ -14,9 +14,9 @@ Promise.all([
   .then(function() {
     config_fn = default_config;
     tree_fn = default_tree;
-    
-    speaku = new SpeakUnit()
-    return speaku.init()
+
+    return SpeakUnit.getInstance()
+      .then(function(_speaku) { speaku = _speaku });
   })
   .then(function() {
     // some hooks
@@ -109,6 +109,9 @@ window.addEventListener('unload', function() {
   if(speaku && speaku.is_native && speaku.synthesizer) {
     speaku.api.release_synthesizer(speaku.synthesizer);
   }
+  if(state && state.edit_mode && tree) {
+    editor_helper.on_restore(tree)
+  }
 }, false);
 
 /* ios related */
@@ -147,6 +150,8 @@ var _alt_voice_rate_by_name = { 'default': 1.0, 'max': 2.0, 'min': 0.5 },
     };
 
 window.addEventListener('keydown', function(ev) {
+  if(state && state._keyhit_off)
+    return;
   var code = ev.charCode || ev.keyCode;
   // look for delegate calls
   var delegate = _debug_keys[code];
@@ -174,6 +179,7 @@ function start(_state) {
       tree: tree,
       index: -1
     } ],
+    config: config,
     _active_elements: [],
     _highlighted_elements: [],
     _auto_next_rem_loops: config.auto_next_loops || 0,
@@ -531,6 +537,23 @@ function _edit_mode_on_tree_click(evt) {
       var anode = !parent.nodes || idx >= parent.nodes.length ||
           parent.nodes.length == 0 ? parent : parent.nodes[idx]
       _tree_move(anode) // is silent move
+    } else if(btn.classList.contains('node-setting')) {
+      // bootstrap modal
+      function on_modal_hidden() {
+        $('#node-setting-modal').off('hidden.bs.modal', on_modal_hidden);
+        if(config._theinput_enabled) {
+          keyevents_handle_theinput();
+        }
+        state._keyhit_off = false;
+        editor_helper.node_setting_modal_unbind();
+      }
+      if(config._theinput_enabled) {
+        keyevents_handle_theinput_off();
+      }
+      state._keyhit_off = true;
+      $('#node-setting-modal').modal('show')
+        .on('hidden.bs.modal', on_modal_hidden);
+      editor_helper.node_setting_modal_bind(_get_current_node());
     }
   } else {
     if(edit_overlay && evt.target != edit_overlay)
@@ -550,8 +573,11 @@ function _on_edit_save() {
   save_btn.disabled = true;
   cancel_btn.disabled = true;
   // save
-  var tree_md = tree_to_markdown(tree)
-  set_file_data(tree_fn, tree_md)
+  editor_helper.on_save(tree)
+    .then(function() {
+      var tree_md = tree_to_markdown(tree)
+      return set_file_data(tree_fn, tree_md)
+    })
     .then(function() {
       // did save
       save_btn.disabled = false;
@@ -567,10 +593,17 @@ function _on_edit_save() {
     });
 }
 function _on_edit_cancel() {
-  // restore will stop => auto toggle off
-  // _edit_mode_toggle(false);
-  _restore_snapshot(state._orig_snapshot);
-  delete state._orig_snapshot;
+  editor_helper.on_restore(tree)
+    .then(function() {
+      // restore will stop => auto toggle off
+      // _edit_mode_toggle(false);
+      _restore_snapshot(state._orig_snapshot);
+      delete state._orig_snapshot;
+    })
+    .catch(function(err) {
+      console.error(err)
+      alert(err+'')
+    });
 }
 /** <Edit Mode/> **/
 
@@ -593,6 +626,8 @@ function _on_navbtns_click(ev) {
 }
 
 function _on_keydown(down_ev) {
+  if(state && state._keyhit_off)
+    return;
   curtime = new Date().getTime()
   if(config.ignore_second_hits_time > 0 && state._last_keydown_time &&
      curtime - state._last_keydown_time < config.ignore_second_hits_time) {
@@ -636,6 +671,8 @@ function _on_keydown(down_ev) {
 }
 
 function _on_keyhit(ev) {
+  if(state && state._keyhit_off)
+    return;
   var code = ev.charCode || ev.keyCode;
   // look for delegate calls
   var delegate = config._keyhit_delegates[state.mode][code+''];
@@ -649,10 +686,11 @@ function _on_keyhit(ev) {
 }
 
 function _before_new_move() {
-  speaku.stop_speaking();
+  var promise = speaku.stop_speaking();
   var el;
   while((el = state._highlighted_elements.pop()))
     el.classList.remove('highlight' || config.highlight_class);
+  return promise;
 }
 
 function _new_move_start(moveobj) {
@@ -832,21 +870,22 @@ function _scan_move(node) {
   var moveobj = _new_move_init(node)
   moveobj.steps.push(_move_sub_highlight.bind(node))
   moveobj.steps.push(_move_sub_speak2.bind(node, 'cue'))
-  _before_new_move();
   moveobj.node.dom_element.dispatchEvent(new CustomEvent("x-new-move", {
     detail: {
       node: node
     }
   }));
-  return _new_move_start(moveobj);
+  moveobj.steps.push();
+  return _before_new_move()
+    .then(_new_move_start.bind(null, moveobj));
 }
 
 function _notify_move(node, notifynode, delay) {
   var moveobj = _new_move_init(node || notifynode)
   moveobj.steps.push(_move_sub_speak2.bind(notifynode, 'main'))
   if(node) {
+    moveobj.steps.push(_before_new_move)
     moveobj.steps.push(function() {
-      _before_new_move()
       moveobj.node.dom_element.dispatchEvent(new CustomEvent("x-new-move", {
         detail: {
           node: node
@@ -869,7 +908,8 @@ function _notify_move(node, notifynode, delay) {
   function un_can_move() {
     state.can_move = true;
   }
-  return _new_move_start(moveobj)
+  return (!node ? speaku.stop_speaking(speaku) : Promise.resolve())
+    .then(_new_move_start.bind(null, moveobj))
     .then(un_can_move);
 }
 

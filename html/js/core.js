@@ -10,6 +10,7 @@ document.addEventListener('deviceready', function() {
 window.newEl = document.createElement.bind(document);
 window.default_config = 'config.json';
 window.default_tree = 'tree.md';
+window.audio_save_dir = 'cdvfile://localhost/persistent/audio';
 
 function initialize_app() {
   var replaceFileKeys = ['default_config', 'default_tree'];
@@ -36,6 +37,7 @@ function initialize_app() {
           })
       );
     });
+    promises.push(cordova_mkdir(audio_save_dir))
     return Promise.all(promises);
   } else {
     function new_read(key) {
@@ -221,6 +223,24 @@ function delete_file(url, options) {
   }  
 }
 
+function cordova_mkdir(path) {
+  return new Promise(function(resolve, reject) {
+    var parts = path.split('/'),
+        basename = parts[parts.length - 1],
+        dirname = parts.slice(0, parts.length - 1).join("/");
+    function onEntry(dirEntry) {
+      dirEntry.getDirectory(basename, { create: true }, function (secondDirEntry) {
+        resolve();
+      }, onFail);
+    }
+    function onFail(err) {
+      console.error(err);
+      reject("Fail to mkdir `" + url + "` -- " + err.code + ", " + err.message)
+    }
+    window.resolveLocalFileSystemURL(dirname, onEntry, onFail);
+  });
+}
+
 function write_file(url, data, options) {
   options = options || { method: 'POST' }
   // cordova specific
@@ -275,6 +295,30 @@ function _cordova_fix_url(url) {
           '' : 'cdvfile://localhost/bundle/www/') + url;
 }
 
+function file_exists(url, options) {
+  if(!/^(https?):\/\//.test(url) && window.cordova &&
+     window.resolveLocalFileSystemURL) {
+    return new Promise(function(resolve, reject) {
+      url = _cordova_fix_url(url)
+      function onSuccess(fileEntry) {
+        resolve(true);
+      }
+      function onFail(err) {
+        if(err.code == 1) { // not found
+          resolve(false);
+        } else {
+          console.error(err);
+          reject("Fail to access `" + url + "` -- " + err.code)
+        }
+      }
+      window.resolveLocalFileSystemURL(url, onSuccess, onFail);
+    });
+  } else {
+    return read_file(url, options)
+      .then(function() { return true; });
+  }
+}
+
 function read_file(url, options) {
   return new Promise(function(resolve, reject) {
     options = options || {};
@@ -295,7 +339,7 @@ function read_file(url, options) {
       }
       function onFail(err) {
         console.error(err);
-        reject("Fail to load `" + url + "` -- " + err.message)
+        reject("Fail to load `" + url + "` -- " + err.code)
       }
       window.resolveLocalFileSystemURL(url, onSuccess, onFail);
     } else {
@@ -358,8 +402,18 @@ function keyevents_handle_theinput() {
 
 window.keyevents_handle_theinput_off = function() { } // dummy func
 
+
 function SpeakUnit() {
   this._alt_finish_queue = [];
+}
+
+SpeakUnit.getInstance = function() {
+  if(SpeakUnit._instancePromise) {
+    return Promise.resolve(SpeakUnit._instancePromise);
+  } else {
+    var speaku = new SpeakUnit();
+    return speaku.init()
+  }
 }
 var proto = SpeakUnit.prototype;
 
@@ -539,9 +593,11 @@ proto.get_voices = function() {
 
 proto._cordova_stop_audio = function() {
   if(this._cordova_media) {
-    this._cordova_media.pause();
+    this._cordova_media.stop();
+    this._cordova_media.release();
     this._cordova_media = null;
   }
+  return Promise.resolve();
 }
 
 proto._cordova_play_audio = function(src, opts) {
@@ -556,7 +612,7 @@ proto._cordova_play_audio = function(src, opts) {
                   },
                   function(err) {
                     reject("Error loading media: " + src +
-                           ", error: " + err.message);
+                           ", error: " + err.code);
                   });
     if(opts.volume)
       media.setVolume(opts.volume)
@@ -580,9 +636,12 @@ proto.stop_audio = function() {
     }
     this._audio_tag = null
   }
+  return Promise.resolve();
 }
 
+
 proto.play_audio = function(src, opts) {
+  opts = opts || {};
   if(window.cordova && window.Media) {
     // alternative approach
     return this._cordova_play_audio(src, opts)

@@ -1,4 +1,7 @@
 @import "util";
+
+@import "main/editor";
+
 @import "main/themes";
 @import "../bower_components/bootstrap/less/variables";
 
@@ -152,7 +155,8 @@ html.ios {
     .add-node-before,
     .add-node-after,
     .add-child-node,
-    .remove-node {
+    .remove-node,
+    .node-setting {
       position: absolute;
       z-index: 1;
     }
@@ -175,14 +179,17 @@ html.ios {
       top: 50%;
       left: 0px;
       transform: translate(0, -50%);
+      color: @btn-danger-bg;
+    }
+    .node-setting {
+      color: @btn-default-color;
+      top: 0px;
+      right: 0px;
     }
     .add-node-before,
     .add-node-after,
     .add-child-node {
       color: @btn-success-bg;
-    }
-    .remove-node {
-      color: @btn-danger-bg;
     }
   }
 
