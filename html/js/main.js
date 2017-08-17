@@ -459,7 +459,11 @@ function _edit_mode_select(node) {
   edit_overlay.classList.add("node-edit-overlay");
   var inp_txt = edit_overlay.querySelector('[name=text]')
   if(inp_txt) {
-    inp_txt.value = node.text
+    var txt = node.text + 
+        (node._more_meta['auditory-cue-in-text'] &&
+         node.meta['auditory-cue'] ?
+         '(' + node.meta['auditory-cue'] + ')' : '');
+    inp_txt.value = txt;
     inp_txt.addEventListener('blur', function(evt) {
       if(config._theinput_enabled) {
         keyevents_handle_theinput();
@@ -473,7 +477,13 @@ function _edit_mode_select(node) {
     inp_txt.addEventListener('touchend', onbefore_other_blur, false);
     inp_txt.addEventListener('mouseup', onbefore_other_blur, false);
     inp_txt.addEventListener('input', function(evt) {
-      node.text = inp_txt.value
+      var data = parse_dom_tree_subrout_parse_text(inp_txt.value);
+      node.text = data.text;
+      if(data.meta['auditory-cue'])
+        node.meta['auditory-cue'] = data.meta['auditory-cue'];
+      else
+        delete node.meta['auditory-cue'];
+      node._more_meta['auditory-cue-in-text'] = !!data._more_meta['auditory-cue-in-text'];
       node.txt_dom_element.textContent = node.text
     }, false);
     inp_txt.addEventListener('keydown', function(evt) {
