@@ -339,7 +339,16 @@
   }
   
   helper.audio_record = function(dest) {
-    return write_file(dest, "")
+    return SpeakUnit.getInstance()
+      .then(function(speaku) {
+        return speaku.api.request_audio_record_permission();
+      })
+      .then(function(granted) {
+        if(!granted) {
+          throw new Error("Permission not granted");
+        }
+        return write_file(dest, "");
+      })
       .then(function() {
         if(helper._audio_record_media_stopped) {
           delete helper._audio_record_media_stopped;

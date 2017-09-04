@@ -43,7 +43,8 @@
     'stop_speaking',
     'speak_finish',
     'get_voices',
-    'is_software_keyboard_visible'
+    'is_software_keyboard_visible',
+    'request_audio_record_permission'
   ];
 
   for(var i = 0, len = direct_delegates.length; i < len; ++i)
