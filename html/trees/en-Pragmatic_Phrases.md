@@ -1,5 +1,6 @@
 # I have something to say
 
+
 ## Quick Chat
 
 ### more
@@ -208,15 +209,15 @@
 
 - Friends
 
-- Bob
+	- Bob
 
-- Sue
+	- Sue
 
 - Staff
 
-- Speech Therapist
+	- Speech Therapist
 
-- Physipotherapist
+	- Physipotherapist
 
 ### I have a question about…
 
@@ -234,7 +235,7 @@
 
 ### I’ll spell it
 
-## I shall spell it (spell)<meta data-onselect-continue-in-branch data-onselect-continue-concat>
+## I shall spell it<meta data-onselect-restart-here>
 
 ### a
 
@@ -288,10 +289,9 @@
 
 ### z
 
-### Finish <meta data-onselect-finish>
-
 
 # Categories
+
 
 ## People
 
@@ -468,5 +468,3 @@
 ### light
 
 ### dark
-
-# Audio from horse/cat <meta data-audio="test-assets/horse.mp3" data-cue-audio="test-assets/horse.mp3" data-main-audio="test-assets/cat.mp3">
