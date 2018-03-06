@@ -2,4 +2,4 @@
 DIR=$(dirname $(dirname $0))
 DIST=$1
 
-cp -r $DIR/html/* $DIST && rm $DIST/css/.gitignore && sed -i "" -e "s%<!-- INJECT SCRIPTS -->%<script src=\"cordova.js\"></script>%" $DIST/index.html $DIST/edit-config.html && sed -i "" -e "s%ws://localhost:3000%data: gap: https://ssl.gstatic.com%" $DIST/index.html $DIST/edit-config.html
+cp -r $DIR/html/* $DIST && rm $DIST/css/.gitignore && sed -i "" -e "s%<!-- INJECT SCRIPTS -->%<script src=\"cordova.js\"></script>%" $DIST/index.html $DIST/edit-config.html && sed -i "" -e "s%<!-- INJECT HEAD -->%%" $DIST/index.html $DIST/edit-config.html  && sed -i "" -e "s%ws://localhost:3000%data: gap: https://ssl.gstatic.com%" $DIST/index.html $DIST/edit-config.html

@@ -1,5 +1,4 @@
-var config_fn, tree_fn, config, tree, state = null, tree_element, speaku,
-    _is_software_keyboard_visible = false,
+var config_fn, tree_fn, config, tree, state = null, tree_element, napi, speaku,
     tree_contentsize_xstep = 50;
 Promise.all([
   window.cordova ? NativeAccessApi.onready() : Promise.resolve(),
@@ -14,9 +13,9 @@ Promise.all([
   .then(function() {
     config_fn = default_config;
     tree_fn = default_tree;
-
-    return SpeakUnit.getInstance()
-      .then(function(_speaku) { speaku = _speaku });
+    napi = new NativeAccessApi();
+    speaku = new SpeakUnit(napi);
+    speaku.init();
   })
   .then(function() {
     // some hooks
@@ -59,41 +58,6 @@ Promise.all([
     // set theme class
     if(config.theme)
       document.body.classList.add('theme-' + config.theme);
-    // prepare onscreen_navigation -> boolean
-    // theinput thing, iOS needs this
-    return new Promise(function(resolve, reject) {
-      if(keyevents_needs_theinput() && speaku && speaku.api &&
-         config.onscreen_navigation == 'auto') {
-        config._theinput_enabled = true;
-        keyevents_handle_theinput();
-        setTimeout(function() { // give time to bring keyboard
-          speaku.api.is_software_keyboard_visible()
-            .then(function(issoft) {
-              if(!('_onscreen_navigation' in config))
-                config._onscreen_navigation = issoft;
-              if(issoft) {
-                keyevents_handle_theinput_off();
-                config._theinput_enabled = false;
-              }
-              _is_software_keyboard_visible = issoft;
-            })
-            .then(resolve, reject);
-        }, 1000);
-      } else {
-        // assuming keyboard is available, then auto is false
-        if(!('_onscreen_navigation' in config))
-          config._onscreen_navigation = config.onscreen_navigation == 'enable';
-        if(keyevents_needs_theinput() && !config._onscreen_navigation) {
-          config._theinput_enabled = true;
-          keyevents_handle_theinput();
-          setTimeout(function() {
-            _update_software_keyboard().then(resolve, reject)
-          }, 1000)
-        } else {
-          resolve()
-        }
-      }
-    });
   })
   .then(function() {
     // deal with on-screen navigation
@@ -149,6 +113,25 @@ var _alt_voice_rate_by_name = { 'default': 1.0, 'max': 2.0, 'min': 0.5 },
       } }
     };
 
+
+window.addEventListener('x-keycommand', function(ev) {
+  if(state && state._keyhit_off)
+    return;
+  if(!NativeAccessApi.keyCodeByInput.hasOwnProperty(ev.detail.input))
+    return;
+  var code = NativeAccessApi.keyCodeByInput[ev.detail.input];
+  ev.charCode = code;
+  // look for delegate calls
+  var delegate = _debug_keys[code];
+  if(delegate) {
+    if(delegate.preventDefault === undefined ||
+       delegate.preventDefault)
+      ev.preventDefault();
+    var ret = delegate.func(ev);
+    if(ret && ret.catch)
+      ret.catch(handle_error);
+  }
+}, false);
 window.addEventListener('keydown', function(ev) {
   if(state && state._keyhit_off)
     return;
@@ -166,6 +149,8 @@ window.addEventListener('keydown', function(ev) {
 }, false);
 
 function start(_state) {
+  if(state && state._start_promise)
+    return state._start_promise;
   // start if _state is given acts as continue
   // modes [auto,switch]
   // diff, auto iterates through nodes <-> switch iteration is manual
@@ -187,31 +172,36 @@ function start(_state) {
   };
   if(_modes.indexOf(state.mode) == -1)
     throw new Error("Unknown mode " + state.mode);
-  tree_element.addEventListener('x-mode-change', _on_mode_change, false);
-  window.addEventListener('keydown', _on_keydown, false);
-  window.addEventListener('resize', _tree_needs_resize, false);
-  var tmp = document.querySelector('#navbtns')
-  if(tmp && config._onscreen_navigation)
-    tmp.addEventListener('click', _on_navbtns_click, false)
-  if(config.can_edit) {
-    document.querySelector('#edit-mode-btn')
-      .addEventListener('click', _on_edit_mode, false);
-    document.querySelector('#edit-mode-save-btn')
-      .addEventListener('click', _on_edit_save, false);
-    document.querySelector('#edit-mode-cancel-btn')
-      .addEventListener('click', _on_edit_cancel, false);
-  }
-  _edit_mode_toggle(!!_state.edit_mode, false)
-  // operation starts
-  if(state.mode == 'auto') {
-    _state.auto_next_start = auto_next
-    _state.auto_next_dead = false
-    auto_next();
-  }
-  if(state.positions[state.positions.length - 1].index != -1)
-    _tree_position_update();
-  else
-    _update_active_positions();
+  return state._start_promise = _start_prepare()
+    .then(function() {
+      tree_element.addEventListener('x-mode-change', _on_mode_change, false);
+      document.addEventListener('x-keycommand', _on_xkeycommand, false);
+      window.addEventListener('keydown', _on_keydown, false);
+      window.addEventListener('resize', _tree_needs_resize, false);
+      var tmp = document.querySelector('#navbtns')
+      if(tmp && config._onscreen_navigation)
+        tmp.addEventListener('click', _on_navbtns_click, false)
+      if(config.can_edit) {
+        document.querySelector('#edit-mode-btn')
+          .addEventListener('click', _on_edit_mode, false);
+        document.querySelector('#edit-mode-save-btn')
+          .addEventListener('click', _on_edit_save, false);
+        document.querySelector('#edit-mode-cancel-btn')
+          .addEventListener('click', _on_edit_cancel, false);
+      }
+      _edit_mode_toggle(!!_state.edit_mode, false)
+      // operation starts
+      if(state.mode == 'auto') {
+        _state.auto_next_start = auto_next
+        _state.auto_next_dead = false
+        auto_next();
+      }
+      if(state.positions[state.positions.length - 1].index != -1)
+        _tree_position_update();
+      else
+        _update_active_positions();
+      delete state._start_promise;
+    });
   function auto_next() {
     if(_state._stopped)
       return; // stop the loop
@@ -276,38 +266,79 @@ function start(_state) {
   }
 }
 
+function _start_prepare() {
+  if(napi.available) {
+    var delegates = config._keyhit_delegates[state.mode];
+    var promises = [];
+    for(var key in delegates) {
+      let input = NativeAccessApi.keyInputByCode[key];
+      if(input) {
+        promises.push(napi.add_key_command(input))
+      }
+    }
+    return Promise.all(promises);
+  } else {
+    return Promise.resolve();
+  }
+}
+
+function _stop_prepare() {
+  if(napi.available) {
+    var delegates = config._keyhit_delegates[state.mode];
+    var promises = [];
+    for(var key in delegates) {
+      var input = NativeAccessApi.keyInputByCode[key];
+      if(input) {
+        promises.push(napi.remove_key_command(input));
+      }
+    }
+    return Promise.all(promises);
+  } else {
+    return Promise.resolve();
+  }
+}
+
 /**
  * Stops the current control-flow if exists, makes it ready for next start
  */
 function stop() {
-  tree_element.removeEventListener('x-mode-change', _on_mode_change, false);
-  if(state._next_keyup) {
-    window.removeEventListener('keyup', state._next_keyup, false);
-    state._next_keyup = null
-  }
-  window.removeEventListener('keydown', _on_keydown, false);
-  window.removeEventListener('resize', _tree_needs_resize, false);
-  var tmp = document.querySelector('#navbtns')
-  if(tmp && config._onscreen_navigation)
-    tmp.removeEventListener('click', _on_navbtns_click, false)
-  if(config.can_edit) {
-    document.querySelector('#edit-mode-btn')
-      .removeEventListener('click', _on_edit_mode, false);
-    document.querySelector('#edit-mode-save-btn')
-      .removeEventListener('click', _on_edit_save, false);
-    document.querySelector('#edit-mode-cancel-btn')
-      .removeEventListener('click', _on_edit_cancel, false);
-  }
-  _edit_mode_toggle(false)
-  _before_new_move(); // stop speech and highlights
-  if(state._active_timeout) {
-    clearTimeout(state._active_timeout);
-    delete state._active_timeout;
-  }
-  var callback;
-  while((callback = state._stop_callbacks.shift()) != null)
-    callback()
-  state._stopped = true;
+  if(!state)
+    return Promise.reject(new Error("stop called when, not running!"));
+  if(state._stop_promise)
+    return state._stop_promise;
+  return state._stop_promise = _stop_prepare()
+    .then(function() {
+      tree_element.removeEventListener('x-mode-change', _on_mode_change, false);
+      if(state._next_keyup) {
+        window.removeEventListener('keyup', state._next_keyup, false);
+        state._next_keyup = null
+      }
+      document.removeEventListener('x-keycommand', _on_xkeycommand, false);
+      window.removeEventListener('keydown', _on_keydown, false);
+      window.removeEventListener('resize', _tree_needs_resize, false);
+      var tmp = document.querySelector('#navbtns')
+      if(tmp && config._onscreen_navigation)
+        tmp.removeEventListener('click', _on_navbtns_click, false)
+      if(config.can_edit) {
+        document.querySelector('#edit-mode-btn')
+          .removeEventListener('click', _on_edit_mode, false);
+        document.querySelector('#edit-mode-save-btn')
+          .removeEventListener('click', _on_edit_save, false);
+        document.querySelector('#edit-mode-cancel-btn')
+          .removeEventListener('click', _on_edit_cancel, false);
+      }
+      _edit_mode_toggle(false)
+      _before_new_move(); // stop speech and highlights
+      if(state._active_timeout) {
+        clearTimeout(state._active_timeout);
+        delete state._active_timeout;
+      }
+      var callback;
+      while((callback = state._stop_callbacks.shift()) != null)
+        callback()
+      state._stopped = true;
+      delete state._stop_promise;
+    });
 }
 
 function is_first_run(_state) {
@@ -317,9 +348,12 @@ function is_first_run(_state) {
 }
 
 function _on_mode_change() {
-  stop();
-  state = renew_state(state)
-  start(state);
+  stop()
+    .then(function() {
+      state = renew_state(state)
+      return start(state);
+    })
+    .catch(handle_error);
 }
 
 function renew_state(_state) {
@@ -331,14 +365,6 @@ function renew_state(_state) {
 
 function _clean_state(_state) {
   _update_active_positions(_state, []);
-}
-
-function _update_software_keyboard() {
-  if(speaku && speaku.api) {
-    return speaku.api.is_software_keyboard_visible()
-      .then(function(v) { _is_software_keyboard_visible = v; });
-  }
-  return Promise.resolve();
 }
 
 function _take_snapshot() {
@@ -354,12 +380,14 @@ function _take_snapshot() {
   };
 }
 function _restore_snapshot(snapshot) {
-  stop(state)
-  tree_element.parentNode.replaceChild(snapshot.tree.dom_element, tree_element)
-  tree_element = snapshot.tree.dom_element
-  tree = snapshot.tree
-  state.positions = snapshot.positions
-  start(state)
+  return stop(state)
+    .then(function() {
+      tree_element.parentNode.replaceChild(snapshot.tree.dom_element, tree_element)
+      tree_element = snapshot.tree.dom_element
+      tree = snapshot.tree
+      state.positions = snapshot.positions
+      return start(state)
+    });
 }
 
 /** <Edit Mode> **/
@@ -389,15 +417,22 @@ function _edit_mode_toggle(b, restart) {
       delete state._selected_node
     }
   }
+  var promise;
   if(restart) {
-    stop()
-    renew_state(state)
-    start(state)
+    promise = stop()
+      .then(function() {
+        renew_state(state)
+        return start(state)
+      });
+  } else {
+    promise = Promise.resolve();
   }
-  state.silent_mode = b
-  state.mode = b ? 'switch' : config.mode || 'auto'
-  state.edit_mode = b
-  delete state._changing_edit_mode;
+  return promise.then(function() {
+    state.silent_mode = b
+    state.mode = b ? 'switch' : config.mode || 'auto'
+    state.edit_mode = b
+    delete state._changing_edit_mode;
+  });
 }
 
 function _remove_child_node(parent, idx) {
@@ -598,8 +633,7 @@ function _on_edit_save() {
     .catch(function(err) {
       save_btn.disabled = false;
       cancel_btn.disabled = false;
-      console.error(err)
-      alert(err+'')
+      handle_error(err)
     });
 }
 function _on_edit_cancel() {
@@ -607,13 +641,12 @@ function _on_edit_cancel() {
     .then(function() {
       // restore will stop => auto toggle off
       // _edit_mode_toggle(false);
-      _restore_snapshot(state._orig_snapshot);
-      delete state._orig_snapshot;
+      return _restore_snapshot(state._orig_snapshot)
+        .then(function() {
+          delete state._orig_snapshot;
+        });
     })
-    .catch(function(err) {
-      console.error(err)
-      alert(err+'')
-    });
+    .catch(handle_error);
 }
 /** <Edit Mode/> **/
 
@@ -635,10 +668,26 @@ function _on_navbtns_click(ev) {
   }
 }
 
-function _on_keydown(down_ev) {
-  if(state && state._keyhit_off)
+function _on_xkeycommand(evt) {
+  if(!state || state._keyhit_off)
     return;
-  curtime = new Date().getTime()
+  var curtime = new Date().getTime()
+  if(config.ignore_second_hits_time > 0 && state._last_keydown_time &&
+     curtime - state._last_keydown_time < config.ignore_second_hits_time) {
+    return; // ignore second hit
+  }
+  state._last_keydown_time = curtime
+  // config.ignore_key_release_time is not applicable
+  if(evt.detail && NativeAccessApi.keyCodeByInput.hasOwnProperty(evt.detail.input)) {
+    evt.charCode = NativeAccessApi.keyCodeByInput[evt.detail.input];
+    _on_keyhit(evt);
+  }
+}
+
+function _on_keydown(down_ev) {
+  if(!state || state._keyhit_off)
+    return;
+  var curtime = new Date().getTime()
   if(config.ignore_second_hits_time > 0 && state._last_keydown_time &&
      curtime - state._last_keydown_time < config.ignore_second_hits_time) {
     return; // ignore second hit
@@ -646,10 +695,7 @@ function _on_keydown(down_ev) {
   state._last_keydown_time = curtime
   state._keydown_time = curtime
   var downcode = down_ev.charCode || down_ev.keyCode;
-  _update_software_keyboard()
-  // software keyboards do not trigger down/up at the correct time
-  // simple fix, ignore it
-  if(!config.ignore_key_release_time || _is_software_keyboard_visible) {
+  if(!config.ignore_key_release_time) {
     // no need to wait for release
     _on_keyhit(down_ev);
   } else {
@@ -687,7 +733,8 @@ function _on_keyhit(ev) {
   // look for delegate calls
   var delegate = config._keyhit_delegates[state.mode][code+''];
   if(delegate) {
-    if(delegate.preventDefault)
+    if(delegate.preventDefault === undefined ||
+       delegate.preventDefault)
       ev.preventDefault();
     var ret = delegate.func(ev);
     if(ret && ret.catch)
@@ -1021,65 +1068,67 @@ function _tree_go_in() {
     }
     // finish it
     // on auto mode stop iteration and on any key restart
-    stop();
-    if(atree.txt_dom_element)
-      atree.txt_dom_element.classList.add('selected' || config.selected_class);
-
-    // display continue-concat if any
-    var popup = document.querySelector('#popup-message-wrp'),
-        popup_mtext = popup ? popup.querySelector('.main-text') : null,
-        popup_visible = false;
-    tmp = _get_node_attr_inherits_full('onselect-continue-concat');
-    if(tmp && tmp[2]._continue_concat) {
-      if(popup && popup_mtext) {
-        popup_mtext.textContent = tmp[2]._continue_concat.join(tmp[0])
-        popup.classList.remove('hide');
-        popup_visible = true; 
-        setTimeout(function() {
-          popup.classList.add('visible');
-        }, 10);
-      }
-      delete tmp[2]._continue_concat;
-    }
-    // speak it
-    return _move_sub_speak2
-      .call(atree, 'main')
+    return stop()
       .then(function() {
-        // start again, on demand
-        function finish() {
-          if(popup_visible) {
-            popup.classList.remove('visible');
+        if(atree.txt_dom_element)
+          atree.txt_dom_element.classList.add('selected' || config.selected_class);
+
+        // display continue-concat if any
+        var popup = document.querySelector('#popup-message-wrp'),
+            popup_mtext = popup ? popup.querySelector('.main-text') : null,
+            popup_visible = false;
+        tmp = _get_node_attr_inherits_full('onselect-continue-concat');
+        if(tmp && tmp[2]._continue_concat) {
+          if(popup && popup_mtext) {
+            popup_mtext.textContent = tmp[2]._continue_concat.join(tmp[0])
+            popup.classList.remove('hide');
+            popup_visible = true; 
             setTimeout(function() {
-              popup_mtext.textContent = "";
-              popup.classList.add('hide');
-            }, 500); // wait for hide transition 
+              popup.classList.add('visible');
+            }, 10);
           }
-          _clean_state()
-          start(); // start over
+          delete tmp[2]._continue_concat;
         }
-        function clear() {
-          if(atree.txt_dom_element)
-            atree.txt_dom_element.classList.remove('selected' || config.selected_class);
-          tmp = document.querySelector('#navbtns')
-          if(tmp && config._onscreen_navigation) {
-            tmp.removeEventListener('click', onscreen_nav_click, false)
-          }
-          window.removeEventListener('keydown', onkeydown, false);
-        }
-        function onscreen_nav_click() {
-          clear()
-          finish()
-        }
-        function onkeydown(ev) {
-          ev.preventDefault();
-          clear()
-          finish()
-        }
-        tmp = document.querySelector('#navbtns')
-        if(tmp && config._onscreen_navigation) {
-          tmp.addEventListener('click', onscreen_nav_click, false)
-        }
-        window.addEventListener('keydown', onkeydown, false);
+        // speak it
+        return _move_sub_speak2
+          .call(atree, 'main')
+          .then(function() {
+            // start again, on demand
+            function finish() {
+              if(popup_visible) {
+                popup.classList.remove('visible');
+                setTimeout(function() {
+                  popup_mtext.textContent = "";
+                  popup.classList.add('hide');
+                }, 500); // wait for hide transition 
+              }
+              _clean_state()
+              return start(); // start over
+            }
+            function clear() {
+              if(atree.txt_dom_element)
+                atree.txt_dom_element.classList.remove('selected' || config.selected_class);
+              tmp = document.querySelector('#navbtns')
+              if(tmp && config._onscreen_navigation) {
+                tmp.removeEventListener('click', onscreen_nav_click, false)
+              }
+              window.removeEventListener('keydown', onkeydown, false);
+            }
+            function onscreen_nav_click() {
+              clear()
+              finish()
+            }
+            function onkeydown(ev) {
+              ev.preventDefault();
+              clear()
+              finish()
+            }
+            tmp = document.querySelector('#navbtns')
+            if(tmp && config._onscreen_navigation) {
+              tmp.addEventListener('click', onscreen_nav_click, false)
+            }
+            window.addEventListener('keydown', onkeydown, false);
+          });
       });
   } else {
     if(atree.nodes.length == 0)

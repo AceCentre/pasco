@@ -1,5 +1,5 @@
 var config_fn, tree_fn;
-var speaku, config, config_data, orig_tree_data, tree_data, voices;
+var speaku, config, config_data, orig_tree_data, tree_data, voices, napi;
 // start
 Promise.all([
   window.cordova ? NativeAccessApi.onready() : Promise.resolve(),
@@ -14,12 +14,12 @@ Promise.all([
   .then(function() {
     config_fn = default_config;
     tree_fn = default_tree;
-    
-    return SpeakUnit.getInstance()
-      .then(function(_speaku) { speaku = _speaku });
-  })
-  .then(function() {
-    return speaku.get_voices().then(function(v) { voices = v })
+    napi = new NativeAccessApi();
+    speaku = new SpeakUnit(napi);
+    return speaku.init()
+      .then(function() {
+        return speaku.get_voices().then(function(v) { voices = v })
+      });
   })
   // load data
   .then(function() {
@@ -104,31 +104,18 @@ function insert_config() {
   var $form = $('form[name=edit-config]').first()
   $form.find('input,select,textarea,radio,checkbox').each(function() {
     if(this.name.length > 0 && this.name[0] != '_') {
-      var path = this.name.split('.');
-      var tmp = config;
+      var name = this.name;
+      var path = name.split('.');
       // special case for voice_options, load prefixed data if not avail
       var vo_suffix = 'voice_options';
       if(path[0].indexOf(vo_suffix) == path[0].length - vo_suffix.length) {
-        if(!config[path[0]] && config['_'+path[0]])
-          path[0] = '_' + path[0];
-      }
-      for(var i = 0, len = path.length; tmp != null && i < len; ++i) {
-        var key = path[i];
-        if(i + 1 == len && tmp[key]) {
-          if(['radio','checkbox'].indexOf(this.type) != -1) {
-            if(this.type == 'checkbox' && typeof tmp[key] == 'boolean') {
-              this.checked = tmp[key];
-            } else {
-              this.checked = this.value == tmp[key]+'';
-            }
-            $(this).trigger('change');
-          } else {
-            this.value = tmp[key]+'';
-          }
-        } else {
-          tmp = tmp[key]
+        if(!config[path[0]] && config['_'+path[0]]) {
+          name = '_' + name;
         }
       }
+      var input_info = _input_info_parse(name, config);
+      if(input_info.value != undefined)
+        _input_set_from_config(this, input_info.value);
     }
   });
   // specific
@@ -176,39 +163,13 @@ function save_config(evt) {
   try {
     $form.find('input,select,textarea').each(function() {
       if(this.name.length > 0 && this.name[0] != '_') {
-        var path = this.name.split('.'),
-            validator_attr = this.getAttribute('data-validator'),
+        var validator_attr = this.getAttribute('data-validator'),
             validator = validator_attr ? config_validators[validator_attr] : null;
         if(validator_attr && !validator)
           throw new Error("Validator not found " + validator_attr + " for " + this.name);
         var value = validator ? validator(this.value, this.name) : this.value;
-        var tmp = _config;
-        for(var i = 0, len = path.length; i < len; ++i) {
-          var key = path[i];
-          if(i + 1 == len) {
-            if(this.type == 'checkbox') {
-              if(!this.value || this.value.toLowerCase() == 'on') {
-                // is boolean
-                tmp[key] = this.checked
-              } else {
-                if(this.checked)
-                  tmp[key] = value
-                else
-                  delete tmp[key]
-              }
-            } else if(this.type == 'radio') {
-              if(this.checked) {
-                tmp[key] = this.value
-              }
-            } else {
-              tmp[key] = value;
-            }
-          } else {
-            if(tmp[key] == null)
-              tmp[key] = {}; // make an object, simple solution
-            tmp = tmp[key]
-          }
-        }
+        var input_info = _input_info_parse(this.name, _config);
+        _input_info_set_config_value(this, input_info, value);
       }
     });
     // specific
@@ -332,3 +293,57 @@ $(document).on('change', 'input[type=checkbox],input[type=radio]', function() {
   }
 });
 
+function _input_set_from_config(element, value) {
+  if(['radio','checkbox'].indexOf(element.type) != -1) {
+    if(element.type == 'checkbox' && typeof value == 'boolean') {
+      element.checked = value;
+    } else {
+      element.checked = element.value == value+'';
+    }
+    $(element).trigger('change');
+  } else {
+    element.value = value+'';
+  }
+}
+function _input_info_set_config_value(element, info, value) {
+  if(element.type == 'checkbox') {
+    if(!element.value || element.value.toLowerCase() == 'on') {
+      // is boolean
+      info.target[info.name] = element.checked
+    } else {
+      if(element.checked)
+        info.target[info.name] = value
+      else
+        delete info.target[info.name]
+    }
+  } else if(element.type == 'radio') {
+    if(element.checked) {
+      info.target[info.name] = value
+    }
+  } else {
+    info.target[info.name] = value;
+  }
+}
+function _input_info_parse(name, config) {
+  var path = name.split('.');
+  var value, target, name;
+  var tmp = config;
+  for(var i = 0, len = path.length; i < len; ++i) {
+    var key = path[i];
+    if(i + 1 == len) {
+      target = tmp;
+      value = tmp[key];
+      name = key;
+    } else {
+      if(tmp[key] == null)
+        tmp[key] = {}; // make an object, simple solution
+      tmp = tmp[key]
+    }
+  }
+  return {
+    path: path,
+    target: target,
+    name: name,
+    value: value
+  };
+}

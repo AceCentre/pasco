@@ -10,7 +10,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "concurrently \"npm run dev-bs\" \"gulp less-watch\"",
     "dev-bs": "browser-sync start -c bs-config.js",
-    "build": "gulp lessc-all"
+    "build": "gulp lessc-all",
+    "cordova-dist": "gulp cordova-dist",
+    "watch-cordova-dist": "gulp watch-cordova-dist"
   },
   "repository": {
     "type": "git",

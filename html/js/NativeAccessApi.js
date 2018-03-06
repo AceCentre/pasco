@@ -5,13 +5,7 @@
    *  Currently connection is based on cordova
    */
   function NativeAccessApi() {
-    if(!window.cordova) {
-      // no access to api
-      // throw new Error("Cannot find cordova")
-      this.has_synthesizer = this.has_audio_device = function() {
-        return Promise.resolve(false);
-      }
-    }
+    this.available = !!window.cordova;
   }
 
   function cordovaExecAsPromise(service, action, args) {
@@ -44,7 +38,8 @@
     'speak_finish',
     'get_voices',
     'is_software_keyboard_visible',
-    'request_audio_record_permission'
+    'request_audio_record_permission',
+    'add_key_command', 'remove_key_command'
   ];
 
   for(var i = 0, len = direct_delegates.length; i < len; ++i)
@@ -58,6 +53,32 @@
       }, true);
     });
   }
+
+  NativeAccessApi.keyInputByCode = {
+    "13": "RETURN",
+    "32": "SPACE",
+    "39": "RIGHT",
+    "37": "LEFT",
+    "38": "UP",
+    "40": "DOWN",
+    "87": "w",
+    "68": "d",
+    "83": "s",
+    "65": "a",
+    "49": "1",
+    "50": "2",
+    "51": "3",
+    "52": "4",
+    "80": "p",
+    "190": "."
+  };
+  NativeAccessApi.keyCodeByInput = {};
+  for(var key in NativeAccessApi.keyInputByCode) {
+    if(NativeAccessApi.keyInputByCode.hasOwnProperty(key)) {
+      NativeAccessApi.keyCodeByInput[NativeAccessApi.keyInputByCode[key]] = key;
+    }
+  }
+
 
   window.NativeAccessApi = NativeAccessApi;
 

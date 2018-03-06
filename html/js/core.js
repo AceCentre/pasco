@@ -403,31 +403,31 @@ function keyevents_handle_theinput() {
 window.keyevents_handle_theinput_off = function() { } // dummy func
 
 
-function SpeakUnit() {
+function SpeakUnit(api) {
+  SpeakUnit._instancePromise = this;
   this._alt_finish_queue = [];
+  this.api = api;
 }
 
-SpeakUnit.getInstance = function() {
+SpeakUnit.getInstance = function(api) {
   if(SpeakUnit._instancePromise) {
     return Promise.resolve(SpeakUnit._instancePromise);
   } else {
-    var speaku = new SpeakUnit();
-    return speaku.init()
+    throw new Error("No instance found, it's not initialized!");
   }
 }
 var proto = SpeakUnit.prototype;
 
 proto.init = function() {
-  var api = new NativeAccessApi();
+  var api = this.api;
   var self = this;
-  return Promise.all([
+  return (api.available ? Promise.all([
     api.has_synthesizer(),
     api.has_audio_device()
-  ])
+  ]) : Promise.resolve(false))
     .then(function(results) {
-      if(results[0] && results[1]) {
+      if(results && results[0] && results[1]) {
         self.is_native = true
-        self.api = api
         return self.api.init_synthesizer()
           .then(function(synthesizer) {
             self.synthesizer = synthesizer;

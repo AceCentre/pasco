@@ -2,8 +2,9 @@ const less = require('gulp-less')
 const path = require('path')
 const gulp = require('gulp')
 const sourcemaps = require('gulp-sourcemaps')
+const spawn = require('child_process').spawn;
  
-let lessfiles = ['main','edit-config'];
+let lessfiles = ['main','edit-config','cordova'];
 
 [...lessfiles,'all'].forEach((name) => {
   let files = (name == 'all' ? lessfiles : [name])
@@ -32,4 +33,25 @@ gulp.task('less-watch', ['lessc-all'], () => {
     }
   })
 });
-
+var cordova_dist_running = false;
+var sh_bin = '/bin/sh';
+gulp.task('cordova-dist', ['lessc-all'], (done) => {
+  if(cordova_dist_running)
+    return done();
+  cordova_dist_running = true;
+  var chp = spawn(sh_bin, [ __dirname + '/scripts/push-cordova', __dirname + '/cordova/www/' ]);
+  chp.on('exit', (code) => {
+    cordova_dist_running = false;
+    if(code == 0) {
+      done();
+    } else {
+      throw new Error("push-cordova output code " + code);
+    }
+  });
+});
+gulp.task('watch-cordova-dist', ['cordova-dist'], () => {
+  var watcher = gulp.watch('html/**/*{.css,.html,.json,.js}');
+  watcher.on('change', (event) => {
+    gulp.run('cordova-dist');
+  });
+});
