@@ -1,4 +1,4 @@
-var config_fn, tree_fn;
+var config_fn, tree_fn, lang = 'en', default_lang = 'en';
 var speaku, config, config_data, orig_tree_data, tree_data, voices, napi;
 // start
 Promise.all([
@@ -21,17 +21,31 @@ Promise.all([
         return speaku.get_voices().then(function(v) { voices = v })
       });
   })
-  // load data
+  // load
   .then(function() {
-    return get_file_json(config_fn)
-      .then(function(_config) { config = _config; config_data = JSON.stringify(config) });
-  })
-  .then(function() {
-    return get_file_data(tree_fn)
-      .then(function(_data) { tree_data = _data; orig_tree_data = _data; });
+    return Promise.all([
+      get_file_json(config_fn)
+        .then(function(_config) { config = _config;
+                                  config_data = JSON.stringify(config);
+                                  _fix_config(config); }),
+      get_file_data(tree_fn)
+        .then(function(_data) { tree_data = _data; orig_tree_data = _data; })
+    ]);
   })
   .then(start)
   .catch(handle_error);
+
+function _fix_config(cfg) {
+  if(!cfg.auditory_cue_first_run_voice_options &&
+     !cfg._auditory_cue_first_run_voice_options) {
+    cfg._auditory_cue_first_run_voice_options =  {
+      "volume": 1.0,
+      "rate": "default",
+      "rateMul": 1.5,
+      "pitch": 1.0
+    };
+  }
+}
 
 function start() {
   // insert voice options
@@ -83,6 +97,34 @@ function start() {
   
   $('form[name=edit-config]').on('submit', save_config)
   $('form[name=edit-tree]').on('submit', save_tree)
+  
+  update_tree_default_select();
+  $('#tree-default-select').on('change', update_tree_default_select);
+  function update_tree_default_select() {
+    var value = $('#tree-default-select').val();
+    $('#tree-default-select-load-btn').prop('disabled', !value);
+  }
+  $('#tree-default-select-load-btn').on('click', function() {
+    var name = $('#tree-default-select').val();
+    if(!name) {
+      alert("Nothing selected!");
+    } else {
+      read_file('trees/' + lang + '-' + name + '.md')
+        .then(change_tree)
+        .catch(function(err) {
+          if(default_lang == lang)
+            throw err;
+          return read_file('trees/' + default_lang + '-' + name + '.md')
+            .then(change_tree)
+            .catch(function() { throw err; });
+        })
+          .catch(handle_error);
+    }
+    function change_tree(data) {
+      tree_data = data
+      $('form[name=edit-tree] [name=tree-input]').val(tree_data)
+    }
+  });
 }
 
 function validate_number(v, name) {
@@ -285,11 +327,14 @@ $(document).on('change', 'input[type=checkbox],input[type=radio]', function() {
         $(this).trigger('change');
         delete this._others_triggered;
       }
-    })
+    });
   }
-  var vis_edit = $el.data('toggle-visibility')
-  if(vis_edit) {
-    $(vis_edit).toggleClass('visibility-dependant-visible', this.checked);
+  var toggle_sel = $el.data('inp-collapse-toggle');
+  if(toggle_sel) {
+    var toggle_el = document.querySelector(toggle_sel);
+    if(toggle_el) {
+      collapsable_toggle(toggle_el, this.checked);
+    }
   }
 });
 

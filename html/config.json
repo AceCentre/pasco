@@ -25,7 +25,7 @@
     "alt_voiceId": "UK English Female",
     "pitch": 1.0
   },
-  "auditory_cue_first_run_voice_options": {
+  "_auditory_cue_first_run_voice_options": {
     "volume": 1.0,
     "rate": "default",
     "rateMul": 1.5,

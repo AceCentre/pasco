@@ -1229,6 +1229,7 @@ function load_config(fn) {
           "65": { func: _tree_go_out }, // A
         })
       };
+      config._onscreen_navigation = config.onscreen_navigation == 'enable';
       // add styles
       var styles = Array.isArray(config.style) ? config.style :
           (config.style ? [ config.style ] : []),

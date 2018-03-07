@@ -698,3 +698,79 @@ function read_json(url, options) {
 window.get_file_json = read_json
 window.get_file_data = read_file
 window.set_file_data = write_file
+
+
+
+document.addEventListener('click', function(evt) {
+  var el = evt.target;
+  var toggle_sel = el.getAttribute('data-collapse-toggle');
+  if(toggle_sel) {
+    var toggle_el = document.querySelector(toggle_sel);
+    if(toggle_el) {
+      collapsable_toggle(toggle_el);
+    }
+  }
+}, false);
+
+document.addEventListener('DOMContentLoaded', update_collapsables, false);
+document.addEventListener('resize', update_collapsables, false);
+
+function update_collapsables() {
+  var elms = document.querySelectorAll('.collasable');
+  for(var i = 0, len = elms.length; i < len; i++) {
+    var elm = elms[i];
+    if(elm.classList.contains('collapse')) {
+      update_collapsable(elm);
+    }
+  }
+}
+
+function update_collapsable(elm) {
+  var pre_height = elm.offsetHeight;
+  if(pre_height > 0) {
+    elm.style.height = '';
+    var height = elm.offsetHeight;
+    console.log(elm, pre_height, height);
+    elm.style.height = pre_height + 'px';
+    if(height > 0 && height != pre_height) {
+      elm._collapsable_timeout = setTimeout(function() {
+        elm.style.height = height + 'px';
+      }, 10);
+    }
+  }
+}
+
+function collapsable_toggle(toggle_el, toggle) {
+  var contains_collapse = toggle_el.classList.contains('collapse');
+  toggle = toggle == null ? !contains_collapse : toggle
+  if(toggle && contains_collapse) {
+    if(toggle_el._collapsable_timeout != null)
+      clearTimeout(toggle_el._collapsable_timeout);
+    toggle_el.classList.remove('collapse')
+    toggle_el.style.height = '';
+    update_parents();
+    var height = toggle_el.offsetHeight;
+    if(height > 0) {
+      toggle_el.style.height = '0px';
+      toggle_el._collapsable_timeout = setTimeout(function() {
+        toggle_el.style.height = height + 'px';
+      }, 10);
+    }
+  } else if(!toggle && !contains_collapse) {
+    if(toggle_el._collapsable_timeout != null)
+      clearTimeout(toggle_el._collapsable_timeout);
+    toggle_el.style.display = 'none';
+    update_parents();
+    toggle_el.style.display = '';
+    toggle_el.classList.add('collapse')
+  }
+  function update_parents() {
+    var parentNode = toggle_el.parentNode;
+    while(parentNode != null && parentNode.nodeType == document.ELEMENT_NODE) {
+      if(parentNode.classList.contains('collapsable')) {
+        update_collapsable(parentNode);
+      }
+      parentNode = parentNode.parentNode;
+    }
+  }
+}
