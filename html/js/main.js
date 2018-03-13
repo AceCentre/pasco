@@ -43,13 +43,22 @@ Promise.all([
       .then(function(_config) { config = _config; });
   })
   .then(function() {
-    // have config, load tree
+    // load tree
     tree_element = document.querySelector('#tree')
     if(!tree_element)
       return Promise.reject(new Error("Cannot find #tree element"));
-    tree_fn = config.tree || tree_fn
-    return load_tree(tree_element, tree_fn)
-      .then(function(_tree) { tree = _tree; });
+    tree_fn = config.tree || tree_fn;
+    return Promise.all([
+      initl10n(config.locale||default_locale)
+        .then(function() {
+          domlocalize();
+        })
+        .catch(function(err) {
+          console.warn(err);
+        }),
+      load_tree(tree_element, tree_fn)
+        .then(function(_tree) { tree = _tree; })
+    ]);
   })
   .then(function() {
     // set tree font-size
@@ -65,6 +74,8 @@ Promise.all([
     if(elem && config._onscreen_navigation) {
       elem.classList.add('navbtns-enable');
     }
+    // display body
+    document.body.style.display = '';
   })
   .then(start)
   .catch(handle_error);
@@ -111,6 +122,12 @@ var _alt_voice_rate_by_name = { 'default': 1.0, 'max': 2.0, 'min': 0.5 },
           document.body.classList.remove('debug-mode')
         }
       } }
+    },
+    _keys_for_rtl = {
+      "39": "37", // ArrowRight => ArrowLeft
+      "37": "39", // ArrowLeft => ArrowRight
+      "68": "65", // D => A
+      "65": "68", // A => D
     };
 
 
@@ -660,10 +677,18 @@ function _on_navbtns_click(ev) {
     _tree_go_next();
     break;
   case 'nav-leftbtn':
-    _tree_go_out();
+    if(window.icu && icu.rtl) {
+      _tree_go_in();
+    } else {
+      _tree_go_out();
+    }
     break;
   case 'nav-rightbtn':
-    _tree_go_in();
+    if(window.icu && icu.rtl) {
+      _tree_go_out();
+    } else {
+      _tree_go_in();
+    }
     break;
   }
 }
@@ -700,6 +725,9 @@ function _on_keydown(down_ev) {
     _on_keyhit(down_ev);
   } else {
     // follow delegate rules
+    if(window.icu && icu.rtl && _keys_for_rtl.hasOwnProperty(downcode+'')) {
+      downcode = _keys_for_rtl[downcode];
+    }
     var delegate = config._keyhit_delegates[state.mode][downcode+''];
     if(delegate) {
       if(delegate.preventDefault)
@@ -709,6 +737,9 @@ function _on_keydown(down_ev) {
       window.removeEventListener('keyup', state._next_keyup, false);
     state._next_keyup = function(ev) {
       var upcode = ev.charCode || ev.keyCode;
+      if(window.icu && icu.rtl && _keys_for_rtl.hasOwnProperty(upcode+'')) {
+        upcode = _keys_for_rtl[upcode];
+      }
       if(upcode != 0 && upcode != downcode) {
         return; // LIMIT:: single key at a time
       }
@@ -730,6 +761,9 @@ function _on_keyhit(ev) {
   if(state && state._keyhit_off)
     return;
   var code = ev.charCode || ev.keyCode;
+  if(window.icu && icu.rtl && _keys_for_rtl.hasOwnProperty(code+'')) {
+    code = _keys_for_rtl[code];
+  }
   // look for delegate calls
   var delegate = config._keyhit_delegates[state.mode][code+''];
   if(delegate) {
@@ -818,10 +852,10 @@ function _update_active_positions(_state, positions) {
       ael.classList.add('current');
     }
   }
-  _update_active_positions_topleft();
+  _update_active_positions_tree();
 }
 
-function _update_active_positions_topleft() {
+function _update_active_positions_tree() {
   // center all
   var widthSum = 0;
   var topSum = 0;
@@ -841,16 +875,24 @@ function _update_active_positions_topleft() {
     topSum += top;
     widthSum += ul.offsetWidth
   }
-  if(widthSum - window.innerWidth > 0) {
-    tree_element.style.left = (-widthSum + window.innerWidth) + "px";
+  if(window.icu && window.icu.rtl) {
+    if(widthSum - window.innerWidth > 0) {
+      tree_element.style.right = (-widthSum + window.innerWidth) + "px";
+    } else {
+      tree_element.style.right = 0;
+    }
   } else {
-    tree_element.style.left = 0;
+    if(widthSum - window.innerWidth > 0) {
+      tree_element.style.left = (-widthSum + window.innerWidth) + "px";
+    } else {
+      tree_element.style.left = 0;
+    }
   }
 }
 
 function _tree_needs_resize() {
   tree_element.tree_height = window.innerHeight;
-  _update_active_positions_topleft();
+  _update_active_positions_tree();
 }
 
 function _tree_set_contentsize(percentage) {

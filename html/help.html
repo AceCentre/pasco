@@ -9,7 +9,7 @@
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, viewport-fit=cover">
 
-    <title>Auditory Scanning</title>
+    <title x-l10n="help_title">PASCO - HELP</title>
 
     <link rel="stylesheet" href="css/edit-config.css">
     <!-- <link rel="icon" href="images/favicon.png"> -->
@@ -22,40 +22,60 @@
     
   </head>
 
-  <body>
+  <body style="display:none">
     <nav class="navbar navbar-default">
       <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
-            <span class="sr-only">Toggle navigation</span>
+            <span class="sr-only" x-l10n>Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href>pasco Help</a>
+          <a class="navbar-brand" href><span x-l10n>pasco</span> <span x-l10n>Help</span></a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li><a href="index.html">Start</a></li>
+            <li><a href="index.html" x-l10n>Start</a></li>
           </ul>
         </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->
     </nav>
     <div class="container">
-      <h2>CONTRIBUTORS</h2>
+      <h2 x-l10n>CONTRIBUTORS</h2>
       <ul>
         <li>Will Wade &lt;wwade@acecentre.org.uk&gt; https://acecentre.org.uk</li>
         <li>Hossein Amin &lt;hossein@aminbros.com&gt; https://aminbros.com/</li>
       </ul>
-      <h2>COPYRIGHT</h2>
-      <p>Copyright info</p>
-      <h2>Techs</h2>
+      <h2 x-l10n>COPYRIGHT</h2>
+      <p x-l10n>Copyright info</p>
+      <h2 x-l10n>Techs</h2>
       <ul>
-        <li>Web Responsive Voice, <a href="https://responsivevoice.org/">https://responsivevoice.org/</a></li>
+        <li><span x-l10n>Web Responsive Voice</span>, <a href="https://responsivevoice.org/">https://responsivevoice.org/</a></li>
       </ul>
     </div>
+    <!-- INJECT SCRIPTS -->
+    <script src="js/lib/translate.js"></script>
+    <script src="js/core.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initialize_app()
+        .then(function() { return get_file_json(default_config); })
+        .then(function(config) {
+          return initl10n(config.locale||default_locale);
+        })
+        .then(function() {
+          domlocalize();
+          document.body.style.display = '';
+        })
+        .catch(function() {
+          console.warn("Could not find file for l10n " + config.locale||default_locale);
+          document.body.style.display = '';
+        });
+    }, false);
+    </script>
   </body>
 </html>

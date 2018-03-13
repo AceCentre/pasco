@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -9,44 +10,43 @@
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, viewport-fit=cover">
 
-    <title>Auditory Scanning</title>
+    <title x-l10n="main_title">PASCO</title>
 
     <!-- bootstrap includes -->
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <!-- bootstrap includes end -->
-    
-
     <link rel="stylesheet" href="css/main.css">
+    
     <!-- <link rel="icon" href="images/favicon.png"> -->
     <!-- INJECT HEAD -->
     
   </head>
 
-  <body class="non-selectable">
+  <body class="non-selectable" style="display:none">
     <nav class="navbar navbar-default main-top-navbar">
       <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
-            <span class="sr-only">Toggle navigation</span>
+            <span class="sr-only" x-l10n>Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href>pasco</a>
+          <a class="navbar-brand" href x-l10n>pasco</a>
         </div>
         
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li><a href="edit-config.html">Configure</a></li>
-            <li class="separate-after"><a href="help.html">Help</a></li>
-            <li><button class="btn btn-default" id="edit-mode-btn" type="button">Edit Mode</button></li>
-            <li><button class="btn btn-success hide" id="edit-mode-save-btn" type="button">Save</button></li>
-            <li><button class="btn btn-default hide" id="edit-mode-cancel-btn" type="button">Cancel</button></li>
-            <li class="on-debug-mode"><button class="btn btn-default" id="debug-clear-storage" type="button">Clear Storage</button></li>
+            <li><a href="edit-config.html" x-l10n>Configure</a></li>
+            <li class="separate-after"><a href="help.html" x-l10n>Help</a></li>
+            <li><button class="btn btn-default" id="edit-mode-btn" type="button" x-l10n>Edit Mode</button></li>
+            <li><button class="btn btn-success hide" id="edit-mode-save-btn" type="button" x-l10n>Save</button></li>
+            <li><button class="btn btn-default hide" id="edit-mode-cancel-btn" type="button" x-l10n>Cancel</button></li>
+            <li class="on-debug-mode"><button class="btn btn-default" id="debug-clear-storage" type="button" x-l10n>Clear Storage</button></li>
           </ul>
 
         </div><!-- /.navbar-collapse -->
@@ -76,36 +76,36 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel">Setting</h4>
+            <h4 class="modal-title" id="myModalLabel" x-l10n>Setting</h4>
           </div>
           <div class="modal-body">
             <div class="row">
               <div class="col-sm-6">
-                <h3>Record Audio</h3>
-                <p>
-                  Select target for recording and by holding record button
+                <h3 x-l10n>Record Audio</h3>
+                <p x-l10n="record_btn_desc">
+                  Select target for recording and by holding record button 
                   record starts. By releasing it the record will be added.
                 </p>
                 <div class="form-group">
-                  <label for="node-record-for">For</label>
+                  <label for="node-record-for" x-l10n>For</label>
                   <select id="node-record-for" class="form-control">
-                    <option value="both">Both</option>
-                    <option value="main">Main</option>
-                    <option value="cue">Cue</option>
+                    <option value="both" x-l10n>Both</option>
+                    <option value="main" x-l10n>Main</option>
+                    <option value="cue" x-l10n>Cue</option>
                   </select>
                 </div>
                 <div class="node-record-btn-wrap">
-                  <button id="node-record-btn" class="btn btn-danger" type="button">Record</button>
+                  <button id="node-record-btn" class="btn btn-danger" type="button" x-l10n>Record</button>
                   <span class="record-amp-circle"></span>
                 </div>
               </div>
               <div class="col-sm-6">
-                <h3>Audio List</h3>
+                <h3 x-l10n>Audio List</h3>
                 <div class="table-responsive">
                   <table class="table table-hover">
                     <thead>
                       <tr>
-                        <th>Name</th>
+                        <th x-l10n>Name</th>
                         <th>#</th>
                         <th>#</th>
                       </tr>
@@ -125,7 +125,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal" x-l10n>Close</button>
             <!--
             <button type="button" class="btn btn-primary">Apply</button>
             -->
@@ -307,6 +307,7 @@
     <!-- MAIN SCRIPTS -->
     <script src="bower_components/underscore/underscore-min.js"></script>
     <script src="bower_components/showdown/dist/showdown.min.js"></script>
+    <script src="js/lib/translate.js"></script>
     <script src="js/lib/sanitize-html.js"></script>
     <script src="js/NativeAccessApi.js"></script>
     <script src="js/core.js"></script>

@@ -9,7 +9,7 @@
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, viewport-fit=cover">
 
-    <title>Auditory Scanning</title>
+    <title x-l10n="config_title">PASCO - Config</title>
 
     <link rel="stylesheet" href="css/edit-config.css">
     <!-- <link rel="icon" href="images/favicon.png"> -->
@@ -19,28 +19,29 @@
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <!-- bootstrap includes end -->
+
     <!-- INJECT HEAD -->
     
   </head>
 
-  <body>
+  <body style="display:none">
     <nav class="navbar navbar-default main-top-navbar">
       <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
-            <span class="sr-only">Toggle navigation</span>
+            <span class="sr-only" x-l10n>Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href>pasco Configuration</a>
+          <a class="navbar-brand" href><span x-l10n>pasco</span> <span x-l10n>Configuration</span></a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li><a href="index.html">Start</a></li>
+            <li><a href="index.html" x-l10n>Start</a></li>
           </ul>
         </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->
@@ -49,54 +50,54 @@
       <form name="edit-config">
       <div class="row">
         <div class="col-xs-12">
-          <h3>On-Screen Navigation</h3>
+          <h3 x-l10n>On-Screen Navigation</h3>
           <div class="row m-b-10">
             <div class="col-xs-12">
-              <label class="radio-inline"><input type="radio" name="onscreen_navigation" value="auto">Auto</label>
-              <label class="radio-inline"><input type="radio" name="onscreen_navigation" value="enable">Enable</label>
-              <label class="radio-inline"><input type="radio" name="onscreen_navigation" value="disable">Disable</label>
+              <label class="radio-inline"><input type="radio" name="onscreen_navigation" value="auto"><span x-l10n>Auto</span></label>
+              <label class="radio-inline"><input type="radio" name="onscreen_navigation" value="enable"><span x-l10n>Enable</span></label>
+              <label class="radio-inline"><input type="radio" name="onscreen_navigation" value="disable"><span x-l10n>Disable</span></label>
             </div>
           </div>
         </div>
       </div>
       <div class="row">
         <div class="col-xs-12">
-          <h3>Switch Access</h3>
+          <h3 x-l10n>Switch Access</h3>
           <div class="row m-b-10">
             <div class="col-xs-12">
-              <label class="radio-inline"><input type="radio" name="mode" value="auto" data-inp-collapse-toggle="#auto_mode_params">Automatic-Scanning</label>
-              <label class="radio-inline"><input type="radio" name="mode" value="switch" data-inp-collapse-toggle="#switch_mode_params">Manual</label>
+              <label class="radio-inline"><input type="radio" name="mode" value="auto" data-inp-collapse-toggle="#auto_mode_params"><span x-l10n>Automatic-Scanning</span></label>
+              <label class="radio-inline"><input type="radio" name="mode" value="switch" data-inp-collapse-toggle="#switch_mode_params"><span x-l10n>Manual</span></label>
             </div>
           </div>
           <div class="row collapsable collapse" id="auto_mode_params">
             <div class="col-sm-3">
               <div class="form-group">
-                <label for="auto_next_loops">Loops</label>
+                <label for="auto_next_loops" x-l10n>Loops</label>
                 <input type="number" id="auto_next_loops" name="auto_next_loops" class="form-control" value="10" data-validator="number">
               </div>
             </div>
             <div class="col-sm-1"></div>
             <div class="col-sm-4">
               <div class="form-group">
-                <label for="auto_next_atfirst_delay">Delay at first item (ms)</label>
+                <label for="auto_next_atfirst_delay" x-l10n>Delay at first item (ms)</label>
                 <input type="number" id="auto_next_atfirst_delay" name="auto_next_atfirst_delay" class="form-control" value="10" data-validator="number">
               </div>
             </div>
             <div class="col-sm-4">
               <div class="form-group">
-                <label for="auto_next_delay">Auto-scanning delay (ms)</label>
+                <label for="auto_next_delay" x-l10n>Auto-scanning delay (ms)</label>
                 <input type="number" id="auto_next_delay" name="auto_next_delay" class="form-control" value="200" data-validator="number">
               </div>
             </div>
             <div class="col-sm-4">
               <div class="form-group">
-                <label>Switch Key to move forward</label>
+                <label x-l10n>Switch Key to move forward</label>
                 <div>
                   <label class="radio-inline">
-                    <input type="radio" name="_auto_forward_key" value="space"> Space
+                    <input type="radio" name="_auto_forward_key" value="space"> <span x-l10n="key_space">Space</span>
                   </label>
                   <label class="radio-inline">
-                    <input type="radio" name="_auto_forward_key" value="enter"> Enter
+                    <input type="radio" name="_auto_forward_key" value="enter"> <span x-l10n="enter_space">Enter</span>
                   </label>
                 </div>
               </div>
@@ -105,41 +106,41 @@
             <div class="col-sm-6">
               <div class="row m-b-10">
                 <div class="col-sm-9">
-                  <h4>First Time Run (Cue Voice)</h4>
+                  <h4 x-l10n>First Time Run (Cue Voice)</h4>
                 </div>
                 <div class="col-sm-3">
-                  <label class="m-t-10 m-b-10 checkbox-inline"><input type="checkbox" name="_cue_first_active" data-inp-collapse-toggle="#auditory-cue-first-run-params">On</label>
+                  <label class="m-t-10 m-b-10 checkbox-inline"><input type="checkbox" name="_cue_first_active" data-inp-collapse-toggle="#auditory-cue-first-run-params"><span x-l10n>On</span></label>
                 </div>
               </div>
               <div id="auditory-cue-first-run-params" class="row collapsable collapse">
                 <div class="col-sm-12" >
                   <div class="form-group">
-                    <label for="auto_next_first_run_delay">Auto-scanning delay (ms)</label>
+                    <label for="auto_next_first_run_delay" x-l10n>Auto-scanning delay (ms)</label>
                     <input type="number" id="auto_next_first_run_delay" name="auto_next_first_run_delay" class="form-control" value="0" data-validator="number">
                   </div>
                 </div>
                 <div class="col-sm-6">
                   <div class="form-group">
-                    <label for="_cue_first_run_voice_id">Voice</label>
+                    <label for="_cue_first_run_voice_id" x-l10n>Voice</label>
                     <select class="form-control" id="_cue_voice_id" name="_cue_first_run_voice_id">
                     </select>
                   </div>
                 </div>
                 <div class="col-sm-6">
                   <div class="form-group">
-                    <label for="auditory_cue_first_run_voice_options.volume">Volume</label>
+                    <label for="auditory_cue_first_run_voice_options.volume" x-l10n>Volume</label>
                     <input class="form-control" type="range" step="any" min="0" max="1" id="auditory_cue_first_run_voice_options.volume" name="auditory_cue_first_run_voice_options.volume" data-validator="number">
                   </div>
                 </div>
                 <div class="col-sm-6">
                   <div class="form-group">
-                    <label for="auditory_cue_first_run_voice_options.pitch">Pitch</label>
+                    <label for="auditory_cue_first_run_voice_options.pitch" x-l10n>Pitch</label>
                     <input class="form-control" type="number" step="any" id="auditory_cue_first_run_voice_options.pitch" name="auditory_cue_first_run_voice_options.pitch" data-validator="number">
                   </div>
                 </div>
                 <div class="col-sm-6">
                   <div class="form-group">
-                    <label for="auditory_cue_first_run_voice_options.rateMul">Rate</label>
+                    <label for="auditory_cue_first_run_voice_options.rateMul" x-l10n>Rate</label>
                     <input class="form-control" type="number" step="any" id="auditory_cue_first_run_voice_options.rateMul" name="auditory_cue_first_run_voice_options.rateMul" data-validator="number">
                   </div>
                 </div>
@@ -148,11 +149,11 @@
           </div>
           <div class="row collaspable collapse" id="switch_mode_params">
             <div class="col-sm-12">
-              <p>Hitting 1 will go to previous and 2 to next. Also W/S, Up/Down arrow will work.</p>
+              <p x-l10n>Hitting 1 will go to previous and 2 to next. Also W/S, Up/Down arrow will work.</p>
               </div>
             <div class="col-sm-4">
               <div class="form-group">
-                <label>Switch key to move forward</label>
+                <label x-l10n>Switch key to move forward</label>
                 <div>
                   <label class="radio-inline">
                     <input type="radio" name="_switch_forward_key" value="space"> Space
@@ -168,14 +169,14 @@
           <div class="row">
             <div class="col-sm-4">
               <div class="form-group">
-                <label for="ignore_second_hits_time">Ignore second hits(ms)</label>
+                <label for="ignore_second_hits_time" x-l10n>Ignore second hits(ms)</label>
                 <input type="number" id="ignore_second_hits_time" name="ignore_second_hits_time" class="form-control" value="100" data-validator="number">
               </div>
             </div>
             <div class="col-sm-1"></div>
             <div class="col-sm-4">
               <div class="form-group">
-                <label for="ignore_key_release_time">Ignore key presses under n ms</label>
+                <label for="ignore_key_release_time" x-l10n>Ignore key presses under n ms</label>
                 <input class="form-control" type="number" id="ignore_key_release_time" name="ignore_key_release_time" value="0" data-validator="number">
               </div>
             </div>
@@ -185,63 +186,63 @@
       <hr class="tinyhr"/>
       <div class="row">
         <div class="col-xs-12">
-          <h3>Speech</h3>
+          <h3 x-l10n>Speech</h3>
         </div>
         <div class="col-sm-6">
-          <h4>Cue Voice</h4>
+          <h4 x-l10n>Cue Voice</h4>
           <div class="row">
             <div class="col-sm-6">
               <div class="form-group">
-                <label for="_cue_voice_id">Voice</label>
+                <label for="_cue_voice_id" x-l10n>Voice</label>
                 <select class="form-control" id="_cue_voice_id" name="_cue_voice_id">
                 </select>
               </div>
             </div>
             <div class="col-sm-6">
               <div class="form-group">
-                <label for="auditory_cue_voice_options.volume">Volume</label>
+                <label for="auditory_cue_voice_options.volume" x-l10n>Volume</label>
                 <input class="form-control" type="range" step="any" min="0" max="1" id="auditory_cue_voice_options.volume" name="auditory_cue_voice_options.volume" data-validator="number">
               </div>
             </div>
             <div class="col-sm-6">
               <div class="form-group">
-                <label for="auditory_cue_voice_options.pitch">Pitch</label>
+                <label for="auditory_cue_voice_options.pitch" x-l10n>Pitch</label>
                 <input class="form-control" type="number" step="any" id="auditory_cue_voice_options.pitch" name="auditory_cue_voice_options.pitch" data-validator="number">
               </div>
             </div>
             <div class="col-sm-6">
               <div class="form-group">
-                <label for="auditory_cue_voice_options.rateMul">Rate</label>
+                <label for="auditory_cue_voice_options.rateMul" x-l10n>Rate</label>
                 <input class="form-control" type="number" step="any" id="auditory_cue_voice_options.rateMul" name="auditory_cue_voice_options.rateMul" data-validator="number">
               </div>
             </div>
           </div>
         </div>
         <div class="col-sm-6">
-          <h4>Main Voice</h4>
+          <h4 x-l10n>Main Voice</h4>
           <div class="row">
             <div class="col-sm-6">
               <div class="form-group">
-                <label for="_main_voice_id">Voice</label>
+                <label for="_main_voice_id" x-l10n>Voice</label>
                 <select class="form-control" id="_main_voice_id" name="_main_voice_id">
                 </select>
               </div>
             </div>
             <div class="col-sm-6">
               <div class="form-group">
-                <label for="auditory_main_voice_options.volume">Volume</label>
+                <label for="auditory_main_voice_options.volume" x-l10n>Volume</label>
                 <input class="form-control" type="range" step="any" min="0" max="1" id="auditory_main_voice_options.volume" name="auditory_main_voice_options.volume" data-validator="number">
               </div>
             </div>
             <div class="col-sm-6">
               <div class="form-group">
-                <label for="auditory_main_voice_options.pitch">Pitch</label>
+                <label for="auditory_main_voice_options.pitch" x-l10n>Pitch</label>
                 <input class="form-control" type="number" step="any" id="auditory_main_voice_options.pitch" name="auditory_main_voice_options.pitch" data-validator="number">
               </div>
             </div>
             <div class="col-sm-6">
               <div class="form-group">
-                <label for="auditory_main_voice_options.rateMul">Rate</label>
+                <label for="auditory_main_voice_options.rateMul" x-l10n>Rate</label>
                 <input class="form-control" type="number" step="any" id="auditory_main_voice_options.rateMul" name="auditory_main_voice_options.rateMul" data-validator="number">
               </div>
             </div>
@@ -250,21 +251,30 @@
       </div>
       <div class="row">
         <div class="col-xs-12">
-          <h3>Appearance</h3>
+          <h3 x-l10n>Appearance</h3>
           <div class="row">
             <div class="col-sm-4">
               <div class="form-group">
-                <label for="tree_content_size_percentage">Font Size (%)</label>
+                <label for="tree_content_size_percentage" x-l10n>Font Size (%)</label>
                 <input type="number" id="tree_content_size_percentage" name="tree_content_size_percentage" class="form-control" value="100" min="10" max="300" data-validator="number">
               </div>
             </div>
             <div class="col-sm-4">
               <div class="form-group">
-                <label for="theme">Theme</label>
+                <label for="theme" x-l10n>Theme</label>
                 <select class="form-control" id="theme" name="theme">
-                  <option value="default">Default</option>
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
+                  <option value="default" x-l10n>Default</option>
+                  <option value="light" x-l10n>Light</option>
+                  <option value="dark" x-l10n>Dark</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="form-group">
+                <label for="locale-select" x-l10n>Locale</label>
+                <select id="locale-select" name="locale" class="form-control">
+                  <option value="en-GB">English (UK)</option>
+                  <option value="ar">Arabic</option>
                 </select>
               </div>
             </div>
@@ -275,7 +285,7 @@
         <div class="col-xs-12 save-section">
           <div class="alert-hidden alert alert-success" role="alert"></div>
           <div class="alert-hidden alert alert-danger" role="alert"></div>
-          <button type="submit" class="btn btn-success">Save Config</button>
+          <button type="submit" class="btn btn-success" x-l10n>Save Config</button>
         </div>
       </div>
       </form>
@@ -283,20 +293,20 @@
       <div class="row">
         <div class="col-xs-12">
           <hr />
-          <h3>Language</h3>
+          <h3 x-l10n>Tree</h3>
           <div class="row">
             <div class="col-sm-5 col-md-4">
               <div class="form-group">
                 <select id="tree-default-select" class="form-control">
-                  <option value="">Choose a default content</option>
-                  <option value="Pragmatic_Phrases">Pragmatic Phrases</option>
-                  <option value="Spell_by_blocks">Spell by blocks</option>
-                  <option value="Spell_by_blocks_in_Frequency">Spell by blocks in Frequency</option>
+                  <option value="" x-l10n>Choose a default content</option>
+                  <option value="Pragmatic_Phrases" x-l10n>Pragmatic Phrases</option>
+                  <option value="Spell_by_blocks" x-l10n>Spell by blocks</option>
+                  <option value="Spell_by_blocks_in_Frequency" x-l10n>Spell by blocks in Frequency</option>
                 </select>
               </div>
             </div>
             <div class="col-sm-7 col-md-8">
-              <button id="tree-default-select-load-btn" type="button" class="btn btn-success">Load Default</button>
+              <button id="tree-default-select-load-btn" type="button" class="btn btn-success" x-l10n>Load Default</button>
             </div>
           </div>
           <div class="row m-t-10">
@@ -315,8 +325,8 @@
         <div class="col-xs-12 save-section">
           <div class="alert-hidden alert alert-success" role="alert"></div>
           <div class="alert-hidden alert alert-danger" role="alert"></div>
-          <button id="tree-revert" type="button" class="btn btn-default">Revert</button>
-          <button type="submit" class="btn btn-success">Save Language</button>
+          <button id="tree-revert" type="button" class="btn btn-default" x-l10n>Revert</button>
+          <button type="submit" class="btn btn-success" x-l10n>Save Tree</button>
         </div>
       </div>
       </form>
@@ -325,6 +335,7 @@
     <!-- MAIN SCRIPTS -->
     <script src="bower_components/underscore/underscore-min.js"></script>
     <script src="bower_components/showdown/dist/showdown.min.js"></script>
+    <script src="js/lib/translate.js"></script>
     <script src="js/lib/sanitize-html.js"></script>
     <script src="js/NativeAccessApi.js"></script>
     <script src="js/core.js"></script>

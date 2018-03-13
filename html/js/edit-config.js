@@ -1,4 +1,4 @@
-var config_fn, tree_fn, lang = 'en', default_lang = 'en';
+var config_fn, tree_fn;
 var speaku, config, config_data, orig_tree_data, tree_data, voices, napi;
 // start
 Promise.all([
@@ -23,14 +23,29 @@ Promise.all([
   })
   // load
   .then(function() {
+    return get_file_json(config_fn)
+      .then(function(_config) {
+        config = _config;
+        config_data = JSON.stringify(config);
+        _fix_config(config);
+      });
+  })
+  .then(function() {
     return Promise.all([
-      get_file_json(config_fn)
-        .then(function(_config) { config = _config;
-                                  config_data = JSON.stringify(config);
-                                  _fix_config(config); }),
-      get_file_data(tree_fn)
+      initl10n(config.locale||default_locale)
+        .then(function() {
+          domlocalize();
+        })
+        .catch(function(err) {
+          console.warn(err);
+        }),
+      get_file_data(config.tree||tree_fn)
         .then(function(_data) { tree_data = _data; orig_tree_data = _data; })
     ]);
+  })
+  .then(function() {
+    // display body
+    document.body.style.display = '';
   })
   .then(start)
   .catch(handle_error);
@@ -76,6 +91,15 @@ function start() {
       $inp.append(opt)
     });
   });
+  $('#locale-select').on('change', function() {
+    initl10n(this.value||default_locale)
+      .then(function() {
+        domlocalize();
+      })
+      .catch(function(err) {
+        console.warn(err);
+      });
+  });
   
   insert_config()
   insert_tree_data()
@@ -105,16 +129,17 @@ function start() {
     $('#tree-default-select-load-btn').prop('disabled', !value);
   }
   $('#tree-default-select-load-btn').on('click', function() {
+    var locale = config.locale || default_locale;
     var name = $('#tree-default-select').val();
     if(!name) {
       alert("Nothing selected!");
     } else {
-      read_file('trees/' + lang + '-' + name + '.md')
+      read_file('trees/' + locale + '-' + name + '.md')
         .then(change_tree)
         .catch(function(err) {
-          if(default_lang == lang)
+          if(default_locale == locale)
             throw err;
-          return read_file('trees/' + default_lang + '-' + name + '.md')
+          return read_file('trees/' + default_locale + '-' + name + '.md')
             .then(change_tree)
             .catch(function() { throw err; });
         })

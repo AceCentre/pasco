@@ -8,6 +8,7 @@ document.addEventListener('deviceready', function() {
 }, false);
 
 window.newEl = document.createElement.bind(document);
+window.default_locale = 'en-GB';
 window.default_config = 'config.json';
 window.default_tree = 'tree.md';
 window.audio_save_dir = 'cdvfile://localhost/persistent/audio';
@@ -63,6 +64,7 @@ function initialize_app() {
     }
     window.get_file_data = new_read
     window.set_file_data = new_write
+    return Promise.resolve();
   }
 }
 
@@ -171,6 +173,86 @@ function parse_dom_tree(el, continue_at, tree) {
     }
   }
   return tree;
+}
+
+function initl10n(locale) {
+  return updatel10n(locale, true);
+}
+
+function updatel10n(locale, firsttime) {
+  if(window.__locale_script && window.__locale_script.parentNode)
+    window.__locale_script.parentNode.removeChild(window.__locale_script);
+  return load_script('l10n/' + locale + '.js')
+    .then(function(script) {
+      return new Promise(function(resolve, reject) {
+        window.__locale_script = script;
+        var unresolved = false;
+        if(window.icu) {
+          if(icu.dictionary) {
+            _t.setTranslation(icu.dictionary);
+          }
+          document.body.classList[icu.rtl ? 'add' : 'remove']('rtl');
+          var elm = document.getElementById('bootstrap-rtl');
+          if(!elm && icu.rtl) {
+            var src = "bower_components/bootstrap-rtl/dist/css/bootstrap-rtl.css";
+            elm = document.createElement('link');
+            elm.setAttribute('href', src);
+            elm.setAttribute('rel', 'stylesheet');
+            elm.id = "bootstrap-rtl";
+            document.body.appendChild(elm);
+            unresolved = !!firsttime;
+            if(unresolved) {
+              elm.addEventListener('load', onresolve, false);
+              setTimeout(onresolve, 3000);
+            }
+          } else if(elm && !icu.rtl && elm.parentNode) {
+            elm.parentNode.removeChild(elm);
+          }
+        }
+        if(!unresolved) {
+          resolve();
+        }
+        function onresolve() {
+          if(unresolved) {
+            resolve();
+            unresolved = false;
+          }
+        }
+      });
+    });
+}
+
+function domlocalize() {
+  var elms = document.querySelectorAll('[x-l10n]');
+  for(var i = 0, len = elms.length; i < len; i++) {
+    var elm = elms[i],
+        l10n = elm.getAttribute('x-l10n'),
+        l10n_cached = elm.getAttribute('x--l10n'),
+        l10n_input = l10n_cached||l10n||elm.textContent.trim(),
+        localized = _t(l10n_input);
+    if(!l10n || localized != l10n) {
+      elm.textContent = localized;
+      if(!l10n && !l10n_cached)
+        elm.setAttribute('x--l10n', l10n_input);
+    }
+  }
+}
+
+function load_script(fn) {
+  return new Promise(function(resolve, reject) {
+    var s = newEl('script');
+    s.addEventListener('load', function() {
+      resolve(s);
+    }, false);
+    s.addEventListener('error', function() {
+      reject(new Error('Could not load script, ' + fn));
+    }, false);
+    s.async = true;
+    s.defer = true;
+    s.src = fn;
+    s.type = 'text/javascript';
+    document.body.appendChild(s);
+  });
 }
 
 function handle_error_checkpoint() {
@@ -655,8 +737,10 @@ proto.play_audio = function(src, opts) {
       // stopped
       return resolve();
     }
-    if(opts.volume)
-      audio.setAttribute('volume', opts.volume+'');
+    if(opts.volume) {
+      audio.setAttribute('volume', opts.volume.toFixed(2)+'');
+      audio.volume = opts.volume;
+    }
     audio.setAttribute('preload', 'auto')
     var src_el = newEl('source');
     src_el.setAttribute('src', src)

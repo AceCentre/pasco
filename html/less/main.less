@@ -73,6 +73,15 @@ html.ios {
   bottom: 0px;
   overflow: hidden;
 }
+body.rtl #tree {
+  left: initial;
+  right: 0px;
+  transition: right 0.3s;
+  ul.children {
+    left: initial;
+    right: 100%;
+  }
+}
 #tree {
   position: absolute;
   z-index: 0;
