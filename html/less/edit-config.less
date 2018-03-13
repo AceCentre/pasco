@@ -19,3 +19,16 @@ input[type=range].form-control:active {
   box-shadow: none;
   webkit-box-shadow: none;
 }
+
+.config-alert-wrp {
+  position: fixed;
+  right: 15px;
+  top: 15px;
+  max-width: 80%;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.5s;
+  &.visible {
+    opacity: 1;
+  }
+}

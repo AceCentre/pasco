@@ -92,9 +92,11 @@ function start() {
     });
   });
   $('#locale-select').on('change', function() {
-    initl10n(this.value||default_locale)
+    var locale = this.value||default_locale;
+    initl10n(locale)
       .then(function() {
         domlocalize();
+        config.locale = locale;
       })
       .catch(function(err) {
         console.warn(err);
@@ -119,6 +121,7 @@ function start() {
     $('form[name=edit-tree] [name=tree-input]').val(tree_data);
   });
   
+  config_auto_save_init();
   $('form[name=edit-config]').on('submit', save_config)
   $('form[name=edit-tree]').on('submit', save_tree)
   
@@ -223,7 +226,8 @@ function insert_tree_data() {
 }
 
 function save_config(evt) {
-  evt.preventDefault();
+  if(evt)
+    evt.preventDefault();
   var $form = $('form[name=edit-config]').first()
   var _config = JSON.parse(config_data);
   // validate & apply input
@@ -294,26 +298,66 @@ function save_config(evt) {
       delete _config._auditory_cue_first_run_voice_options;
     }
   } catch(err) {
-    $form.find('.save-section .alert-danger')
-      .html(error_to_html(err))
-      .toggleClass('alert-hidden', false);
+    update_config_alert(false, err);
     return;
   }
   // then save
   // console.log(_config)
-  $form.find('.save-section .alert').html('').toggleClass('alert-hidden', true)
   set_file_data(config_fn, JSON.stringify(_config, null, "  "))
     .then(function() {
       config = _config
-      $form.find('.save-section .alert-success')
-        .html('<strong>Success!</strong>')
-        .toggleClass('alert-hidden', false);
+      update_config_alert(true);
     })
     .catch(function(err) {
-      $form.find('.save-section .alert-danger')
-        .html(error_to_html(err))
-        .toggleClass('alert-hidden', false);
-    })
+      update_config_alert(false, err);
+    });
+}
+
+function update_config_alert(success, err) {
+  var $form = $('form[name=edit-config]').first();
+  if($form[0].__config_alert_timeout)
+    clearTimeout($form[0].__config_alert_timeout);
+  $form.find('.config-success-alert').toggleClass('visible', success);
+  $form.find('.config-danger-alert').toggleClass('visible', !success);
+  if(success) {
+    $form.find('.save-section .alert-success')
+      .html('<strong>Success!</strong>')
+      .toggleClass('alert-hidden', false);
+  } else {
+    $form.find('.save-section .alert-danger')
+      .html(error_to_html(err))
+      .toggleClass('alert-hidden', false);
+  }
+  $form[0].__config_alert_timeout = setTimeout(function() {
+    $form.find('.config-success-alert').toggleClass('visible', false);
+    $form.find('.config-danger-alert').toggleClass('visible', false);
+    $form[0].__config_alert_timeout = setTimeout(function() {
+      $form.find('.save-section .alert-success').html('')
+        .toggleClass('alert-hidden', true);
+      $form.find('.save-section .alert-danger').html('')
+        .toggleClass('alert-hidden', true);
+      delete $form[0].__config_alert_timeout;
+    }, 510);
+  }, 3000);
+}
+
+function config_auto_save_init() {
+  var $form = $('form[name=edit-config]').first()
+  if($form[0].__autosave_timeout)
+    $form[0].__autosave_timeout
+  $form.on('input', 'input', onchange);
+  $form.on('change', 'select,input[type=checkbox],input[type=radio]', onchange);
+  function onchange() {
+    start_countdown();
+  }
+  function start_countdown() {
+    if($form[0].__autosave_timeout)
+      clearTimeout($form[0].__autosave_timeout);
+    $form[0].__autosave_timeout = setTimeout(function() {
+      $form.find('button[type=submit]').first().click();
+      delete $form[0].__autosave_timeout;
+    }, 2000);
+  }
 }
 
 function save_tree(evt) {
