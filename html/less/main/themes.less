@@ -4,6 +4,10 @@
 @theme-light-secondary: #D6602B;
 @theme-light-hint: #F0C000;
 
+@theme-yb-bg: #FFFF00;
+@theme-yb-primary: #999999;
+@theme-yb-secondary: #000000;
+@theme-yb-hint: #AAAAAA;
 
 @theme-dark-bg: #12003D;
 @theme-dark-primary: #FFE400;
@@ -21,6 +25,21 @@ body.theme-light {
   }
   .selected {
     color: @theme-light-hint;
+  }
+}
+
+body.theme-yb {
+  background-color: @theme-yb-bg;
+  color: @theme-yb-primary;
+  font-weight: bold;
+  #tree ul.children {
+    background-color: @theme-yb-bg;
+  }
+  .highlight {
+    color: @theme-yb-secondary;
+  }
+  .selected {
+    color: @theme-yb-hint;
   }
 }
 
