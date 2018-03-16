@@ -68,7 +68,7 @@ function start() {
       voices_by_id = _.object(_.map(voices, function(voice) { return [voice.id,voice] }));
   _.each(_voice_id_links, function(alink) {
     var $wrp = $(alink[2]),
-        text = "Auditory scanner at your service";
+        text = "Quiet people have the loudest minds. Pasco at your service.";
     $wrp.find('.play-btn').click(function() {
       $wrp.find('.play-btn').addClass('hide');
       $wrp.find('.stop-btn').removeClass('hide');
