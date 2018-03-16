@@ -271,15 +271,57 @@ body.debug-mode .on-debug-mode {
   &.navbtns-enable {
     display: block;
   }
+  .edit-bound {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: 3px dotted darkgrey;
+    .reset-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .resize-tr-hdl, .resize-tl-hdl,
+    .resize-br-hdl, .resize-bl-hdl {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: white;
+      border: 2px solid black;
+      z-index: 2;
+      cursor: pointer;
+    }
+    .resize-tr-hdl {
+      right: -5px;
+      top: -5px;
+    }
+    .resize-tl-hdl {
+      left: -5px;
+      top: -5px;
+    }
+    .resize-br-hdl {
+      right: -5px;
+      bottom: -5px;
+    }
+    .resize-bl-hdl {
+      left: -5px;
+      bottom: -5px;
+    }
+  }
 }
 #navbtns {
   width: auto;
   height: auto;
-  cursor: pointer;
   max-width: 200px;
   max-height: 200px;
   max-width: 40vw;
   max-height: 40vh;
+  #nav-leftbtn, #nav-topbtn, #nav-rightbtn, #nav-bottombtn {
+    cursor: pointer;
+  }
   @media (max-width: 767px) {
     & {
       max-width: 150px;
@@ -291,6 +333,7 @@ body.debug-mode .on-debug-mode {
   .main-stroke-outline {
     stroke: #606060 !important;
     stroke-width: 20 !important;
+    cursor: grab;
   }
   .stroke-outline {
     stroke: #606060 !important;
@@ -337,3 +380,4 @@ body.debug-mode .on-debug-mode {
     line-height: 1.3;
   }
 }
+

@@ -3,18 +3,19 @@
 * Node
 * Bower
 
-# Install and Test (Web)
-
-
-Run the following
+# Install requirements
 
 * npm install
 * bower install
+
+# Install and Test (Web)
+
+Run the following
+
 * npm run dev
 
 # To build cordova version
 
-* bower install
 * npm run cordova-dist
 * cd cordova
 * cordova platform add ios
@@ -24,7 +25,6 @@ Run the following
 # Config
 
 configuration file is at `html/config.json`. modes are `auto` and `switch`.
-
 
 # Keyboard actions
 
