@@ -99,8 +99,7 @@ document.addEventListener('touchmove', function(evt) {
 
 /* execution code start */
 
-var _alt_voice_rate_by_name = { 'default': 1.0, 'max': 2.0, 'min': 0.5 },
-    _modes = ['auto', 'switch'],
+var _modes = ['auto', 'switch'],
     _all_delegates = {
       "tree_go_in": _tree_go_in, "tree_go_out": _tree_go_out,
       "tree_go_previous": _tree_go_previous, "tree_go_next": _tree_go_next,

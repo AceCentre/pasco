@@ -67,19 +67,40 @@ function start() {
   var $form = $('form[name=edit-config]').first(),
       voices_by_id = _.object(_.map(voices, function(voice) { return [voice.id,voice] }));
   _.each(_voice_id_links, function(alink) {
-    var $inp = $form.find('select[name='+alink[1]+']')
-    $inp.on('change', function() {
-      var text;
-      if(this.value in voices_by_id) {
-        text = voices_by_id[this.value].label
-      } else {
-        text = "Default"
-      }
-      var opts = {};
-      if(this.value)
-        opts.voiceId = this.value
+    var $wrp = $(alink[2]),
+        text = "Auditory scanner at your service";
+    $wrp.find('.play-btn').click(function() {
+      $wrp.find('.play-btn').addClass('hide');
+      $wrp.find('.stop-btn').removeClass('hide');
+      var opts = {}, $inp;
+      $inp = $form.find('[name='+alink[1]+']');
+      if($inp.length > 0 && $inp.val())
+        opts.voiceId = $inp.val();
+      $inp = $form.find('[name="'+alink[0]+'.volume"]');
+      if($inp.length > 0 && parseFloat($inp.val()) >= 0)
+        opts.volume = parseFloat($inp.val());
+      opts.rate = "default";
+      $inp = $form.find('[name="'+alink[0]+'.rateMul"]');
+      if($inp.length > 0 && parseFloat($inp.val()) > 0)
+        opts.rateMul = parseFloat($inp.val());
+      $inp = $form.find('[name="'+alink[0]+'.pitch"]');
+      if($inp.length > 0 && !isNaN(parseFloat($inp.val())))
+        opts.pitch = parseFloat($inp.val())
+      $inp = $form.find('[name="'+alink[0]+'.delay"]');
+      if($inp.length > 0  && parseFloat($inp.val()) >= 0)
+        opts.delay = parseFloat($inp.val());
       speaku.simple_speak(text, opts)
-    })
+        .then(function(){
+          $wrp.find('.play-btn').removeClass('hide');
+          $wrp.find('.stop-btn').addClass('hide');
+        });
+    });
+    $wrp.find('.stop-btn').click(function() {
+      $wrp.find('.play-btn').removeClass('hide');
+      $wrp.find('.stop-btn').addClass('hide');
+      speaku.stop_speaking();
+    });
+    var $inp = $form.find('[name='+alink[1]+']');
     var opt = newEl('option')
     opt.value = ''
     opt.textContent = 'Default'
@@ -165,9 +186,9 @@ var config_validators = {
   'number': validate_number
 };
 var _voice_id_links = [
-  [ 'auditory_main_voice_options', '_main_voice_id' ],
-  [ 'auditory_cue_voice_options', '_cue_voice_id' ],
-  [ 'auditory_cue_first_run_voice_options', '_cue_first_run_voice_id' ],
+  [ 'auditory_main_voice_options', '_main_voice_id', '#auditory-main-playback-wrp' ],
+  [ 'auditory_cue_voice_options', '_cue_voice_id', '#auditory-cue-playback-wrp' ],
+  [ 'auditory_cue_first_run_voice_options', '_cue_first_run_voice_id', '#auditory-cue-first-run-playback-wrp' ],
 ]; 
 
 function insert_config() {
@@ -282,7 +303,7 @@ function save_config(evt) {
       _config.switch_keys = Object.assign((_config.switch_keys || {}), keys);
     _.each(_voice_id_links, function(alink) {
       var propname = (speaku.is_native ? '' : 'alt_') + 'voiceId',
-          str = $form.find('[name='+alink[1]+']').val()
+          str = $form.find('[name='+alink[1]+']').val();
       if(!_config[alink[0]])
         _config[alink[0]] = {}
       if(str)

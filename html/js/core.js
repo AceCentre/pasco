@@ -553,6 +553,8 @@ proto.simple_speak = function(speech, opts) {
     });
 }
 
+window._alt_voice_rate_by_name = { 'default': 1.0, 'max': 2.0, 'min': 0.5 };
+
 proto.start_speaking = function(speech, opts) {
   if(this._audio_tag) {
     // prevent multiple audio running at same time
@@ -797,64 +799,73 @@ document.addEventListener('click', function(evt) {
 }, false);
 
 document.addEventListener('DOMContentLoaded', update_collapsables, false);
-document.addEventListener('resize', update_collapsables, false);
+window.addEventListener('resize', set_needs_update_collapsables, false);
+
+function set_needs_update_collapsables() {
+  if(window._collapsable_timeout)
+    clearTimeout(window._collapsable_timeout);
+  window._collapsable_timeout = setTimeout(function() {
+    delete window._collapsable_timeout;
+    update_collapsables();
+  }, 200);
+}
 
 function update_collapsables() {
-  var elms = document.querySelectorAll('.collasable');
+  var elms = document.querySelectorAll('.collapsable');
   for(var i = 0, len = elms.length; i < len; i++) {
     var elm = elms[i];
-    if(elm.classList.contains('collapse')) {
+    if(!elm.classList.contains('collapse')) {
       update_collapsable(elm);
     }
   }
 }
 
 function update_collapsable(elm) {
+  var tmp = elm;
+  var set_height_queue = [];
+  while(tmp != null && tmp.nodeType == document.ELEMENT_NODE) {
+    if(tmp.classList.contains('collapsable')) {
+      set_height_queue.push(update_collapsable_subrout(tmp));
+    }
+    tmp = tmp.parentNode;
+  }
+  for(var i = 0, len = set_height_queue.length; i < len; i++)
+    set_height_queue[i]();
+}
+
+function update_collapsable_subrout(elm) {
+  if(elm._collapsable_timeout != null)
+    clearTimeout(elm._collapsable_timeout);
   var pre_height = elm.offsetHeight;
-  if(pre_height > 0) {
-    elm.style.height = '';
-    var height = elm.offsetHeight;
-    console.log(elm, pre_height, height);
+  elm.style.height = '';
+  var height = elm.offsetHeight;
+  return function() {
     elm.style.height = pre_height + 'px';
-    if(height > 0 && height != pre_height) {
+    if(height != pre_height) {
       elm._collapsable_timeout = setTimeout(function() {
         elm.style.height = height + 'px';
+        delete elm._collapsable_timeout;
       }, 10);
     }
-  }
+  };
 }
 
 function collapsable_toggle(toggle_el, toggle) {
   var contains_collapse = toggle_el.classList.contains('collapse');
   toggle = toggle == null ? !contains_collapse : toggle
+  if(toggle_el._collapsable_timeout != null)
+    clearTimeout(toggle_el._collapsable_timeout);
   if(toggle && contains_collapse) {
-    if(toggle_el._collapsable_timeout != null)
-      clearTimeout(toggle_el._collapsable_timeout);
     toggle_el.classList.remove('collapse')
-    toggle_el.style.height = '';
-    update_parents();
-    var height = toggle_el.offsetHeight;
-    if(height > 0) {
-      toggle_el.style.height = '0px';
-      toggle_el._collapsable_timeout = setTimeout(function() {
-        toggle_el.style.height = height + 'px';
-      }, 10);
-    }
+    update_collapsable(toggle_el);
   } else if(!toggle && !contains_collapse) {
-    if(toggle_el._collapsable_timeout != null)
-      clearTimeout(toggle_el._collapsable_timeout);
     toggle_el.style.display = 'none';
-    update_parents();
+    if(toggle_el.parentNode)
+      update_collapsable(toggle_el.parentNode);
     toggle_el.style.display = '';
-    toggle_el.classList.add('collapse')
-  }
-  function update_parents() {
-    var parentNode = toggle_el.parentNode;
-    while(parentNode != null && parentNode.nodeType == document.ELEMENT_NODE) {
-      if(parentNode.classList.contains('collapsable')) {
-        update_collapsable(parentNode);
-      }
-      parentNode = parentNode.parentNode;
-    }
+    toggle_el._collapsable_timeout = setTimeout(function() {
+      toggle_el.classList.add('collapse')
+      delete toggle_el._collapsable_timeout;
+    }, 10);
   }
 }
