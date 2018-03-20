@@ -283,32 +283,45 @@ body.debug-mode .on-debug-mode {
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+      @media (max-width: 450px), (max-height: 450px) {
+        padding: 3px 6px;
+        font-size: 90%;
+      }
     }
-    .resize-tr-hdl, .resize-tl-hdl,
-    .resize-br-hdl, .resize-bl-hdl {
-      position: absolute;
+    .resize-tr-hdl .dot, .resize-tl-hdl .dot,
+    .resize-br-hdl .dot, .resize-bl-hdl .dot {
+      display: block;
       width: 10px;
       height: 10px;
       background-color: white;
       border: 2px solid black;
+    }
+    .resize-tr-hdl, .resize-tl-hdl,
+    .resize-br-hdl, .resize-bl-hdl {
+      position: absolute;
       z-index: 2;
       cursor: pointer;
+      padding: 15px;  
     }
     .resize-tr-hdl {
-      right: -5px;
-      top: -5px;
+      right: 0px;
+      top: 0px;
+      transform: translate(50%, -50%);
     }
     .resize-tl-hdl {
-      left: -5px;
-      top: -5px;
+      left: 0px;
+      top: 0px;
+      transform: translate(-50%, -50%);
     }
     .resize-br-hdl {
-      right: -5px;
-      bottom: -5px;
+      right: 0px;
+      bottom: 0px;
+      transform: translate(50%, 50%);
     }
     .resize-bl-hdl {
-      left: -5px;
-      bottom: -5px;
+      left: 0px;
+      bottom: 0px;
+      transform: translate(-50%, -50%);
     }
   }
 }

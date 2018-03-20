@@ -115,7 +115,7 @@
     <plugin name="cordova-plugin-media" spec="^3.0.1">
         <variable name="MICROPHONE_USAGE_DESCRIPTION" value="pacso records voice for future playback" />
     </plugin>
-    <plugin name="audscan-cordova-plugin" spec="https://github.com/hosseinamin/audscan-cordova-plugin.git" />
     <plugin name="cordova-plugin-browsersync" spec="^1.1.0" />
+    <plugin name="audscan-cordova-plugin" spec="https://github.com/hosseinamin/audscan-cordova-plugin.git" />
     <engine name="ios" spec="^4.5.4" />
 </widget>

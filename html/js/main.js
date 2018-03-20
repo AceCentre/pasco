@@ -122,8 +122,7 @@ function navbtns_init() {
       } else {
         ontouchcancel();
       }
-      var has_edit = !navbtns_wrp.querySelector('.edit-bound').classList.contains('hide');
-      navbtns_wrp.querySelector('.edit-bound').classList[has_edit?'add':'remove']('hide');
+      toggle_edit();
     } else {
       delete cache.down_timeout;
     }
@@ -256,18 +255,37 @@ function navbtns_init() {
     navbtns_set_position(navbtns_wrp, pos);
     return pos;
   }
+  var toggle_edit;
   function resizable_init() {
     // resize section
     var edit_wrp = navbtns_wrp.querySelector('.edit-bound'),
         reset_btn = navbtns_wrp.querySelector('.reset-btn'),
         _cache;
+    toggle_edit = function(toggle) {
+      if(toggle == null) {
+        toggle = !!navbtns_wrp.querySelector('.edit-bound').classList.contains('hide');
+      }
+      navbtns_wrp.querySelector('.edit-bound').classList[toggle?'remove':'add']('hide');
+      if(_cache) {
+        document.removeEventListener('mouseup', resize_onmouseup, true);
+        document.removeEventListener('mousemove', resize_onmousemove, true);
+        _cache = null;
+      }
+      if(toggle) {
+        document.addEventListener('mousedown', edit_onmousedown, false);
+        document.addEventListener('touchstart', edit_ontouchstart, false);
+      } else {
+        document.removeEventListener('mousedown', edit_onmousedown, false);
+        document.removeEventListener('touchstart', edit_ontouchstart, false);
+      }
+    }
     navbtns_wrp._scale_end = config.nav_scale;
     reset_btn.addEventListener('click', function(evt) {
       navbtns_wrp._scale_end = 1;
       reset_btn.disabled = true;
       navbtns_set_position(navbtns_wrp, null);
       navbtns_set_scale(navbtns_wrp, 1.0);
-      edit_wrp.classList.add('hide');
+      toggle_edit(false);
       save({
         nav_scale: 1,
         nav_pos: null
@@ -282,11 +300,16 @@ function navbtns_init() {
     reset_btn.addEventListener('touchstart', function(evt) {
       evt.stopPropagation();
     }, true);
-    edit_wrp.addEventListener('mousedown', function(evt) {
-      if(cache)
+    function edit_onmousedown(evt) {
+      if(_cache)
         return;
+      evt.preventDefault();
       _cache = {};
-      var foundclasses = _.filter(evt.target.classList, function(a){return a.indexOf('resize-') == 0});
+      var elm = evt.target;
+      if(elm.classList.contains('dot'))
+        elm = elm.parentNode;
+      var foundclasses = _.filter(elm.classList, function(a){return a.indexOf('resize-') == 0});
+      document.addEventListener('mouseup', resize_onmouseup, true);
       if(foundclasses.length > 0) {
         var dir = foundclasses[0].substr('resize-'.length, 2);
         var rect = navbtns_wrp.getBoundingClientRect();
@@ -294,18 +317,21 @@ function navbtns_init() {
         _cache.resize = true;
         _cache.dir = dir;
         _cache.move_pos = [evt.clientX, evt.clientY];
-        document.addEventListener('mouseup', resize_onmouseup, true);
         document.addEventListener('mousemove', resize_onmousemove, true);
       } else {
         _cache.down_timeout = setTimeout(edit_ondown_timeout, down_timeout_ms);
       }
-    }, false);
-    edit_wrp.addEventListener('touchstart', function(evt) {
-      if(cache)
+    }
+    function edit_ontouchstart(evt) {
+      if(_cache)
         return;
       if(evt.touches.length == 1) {
+        evt.preventDefault();
         _cache = {};
-        var foundclasses = _.filter(evt.touches[0].target.classList, function(a){return a.indexOf('resize-') == 0});
+        var elm = evt.touches[0].target;
+        if(elm.classList.contains('dot'))
+          elm = elm.parentNode;
+        var foundclasses = _.filter(elm.classList, function(a){return a.indexOf('resize-') == 0});
         if(foundclasses.length > 0) {
           var dir = foundclasses[0].substr('resize-'.length, 2);
           var rect = navbtns_wrp.getBoundingClientRect();
@@ -313,23 +339,22 @@ function navbtns_init() {
           _cache.resize = true;
           _cache.dir = dir;
           _cache.move_pos = [evt.touches[0].clientX, evt.touches[0].clientY];
-          document.addEventListener('touchstart', resize_ontouchstart, true);
+          document.addEventListener('touchend', resize_ontouchend, true);
           document.addEventListener('touchmove', resize_ontouchmove, true);
         } else {
           _cache.down_timeout = setTimeout(edit_ondown_timeout, down_timeout_ms);
         }
       }
-    }, false);
+    }
     function edit_ondown_timeout() {
       if(!_cache)
         return;
-      _cache = null;
-      var has_edit = !navbtns_wrp.querySelector('.edit-bound').classList.contains('hide');
-      navbtns_wrp.querySelector('.edit-bound').classList[has_edit?'add':'remove']('hide');
+      toggle_edit(false);
     }
     function resize_onmouseup(evt) {
       if(!_cache)
         return;
+      evt.preventDefault();
       if(_cache.down_timeout)
         clearTimeout(_cache.down_timeout);
       if(_cache.resize) {
@@ -342,6 +367,7 @@ function navbtns_init() {
     function resize_ontouchend(evt) {
       if(!_cache)
         return;
+      evt.preventDefault();
       if(_cache.down_timeout)
         clearTimeout(_cache.down_timeout);
       if(_cache.resize) {
@@ -353,12 +379,14 @@ function navbtns_init() {
     }
     function resize_onmousemove(evt) {
       if(_cache.resize) {
+        evt.preventDefault();
         var new_move = [evt.clientX, evt.clientY];
         resize_onmove(_cache.dir, new_move[0]-_cache.move_pos[0], new_move[1]-_cache.move_pos[1]);
       }
     }
     function resize_ontouchmove(evt) {
       if(_cache.resize) {
+        evt.preventDefault();
         var new_move = [evt.touches[0].clientX, evt.touches[0].clientY];
         resize_onmove(_cache.dir, new_move[0]-_cache.move_pos[0], new_move[1]-_cache.move_pos[1]);
       }
@@ -410,11 +438,28 @@ function navbtns_set_scale(elm, scale) {
   elm._scale = scale;
   var edit_elm = elm.querySelector('.edit-bound');
   if(edit_elm) {
-    var divs = edit_elm.querySelectorAll('div');
+    var divs = edit_elm.querySelectorAll(':scope > div');
     var iscale = 1/scale;
     _.each(divs, function(div) {
-      if(_.filter(div.classList, function(a){return a.indexOf('resize-')==0}).length>0) {
-        div.style.transform = 'scale('+iscale.toFixed(2)+')'; 
+      var foundclasses = _.filter(div.classList, function(a){return a.indexOf('resize-') == 0});
+      if(foundclasses.length>0) {
+        var dir = foundclasses[0].substr('resize-'.length, 2);
+        var move_str = '', scale_str = 'scale('+iscale.toFixed(2)+')';
+        switch(dir) {
+        case 'tr':
+          move_str = 'translate(50%, -50%)';
+          break;
+        case 'tl':
+          move_str = 'translate(-50%, -50%)';
+          break;
+        case 'br':
+          move_str = 'translate(50%, 50%)';
+          break;
+        case 'bl':
+          move_str = 'translate(-50%, 50%)';
+          break;
+        }
+        div.style.transform = move_str + ' ' + scale_str;
       }
     });
   }
