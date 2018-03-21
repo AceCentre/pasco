@@ -234,7 +234,7 @@
 
 ### I’ll spell it
 
-## I shall spell it (spell)<meta data-onselect-continue-in-branch data-onselect-continue-concat>
+## I shall spell it (spell)<meta data-spell-branch>
 
 ### a
 
@@ -288,7 +288,7 @@
 
 ### z
 
-### Finish <meta data-onselect-finish>
+### Finish <meta data-spell-finish>
 
 
 # Categories

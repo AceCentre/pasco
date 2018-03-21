@@ -1346,7 +1346,7 @@ function _move_sub_speak(text, voice_options) {
   }
 }
 
-function _move_sub_speak2(type) {
+function _move_sub_speak2(type, override_msg) {
   if(state.silent_mode) {
     return Promise.resolve();
   }
@@ -1362,6 +1362,10 @@ function _move_sub_speak2(type) {
     audio = this.meta['main-audio'] || this.meta['audio'];
     text = this.text;
     break;
+  }
+  if(typeof override_msg == 'string') {
+    text = override_msg;
+    audio = null;
   }
   if(audio) {
     return speaku.play_audio(audio, opts)
@@ -1386,9 +1390,10 @@ function _scan_move(node) {
     .then(_new_move_start.bind(null, moveobj));
 }
 
-function _notify_move(node, notifynode, delay) {
+function _notify_move(node, notifynode, opts) {
+  opts = opts||{};
   var moveobj = _new_move_init(node || notifynode)
-  moveobj.steps.push(_move_sub_speak2.bind(notifynode, 'main'))
+  moveobj.steps.push(_move_sub_speak2.bind(notifynode, 'main', opts.main_override_msg))
   if(node) {
     moveobj.steps.push(_before_new_move)
     moveobj.steps.push(function() {
@@ -1400,14 +1405,14 @@ function _notify_move(node, notifynode, delay) {
     });
     moveobj.steps.push(_move_sub_highlight.bind(node))
   }
-  if(delay > 0) {
+  if(opts.delay > 0) {
     moveobj.steps.push(function() {
       return new Promise(function(resolve) { setTimeout(resolve, delay) })
     })
   }
   moveobj.steps.push(un_can_move)
   if(node) {
-    moveobj.steps.push(_move_sub_speak2.bind(node, 'cue'))
+    moveobj.steps.push(_move_sub_speak2.bind(node, 'cue', opts.cue_override_msg))
   }
   speaku.stop_speaking();
   state.can_move = false;
@@ -1443,12 +1448,17 @@ function _get_current_node(position) {
 function _get_node_attr_inherits_full(name) {
   for(var i = state.positions.length - 1; i >= 0; i--) {
     var pos = state.positions[i];
-    if(pos.index == -1)
-      continue;
-    var node = pos.tree.nodes[pos.index],
-        val = node.meta[name]
-    if(val !== undefined && val != 'inherit') {
-      return [ val, pos, node ];
+    if(pos.index == -1) { // special case, at root
+      var node = pos.tree.nodes[pos.index],
+          val = node.meta[name]
+      if(val !== undefined && val != 'inherit') {
+        return [ val, pos, node ];
+      }
+    } else {
+      var val = pos.tree.meta[name];
+      if(val !== undefined && val != 'inherit') {
+        return [ val, pos, null ];
+      }
     }
   }
   return null;
@@ -1494,25 +1504,38 @@ function _tree_go_in() {
       return Promise.resolve();
     
     // explicit finish check
-    if(!_meta_true_check(atree.meta['onselect-finish'])) {
+    if(!_meta_true_check(atree.meta['spell-finish'])) {
       // continue check
-      tmp = _get_node_attr_inherits_full('onselect-continue-in-branch');
+      tmp = _get_node_attr_inherits_full('spell-branch');
       if(tmp && _meta_true_check(tmp[0])) {
         // continue it
         var idx = state.positions.indexOf(tmp[1]);
         state.positions = state.positions.slice(0, idx + 1);
-        state.positions.push({
-          tree: tmp[2],
-          index: 0
-        });
-        // concat check
-        tmp = _get_node_attr_inherits_full('onselect-continue-concat');
-        if(tmp) {
-          if(!tmp[2]._continue_concat)
-            tmp[2]._continue_concat = []
-          tmp[2]._continue_concat.push(atree.text)
+        if(tmp[2] != null) {
+          state.positions.push({
+            tree: tmp[2],
+            index: 0
+          });
         }
-        return _notify_move(_get_current_node(), atree);
+        // concat and spell each letter
+        var concat_letters = tmp[1]._concat_letters;
+        if(!concat_letters)
+          concat_letters = tmp[1]._concat_letters = []
+        var letter = atree.meta['spell-letter'] || atree.text;
+        concat_letters.push(letter)
+        var msg;
+        {
+          var idx = concat_letters.lastIndexOf(' ');
+          if(idx != -1) {
+            msg = concat_letters.slice(0, idx).join('') + ' ' +
+              concat_letters.slice(idx + 1).join(' ');
+          } else {
+            msg = concat_letters.join(' ');
+          }
+        }
+        return _notify_move(_get_current_node(), atree, {
+          main_override_msg: msg
+        });
       }
     }
     // finish it
@@ -1521,26 +1544,27 @@ function _tree_go_in() {
       .then(function() {
         if(atree.txt_dom_element)
           atree.txt_dom_element.classList.add('selected' || config.selected_class);
-
+        var speak_callable = _move_sub_speak2.bind(atree, 'main');
         // display continue-concat if any
         var popup = document.querySelector('#popup-message-wrp'),
             popup_mtext = popup ? popup.querySelector('.main-text') : null,
             popup_visible = false;
-        tmp = _get_node_attr_inherits_full('onselect-continue-concat');
-        if(tmp && tmp[2]._continue_concat) {
+        tmp = _get_node_attr_inherits_full('spell-branch');
+        if(tmp && tmp[1]._concat_letters) {
+          var msg = tmp[1]._concat_letters.join('');
+          speak_callable = _move_sub_speak2.bind(atree, 'main', msg);
           if(popup && popup_mtext) {
-            popup_mtext.textContent = tmp[2]._continue_concat.join(tmp[0])
+            popup_mtext.textContent = msg
             popup.classList.remove('hide');
             popup_visible = true; 
             setTimeout(function() {
               popup.classList.add('visible');
             }, 10);
           }
-          delete tmp[2]._continue_concat;
+          delete tmp[1]._concat_letters;
         }
         // speak it
-        return _move_sub_speak2
-          .call(atree, 'main')
+        return speak_callable()
           .then(function() {
             // start again, on demand
             function finish() {
@@ -1587,7 +1611,7 @@ function _tree_go_in() {
       index: 0
     });
     var delay = state.mode == 'auto' ? config.auto_next_atfirst_delay || 0 : 0;
-    return _notify_move(_get_current_node(), atree, delay);
+    return _notify_move(_get_current_node(), atree, { delay: delay });
   }
 }
 function _tree_move(node) {
@@ -1718,6 +1742,7 @@ function load_tree(tree_element, fn) {
       });
       tree_element.innerHTML = html_data;
       var tree = parse_dom_tree(tree_element);
+      console.log(tree);
       tree_element.innerHTML = ''; // clear all
       tree_mk_list_base(tree, tree_element); // re-create
       tree_element.tree_height = window.innerHeight;

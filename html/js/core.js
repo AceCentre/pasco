@@ -544,11 +544,12 @@ proto.init = function() {
 }
 
 proto.simple_speak = function(speech, opts) {
-  return speaku.start_speaking(speech, opts)
+  var self = this;
+  return self.start_speaking(speech, opts)
     .then(function(hdl) {
-      return speaku.speak_finish(hdl)
+      return self.speak_finish(hdl)
         .then(function() {
-          return speaku.utterance_release(hdl);
+          return self.utterance_release(hdl);
         });
     });
 }
