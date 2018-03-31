@@ -20,7 +20,7 @@ input[type=range].form-control:active {
   webkit-box-shadow: none;
 }
 
-.config-alert-wrp {
+.settings-alert-wrp {
   position: fixed;
   top: 30px;
   left: 50%;
@@ -35,4 +35,18 @@ input[type=range].form-control:active {
 }
 .voice-playback-wrp .btn {
   padding: 1px 12px;
+}
+
+#tree-import-btn {
+  position: relative;
+  overflow: hidden;
+  input[type=file] {
+    position: absolute;
+    left: -50%;
+    top: -50%;
+    width: 200%;
+    height: 200%;
+    opacity: 0;
+    cursor: pointer;
+  }
 }

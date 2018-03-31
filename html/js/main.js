@@ -10,9 +10,9 @@ Promise.all([
   })
 ])
   .then(initialize_app)
+  .catch(handle_error_checkpoint())
   .then(function() {
     config_fn = default_config;
-    tree_fn = default_tree;
     napi = new NativeAccessApi();
     speaku = new SpeakUnit(napi);
     speaku.init();
@@ -26,7 +26,7 @@ Promise.all([
         if(window.cordova) {
           Promise.all([
             delete_file(config_fn),
-            delete_file(tree_fn)
+            tree_fn ? delete_file(tree_fn) : Promise.resolve()
           ])
             .then(function() {
               location.reload();
@@ -49,11 +49,18 @@ Promise.all([
       .catch(handle_error_checkpoint());
   })
   .then(function() {
+    return prepare_tree(config.tree || window.default_tree)
+      .catch(handle_error_checkpoint())
+      .then(function(info) {
+        tree_fn = info.tree_fn;
+        editor_helper.audio_save_dir = info.audio_dir;
+      });
+  })
+  .then(function() {
     // load tree
     tree_element = document.querySelector('#tree')
     if(!tree_element)
       return Promise.reject(new Error("Cannot find #tree element"));
-    tree_fn = config.tree || tree_fn;
     return Promise.all([
       initl10n(config.locale||default_locale)
         .then(function() {
@@ -63,6 +70,7 @@ Promise.all([
           console.warn(err);
         }),
       load_tree(tree_element, tree_fn)
+        .catch(handle_error_checkpoint())
         .then(function(_tree) { tree = _tree; })
     ]);
   })
@@ -1731,22 +1739,7 @@ function load_tree(tree_element, fn) {
   }
   return get_file_data(fn)
     .then(function(data) {
-      var html_data = new showdown.Converter().makeHtml(data);
-      html_data = sanitizeHtml(html_data, {
-        allowedTags:
-          sanitizeHtml.defaults.allowedTags.concat([ 'h1', 'h2', 'meta' ]),
-        allowedAttributes:
-           Object.assign({}, sanitizeHtml.defaults.allowedAttributes, {
-             meta: [ 'data-*' ]
-           })
-      });
-      tree_element.innerHTML = html_data;
-      var tree = parse_dom_tree(tree_element);
-      console.log(tree);
-      tree_element.innerHTML = ''; // clear all
-      tree_mk_list_base(tree, tree_element); // re-create
-      tree_element.tree_height = window.innerHeight;
-      return tree;
+      return parse_tree(tree_element, data);
     })
     .catch(handle_error_checkpoint());
 }
@@ -1776,47 +1769,6 @@ function _state_redefine_positions(positions, new_tree) {
     new_tree = new_tree.nodes[position.index];
   });
   return new_positions;
-}
-
-function tree_to_markdown(tree) {
-  var md_lines = [];
-  _tree_to_markdown_subrout_node(tree, 0, md_lines);
-  return md_lines.join("\r\n");
-}
-function _tree_to_markdown_subrout_meta_html(anode) {
-  var tmp_meta = document.createElement('meta')
-  var auditory_cue_in_text = anode._more_meta['auditory-cue-in-text'];
-  var len = 0;
-  for(var key in anode.meta) {
-    if(anode.meta.hasOwnProperty(key) &&
-       (!auditory_cue_in_text || key != 'auditory-cue')) {
-      tmp_meta.setAttribute('data-' + key, anode.meta[key]);
-      len++;
-    }
-  }
-  if(len > 0) {
-    var tmp2 = document.createElement('div');
-    tmp2.appendChild(tmp_meta)
-    return tmp2.innerHTML;
-  }
-  return null;
-}
-function _tree_to_markdown_subrout_node(node, level, md_lines) {
-  var auditory_cue_in_text = node._more_meta['auditory-cue-in-text'],
-      text = level > 0 ?
-             (node.text +
-              (auditory_cue_in_text ?
-               '('+node.meta['auditory-cue']+')' : '')) : null,
-      meta_html = _tree_to_markdown_subrout_meta_html(node);
-  md_lines.push((text != null ? '#'.repeat(level) + ' ' + text : '') +
-                (meta_html ? ' ' + meta_html : ''))
-  md_lines.push("") // empty line
-  if(!node.is_leaf) {
-    _.each(node.nodes, function(anode) {
-      _tree_to_markdown_subrout_node(anode, level + 1, md_lines);
-    });
-  }
-    
 }
 
 function clear_config(config) {

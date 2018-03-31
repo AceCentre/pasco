@@ -27,8 +27,12 @@
         audio_meta = audio_meta_by_name(audio_name);
     if(!audio_name || helper._record_promise || helper._record_inprogress)
       return;
+    if(!helper.audio_save_dir) {
+      alert("Could not save, save directory not found!");
+      return;
+    }
     helper._record_promise =
-      find_unique_filename(audio_save_dir, filename_friendly(node.text + '_' + audio_name), '.wav')
+      find_unique_filename(helper.audio_save_dir, filename_friendly(node.text + '_' + audio_name), '.wav')
       .then(function(dest) {
         if(!helper._record_promise) // (ref removed) no longer needed
           return;
@@ -159,6 +163,8 @@
   }
   
   var helper = {};
+
+  helper.audio_save_dir = null;
 
   helper.on_save = function(tree) {
     var promises = [];
@@ -435,7 +441,7 @@
     return SpeakUnit.getInstance()
       .then(function(speaku) {
         return self._audio_stop(speaku)
-          .then(function() {
+           .then(function() {
             toggle_audio_btn(audio_name, true);
             self._playing_audio_name = audio_name;
             return speaku.play_audio(src);

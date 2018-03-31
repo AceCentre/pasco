@@ -10,17 +10,82 @@ document.addEventListener('deviceready', function() {
 window.newEl = document.createElement.bind(document);
 window.default_locale = 'en-GB';
 window.default_config = 'config.json';
-window.default_tree = 'tree.md';
-window.audio_save_dir = 'cdvfile://localhost/persistent/audio';
+window.host_tree_dir_prefix = 'trees/';
+window.trees_table_fn = 'trees_table.json';
+window.default_tree = window.host_tree_dir_prefix + 'default/default.md';
+window.cordova_tree_dir_prefix = 'cdvfile://localhost/persistent/';
+
+/**
+ * determines place of tree and prepares it if default does not exists
+ */
+function prepare_tree(tree_fn) {
+  if(!tree_fn)
+    throw new Error("Invalid argument");
+  var parts = tree_fn.split('/'),
+      basename = parts[parts.length - 1],
+      dirname = parts.slice(0, parts.length - 1).join("/");
+  // remove host dir prefix
+  if(dirname.indexOf(window.host_tree_dir_prefix) == 0) {
+    dirname = dirname.substr(window.host_tree_dir_prefix.length);
+  }
+  // should have a dirname
+  if(!dirname) {
+    tree_fn = 'default/' + tree_fn;
+    dirname = 'default';
+  }
+  // make dirname fs friendly
+  dirname = dirname.replace(/^[a-z]{1,10}\:\/\//i,"").replace(/\?.*$/,"")
+    .replace(/[ \(\)\[\]\*\#\@\!\$\%\^\&\+\=\/\\:]/g, '_')
+    .replace(/[\r\n\t]/g, '');
+  // for cordova
+  if(window.cordova) {
+    var path = tree_fn,
+        newdir = window.cordova_tree_dir_prefix + dirname,
+        newpath = newdir + '/' + basename,
+        audio_dir = newdir + '/audio';
+    return new Promise(function(resolve, reject) {
+      window.resolveLocalFileSystemURL(newpath, resolve, continue_proc);
+      function continue_proc(err) {
+        // if not found
+        cordova_mkdir(newdir)
+          .then(function() {
+            read_file(path)
+          })
+          .then(function(data) {
+            return write_file(newpath, data)
+          })
+          .then(resolve, reject);
+      }
+    })
+      .then(function() {
+        return cordova_mkdir(audio_dir);
+      })
+      .then(function() {
+        return {
+          tree_fn: newpath,
+          basename: basename,
+          dirname: dirname,
+          audio_dir: audio_dir
+        };
+      });
+  } else {
+    return Promise.resolve({
+      tree_fn: tree_fn,
+      basename: basename,
+      dirname: dirname,
+      audio_dir: null // Not implemented
+    });
+  }
+}
 
 function initialize_app() {
-  var replaceFileKeys = ['default_config', 'default_tree'];
+  var replaceFileKeys = ['default_config'];
   // for cordova
   if(window.cordova) {
     var promises = [];
     _.each(replaceFileKeys, function(key) {
       var path = window[key],
-          newpath = 'cdvfile://localhost/persistent/' + window[key];
+          newpath = window.cordova_tree_dir_prefix + window[key];
       promises.push(
         new Promise(function(resolve, reject) {
           window.resolveLocalFileSystemURL(newpath, resolve, continue_proc);
@@ -38,7 +103,6 @@ function initialize_app() {
           })
       );
     });
-    promises.push(cordova_mkdir(audio_save_dir))
     return Promise.all(promises);
   } else {
     function new_read(key) {
@@ -256,13 +320,16 @@ function load_script(fn) {
 }
 
 function handle_error_checkpoint() {
-  var stack = new Error().stack;
+  var stack = new Error().stack.split("\n").slice(1).join("\n").trim();
+  if(!stack) {
+    throw new Error("Could not get any stack from checkpoint");
+  }
   return function(err) {
     if(err.withcheckpoint)
       throw err;
     throw {
       withcheckpoint: true,
-      checkpoint_stack: stack.split("\n").slice(2).join("\n"),
+      checkpoint_stack: stack,
       error: err
     };
   }
@@ -400,7 +467,10 @@ function file_exists(url, options) {
       .then(function() { return true; });
   }
 }
-
+/**
+ * options
+ *   - responseType [blob]
+ */
 function read_file(url, options) {
   return new Promise(function(resolve, reject) {
     options = options || {};
@@ -409,30 +479,43 @@ function read_file(url, options) {
       url = _cordova_fix_url(url)
       function onSuccess(fileEntry) {
         fileEntry.file(function(file) {
-          var reader = new FileReader();
+          if(options.responseType == 'blob') {
+            resolve(file);
+          } else {
+            var reader = new FileReader();
 
-          reader.onloadend = function(e) {
-            resolve(this.result)
+            reader.onloadend = function(e) {
+              resolve(this.result)
+            }
+
+            reader.readAsText(file);
           }
-
-          reader.readAsText(file);
         });
 
       }
       function onFail(err) {
         console.error(err);
-        reject("Fail to load `" + url + "` -- " + err.code)
+        reject(new Error("Fail to load `" + url + "` -- " + err.code))
       }
       window.resolveLocalFileSystemURL(url, onSuccess, onFail);
     } else {
       var xhr = new XMLHttpRequest();
+      if(options.responseType) {
+        xhr.responseType = options.responseType;
+      }
       xhr.open(options.method || 'GET', url);
       xhr.onreadystatechange = function() {
         if(xhr.readyState === XMLHttpRequest.DONE) {
           if(xhr.status >= 200 && xhr.status < 300) {
-            resolve(xhr.responseText)
+            if(options.blobResponse) {
+              resolve(xhr.response);
+            } else {
+              resolve(xhr.responseText)
+            }
           } else {
             var err = new Error(xhr.statusText || 'unknown status ' + xhr.status + ' for `' + url + '`');
+            err.options = options;
+            err.url = url;
             err.xhr = xhr;
             reject(err)
           }
@@ -868,5 +951,66 @@ function collapsable_toggle(toggle_el, toggle) {
       toggle_el.classList.add('collapse')
       delete toggle_el._collapsable_timeout;
     }, 10);
+  }
+}
+
+function parse_tree(tree_element, data) {
+  var html_data = new showdown.Converter().makeHtml(data);
+  html_data = sanitizeHtml(html_data, {
+    allowedTags:
+    sanitizeHtml.defaults.allowedTags.concat([ 'h1', 'h2', 'meta' ]),
+    allowedAttributes:
+    Object.assign({}, sanitizeHtml.defaults.allowedAttributes, {
+      meta: [ 'data-*' ]
+    })
+  });
+  tree_element.innerHTML = html_data;
+  var tree = parse_dom_tree(tree_element);
+  tree_element.innerHTML = ''; // clear all
+  tree_mk_list_base(tree, tree_element); // re-create
+  tree_element.tree_height = window.innerHeight;
+  return tree;
+}
+
+function tree_to_markdown(tree) {
+  var md_lines = [];
+  _tree_to_markdown_subrout_node(tree, 0, md_lines);
+  return md_lines.join("\r\n");
+}
+function _tree_to_markdown_subrout_meta_html(anode) {
+  var tmp_meta = document.createElement('meta')
+  var auditory_cue_in_text = anode._more_meta['auditory-cue-in-text'];
+  var len = 0;
+  for(var key in anode.meta) {
+    if(anode.meta.hasOwnProperty(key) &&
+       (!auditory_cue_in_text || key != 'auditory-cue')) {
+      tmp_meta.setAttribute('data-' + key, anode.meta[key]);
+      len++;
+    }
+  }
+  if(len > 0) {
+    var tmp2 = document.createElement('div');
+    tmp2.appendChild(tmp_meta)
+    return tmp2.innerHTML;
+  }
+  return null;
+}
+function _tree_to_markdown_subrout_node(node, level, md_lines) {
+  var auditory_cue_in_text = node._more_meta['auditory-cue-in-text'],
+      text = level > 0 ?
+             (node.text +
+              (auditory_cue_in_text ?
+               '('+node.meta['auditory-cue']+')' : '')) : null,
+      meta_html = _tree_to_markdown_subrout_meta_html(node);
+  var line = (text != null ? '#'.repeat(level) + ' ' + text : '') +
+      (meta_html ? ' ' + meta_html : '');
+  if(line) {
+    md_lines.push(line)
+    md_lines.push("") // empty line
+  }
+  if(!node.is_leaf) {
+    _.each(node.nodes, function(anode) {
+      _tree_to_markdown_subrout_node(anode, level + 1, md_lines);
+    });
   }
 }
