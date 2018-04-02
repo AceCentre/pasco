@@ -24,6 +24,7 @@ Promise.all([
       el.addEventListener('click', function() {
         // for cordova
         if(window.cordova) {
+          console.log(tree_fn);
           Promise.all([
             delete_file(config_fn),
             tree_fn ? delete_file(tree_fn) : Promise.resolve()
@@ -185,7 +186,7 @@ function navbtns_init() {
       evt.preventDefault();
       evt.stopPropagation();
       var new_pos = [ evt.touches[0].clientX, evt.touches[0].clientY ];
-      cache.end_pos = navbtns_move(navbtns_wrp, new_pos[0]-cache.pos[0], new_pos[1]-cache.pos[1]);
+      cache.end_pos = move(new_pos[0]-cache.pos[0], new_pos[1]-cache.pos[1]);
     }
   }
   function ontouchcancel() {

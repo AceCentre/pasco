@@ -117,5 +117,6 @@
     </plugin>
     <plugin name="cordova-plugin-browsersync" spec="^1.1.0" />
     <plugin name="audscan-cordova-plugin" spec="https://github.com/hosseinamin/audscan-cordova-plugin.git" />
+    <plugin name="cordova-plugin-x-socialsharing" spec="^5.3.2" />
     <engine name="ios" spec="^4.5.4" />
 </widget>

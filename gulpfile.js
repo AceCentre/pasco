@@ -50,7 +50,7 @@ gulp.task('cordova-dist', ['lessc-all'], (done) => {
   });
 });
 gulp.task('watch-cordova-dist', ['cordova-dist'], () => {
-  var watcher = gulp.watch('html/**/*{.css,.html,.json,.js}');
+  var watcher = gulp.watch('html/**/*{.less,.html,.json,.js}');
   watcher.on('change', (event) => {
     gulp.run('cordova-dist');
   });

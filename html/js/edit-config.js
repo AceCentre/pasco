@@ -154,15 +154,15 @@ function start() {
     btn._working = true;
     waitingDialog.show();
 	  zip.createWriter(new zip.BlobWriter(), function(zipWriter) {
-      var elm = newEl('div'), tree;
+      var elm = newEl('div'), tree,
+          parts = tree_fn.split('/'),
+          basename = parts[parts.length - 1],
+          treename = parts.length > 1 ? parts[parts.length - 2] : null;
+      if(!treename) {
+        treename = 'default';
+      }
       Promise.resolve()
         .then(function() {
-          var parts = tree_fn.split('/'),
-              basename = parts[parts.length - 1],
-              treename = parts.length > 1 ? parts[parts.length - 2] : null;
-          if(!treename) {
-            treename = 'default';
-          }
           tree = parse_tree(elm, tree_data);
           return new Promise(function(resolve, reject) {
             zipWriter.add(treename + '/' + basename, new zip.BlobReader(new Blob([tree_data], {type:'text/markdown'})), resolve);
@@ -208,31 +208,81 @@ function start() {
         return new Promise(function(resolve) {
 				  zipWriter.close(function(blob) {
             if(success) {
-					    var blobURL = URL.createObjectURL(blob);
-              open(blobURL);
+              showmodal('tree.zip', blob);
             }
             waitingDialog.hide();
             btn._working = false;
             resolve();
-				  });
+          });
         });
       }
-      function open(url) {
-				var clickEvent;
-				clickEvent = document.createEvent("MouseEvent");
-				clickEvent.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-        var downloadBtn = newEl('a');
-        downloadBtn.style.display = 'none';
-        document.body.appendChild(downloadBtn);
-				downloadBtn.href = url;
-        downloadBtn.download = 'tree.zip';
-				downloadBtn.dispatchEvent(clickEvent);
+      function showmodal(name, blob) {
+        var $modal = $('#save-file-modal');
+        if($modal.length == 0)
+          return; // should never happen
+        if(window.cordova) {
+          var filepath = window.cordova_user_dir_prefix + 'tree.zip';
+          write_file(filepath, blob)
+            .then(function() {
+              return new Promise(function(resolve, reject) {
+                resolveLocalFileSystemURL(filepath, function(entry) {
+                  $modal[0]._nfilepath = entry.toURL();
+                  resolve();
+                }, reject);
+              })
+            })
+            .then(function() {
+              $modal.modal('show');
+              $('#save-file--share-btn').delay(500).click();
+            })
+            .catch(function(err) {
+              console.error(err);
+              update_alert(false, new Error("Could not share file!"));
+            });
+        } else {
+          $modal.modal('show');
+          $modal[0]._blob = blob;
+				  var blobURL = URL.createObjectURL(blob);
+          $('#save-file--open-btn')
+            .prop('href', blobURL)
+            .prop('download', name)
+            .delay(500).click();
+        }
       }
     }, function(err) {
       waitingDialog.hide();
       console.error(err);
       update_alert(false, new Error("Could not create zip writer"));
     });
+  });
+  $('#save-file--share-btn').on('click', function($evt) {
+    $evt.preventDefault();
+    var $modal = $('#save-file-modal');
+    if($modal.length == 0)
+      return; // should never happen
+    var nfilepath = $modal[0]._nfilepath;
+    (new Promise(function(resolve, reject) {
+      try {
+        var options = {
+          //message: 'tree.zip, pasco tree package',
+          files: [nfilepath],
+          chooserTitle: 'Share/Save the package'
+        };
+        var onSuccess = function(result) {
+          resolve();
+        }
+        var onError = function(msg) {
+          reject(new Error("Sharing failed, " + msg));
+        }
+        window.plugins.socialsharing.shareWithOptions(options, onSuccess, onError);
+      } catch(err) {
+        reject(err);
+      }
+    }))
+      .catch(function(err) {
+        console.error(err);
+        update_alert(false, err);
+      });
   });
   $('#tree-import-inp').on('change', function() {
     if(this.files && this.files.length > 0) {
@@ -401,7 +451,7 @@ function tree_import_prepare(name, tree, import_list) {
       var val = tree.meta[audio_meta];
       if(val) {
         if(window.cordova) {
-          tree.meta[audio_meta] = window.cordova_tree_dir_prefix +
+          tree.meta[audio_meta] = window.cordova_user_dir_prefix +
             name + '/' + val;
           import_list.push({
             tree: tree,
@@ -418,7 +468,7 @@ function tree_import_prepare(name, tree, import_list) {
 }
 function tree_export_prepare(name, tree, export_files) {
   var tree_prefix = window.cordova ?
-      window.cordova_tree_dir_prefix + name + '/' : null;
+      window.cordova_user_dir_prefix + name + '/' : null;
   if(tree.meta) {
     _.each(audio_meta_list, function(audio_meta) {
       var val = tree.meta[audio_meta];

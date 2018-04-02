@@ -2,7 +2,7 @@
   "theme": "light",
   "mode": "switch",
   "can_edit": true,
-  "onscreen_navigation": "auto",
+  "onscreen_navigation": "enable",
   "ignore_second_hits_time": 100,
   "ignore_key_release_time": 50,
   "auto_next_delay": 200,

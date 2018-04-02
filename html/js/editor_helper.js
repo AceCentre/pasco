@@ -172,8 +172,12 @@
     var audio_reverts = tree._more_meta.audio_reverts;
     if(audio_reverts) {
       for(var name in audio_reverts) {
-        if(audio_reverts[name] !== true) // true is for first record
-          promises.push(delete_file(audio_reverts[name]));
+        if(audio_reverts[name] !== true) { // true is for first record
+          var fn = audio_reverts[name];
+          if(fn.indexOf(window.cordova_user_dir_prefix) == 0) {
+            promises.push(delete_file(fn));
+          }
+        }
       }
       delete tree._more_meta.audio_reverts;
     }

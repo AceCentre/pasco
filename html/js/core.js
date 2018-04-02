@@ -13,7 +13,7 @@ window.default_config = 'config.json';
 window.host_tree_dir_prefix = 'trees/';
 window.trees_table_fn = 'trees_table.json';
 window.default_tree = window.host_tree_dir_prefix + 'default/default.md';
-window.cordova_tree_dir_prefix = 'cdvfile://localhost/persistent/';
+window.cordova_user_dir_prefix = 'cdvfile://localhost/persistent/';
 
 /**
  * determines place of tree and prepares it if default does not exists
@@ -40,7 +40,7 @@ function prepare_tree(tree_fn) {
   // for cordova
   if(window.cordova) {
     var path = tree_fn,
-        newdir = window.cordova_tree_dir_prefix + dirname,
+        newdir = window.cordova_user_dir_prefix + dirname,
         newpath = newdir + '/' + basename,
         audio_dir = newdir + '/audio';
     return new Promise(function(resolve, reject) {
@@ -49,7 +49,7 @@ function prepare_tree(tree_fn) {
         // if not found
         cordova_mkdir(newdir)
           .then(function() {
-            read_file(path)
+            return read_file(path)
           })
           .then(function(data) {
             return write_file(newpath, data)
@@ -85,7 +85,7 @@ function initialize_app() {
     var promises = [];
     _.each(replaceFileKeys, function(key) {
       var path = window[key],
-          newpath = window.cordova_tree_dir_prefix + window[key];
+          newpath = window.cordova_user_dir_prefix + window[key];
       promises.push(
         new Promise(function(resolve, reject) {
           window.resolveLocalFileSystemURL(newpath, resolve, continue_proc);
