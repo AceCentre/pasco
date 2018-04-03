@@ -145,6 +145,9 @@
                     <input class="form-control" type="number" step="any" id="auditory_cue_first_run_voice_options.rateMul" name="auditory_cue_first_run_voice_options.rateMul" data-validator="number">
                   </div>
                 </div>
+                <div class="col-sm-6 visible-for-ios">
+                  <label class="checkbox-inline"><input type="checkbox" name="auditory_cue_first_run_voice_options.override_to_speaker"><span x-l10n>Override to speaker</span></label>
+                </div>
               </div>
             </div>
           </div>
@@ -176,7 +179,7 @@
             </div>
             <div class="col-sm-1"></div>
             <div class="col-sm-4">
-              <div class="form-group">
+              <div class="form-group hide-for-ios">
                 <label for="ignore_key_release_time" x-l10n>Ignore key presses under n ms</label>
                 <input class="form-control" type="number" id="ignore_key_release_time" name="ignore_key_release_time" value="0" data-validator="number">
               </div>
@@ -217,6 +220,9 @@
                 <input class="form-control" type="number" step="any" id="auditory_cue_voice_options.rateMul" name="auditory_cue_voice_options.rateMul" data-validator="number">
               </div>
             </div>
+            <div class="col-sm-6 visible-for-ios">
+              <label class="checkbox-inline"><input type="checkbox" name="auditory_cue_voice_options.override_to_speaker"><span x-l10n>Override to speaker</span></label>
+            </div>
           </div>
         </div>
         <div class="col-sm-6">
@@ -246,6 +252,9 @@
                 <label for="auditory_main_voice_options.rateMul" x-l10n>Rate</label>
                 <input class="form-control" type="number" step="any" id="auditory_main_voice_options.rateMul" name="auditory_main_voice_options.rateMul" data-validator="number">
               </div>
+            </div>
+            <div class="col-sm-6 visible-for-ios">
+              <label class="checkbox-inline"><input type="checkbox" name="auditory_main_voice_options.override_to_speaker"><span x-l10n>Override to speaker</span></label>
             </div>
           </div>
         </div>

@@ -9,13 +9,14 @@ let lessfiles = ['main','edit-config','cordova'];
 [...lessfiles,'all'].forEach((name) => {
   let files = (name == 'all' ? lessfiles : [name])
       .map((s)=>'html/less/'+s+'.less')
+  var running = false;
   gulp.task('lessc-'+name, () => {
     return gulp.src(files)
       .pipe(sourcemaps.init())
       .pipe(less({
         paths: ['html/less']
       }))
-      .pipe(sourcemaps.write())
+      .pipe(sourcemaps.write('../css/'))
       .pipe(gulp.dest('html/css/'));
   });
 });

@@ -75,11 +75,13 @@ function start() {
   var $form = $('form[name=edit-config]').first(),
       voices_by_id = _.object(_.map(voices, function(voice) { return [voice.id,voice] }));
   _.each(_voice_id_links, function(alink) {
-    var $wrp = $(alink[2]),
+    var $section = $(alink[3]),
+        $pbwrp = $(alink[2]),
         text = "Quiet people have the loudest minds. Pasco at your service.";
-    $wrp.find('.play-btn').click(function() {
-      $wrp.find('.play-btn').addClass('hide');
-      $wrp.find('.stop-btn').removeClass('hide');
+    /* voice playback */
+    $pbwrp.find('.play-btn').click(function() {
+      $pbwrp.find('.play-btn').addClass('hide');
+      $pbwrp.find('.stop-btn').removeClass('hide');
       var opts = {}, $inp;
       $inp = $form.find('[name='+alink[1]+']');
       if($inp.length > 0 && $inp.val())
@@ -99,15 +101,16 @@ function start() {
         opts.delay = parseFloat($inp.val());
       speaku.simple_speak(text, opts)
         .then(function(){
-          $wrp.find('.play-btn').removeClass('hide');
-          $wrp.find('.stop-btn').addClass('hide');
+          $pbwrp.find('.play-btn').removeClass('hide');
+          $pbwrp.find('.stop-btn').addClass('hide');
         });
     });
-    $wrp.find('.stop-btn').click(function() {
-      $wrp.find('.play-btn').removeClass('hide');
-      $wrp.find('.stop-btn').addClass('hide');
+    $pbwrp.find('.stop-btn').click(function() {
+      $pbwrp.find('.play-btn').removeClass('hide');
+      $pbwrp.find('.stop-btn').addClass('hide');
       speaku.stop_speaking();
     });
+    /* voice list */
     var $inp = $form.find('[name='+alink[1]+']');
     var opt = newEl('option')
     opt.value = ''
@@ -409,14 +412,18 @@ function start() {
     if(!name) {
       alert("Nothing selected!");
     } else {
-      get_file_data('trees/' + locale + '-' + name + '.md')
+      get_file_data('trees/' + name + '/' + locale + '-' + name + '.md')
         .then(change_tree)
         .catch(function(err) {
           if(default_locale == locale)
             throw err;
-          return get_file_data('trees/' + default_locale + '-' + name + '.md')
+          return get_file_data('trees/' + name + '/' + default_locale + '-' + name + '.md')
             .then(change_tree)
-            .catch(function() { throw err; });
+            .catch(function() {
+              return get_file_data('trees/' + name + '/' + name + '.md')
+                .then(change_tree)
+                .catch(function() { throw err; });
+            });
         })
           .catch(handle_error);
     }
@@ -622,9 +629,9 @@ function save_config(evt) {
       if(!_config[alink[0]])
         _config[alink[0]] = {}
       if(str)
-        _config[alink[0]][propname] = str
+        _config[alink[0]][propname] = str;
       else
-        delete _config[alink[0]][propname]
+        delete _config[alink[0]][propname];
     });
     if(!$form.find('[name=_cue_first_active]').prop('checked')) {
       _config._auditory_cue_first_run_voice_options =
@@ -678,22 +685,21 @@ function update_alert(success, err) {
 
 function config_auto_save_init() {
   var $form = $('form[name=edit-config]').first()
-  if($form[0].__autosave_timeout)
-    $form[0].__autosave_timeout
   $form.on('input', 'input', onchange);
   $form.on('change', 'select,input[type=checkbox],input[type=radio]', onchange);
   function onchange() {
-    start_countdown();
-  }
-  function start_countdown() {
-    if($form[0].__autosave_timeout)
-      clearTimeout($form[0].__autosave_timeout);
-    $form[0].__autosave_timeout = setTimeout(function() {
-      $form.find('button[type=submit]').first().click();
-      delete $form[0].__autosave_timeout;
-    }, 2000);
+    _config_autosave_start_countdown();
   }
 }
+function _config_autosave_start_countdown() {
+  if(window.__config_autosave_timeout)
+    clearTimeout(window.__config_autosave_timeout);
+  window.__config_autosave_timeout = setTimeout(function() {
+    $('form[name=edit-config] button[type=submit]').first().click();
+    delete window.__config_autosave_timeout;
+  }, 2000);
+}
+
 
 function save_tree(evt) {
   if(evt)

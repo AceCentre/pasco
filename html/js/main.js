@@ -1376,12 +1376,16 @@ function _move_sub_speak2(type, override_msg) {
     text = override_msg;
     audio = null;
   }
-  if(audio) {
-    return speaku.play_audio(audio, opts)
-  } else if(text) {
-    return speaku.simple_speak(text, opts);
-  }
-  return Promise.resolve();
+  var promise = config._has_override_to_speaker && napi.available ?
+      napi.override_output_audio_to_speaker(!!opts.override_to_speaker) :
+      Promise.resolve();
+  return promise.then(function() {
+    if(audio) {
+      return speaku.play_audio(audio, opts)
+    } else if(text) {
+      return speaku.simple_speak(text, opts);
+    }
+  });
 }
 
 function _scan_move(node) {
@@ -1416,7 +1420,7 @@ function _notify_move(node, notifynode, opts) {
   }
   if(opts.delay > 0) {
     moveobj.steps.push(function() {
-      return new Promise(function(resolve) { setTimeout(resolve, delay) })
+      return new Promise(function(resolve) { setTimeout(resolve, opts.delay) })
     })
   }
   moveobj.steps.push(un_can_move)
@@ -1729,6 +1733,12 @@ function eval_config(config) {
   }
   if(!('can_edit' in config))
     config.can_edit = true;
+  config._has_override_to_speaker = _.filter([
+    'auditory_main_voice_options', 'auditory_cue_voice_options',
+    'auditory_cue_first_run_voice_options'
+  ], function(name) {
+    return config[name] && !!config[name].override_to_speaker;
+  }).length > 0;
   return config;
 }
 

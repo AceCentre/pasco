@@ -644,8 +644,8 @@ proto.start_speaking = function(speech, opts) {
     // prevent multiple audio running at same time
     this.stop_audio()
   }
-  opts = Object.assign({}, opts)
   var self = this;
+  opts = Object.assign({}, opts)
   if(self.is_native) {
     for(var key in opts)
       if(key.indexOf('alt_') == 0)
