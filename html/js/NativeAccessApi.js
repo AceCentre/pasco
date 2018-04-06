@@ -1,5 +1,3 @@
-
-
 (function(){
   var slice = [].slice;
   
@@ -42,7 +40,6 @@
     'is_software_keyboard_visible',
     'request_audio_record_permission',
     'add_key_command', 'remove_key_command',
-    'override_output_audio_to_speaker'
   ];
 
   for(var i = 0, len = direct_delegates.length; i < len; ++i)

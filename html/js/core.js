@@ -650,10 +650,15 @@ proto.start_speaking = function(speech, opts) {
     for(var key in opts)
       if(key.indexOf('alt_') == 0)
         delete opts[key];
+    var spk_opts = {};
+    if(opts.override_to_speaker) {
+      spk_opts.override_to_speaker = opts.override_to_speaker;
+      delete opts.override_to_speaker;
+    }
     return self.api.init_utterance(speech, opts)
       .then(function(utterance) {
         return self.api
-          .speak_utterance(self.synthesizer, utterance)
+          .speak_utterance(self.synthesizer, utterance, spk_opts)
           .then(function(){ return utterance; });
       });
   } else {
@@ -731,7 +736,7 @@ proto.speak_finish = function(utterance_hdl) {
 }
 
 proto.stop_speaking = function() {
-  if(this._audio_tag) {
+  if(this._audio_tag || this._cordova_media) {
     this.stop_audio()
     return Promise.resolve();
   } else {
@@ -784,7 +789,10 @@ proto._cordova_play_audio = function(src, opts) {
                   });
     if(opts.volume)
       media.setVolume(opts.volume)
-    media.play();
+    var play_opts = {};
+    if(opts.override_to_speaker)
+      play_opts.overrideToSpeaker = true;
+    media.play(play_opts);
   });
   
 }

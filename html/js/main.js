@@ -1,3 +1,4 @@
+
 var config_fn, tree_fn, config, tree, state = null, tree_element, napi, speaku,
     config_json, tree_contentsize_xstep = 50;
 Promise.all([
@@ -24,7 +25,6 @@ Promise.all([
       el.addEventListener('click', function() {
         // for cordova
         if(window.cordova) {
-          console.log(tree_fn);
           Promise.all([
             delete_file(config_fn),
             tree_fn ? delete_file(tree_fn) : Promise.resolve()
@@ -612,8 +612,13 @@ function start(_state) {
       window.addEventListener('keydown', _on_keydown, false);
       window.addEventListener('resize', _tree_needs_resize, false);
       var tmp = document.querySelector('#navbtns')
-      if(tmp && config._onscreen_navigation)
-        tmp.addEventListener('click', _on_navbtns_click, false)
+      if(tmp && config._onscreen_navigation) {
+        if(window.device.platform.toLowerCase() == 'ios') {
+          tmp.addEventListener('touchstart', _on_navbtns_tstart, false);
+        } else {
+          tmp.addEventListener('click', _on_navbtns_click, false)
+        }
+      }
       if(config.can_edit) {
         document.querySelector('#edit-mode-btn')
           .addEventListener('click', _on_edit_mode, false);
@@ -750,8 +755,13 @@ function stop() {
       window.removeEventListener('keydown', _on_keydown, false);
       window.removeEventListener('resize', _tree_needs_resize, false);
       var tmp = document.querySelector('#navbtns')
-      if(tmp && config._onscreen_navigation)
-        tmp.removeEventListener('click', _on_navbtns_click, false)
+      if(tmp && config._onscreen_navigation) {
+        if(window.device.platform.toLowerCase() == 'ios') {
+          tmp.removeEventListener('touchstart', _on_navbtns_tstart, false);
+        } else {
+          tmp.removeEventListener('click', _on_navbtns_click, false);
+        }
+      }
       if(config.can_edit) {
         document.querySelector('#edit-mode-btn')
           .removeEventListener('click', _on_edit_mode, false);
@@ -1083,6 +1093,39 @@ function _on_edit_cancel() {
 }
 /** <Edit Mode/> **/
 
+function _on_navbtns_tstart(evt) {
+  var call = null;
+  if(evt.touches.length == 1) {
+    var elem = evt.touches[0].target;
+    switch(elem.id) {
+    case 'nav-upbtn':
+      call = _tree_go_previous;
+      break;
+    case 'nav-downbtn':
+      call = _tree_go_next;
+      break;
+    case 'nav-leftbtn':
+      if(window.icu && icu.rtl) {
+        call = _tree_go_in;
+      } else {
+        call = _tree_go_out;
+      }
+      break;
+    case 'nav-rightbtn':
+      if(window.icu && icu.rtl) {
+        call = _tree_go_out;
+      } else {
+        call = _tree_go_in;
+      }
+      break;
+    }
+  }
+  if(call) {
+    evt.preventDefault();
+    call();
+  }
+}
+
 function _on_navbtns_click(ev) {
   var elem = ev.target;
   switch(elem.id) {
@@ -1376,16 +1419,11 @@ function _move_sub_speak2(type, override_msg) {
     text = override_msg;
     audio = null;
   }
-  var promise = config._has_override_to_speaker && napi.available ?
-      napi.override_output_audio_to_speaker(!!opts.override_to_speaker) :
-      Promise.resolve();
-  return promise.then(function() {
-    if(audio) {
-      return speaku.play_audio(audio, opts)
-    } else if(text) {
-      return speaku.simple_speak(text, opts);
-    }
-  });
+  if(audio) {
+    return  speaku.play_audio(audio, opts);
+  } else if(text) {
+    return speaku.simple_speak(text, opts);
+  }
 }
 
 function _scan_move(node) {
@@ -1398,7 +1436,6 @@ function _scan_move(node) {
       node: node
     }
   }));
-  moveobj.steps.push();
   return _before_new_move()
     .then(_new_move_start.bind(null, moveobj));
 }
