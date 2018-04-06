@@ -1,5 +1,6 @@
 var config_fn, tree_fn;
-var speaku, config, config_data, orig_tree_data, tree_data, voices, napi;
+var speaku, config, config_data, orig_tree_data, tree_data, voices, napi,
+    is_quick_setup;
 // start
 Promise.all([
   window.cordova ? NativeAccessApi.onready() : Promise.resolve(),
@@ -71,19 +72,21 @@ function _fix_config(cfg) {
 }
 
 function start() {
+  is_quick_setup = $('form[name=quick-setup]').length > 0;
   // insert voice options
-  var $form = $('form[name=edit-config]').first(),
+  var $form = $(is_quick_setup ? 'form[name=quick-setup]' : 'form[name=edit-config]').first(),
       voices_by_id = _.object(_.map(voices, function(voice) { return [voice.id,voice] }));
   _.each(_voice_id_links, function(alink) {
-    var $section = $(alink[3]),
-        $pbwrp = $(alink[2]),
-        text = "Quiet people have the loudest minds. Pasco at your service.";
+    var $inp = $form.find('[name='+alink[1]+']');
+    if($inp.length == 0)
+      return; // does not exists, skip
+    var $pbwrp = $(alink[2]),
+        text = "Quiet people have the loudest minds. Pasco at your service.",
+        opts = {};
     /* voice playback */
     $pbwrp.find('.play-btn').click(function() {
       $pbwrp.find('.play-btn').addClass('hide');
       $pbwrp.find('.stop-btn').removeClass('hide');
-      var opts = {}, $inp;
-      $inp = $form.find('[name='+alink[1]+']');
       if($inp.length > 0 && $inp.val())
         opts.voiceId = $inp.val();
       $inp = $form.find('[name="'+alink[0]+'.volume"]');
@@ -136,16 +139,20 @@ function start() {
   });
   
   insert_config()
-  insert_tree_data()
+  if(!is_quick_setup) {
+    insert_tree_data()
 
-  $('#tree-revert').on('click', function() {
-    tree_data = orig_tree_data
-    $('form[name=edit-tree] [name=tree-input]').val(tree_data);
-  });
-  
-  config_auto_save_init();
-  $('form[name=edit-config]').on('submit', save_config)
-  $('form[name=edit-tree]').on('submit', save_tree)
+    $('#tree-revert').on('click', function() {
+      tree_data = orig_tree_data
+      $('form[name=edit-tree] [name=tree-input]').val(tree_data);
+    });
+    
+    config_auto_save_init();
+    $form.on('submit', save_config)
+    $('form[name=edit-tree]').on('submit', save_tree)
+  } else {
+    $form.on('submit', save_quick_setup)
+  }
   
   update_tree_default_select();
   $('#tree-default-select').on('change', update_tree_default_select);
@@ -412,26 +419,28 @@ function start() {
     if(!name) {
       alert("Nothing selected!");
     } else {
-      get_file_data('trees/' + name + '/' + locale + '-' + name + '.md')
+      get_default_tree(name, locale)
         .then(change_tree)
-        .catch(function(err) {
-          if(default_locale == locale)
-            throw err;
-          return get_file_data('trees/' + name + '/' + default_locale + '-' + name + '.md')
-            .then(change_tree)
-            .catch(function() {
-              return get_file_data('trees/' + name + '/' + name + '.md')
-                .then(change_tree)
-                .catch(function() { throw err; });
-            });
-        })
-          .catch(handle_error);
+        .catch(handle_error);
     }
     function change_tree(data) {
       tree_data = data
       $('form[name=edit-tree] [name=tree-input]').val(tree_data)
     }
   });
+}
+
+function get_default_tree(name, locale) {
+  return get_file_data('trees/' + name + '/' + locale + '-' + name + '.md')
+    .catch(function(err) {
+      if(default_locale == locale)
+        throw err;
+      return get_file_data('trees/' + name + '/' + default_locale + '-' + name + '.md')
+        .catch(function() {
+          return get_file_data('trees/' + name + '/' + name + '.md')
+            .catch(function() { throw err; });
+        });
+    });
 }
 
 function serial_promise(funcs) {
@@ -514,9 +523,9 @@ var _voice_id_links = [
 ];
 
 function insert_config() {
-  var $form = $('form[name=edit-config]').first()
+  var $form = $(is_quick_setup ? 'form[name=quick-setup]' : 'form[name=edit-config]').first()
   $form.find('input,select,textarea,radio,checkbox').each(function() {
-    if(this.name.length > 0 && this.name[0] != '_') {
+    if(this.name.length > 0 && this.name && this.name[0] != '_') {
       var name = this.name;
       var path = name.split('.');
       // special case for voice_options, load prefixed data if not avail
@@ -573,10 +582,14 @@ function save_config(evt) {
     evt.preventDefault();
   var $form = $('form[name=edit-config]').first()
   var _config = JSON.parse(config_data);
+  return do_save_config($form, _config, true);
+}
+
+function do_save_config($form, _config, hdlerr) {
   // validate & apply input
   try {
     $form.find('input,select,textarea').each(function() {
-      if(this.name.length > 0 && this.name[0] != '_') {
+      if(this.name.length > 0 && this.name && this.name[0] != '_') {
         var validator_attr = this.getAttribute('data-validator'),
             validator = validator_attr ? config_validators[validator_attr] : null;
         if(validator_attr && !validator)
@@ -587,45 +600,50 @@ function save_config(evt) {
       }
     });
     // specific
-    var $inp = $form.find('[name=_auto_forward_key]:checked'),
-        keys = null;
-    switch($inp.val()) {
-    case 'enter':
-      keys = {
-        '32': { 'func': 'tree_go_out', 'comment': 'space' },
-        '13': { 'func': 'tree_go_in', 'comment': 'enter' }
+    if(!is_quick_setup) {
+      var $inp = $form.find('[name=_auto_forward_key]:checked'),
+          keys = null;
+      switch($inp.val()) {
+      case 'enter':
+        keys = {
+          '32': { 'func': 'tree_go_out', 'comment': 'space' },
+          '13': { 'func': 'tree_go_in', 'comment': 'enter' }
+        }
+        break;
+      case 'space':
+        keys = {
+          '32': { 'func': 'tree_go_in', 'comment': 'space' },
+          '13': { 'func': 'tree_go_out', 'comment': 'enter' }
+        }
+        break;
       }
-      break;
-    case 'space':
-      keys = {
-        '32': { 'func': 'tree_go_in', 'comment': 'space' },
-        '13': { 'func': 'tree_go_out', 'comment': 'enter' }
+      if(keys)
+        _config.auto_keys = Object.assign((_config.auto_keys || {}), keys);
+      $inp = $form.find('[name=_switch_forward_key]:checked');
+      keys = null;
+      switch($inp.val()) {
+      case 'enter':
+        keys = {
+          '32': { 'func': 'tree_go_out', 'comment': 'space' },
+          '13': { 'func': 'tree_go_in', 'comment': 'enter' }
+        }
+        break;
+      case 'space':
+        keys = {
+          '32': { 'func': 'tree_go_in', 'comment': 'space' },
+          '13': { 'func': 'tree_go_out', 'comment': 'enter' }
+        }
+        break;
       }
-      break;
+      if(keys)
+        _config.switch_keys = Object.assign((_config.switch_keys || {}), keys);
     }
-    if(keys)
-      _config.auto_keys = Object.assign((_config.auto_keys || {}), keys);
-    $inp = $form.find('[name=_switch_forward_key]:checked');
-    keys = null;
-    switch($inp.val()) {
-    case 'enter':
-      keys = {
-        '32': { 'func': 'tree_go_out', 'comment': 'space' },
-        '13': { 'func': 'tree_go_in', 'comment': 'enter' }
-      }
-      break;
-    case 'space':
-      keys = {
-        '32': { 'func': 'tree_go_in', 'comment': 'space' },
-        '13': { 'func': 'tree_go_out', 'comment': 'enter' }
-      }
-      break;
-    }
-    if(keys)
-      _config.switch_keys = Object.assign((_config.switch_keys || {}), keys);
     _.each(_voice_id_links, function(alink) {
+      var $inp = $form.find('[name='+alink[1]+']');
+      if($inp.length == 0)
+        return; // skip when not exists
       var propname = (speaku.is_native ? '' : 'alt_') + 'voiceId',
-          str = $form.find('[name='+alink[1]+']').val();
+          str = $inp.val();
       if(!_config[alink[0]])
         _config[alink[0]] = {}
       if(str)
@@ -633,27 +651,67 @@ function save_config(evt) {
       else
         delete _config[alink[0]][propname];
     });
-    if(!$form.find('[name=_cue_first_active]').prop('checked')) {
-      _config._auditory_cue_first_run_voice_options =
-        _config.auditory_cue_first_run_voice_options;
-      delete _config.auditory_cue_first_run_voice_options;
-    } else {
-      delete _config._auditory_cue_first_run_voice_options;
+    if(!is_quick_setup) {
+      if(!$form.find('[name=_cue_first_active]').prop('checked')) {
+        _config._auditory_cue_first_run_voice_options =
+          _config.auditory_cue_first_run_voice_options;
+        delete _config.auditory_cue_first_run_voice_options;
+      } else {
+        delete _config._auditory_cue_first_run_voice_options;
+      }
     }
   } catch(err) {
-    update_alert(false, err);
-    return;
+    if(hdlerr) {
+      return update_alert(false, err);
+    } else {
+      return Promise.reject(err);
+    }
   }
   // then save
   // console.log(_config)
-  set_file_data(config_fn, JSON.stringify(_config, null, "  "))
+  return set_file_data(config_fn, JSON.stringify(_config, null, "  "))
     .then(function() {
       config = _config
-      update_alert(true);
+      if(hdlerr) {
+        update_alert(true);
+      }
     })
     .catch(function(err) {
-      update_alert(false, err);
+      if(hdlerr) {
+        update_alert(false, err);
+      } else {
+        throw err;
+      }
     });
+}
+
+function save_quick_setup(evt) {
+  evt.preventDefault();
+  var $form = $('form[name=quick-setup]');
+  var $tree_select = $('#tree-default-select');
+  if(!$tree_select.val()) {
+    return show_error(new Error("Please select a tree"));
+  }
+  var _config = JSON.parse(config_data);
+  _config.__did_quick_setup = true;
+  return do_save_config($form, _config)
+    .then(function() {
+      var locale = config.locale;
+      var name = $('#tree-default-select').val();
+      return get_default_tree(name, locale)
+        .then(function(data) {
+          return set_file_data(tree_fn, data);
+        });
+    })
+    .then(function() {
+      window.location = 'index.html'; // goto pasco
+    })
+    .catch(show_error);
+  function show_error(err) {
+    console.error(err);
+    var $alert = $form.find('.save-section .alert-danger')
+    $alert.html(error_to_html(err)).removeClass('alert-hidden');
+  }
 }
 
 function update_alert(success, err) {
