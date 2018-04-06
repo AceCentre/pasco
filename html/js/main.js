@@ -756,7 +756,7 @@ function stop() {
       window.removeEventListener('resize', _tree_needs_resize, false);
       var tmp = document.querySelector('#navbtns')
       if(tmp && config._onscreen_navigation) {
-        if(window.device.platform.toLowerCase() == 'ios') {
+        if(window.device && window.device.platform.toLowerCase() == 'ios') {
           tmp.removeEventListener('touchstart', _on_navbtns_tstart, false);
         } else {
           tmp.removeEventListener('click', _on_navbtns_click, false);
