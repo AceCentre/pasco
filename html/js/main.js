@@ -613,7 +613,7 @@ function start(_state) {
       window.addEventListener('resize', _tree_needs_resize, false);
       var tmp = document.querySelector('#navbtns')
       if(tmp && config._onscreen_navigation) {
-        if(window.device.platform.toLowerCase() == 'ios') {
+        if(window.device && window.device.platform.toLowerCase() == 'ios') {
           tmp.addEventListener('touchstart', _on_navbtns_tstart, false);
         } else {
           tmp.addEventListener('click', _on_navbtns_click, false)
