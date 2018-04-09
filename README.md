@@ -16,6 +16,8 @@ Run the following
 
 # To build cordova version
 
+* npm install 
+* bower install
 * npm run cordova-dist
 * cd cordova
 * cordova platform add ios
