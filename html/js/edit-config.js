@@ -744,6 +744,28 @@ $(document).on('change', 'input[type=checkbox],input[type=radio]', function() {
     }
   }
 });
+$(document).on('input', 'input[type=number],input[type=range]', function() {
+  var $elm = $(this);
+  if($elm.data('dependent')) {
+    var $other = $($elm.data('dependent')),
+        val = $elm.val();
+    if(typeof val != 'number')
+      val = parseFloat(val);
+    if(isNaN(val)) {
+      return;
+    }
+    $other.each(function() {
+      var lval = val,
+          max = this.max ? parseFloat(this.max) : NaN,
+          min = this.min ? parseFloat(this.min) : NaN;
+      if(!isNaN(max) && lval > max)
+        lval = max;
+      if(!isNaN(min) && lval < min)
+        lval = min;
+      this.value = lval;
+    });
+  }
+});
 
 function _input_set_from_config(element, value) {
   if(['radio','checkbox'].indexOf(element.type) != -1) {
@@ -755,6 +777,9 @@ function _input_set_from_config(element, value) {
     $(element).trigger('change');
   } else {
     element.value = value+'';
+  }
+  if(['text','number','range'].indexOf(element.type) != -1) {
+    $(element).trigger('input');
   }
 }
 function _input_info_set_config_value(element, info, value) {

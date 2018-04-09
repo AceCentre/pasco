@@ -74,20 +74,23 @@
             <div class="col-sm-3">
               <div class="form-group">
                 <label for="auto_next_loops" x-l10n>Loops</label>
-                <input type="number" id="auto_next_loops" name="auto_next_loops" class="form-control" value="10" data-validator="number">
+                <input type="number" id="auto_next_loops" name="auto_next_loops" class="form-control" value="10" data-validator="number" data-dependent="#auto_next_loops_range">
+                <input type="range" id="auto_next_loops_range" class="form-control" type="range" step="1" min="0" max="4" data-dependent="#auto_next_loops">
               </div>
             </div>
             <div class="col-sm-1"></div>
             <div class="col-sm-4">
               <div class="form-group">
                 <label for="auto_next_atfirst_delay" x-l10n>Delay at first item (ms)</label>
-                <input type="number" id="auto_next_atfirst_delay" name="auto_next_atfirst_delay" class="form-control" value="10" data-validator="number">
+                <input type="number" id="auto_next_atfirst_delay" name="auto_next_atfirst_delay" class="form-control" value="10" data-validator="number" data-dependent="#auto_next_atfirst_delay_range">
+                <input type="range" id="auto_next_atfirst_delay_range" class="form-control" type="range" step="1" min="0" max="2000" data-dependent="#auto_next_atfirst_delay">
               </div>
             </div>
             <div class="col-sm-4">
               <div class="form-group">
                 <label for="auto_next_delay" x-l10n>Auto-scanning delay (ms)</label>
-                <input type="number" id="auto_next_delay" name="auto_next_delay" class="form-control" value="200" data-validator="number">
+                <input type="number" id="auto_next_delay" name="auto_next_delay" class="form-control" value="200" data-validator="number" data-dependent="#auto_next_delay_range">
+                <input type="range" id="auto_next_delay_range" class="form-control" type="range" step="1" min="0" max="2000" data-dependent="#auto_next_delay">
               </div>
             </div>
             <div class="col-sm-4">
@@ -117,7 +120,8 @@
                 <div class="col-sm-12" >
                   <div class="form-group">
                     <label for="auto_next_first_run_delay" x-l10n>Auto-scanning delay (ms)</label>
-                    <input type="number" id="auto_next_first_run_delay" name="auto_next_first_run_delay" class="form-control" value="0" data-validator="number">
+                    <input type="number" id="auto_next_first_run_delay" name="auto_next_first_run_delay" class="form-control" value="0" data-validator="number" data-dependent="#auto_next_first_run_delay_range">
+                    <input type="range" id="auto_next_first_run_delay_range" class="form-control" type="range" step="1" min="0" max="2000" data-dependent="#auto_next_first_run_delay">
                   </div>
                 </div>
                 <div class="col-sm-6">
@@ -136,13 +140,13 @@
                 <div class="col-sm-6">
                   <div class="form-group">
                     <label for="auditory_cue_first_run_voice_options.pitch" x-l10n>Pitch</label>
-                    <input class="form-control" type="number" step="any" id="auditory_cue_first_run_voice_options.pitch" name="auditory_cue_first_run_voice_options.pitch" data-validator="number">
+                    <input class="form-control" type="range" step="any" min="0.01" max="2" id="auditory_cue_first_run_voice_options.pitch" name="auditory_cue_first_run_voice_options.pitch" data-validator="number">
                   </div>
                 </div>
                 <div class="col-sm-6">
                   <div class="form-group">
                     <label for="auditory_cue_first_run_voice_options.rateMul" x-l10n>Rate</label>
-                    <input class="form-control" type="number" step="any" id="auditory_cue_first_run_voice_options.rateMul" name="auditory_cue_first_run_voice_options.rateMul" data-validator="number">
+                    <input class="form-control" type="range" step="any" min="0.01" max="4" id="auditory_cue_first_run_voice_options.rateMul" name="auditory_cue_first_run_voice_options.rateMul" data-validator="number">
                   </div>
                 </div>
                 <div class="col-sm-6 visible-for-ios">
@@ -174,7 +178,8 @@
             <div class="col-sm-4">
               <div class="form-group">
                 <label for="ignore_second_hits_time" x-l10n>Ignore second hits(ms)</label>
-                <input type="number" id="ignore_second_hits_time" name="ignore_second_hits_time" class="form-control" value="100" data-validator="number">
+                <input type="number" id="ignore_second_hits_time" name="ignore_second_hits_time" class="form-control" value="100" data-validator="number" data-dependent="#ignore_second_hits_time_range">
+                <input type="range" id="ignore_second_hits_time_range" class="form-control" type="range" step="1" min="0" max="2000" data-dependent="#ignore_second_hits_time">
               </div>
             </div>
             <div class="col-sm-1"></div>
@@ -211,13 +216,13 @@
             <div class="col-sm-6">
               <div class="form-group">
                 <label for="auditory_cue_voice_options.pitch" x-l10n>Pitch</label>
-                <input class="form-control" type="number" step="any" id="auditory_cue_voice_options.pitch" name="auditory_cue_voice_options.pitch" data-validator="number">
+                <input class="form-control" type="range" step="any" min="0.01" max="2" id="auditory_cue_voice_options.pitch" name="auditory_cue_voice_options.pitch" data-validator="number">
               </div>
             </div>
             <div class="col-sm-6">
               <div class="form-group">
                 <label for="auditory_cue_voice_options.rateMul" x-l10n>Rate</label>
-                <input class="form-control" type="number" step="any" id="auditory_cue_voice_options.rateMul" name="auditory_cue_voice_options.rateMul" data-validator="number">
+                <input class="form-control" type="range" step="any" min="0.01" max="4" id="auditory_cue_voice_options.rateMul" name="auditory_cue_voice_options.rateMul" data-validator="number">
               </div>
             </div>
             <div class="col-sm-6 visible-for-ios">
@@ -244,13 +249,13 @@
             <div class="col-sm-6">
               <div class="form-group">
                 <label for="auditory_main_voice_options.pitch" x-l10n>Pitch</label>
-                <input class="form-control" type="number" step="any" id="auditory_main_voice_options.pitch" name="auditory_main_voice_options.pitch" data-validator="number">
+                <input class="form-control" type="range" step="any" min="0.01" max="2" id="auditory_main_voice_options.pitch" name="auditory_main_voice_options.pitch" data-validator="number">
               </div>
             </div>
             <div class="col-sm-6">
               <div class="form-group">
                 <label for="auditory_main_voice_options.rateMul" x-l10n>Rate</label>
-                <input class="form-control" type="number" step="any" id="auditory_main_voice_options.rateMul" name="auditory_main_voice_options.rateMul" data-validator="number">
+                <input class="form-control" type="range" step="any" min="0.01" max="4" id="auditory_main_voice_options.rateMul" name="auditory_main_voice_options.rateMul" data-validator="number">
               </div>
             </div>
             <div class="col-sm-6 visible-for-ios">
@@ -266,7 +271,8 @@
             <div class="col-sm-4">
               <div class="form-group">
                 <label for="tree_content_size_percentage" x-l10n>Font Size (%)</label>
-                <input type="number" id="tree_content_size_percentage" name="tree_content_size_percentage" class="form-control" value="100" min="10" max="300" data-validator="number">
+                <input type="number" id="tree_content_size_percentage" name="tree_content_size_percentage" class="form-control" step="1" value="100" min="10" max="300" data-validator="number" data-dependent="#tree_content_size_percentage_range">
+                <input type="range" id="tree_content_size_percentage_range" class="form-control" step="1" min="10" max="300" data-dependent="#tree_content_size_percentage">
               </div>
             </div>
             <div class="col-sm-4">
