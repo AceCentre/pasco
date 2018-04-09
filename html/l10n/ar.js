@@ -79,7 +79,7 @@
     'Locale': 'مكان',
     'Save Config': 'حفظ التكوين',
     'Tree': 'شجرة',
-    'Choose a default content': 'اختر محتوى افتراضي',
+    'Choose a default tree': 'اختر محتوى افتراضي',
     'Pragmatic Phrases': 'العبارات البراغماتية',
     'Spell by blocks': 'تهجئة كتل',
     'Spell by blocks in Frequency': 'تهجئة كتل في التردد',

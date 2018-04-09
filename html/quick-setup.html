@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-eval' 'unsafe-inline' http://code.responsivevoice.org/responsivevoice.js ws://localhost:3000; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+    
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, viewport-fit=cover">
+
+    <title x-l10n="quick_setup_title">pasco - Quick Setup</title>
+
+    <link rel="stylesheet" href="css/edit-config.css">
+    <!-- <link rel="icon" href="images/favicon.png"> -->
+
+    <!-- bootstrap includes -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="bower_components/bootstrap-waitingfor/build/bootstrap-waitingfor.min.js"></script>
+    <!-- bootstrap includes end -->
+
+    <!-- INJECT HEAD -->
+    
+  </head>
+  <body style="display:none">
+    <div class="container edit-config-container">
+      <form name="quick-setup">
+        <div class="row">
+          <div class="col-xs-12">
+            <h3 x-l10n>Quick Setup</h3>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="locale-select" x-l10n>Locale</label>
+              <select id="locale-select" name="locale" class="form-control">
+                <option value="en-GB">English (UK)</option>
+                <option value="ar">Arabic</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="locale-select" x-l10n>Tree</label>
+              <select id="tree-default-select" class="form-control">
+                <option value="" x-l10n>Choose a default tree</option>
+                <option value="Pragmatic_Phrases" x-l10n>Pragmatic Phrases</option>
+                <option value="Spell_by_blocks" x-l10n>Spell by blocks</option>
+                <option value="Spell_by_blocks_in_Frequency" x-l10n>Spell by blocks in Frequency</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-xs-12">
+            <label class="radio-inline"><input type="radio" name="mode" value="auto"><span x-l10n>Automatic-Scanning</span></label>
+            <label class="radio-inline"><input type="radio" name="mode" value="switch"><span x-l10n>Manual</span></label>
+          </div>
+        </div>
+        <hr class="tinyhr"/>
+        <div class="row">
+          <div class="col-xs-12">
+            <h3 x-l10n>Speech</h3>
+          </div>
+          <div class="col-sm-6">
+            <h4><span x-l10n>Cue Voice</span> <span id="auditory-cue-playback-wrp" class="voice-playback-wrp"><button type="button" class="btn btn-success play-btn"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="hide btn btn-default stop-btn"><span class="glyphicon glyphicon-stop"></span></button></span></h4>
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label for="_cue_voice_id" x-l10n>Voice</label>
+                  <select class="form-control" id="_cue_voice_id" name="_cue_voice_id">
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label for="auditory_cue_voice_options.volume" x-l10n>Volume</label>
+                  <input class="form-control" type="range" step="any" min="0" max="1" id="auditory_cue_voice_options.volume" name="auditory_cue_voice_options.volume" data-validator="number">
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label for="auditory_cue_voice_options.pitch" x-l10n>Pitch</label>
+                  <input class="form-control" type="number" step="any" id="auditory_cue_voice_options.pitch" name="auditory_cue_voice_options.pitch" data-validator="number">
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label for="auditory_cue_voice_options.rateMul" x-l10n>Rate</label>
+                  <input class="form-control" type="number" step="any" id="auditory_cue_voice_options.rateMul" name="auditory_cue_voice_options.rateMul" data-validator="number">
+                </div>
+              </div>
+              <div class="col-sm-6 visible-for-ios">
+                <label class="checkbox-inline"><input type="checkbox" name="auditory_cue_voice_options.override_to_speaker"><span x-l10n>Override to speaker</span></label>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <h4><span x-l10n>Main Voice</span> <span id="auditory-main-playback-wrp" class="voice-playback-wrp"><button type="button" class="btn btn-success play-btn"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="hide btn btn-default stop-btn"><span class="glyphicon glyphicon-stop"></span></button></span></h4>
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label for="_main_voice_id" x-l10n>Voice</label>
+                  <select class="form-control" id="_main_voice_id" name="_main_voice_id">
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label for="auditory_main_voice_options.volume" x-l10n>Volume</label>
+                  <input class="form-control" type="range" step="any" min="0" max="1" id="auditory_main_voice_options.volume" name="auditory_main_voice_options.volume" data-validator="number">
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label for="auditory_main_voice_options.pitch" x-l10n>Pitch</label>
+                  <input class="form-control" type="number" step="any" id="auditory_main_voice_options.pitch" name="auditory_main_voice_options.pitch" data-validator="number">
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label for="auditory_main_voice_options.rateMul" x-l10n>Rate</label>
+                  <input class="form-control" type="number" step="any" id="auditory_main_voice_options.rateMul" name="auditory_main_voice_options.rateMul" data-validator="number">
+                </div>
+              </div>
+              <div class="col-sm-6 visible-for-ios">
+                <label class="checkbox-inline"><input type="checkbox" name="auditory_main_voice_options.override_to_speaker"><span x-l10n>Override to speaker</span></label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 save-section">
+            <div class="alert-hidden alert alert-danger" role="alert"></div>
+            <button type="submit" class="btn btn-success" x-l10n>Submit</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <!-- INJECT SCRIPTS -->
+    <!-- MAIN SCRIPTS -->
+    <script src="bower_components/underscore/underscore-min.js"></script>
+    <script src="bower_components/showdown/dist/showdown.min.js"></script>
+    <script src="js/lib/translate.js"></script>
+    <script src="js/lib/sanitize-html.js"></script>
+    <script src="js/lib/zipjs/zip.js"></script>
+    <script>zip.workerScriptsPath = "js/lib/zipjs/";</script>
+    <script src="js/NativeAccessApi.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/edit-config.js"></script>
+  </body>
+</html>
