@@ -839,12 +839,12 @@ function _edit_mode_toggle(b, restart) {
   if(state._changing_edit_mode)
     return;
   state._changing_edit_mode = true;
-  document.querySelector('#edit-mode-btn').disabled = b
-    // .classList[b?'add':'remove']('hide')
+  document.querySelector('#edit-mode-btn')
+    .classList[b?'add':'remove']('disabled');
   document.querySelector('#edit-mode-save-btn')
-    .classList[!b?'add':'remove']('hide')
+    .classList[!b?'add':'remove']('hide');
   document.querySelector('#edit-mode-cancel-btn')
-    .classList[!b?'add':'remove']('hide')
+    .classList[!b?'add':'remove']('hide');
   tree_element[(b?'add':'remove')+'EventListener']
     ('click', _edit_mode_on_tree_click, false)
   tree_element[(b?'add':'remove')+'EventListener']
@@ -1051,11 +1051,18 @@ function _edit_mode_on_tree_click(evt) {
     _tree_move(node);
   }
 }
-function _on_edit_mode() {
+function _on_edit_mode(evt) {
+  if(evt)
+    evt.preventDefault();
+  if(document.querySelector('#edit-mode-btn').classList.contains('disabled')) {
+    return;
+  }
   state._orig_snapshot = _take_snapshot()
   _edit_mode_toggle(true, true)
 }
-function _on_edit_save() {
+function _on_edit_save(evt) {
+  if(evt)
+    evt.preventDefault();
   var save_btn = document.querySelector('#edit-mode-save-btn'),
       cancel_btn = document.querySelector('#edit-mode-cancel-btn');
   save_btn.disabled = true;
@@ -1079,7 +1086,9 @@ function _on_edit_save() {
       handle_error(err)
     });
 }
-function _on_edit_cancel() {
+function _on_edit_cancel(evt) {
+  if(evt)
+    evt.preventDefault();
   editor_helper.on_restore(tree)
     .then(function() {
       // restore will stop => auto toggle off

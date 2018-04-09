@@ -33,8 +33,12 @@
 
 #tree {
   .text {
-    color: @theme-color-dimmed;
-    transition: color 0.5s;
+    opacity: 0.5;
+    transition: color, opacity 0.5s;
+    &.selected,
+    &.highlight {
+      opacity: 1;
+    }
   }
 }
 

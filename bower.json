@@ -13,6 +13,7 @@
     "bootstrap": "^3.3.7",
     "jquery": "^3.2.1",
     "bootstrap-rtl": "^3.4.0",
-    "bootstrap-waitingfor": "^1.2.7"
+    "bootstrap-waitingfor": "^1.2.7",
+    "fontawesome": "^5.0.9"
   }
 }

@@ -19,31 +19,20 @@
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <!-- bootstrap includes end -->
+    <link rel="stylesheet" href="bower_components/fontawesome/web-fonts-with-css/css/fontawesome-all.min.css">
     
   </head>
 
   <body style="display:none">
-    <nav class="navbar navbar-default">
+    <nav class="navbar navbar-default main-top-navbar">
       <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
-            <span class="sr-only" x-l10n>Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href><span x-l10n>pasco</span> <span x-l10n>Help</span></a>
-        </div>
-
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-            <li><a href="edit-config.html" x-l10n class="separate-after">Configure</a></li>
-            <li><a href="index.html" x-l10n>Start</a></li>
-          </ul>
-        </div><!-- /.navbar-collapse -->
-      </div><!-- /.container-fluid -->
+        <ul class="x-navbar">
+          <li class="head"><a href x-l10n>pasco Help</a></li>
+          <li class="space"></li>
+          <li><a class="icon-btn" href="index.html"><span class="fa fa-play fa-2x"></span></a></li>
+          <li><a class="icon-btn" href="help.html"><span class="fa fa-question-circle fa-2x"></span></a></li>
+        </ul>
+      </div>
     </nav>
     <div class="container">
       <h2 x-l10n>Help</h2>
