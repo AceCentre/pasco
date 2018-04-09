@@ -1,4 +1,6 @@
 /* LIGHT */
+@theme-color-dimmed: #777;
+
 @theme-light-bg: #C8F2FD;
 @theme-light-primary: #001401;
 @theme-light-secondary: #D6602B;
@@ -29,17 +31,24 @@
 @theme-dark-secondary: #D6602B;
 @theme-dark-hint: #EEE;
 
+#tree {
+  .text {
+    color: @theme-color-dimmed;
+    transition: color 0.5s;
+  }
+}
+
 body.theme-light {
   background-color: @theme-light-bg;
   color: @theme-light-primary;
   #tree ul.children {
     background-color: @theme-light-bg;
-  }
-  .highlight {
-    color: @theme-light-secondary;
-  }
-  .selected {
-    color: @theme-light-hint;
+    .highlight {
+      color: @theme-light-secondary;
+    }
+    .selected {
+      color: @theme-light-hint;
+    }
   }
 }
 
@@ -49,12 +58,12 @@ body.theme-greyred {
   color: @theme-greyred-primary;
   #tree ul.children {
     background-color: @theme-greyred-bg;
-  }
-  .highlight {
-    color: @theme-greyred-secondary;
-  }
-  .selected {
-    color: @theme-greyred-hint;
+    .highlight {
+      color: @theme-greyred-secondary;
+    }
+    .selected {
+      color: @theme-greyred-hint;
+    }
   }
 }
 
@@ -64,12 +73,12 @@ body.theme-yb {
   font-weight: bold;
   #tree ul.children {
     background-color: @theme-yb-bg;
-  }
-  .highlight {
-    color: @theme-yb-secondary;
-  }
-  .selected {
-    color: @theme-yb-hint;
+    .highlight {
+      color: @theme-yb-secondary;
+    }
+    .selected {
+      color: @theme-yb-hint;
+    }
   }
 }
 
@@ -79,12 +88,12 @@ body.theme-by {
   font-weight: bold;
   #tree ul.children {
     background-color: @theme-by-bg;
-  }
-  .highlight {
-    color: @theme-by-secondary;
-  }
-  .selected {
-    color: @theme-by-hint;
+    .highlight {
+      color: @theme-by-secondary;
+    }
+    .selected {
+      color: @theme-by-hint;
+    }
   }
 }
 
@@ -93,12 +102,12 @@ body.theme-mint {
   color: @theme-mint-primary;
   #tree ul.children {
     background-color: @theme-mint-bg;
-  }
-  .highlight {
-    color: @theme-mint-secondary;
-  }
-  .selected {
-    color: @theme-mint-hint;
+    .highlight {
+      color: @theme-mint-secondary;
+    }
+    .selected {
+      color: @theme-mint-hint;
+    }
   }
 }
 
@@ -107,12 +116,12 @@ body.theme-dark {
   color: @theme-dark-primary;
   #tree ul.children {
     background-color: @theme-dark-bg;
-  }
-  .highlight {
-    color: @theme-dark-secondary;
-  }
-  .selected {
-    color: @theme-dark-hint;
+    .highlight {
+      color: @theme-dark-secondary;
+    }
+    .selected {
+      color: @theme-dark-hint;
+    }
   }
   #popup-message-wrp {
     color: @theme-dark-hint;
