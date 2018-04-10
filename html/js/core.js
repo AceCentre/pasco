@@ -963,6 +963,14 @@ function collapsable_toggle(toggle_el, toggle) {
 }
 
 function parse_tree(tree_element, data) {
+  // #46 \t to h1-6
+  data = data.replace(/^(\t{1,6})(.+)/gm, function(all, tabs, text) {
+    var tmp = text.trim();
+    if(!tmp || tmp[0] == '-') {
+      return all;
+    }
+    return '#'.repeat(tabs.length) + ' ' + tmp;
+  });
   var html_data = new showdown.Converter().makeHtml(data);
   html_data = sanitizeHtml(html_data, {
     allowedTags:
