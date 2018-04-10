@@ -132,21 +132,39 @@ function initialize_app() {
   }
 }
 
-function tree_mk_list_base(tree, el) {
+function tree_mk_list_base(tree, el, content_template) {
   el.target_node = tree
   tree.dom_element = el;
   el.classList.add('level-' + tree.level);
   el.classList.add('node')
   if(tree.text) {
-    var cel = newEl('div');
-    cel.classList.add('content');
-    el.appendChild(cel);
-    tree.content_element = cel;
-    var txtel = newEl('p');
-    txtel.classList.add('text');
-    txtel.textContent = tree.text;
-    cel.appendChild(txtel);
-    tree.txt_dom_element = txtel;
+    var text = tree.text;
+    if(content_template) {
+      var cel = newEl('div');
+      cel.classList.add('content');
+      el.appendChild(cel);
+      tree.content_element = cel;
+      var tmp = newEl('div');
+      tmp.textContent = text;
+      cel.innerHTML = content_template({
+        text: tmp.innerHTML,
+        tree: tree
+      });
+      var txtel = cel.querySelector('.text');
+      if(txtel) {
+        tree.txt_dom_element = txtel;
+      }
+    } else {
+      var cel = newEl('div');
+      cel.classList.add('content');
+      el.appendChild(cel);
+      tree.content_element = cel;
+      var txtel = newEl('p');
+      txtel.classList.add('text');
+      txtel.textContent = text;
+      cel.appendChild(txtel);
+      tree.txt_dom_element = txtel;
+    }
   }
   if(!tree.is_leaf) {
     var nodes = tree.nodes,
@@ -155,7 +173,7 @@ function tree_mk_list_base(tree, el) {
     for(var i = 0, len = nodes.length; i < len; ++i) {
       var node = nodes[i],
           li = newEl('li');
-      tree_mk_list_base(node, li);
+      tree_mk_list_base(node, li, content_template);
       ul.appendChild(li);
     }
     el.appendChild(ul);
@@ -981,9 +999,13 @@ function parse_tree(tree_element, data) {
     })
   });
   tree_element.innerHTML = html_data;
+  var content_template,
+      tmp = document.querySelector('#tree-node-template');
+  if(tmp)
+    content_template = _.template(tmp.innerHTML);
   var tree = parse_dom_tree(tree_element);
   tree_element.innerHTML = ''; // clear all
-  tree_mk_list_base(tree, tree_element); // re-create
+  tree_mk_list_base(tree, tree_element, content_template); // re-create
   tree_element.tree_height = window.innerHeight;
   return tree;
 }

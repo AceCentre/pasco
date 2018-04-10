@@ -1,4 +1,3 @@
-
 var config_fn, tree_fn, config, tree, state = null, tree_element, napi, speaku,
     config_json, tree_contentsize_xstep = 50;
 Promise.all([
@@ -843,6 +842,10 @@ function _edit_mode_toggle(b, restart) {
   if(state._changing_edit_mode)
     return;
   state._changing_edit_mode = true;
+  document.querySelector('#edit-config-btn')
+    .classList[b?'add':'remove']('hide');
+  document.querySelector('#help-btn')
+    .classList[b?'add':'remove']('hide');
   document.querySelector('#edit-mode-btn')
     .classList[b?'add':'remove']('disabled');
   document.querySelector('#edit-mode-save-btn')
@@ -966,7 +969,8 @@ function _edit_mode_select(node) {
       else
         delete node.meta['auditory-cue'];
       node._more_meta['auditory-cue-in-text'] = !!data._more_meta['auditory-cue-in-text'];
-      node.txt_dom_element.textContent = node.text
+      if(node.txt_dom_element)
+        node.txt_dom_element.textContent = node.text
     }, false);
     inp_txt.addEventListener('keydown', function(evt) {
       var code = evt.keyCode;
@@ -1393,9 +1397,9 @@ function _node_cue_text(node) {
 
 function _move_sub_highlight() {
   var node = this
-  if(node.txt_dom_element) {
-    node.txt_dom_element.classList.add('highlight' || config.highlight_class);
-    state._highlighted_elements.push(node.txt_dom_element);
+  if(node.content_element) {
+    node.content_element.classList.add('highlight' || config.highlight_class);
+    state._highlighted_elements.push(node.content_element);
   }
   _update_active_positions();
 }
@@ -1605,8 +1609,8 @@ function _tree_go_in() {
     // on auto mode stop iteration and on any key restart
     return stop()
       .then(function() {
-        if(atree.txt_dom_element)
-          atree.txt_dom_element.classList.add('selected' || config.selected_class);
+        if(atree.content_element)
+          atree.content_element.classList.add('selected' || config.selected_class);
         var speak_callable = _move_sub_speak2.bind(atree, 'main');
         // display continue-concat if any
         var popup = document.querySelector('#popup-message-wrp'),
@@ -1642,8 +1646,8 @@ function _tree_go_in() {
               return start(); // start over
             }
             function clear() {
-              if(atree.txt_dom_element)
-                atree.txt_dom_element.classList.remove('selected' || config.selected_class);
+              if(atree.content_element)
+                atree.content_element.classList.remove('selected' || config.selected_class);
               tmp = document.querySelector('#navbtns')
               if(tmp && config._onscreen_navigation) {
                 tmp.removeEventListener('click', onscreen_nav_click, false)

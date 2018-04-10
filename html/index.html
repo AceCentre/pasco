@@ -30,8 +30,8 @@
         <ul class="x-navbar">
           <li class="head"><a href x-l10n>pasco</a></li>
           <li class="space"></li>
-          <li><a class="icon-btn" href="edit-config.html"><span class="far fa-cog fa-2x"></span></a></li>
-          <li><a class="icon-btn" href="help.html"><span class="far fa-question-circle fa-2x"></span></a></li>
+          <li><a class="icon-btn" href="edit-config.html" id="edit-config-btn"><span class="far fa-cog fa-2x"></span></a></li>
+          <li><a class="icon-btn" href="help.html" id="help-btn"><span class="far fa-question-circle fa-2x"></span></a></li>
           <li><a class="icon-btn" href id="edit-mode-btn"><span class="far fa-edit fa-2x"></span></a></li>
           <li><a class="icon-btn" href id="edit-mode-save-btn"><span class="far fa-save fa-2x"></span></a></li>
           <li><a class="icon-btn" href id="edit-mode-cancel-btn"><span class="far fa-times fa-2x"></span></a></li>
@@ -46,6 +46,12 @@
       <div id="tree" class="resizable-content">
       </div>
     </div>
+    <script type="text/x-template" id="tree-node-template">
+      <p class="text"><%= text %></p>
+      <% if(!tree.is_leaf) { %>
+      <div class="arrow-wrp"><span class="fa fa-2x fa-angle-right"></span></div>
+      <% } %>
+    </script>
     <script type="text/x-template" id="node-edit-overlay">
       <!-- should get wrap with div class="node-edit-overlay" -->
       <button class="add-node-before btn btn-transparent"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button>

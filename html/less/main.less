@@ -116,10 +116,10 @@ body.rtl #tree {
   .no-transition > ul.children {
     transition: none;
   }
-  .active > .content .text,
-  .text.highlight,
-  .text.selected {
-    padding: 30px 10px;
+  .active > .content,
+  .content.highlight,
+  .content.selected {
+    padding: 30px 0px;
     // padding: 2.14em 0.71em;
   }
   .text {
@@ -133,6 +133,18 @@ body.rtl #tree {
   .content {
     position: relative;
     z-index: 1;
+    display: flex;
+    & > .text {
+      flex-grow: 1;
+    }
+    & > .arrow-wrp {
+      position: relative;
+      .fa, .far {
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+    }
   }
   .node.selected .content {
     z-index: 3;
