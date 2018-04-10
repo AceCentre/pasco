@@ -98,6 +98,16 @@ body.rtl #tree {
   .active > ul.children {
     display: block;
   }
+  .content > .arrow-wrp {
+    transition: opacity 0.5s;
+    opacity: 0;
+  }
+  &.current .content,
+  .current .content {
+    & > .arrow-wrp {
+      opacity: 1;
+    }
+  }
   ul.children {
     display: none;
     list-style: none;
