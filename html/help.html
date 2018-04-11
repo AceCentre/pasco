@@ -56,11 +56,21 @@
       </ul>
     </div>
     <!-- INJECT SCRIPTS -->
+    <script src="bower_components/underscore/underscore-min.js"></script>
     <script src="js/lib/translate.js"></script>
+    <script src="js/NativeAccessApi.js"></script>
     <script src="js/core.js"></script>
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      initialize_app()
+      Promise.all([
+        window.cordova ? NativeAccessApi.onready() : Promise.resolve(),
+        new Promise(function(resolve) { // domready
+          document.addEventListener('DOMContentLoaded', function() {
+            document.removeEventListener('DOMContentLoaded', arguments.callee, false);
+            resolve();
+          }, false);
+        })
+      ])
+        .then(initialize_app)
         .then(function() { return get_file_json(default_config); })
         .then(function(config) {
           return initl10n(config.locale||default_locale);
@@ -73,7 +83,6 @@
           console.warn("Could not find file for l10n " + config.locale||default_locale);
           document.body.style.display = '';
         });
-    }, false);
     </script>
   </body>
 </html>
