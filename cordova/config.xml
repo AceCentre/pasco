@@ -86,6 +86,9 @@
         <splash density="port-xxxhdpi" src="res/screens/android/screen-xxxhdpi-portrait.png" />
     </platform>
     <platform name="ios">
+        <edit-config file="*-Info.plist" mode="merge" target="NSMicrophoneUsageDescription">
+            <string>pacso records voice for future playback</string>
+        </edit-config>
         <splash height="480" src="res/screen/ios/Default~iphone.png" width="320" />
         <splash height="960" src="res/screen/ios/Default@2x~iphone.png" width="640" />
         <splash height="1024" src="res/screen/ios/Default-Portrait~ipad.png" width="768" />
