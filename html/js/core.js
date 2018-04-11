@@ -987,7 +987,11 @@ function parse_tree(tree_element, data) {
     if(!tmp || tmp[0] == '-') {
       return all;
     }
-    return '#'.repeat(tabs.length) + ' ' + tmp;
+    return '#' + '#'.repeat(tabs.length) + ' ' + tmp;
+  });
+  // start of line with a letter or number is h1
+  data = data.replace(/^\s*[^\#\@\<\-\*\_\ \t]/gm, function(all) {
+    return '# ' + all;
   });
   var html_data = new showdown.Converter().makeHtml(data);
   html_data = sanitizeHtml(html_data, {
