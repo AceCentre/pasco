@@ -123,8 +123,5 @@
     <plugin name="cordova-plugin-media" spec="https://github.com/hosseinamin/cordova-plugin-media.git">
         <variable name="KEEP_AVAUDIOSESSION_ALWAYS_ACTIVE" value="YES" />
     </plugin>
-    <plugin name="cordova-plugin-media-capture" spec="^3.0.1">
-        <variable name="MICROPHONE_USAGE_DESCRIPTION" value="Pasco would like to access the microphone so you can record your own messages." />
-    </plugin>
     <engine name="ios" spec="^4.5.4" />
 </widget>
