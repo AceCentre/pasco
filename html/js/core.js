@@ -990,7 +990,7 @@ function parse_tree(tree_element, data) {
     return '#' + '#'.repeat(tabs.length) + ' ' + tmp;
   });
   // start of line with a letter or number is h1
-  data = data.replace(/^\s*[^\#\@\<\-\*\_\ \t]/gm, function(all) {
+  data = data.replace(/^\s*[^\#\@\<\-\*\_\ \t\n\r]/gm, function(all) {
     return '# ' + all;
   });
   var html_data = new showdown.Converter().makeHtml(data);
