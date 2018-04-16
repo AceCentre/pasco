@@ -4,7 +4,7 @@ const gulp = require('gulp')
 const sourcemaps = require('gulp-sourcemaps')
 const spawn = require('child_process').spawn;
  
-let lessfiles = ['main','edit-config','cordova'];
+let lessfiles = ['main','edit-config','common'];
 
 [...lessfiles,'all'].forEach((name) => {
   let files = (name == 'all' ? lessfiles : [name])

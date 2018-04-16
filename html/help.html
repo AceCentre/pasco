@@ -11,7 +11,7 @@
 
     <title x-l10n="help_title">pasco - Help</title>
 
-    <link rel="stylesheet" href="css/edit-config.css">
+    <link rel="stylesheet" href="css/common.css">
     <!-- <link rel="icon" href="images/favicon.png"> -->
 
     <!-- bootstrap includes -->
@@ -24,7 +24,7 @@
     
   </head>
 
-  <body style="display:none">
+  <body class="notready">
     <nav class="navbar navbar-default main-top-navbar">
       <div class="container-fluid">
         <ul class="x-navbar">
@@ -77,7 +77,7 @@
         })
         .then(function() {
           domlocalize();
-          document.body.style.display = '';
+          document.body.classList.remove('notready');
         })
         .catch(function() {
           console.warn("Could not find file for l10n " + config.locale||default_locale);

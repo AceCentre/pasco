@@ -53,8 +53,7 @@ Promise.all([
     ]);
   })
   .then(function() {
-    // display body
-    document.body.style.display = '';
+    document.body.classList.remove('notready');
   })
   .then(start)
   .catch(handle_error);

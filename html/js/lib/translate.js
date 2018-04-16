@@ -1,3 +1,4 @@
+// code is from localeplanet.com
 (function() {
 
 	var translate = function(text)

@@ -93,8 +93,7 @@ Promise.all([
       elem.classList.add('navbtns-enable');
     }
     navbtns_init();
-    // display body
-    document.body.style.display = '';
+    document.body.classList.remove('notready');
   })
   .then(start)
   .catch(handle_error);
@@ -672,6 +671,9 @@ function start(_state) {
           if(Math.abs(--_state._auto_next_rem_loops) < 1) {
             // stop the loop
             _state.auto_next_dead = true
+            // start at begining next time
+            var pos = _state.positions[_state.positions.length - 1];
+            pos.index = -1;
             return;
           }
         }
@@ -707,7 +709,7 @@ function start(_state) {
   }
 }
 
-function _start_prepare() {
+function _napi_add_key_command() {
   if(napi.available) {
     var delegates = config._keyhit_delegates[state.mode];
     var promises = [];
@@ -723,7 +725,7 @@ function _start_prepare() {
   }
 }
 
-function _stop_prepare() {
+function _napi_remove_key_command() {
   if(napi.available) {
     var delegates = config._keyhit_delegates[state.mode];
     var promises = [];
@@ -737,6 +739,12 @@ function _stop_prepare() {
   } else {
     return Promise.resolve();
   }
+}
+function _start_prepare() {
+  return _napi_add_key_command();
+}
+function _stop_prepare() {
+  return _napi_remove_key_command();
 }
 
 /**
@@ -1534,16 +1542,23 @@ function _meta_true_check(v) {
   return v == 'true' || v == '';
 }
 
-function _will_go_in_or_out() {
+function _on_override_go_in_or_out() {
   state._auto_next_rem_loops = config.auto_next_loops || 0
-  if(state.mode == 'auto' && state.auto_next_dead)
-    state.auto_next_start()
+  if(state.mode == 'auto' && state.auto_next_dead) {
+    var promise = _tree_go_next();
+    state.auto_next_start();
+    return promise;
+  }
+  return null;
 }
 
 function _tree_go_out() {
   if(!state.can_move)
     return Promise.resolve();
-  _will_go_in_or_out()
+  var res;
+  if((res = _on_override_go_in_or_out()) != null) {
+    return res;
+  }
   if(state.positions.length > 1) {
     state.positions.pop();
   } else {
@@ -1557,10 +1572,12 @@ function _tree_go_in() {
   if(!state.can_move)
     return Promise.resolve();
   var tmp;
+  if((tmp = _on_override_go_in_or_out()) != null) {
+    return tmp;
+  }
   var position = _get_current_position();
   if(position.index == -1) // not started yet, do nothing
     return Promise.resolve();
-  _will_go_in_or_out()
   var atree = _get_current_node();
   if(atree.is_leaf) {
     // is leaf node, select
@@ -1635,15 +1652,18 @@ function _tree_go_in() {
           .then(function() {
             // start again, on demand
             function finish() {
-              if(popup_visible) {
-                popup.classList.remove('visible');
-                setTimeout(function() {
-                  popup_mtext.textContent = "";
-                  popup.classList.add('hide');
-                }, 500); // wait for hide transition 
-              }
-              _clean_state()
-              return start(); // start over
+              return _napi_remove_key_command()
+                .then(function() {
+                  if(popup_visible) {
+                    popup.classList.remove('visible');
+                    setTimeout(function() {
+                      popup_mtext.textContent = "";
+                      popup.classList.add('hide');
+                    }, 500); // wait for hide transition 
+                  }
+                  _clean_state()
+                  return start(); // start over
+                });
             }
             function clear() {
               if(atree.content_element)
@@ -1653,6 +1673,7 @@ function _tree_go_in() {
                 tmp.removeEventListener('click', onscreen_nav_click, false)
               }
               window.removeEventListener('keydown', onkeydown, false);
+              window.removeEventListener('x-keycommand', onkeydown, false);
             }
             function onscreen_nav_click() {
               clear()
@@ -1663,11 +1684,15 @@ function _tree_go_in() {
               clear()
               finish()
             }
-            tmp = document.querySelector('#navbtns')
-            if(tmp && config._onscreen_navigation) {
-              tmp.addEventListener('click', onscreen_nav_click, false)
-            }
-            window.addEventListener('keydown', onkeydown, false);
+            return _napi_add_key_command()
+              .then(function() {
+                tmp = document.querySelector('#navbtns')
+                if(tmp && config._onscreen_navigation) {
+                  tmp.addEventListener('click', onscreen_nav_click, false)
+                }
+                window.addEventListener('keydown', onkeydown, false);
+                window.addEventListener('x-keycommand', onkeydown, false);
+              });
           });
       });
   } else {
