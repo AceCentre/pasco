@@ -175,7 +175,8 @@
             <div class="col-sm-4">
               <div class="form-group hide-for-ios">
                 <label for="ignore_key_release_time" x-l10n>Ignore key presses under n ms</label>
-                <input class="form-control" type="number" id="ignore_key_release_time" name="ignore_key_release_time" value="0" data-validator="number">
+                <input class="form-control" type="number" id="ignore_key_release_time" name="ignore_key_release_time" value="0" data-validator="number" data-dependent="#ignore_key_release_time_range">
+                <input type="range" id="ignore_key_release_time_range" class="form-control" type="range" step="1" min="0" max="2000" data-dependent="#ignore_key_release_time">
               </div>
             </div>
           </div>
