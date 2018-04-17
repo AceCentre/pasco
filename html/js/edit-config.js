@@ -754,7 +754,7 @@ function _config_autosave_start_countdown() {
   window.__config_autosave_timeout = setTimeout(function() {
     $('form[name=edit-config] button[type=submit]').first().click();
     delete window.__config_autosave_timeout;
-  }, 2000);
+  }, 500);
 }
 
 
