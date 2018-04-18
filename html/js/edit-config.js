@@ -720,7 +720,7 @@ function update_alert(success, err) {
   $('.settings-danger-alert').toggleClass('visible', !success);
   if(success) {
     $('.settings-success-alert .alert-success')
-      .html('<strong>Success!</strong>')
+      .html('<strong>Saved!</strong>')
       .toggleClass('alert-hidden', false);
   } else {
     $('.settings-danger-alert .alert-danger')
