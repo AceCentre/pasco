@@ -22,7 +22,6 @@
 
   icu.rtl = false;
   icu.dictionary = {
-    'config_title': 'Paramètres',
     'help_title': 'PASCO - Ayuda',
     'Toggle navigation': 'Navegación de palanca',
     'Start': 'Comienzo',
@@ -47,8 +46,8 @@
     'Record': 'Grabar',
     'Audio List': 'Lista de audio',
     'Close': 'Cerca',
-    'config_title': 'PASCO - Configuración',
-    'Configuration': 'Configuración',
+    'config_title': 'Paramètres',
+    'Configuration': 'Paramètres',
     'On-Screen Navigation': 'Navegación en pantalla',
     'Auto': 'Automático',
     'Enable': 'Habilitar',

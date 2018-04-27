@@ -22,7 +22,6 @@
 
   icu.rtl = true;
   icu.dictionary = {
-    'config_title': 'إعدادات',
     'help_title': 'PASCO - مساعدة',
     'Toggle navigation': 'تبديل التنقل',
     'Start': 'بداية',
@@ -47,7 +46,7 @@
     'Record': 'سجل',
     'Audio List': 'قائمة الصوت',
     'Close': 'خروج',
-    'config_title': 'PASCO - التكوين',
+    'config_title': 'التكوين',
     'Configuration': 'تكوينات',
     'On-Screen Navigation': 'الملاحة على الشاشة',
     'Auto': 'أوتوماتيكي',
