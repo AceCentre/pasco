@@ -22,6 +22,7 @@
 
   icu.rtl = true;
   icu.dictionary = {
+    'config_title': 'إعدادات',
     'help_title': 'PASCO - مساعدة',
     'Toggle navigation': 'تبديل التنقل',
     'Start': 'بداية',
