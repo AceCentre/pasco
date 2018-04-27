@@ -48,6 +48,7 @@
     'Close': 'Cerca',
     'config_title': 'Paramètres',
     'Configuration': 'Paramètres',
+    'Settings': 'Paramètres',
     'On-Screen Navigation': 'Navegación en pantalla',
     'Auto': 'Automático',
     'Enable': 'Habilitar',

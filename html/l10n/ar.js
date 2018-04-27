@@ -48,6 +48,7 @@
     'Close': 'خروج',
     'config_title': 'التكوين',
     'Configuration': 'تكوينات',
+    'Settings': 'تكوينات',
     'On-Screen Navigation': 'الملاحة على الشاشة',
     'Auto': 'أوتوماتيكي',
     'Enable': 'مكن',
