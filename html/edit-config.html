@@ -52,6 +52,16 @@
       </div>
       <div class="row">
         <div class="col-xs-12">
+          <h3 x-l10n>Helpers</h3>
+          <div class="row m-b-10">
+            <div class="col-sm-6">
+              <label class="m-t-10 m-b-10 checkbox-inline"><input type="checkbox" name="back_at_end"><span x-l10n>Back option for all branches</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12">
           <h3 x-l10n>Switch Access</h3>
           <div class="row m-b-10">
             <div class="col-xs-12">
@@ -60,15 +70,14 @@
             </div>
           </div>
           <div class="row x-collapsable x-collapse" id="auto_mode_params">
-            <div class="col-sm-2">
+            <div class="col-sm-3">
               <div class="form-group">
                 <label for="auto_next_loops" x-l10n>Loops</label>
                 <input type="number" id="auto_next_loops" name="auto_next_loops" class="form-control" value="10" data-validator="number" data-dependent="#auto_next_loops_range">
                 <input type="range" id="auto_next_loops_range" class="form-control" type="range" step="1" min="0" max="4" data-dependent="#auto_next_loops">
               </div>
             </div>
-            <div class="col-sm-2">
-              <label class="m-t-10 m-b-10 checkbox-inline"><input type="checkbox" name="auto_back_at_end"><span x-l10n>Back option</span></label>
+            <div class="col-sm-1">
             </div>
             <div class="col-sm-4">
               <div class="form-group">

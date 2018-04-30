@@ -5,7 +5,7 @@
   "onscreen_navigation": "enable",
   "ignore_second_hits_time": 100,
   "ignore_key_release_time": 50,
-  "auto_back_at_end": true,
+  "back_at_end": true,
   "auto_next_delay": 200,
   "auto_next_first_run_delay": 0,
   "auto_next_recycle_delay": 0,

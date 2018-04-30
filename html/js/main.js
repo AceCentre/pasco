@@ -340,7 +340,7 @@ function _napi_remove_key_command() {
   }
 }
 function _start_prepare() {
-  if(!state.edit_mode && state.mode == 'auto' && config.auto_back_at_end) {
+  if(!state.edit_mode && config.back_at_end) {
     var tree = state.positions[0].tree;
     var content_template,
         tmp = document.querySelector('#tree-node-template');
@@ -351,7 +351,7 @@ function _start_prepare() {
   return _napi_add_key_command();
 }
 function _stop_prepare() {
-  if(!state.edit_mode && state.mode == 'auto' && config.auto_back_at_end) {
+  if(!state.edit_mode && config.back_at_end) {
     var tree = state.positions[0].tree;
     _stop_auto_remove_back(tree);
   }
