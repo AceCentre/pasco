@@ -43,17 +43,42 @@
 		    <li x-l10n>Choose a default tree of language or make your own. There are some example layouts in the software. You can use this but we will recommend that you adjust these for your own needs. There are a number of ways you can edit it. 1. In app - go to "Edit" in the menu, Select your item and either add, remove or edit the phrase. In iOS you can create a recorded message for the cue or main message. 2. Create your basic list in <a href="https://mindnode.com">MindNode</a> and export your mindmap as a markdown file. Import it. Done! 3. Create your structure in a text file and upload it in the config screen. 
       </ol>
 	  </p>
+	  <h2 x-l10n>Advanced editing</h2>
+	  <p x-l10n>In the config it's possible to import and export your own language tree. This is simply a text file. There are two ways you can make this:
+	  <ol>
+        <li x-l10n>Within MindNode. A mindmap editor. Create your list then export to Markdown and import this file</li>
+        <li x-l10n>Within a plain text editor (e.g. Notepad). Simply indent lines using the tab key under each heading. You can look at an example <a href="https://gist.githubusercontent.com/willwade/c4b96b99c1788b168f4b244f99f82baf/raw/0943dbaad21c4d72ba40ed4f8aeeaee7967bfb75/PlainTextTreeExample.txt">here</a>
+	  </ol>
+	  Copy and paste the file (either the markdown file - or the indented text file) into the <b>Tree</b> in the Config. 
+	  </p>
+	  <p x-l10n>	  
+	  As well as the indented or markdown text there are some additional commands you can add to the file.
+	  These are meta-data commands and cue commands
+	  
+	  Here are the meta-data commands:
+	   <ul>
+        <li>meta data-spell-letter=" "</li>
+        <li>meta data-spell-finish</li>
+		<li></li>
+	   </ul>	  
+	    
+	  </p>
       <h2 x-l10n>Credits</h2>
       <ul>
-        <li>Will Wade, https://acecentre.org.uk</li>
-        <li>Hossein Amin,  https://aminbros.com/</li>
+        <li>Inspiration and reason: Clients of the Ace Centre, https://acecentre.org.uk</li>
+        <li>Fundraising: Paul Pickford</li>
+        <li>Project management, Design and planning: Will Wade, https://acecentre.org.uk</li>
+        <li>Coding: Hossein Amin,  https://aminbros.com/</li>
       </ul>
+      
+      This software makes use of the following technologies:
+       <ul>
+        <li><span x-l10n>Responsive Voice for Text to Speech (Web)</span>, <a href="https://responsivevoice.org/">https://responsivevoice.org/</a></li>
+        <li><span x-l10n>Fontawesome</span>, <a href="http://fontawesome.com">http://fontawesome.com</a></li>
+      </ul>
+      
       <h2 x-l10n>Licence</h2>
-      <p x-l10n>This software is released under the <a href="https://choosealicense.com/licenses/gpl-3.0/">GNU GPL v3</a></p>
-      <h2 x-l10n>This app uses.. </h2>
-      <ul>
-        <li><span x-l10n>Web Responsive Voice</span>, <a href="https://responsivevoice.org/">https://responsivevoice.org/</a></li>
-      </ul>
+      <p x-l10n>This software is released under the <a href="https://choosealicense.com/licenses/gpl-3.0/">GNU GPL v3</a>. Want something new in the app? Please consider donating to the Ace centre to help fund the development or submitting features and code directly yourself on <a href="http://github.com/acecentre/pasco/issues">GitHub</a></p>
     </div>
     <!-- INJECT SCRIPTS -->
     <script src="bower_components/underscore/underscore-min.js"></script>
