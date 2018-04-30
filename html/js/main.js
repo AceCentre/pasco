@@ -933,40 +933,95 @@ function _tree_go_out() {
   return _scan_move();
 }
 
-function _in_check_spell_finish(atree) {
-  if(!_meta_true_check(atree.meta['spell-finish'])) {
-    // continue check
+function _in_check_spell_delchar(atree) {
+  if(_meta_true_check(atree.meta['spell-delchar'])) {
+    // concat and spell each letter
     var tmp = _get_node_attr_inherits_full(state.positions, 'spell-branch');
-    if(tmp && _meta_true_check(tmp[0])) {
-      // continue it
-      var idx = state.positions.indexOf(tmp[1]);
-      state.positions = state.positions.slice(0, idx + 1);
-      if(tmp[2] != null) {
-        state.positions.push({
-          tree: tmp[2],
-          index: 0
-        });
-      }
-      // concat and spell each letter
+    if(tmp && tmp[1]._concat_letters) {
       var concat_letters = tmp[1]._concat_letters;
       if(!concat_letters)
         concat_letters = tmp[1]._concat_letters = []
-      var letter = atree.meta['spell-letter'] || atree.text;
-      concat_letters.push(letter)
-      var msg;
-      {
-        var idx = concat_letters.lastIndexOf(' ');
-        if(idx != -1) {
-          msg = concat_letters.slice(0, idx).join('') + ' ' +
-            concat_letters.slice(idx + 1).join(' ');
-        } else {
-          msg = concat_letters.join(' ');
-        }
+      if(concat_letters.length > 0) {
+        var letter;
+        while((letter = concat_letters.pop()) == ' ')
+          ;
+      }
+      var msg, idx = concat_letters.lastIndexOf(' ');
+      if(idx != -1) {
+        msg = concat_letters.slice(0, idx).join('') + ' ' +
+          concat_letters.slice(idx + 1).join(' ');
+      } else {
+        msg = concat_letters.join(' ');
       }
       return _notify_move(_get_current_node(), atree, {
         main_override_msg: msg
       });
     }
+  }
+}
+function _in_check_spell_finish(atree) {
+  if(_meta_true_check(atree.meta['spell-finish'])) {
+    // display continue-concat if any
+    var popup = document.querySelector('#popup-message-wrp'),
+        popup_mtext = popup ? popup.querySelector('.main-text') : null,
+        tmp = _get_node_attr_inherits_full(state.positions, 'spell-branch');
+    if(tmp && tmp[1]._concat_letters) {
+      var msg = tmp[1]._concat_letters.join('');
+      if(popup && popup_mtext) {
+        popup_mtext.textContent = msg
+        popup.classList.remove('hide');
+        setTimeout(function() {
+          popup.classList.add('visible');
+        }, 10);
+      }
+      delete tmp[1]._concat_letters;
+      return stop()
+        .then(function() {
+          if(atree.content_element)
+            atree.content_element.classList.add('selected' || config.selected_class);
+          // speak it
+          return _move_sub_speak2.call(atree, 'main', msg)
+            .then(function() {
+              _start_at_next_action(atree)
+            });
+        });
+    }
+  }
+}
+function _in_check_spell_default(atree) {
+  // continue check
+  var tmp = _get_node_attr_inherits_full(state.positions, 'spell-branch');
+  if(tmp && _meta_true_check(tmp[0])) {
+    // continue it
+    var idx = state.positions.indexOf(tmp[1]);
+    state.positions = state.positions.slice(0, idx + 1);
+    if(tmp[2] != null) {
+      state.positions.push({
+        tree: tmp[2],
+        index: 0
+      });
+    } else {
+      state.positions[0].index = 0;
+    }
+    // concat and spell each letter
+    var concat_letters = tmp[1]._concat_letters;
+    if(!concat_letters)
+      concat_letters = tmp[1]._concat_letters = []
+    var letter = atree.meta['spell-letter'] || atree.text;
+    concat_letters.push(letter)
+    var msg;
+    {
+      var idx = concat_letters.lastIndexOf(' ');
+      if(idx != -1) {
+        msg = concat_letters.slice(0, idx).join('') + ' ' +
+          concat_letters.slice(idx + 1).join(' ');
+      } else {
+        msg = concat_letters.join(' ');
+      }
+    }
+    return _notify_move(_get_current_node(), atree, {
+      main_override_msg: msg
+    });
   }
 }
 function _in_check_back_n_branch(atree) {
@@ -981,7 +1036,54 @@ function _in_check_back_n_branch(atree) {
   }
   return _scan_move();
 }
-
+function _start_at_next_action(atree) {
+  // start again, on demand
+  function finish() {
+    return _napi_remove_key_command()
+      .then(function() {
+        var popup = document.querySelector('#popup-message-wrp'),
+            popup_mtext = popup ? popup.querySelector('.main-text') : null;
+        if(popup && popup.classList.contains('visible')) {
+          popup.classList.remove('visible');
+          setTimeout(function() {
+            if(popup_mtext)
+              popup_mtext.textContent = "";
+            popup.classList.add('hide');
+          }, 500); // wait for hide transition 
+        }
+        _clean_state()
+        return start(); // start over
+      });
+  }
+  function clear() {
+    if(atree.content_element)
+      atree.content_element.classList.remove('selected' || config.selected_class);
+    tmp = document.querySelector('#navbtns')
+    if(tmp && config._onscreen_navigation) {
+      tmp.removeEventListener('click', onscreen_nav_click, false)
+    }
+    window.removeEventListener('keydown', onkeydown, false);
+    window.removeEventListener('x-keycommand', onkeydown, false);
+  }
+  function onscreen_nav_click() {
+    clear()
+    finish()
+  }
+  function onkeydown(ev) {
+    ev.preventDefault();
+    clear()
+    finish()
+  }
+  return _napi_add_key_command()
+    .then(function() {
+      tmp = document.querySelector('#navbtns')
+      if(tmp && config._onscreen_navigation) {
+        tmp.addEventListener('click', onscreen_nav_click, false)
+      }
+      window.addEventListener('keydown', onkeydown, false);
+      window.addEventListener('x-keycommand', onkeydown, false);
+    });
+}
 function _tree_go_in() {
   if(!state.can_move)
     return Promise.resolve();
@@ -1002,83 +1104,26 @@ function _tree_go_in() {
 
     // special case
     // explicit finish check
+    var override_functions = [
+      _in_check_back_n_branch,
+      _in_check_spell_finish, _in_check_spell_delchar,
+      _in_check_spell_default
+    ];
     var res;
-    if((res = _in_check_spell_finish(atree)) != null)
-      return res;
-    if((res = _in_check_back_n_branch(atree)) != null)
-      return res;
-    
+    for(var i = 0, len = override_functions.length; i < len; i++) {
+      if((res = override_functions[i](atree)) != null)
+        return res;
+    }
     // finish it
     // on auto mode stop iteration and on any key restart
     return stop()
       .then(function() {
         if(atree.content_element)
           atree.content_element.classList.add('selected' || config.selected_class);
-        var speak_callable = _move_sub_speak2.bind(atree, 'main');
-        // display continue-concat if any
-        var popup = document.querySelector('#popup-message-wrp'),
-            popup_mtext = popup ? popup.querySelector('.main-text') : null,
-            popup_visible = false;
-        tmp = _get_node_attr_inherits_full(state.positions, 'spell-branch');
-        if(tmp && tmp[1]._concat_letters) {
-          var msg = tmp[1]._concat_letters.join('');
-          speak_callable = _move_sub_speak2.bind(atree, 'main', msg);
-          if(popup && popup_mtext) {
-            popup_mtext.textContent = msg
-            popup.classList.remove('hide');
-            popup_visible = true; 
-            setTimeout(function() {
-              popup.classList.add('visible');
-            }, 10);
-          }
-          delete tmp[1]._concat_letters;
-        }
         // speak it
-        return speak_callable()
+        return _move_sub_speak2.call(atree, 'main')
           .then(function() {
-            // start again, on demand
-            function finish() {
-              return _napi_remove_key_command()
-                .then(function() {
-                  if(popup_visible) {
-                    popup.classList.remove('visible');
-                    setTimeout(function() {
-                      popup_mtext.textContent = "";
-                      popup.classList.add('hide');
-                    }, 500); // wait for hide transition 
-                  }
-                  _clean_state()
-                  return start(); // start over
-                });
-            }
-            function clear() {
-              if(atree.content_element)
-                atree.content_element.classList.remove('selected' || config.selected_class);
-              tmp = document.querySelector('#navbtns')
-              if(tmp && config._onscreen_navigation) {
-                tmp.removeEventListener('click', onscreen_nav_click, false)
-              }
-              window.removeEventListener('keydown', onkeydown, false);
-              window.removeEventListener('x-keycommand', onkeydown, false);
-            }
-            function onscreen_nav_click() {
-              clear()
-              finish()
-            }
-            function onkeydown(ev) {
-              ev.preventDefault();
-              clear()
-              finish()
-            }
-            return _napi_add_key_command()
-              .then(function() {
-                tmp = document.querySelector('#navbtns')
-                if(tmp && config._onscreen_navigation) {
-                  tmp.addEventListener('click', onscreen_nav_click, false)
-                }
-                window.addEventListener('keydown', onkeydown, false);
-                window.addEventListener('x-keycommand', onkeydown, false);
-              });
+            _start_at_next_action(atree)
           });
       });
   } else {
