@@ -3,7 +3,7 @@
 
 function _edit_mode_toggle(b, restart) {
   if(state._changing_edit_mode)
-    return;
+    return; 
   state._changing_edit_mode = true;
   document.querySelector('#edit-config-btn')
     .classList[b?'add':'remove']('hide');
@@ -34,18 +34,33 @@ function _edit_mode_toggle(b, restart) {
   if(restart) {
     promise = stop()
       .then(function() {
-        renew_state(state)
+        state = renew_state(state)
+        state.silent_mode = b
+        state.mode = b ? 'switch' : config.mode || 'auto'
+        state.edit_mode = b
+        // check if positions are still valid
+        validate_positions(state.positions);
         return start(state)
       });
   } else {
-    promise = Promise.resolve();
-  }
-  return promise.then(function() {
     state.silent_mode = b
     state.mode = b ? 'switch' : config.mode || 'auto'
     state.edit_mode = b
+    promise = Promise.resolve();
+  }
+  return promise.then(function() {
     delete state._changing_edit_mode;
   });
+  function validate_positions(positions) {
+    for(var i = 0; i < positions.length; i++) {
+      var apos = positions[i];
+      if(apos.index >= apos.tree.nodes.length) {
+        apos.index = apos.tree.nodes.length - 1;
+        positions.splice(i + 1, positions.length - i - 1);
+        break;
+      }
+    }
+  }
 }
 
 function _remove_child_node(parent, idx) {
@@ -58,7 +73,7 @@ function _remove_child_node(parent, idx) {
   }
 }
 function _add_new_node(parent, index, override) {
-  var ul = parent.dom_element.querySelector(':scope > ul.children')
+  var ul = parent.nodes_ul_dom_element;
   if(!ul) {
     ul = newEl('ul')
     ul.classList.add('children')
@@ -228,8 +243,10 @@ function _on_edit_mode(evt) {
   if(document.querySelector('#edit-mode-btn').classList.contains('disabled')) {
     return;
   }
-  state._orig_snapshot = _take_snapshot()
   _edit_mode_toggle(true, true)
+    .then(function() {
+      state._orig_snapshot = _take_snapshot()
+    });
 }
 function _on_edit_save(evt) {
   if(evt)
@@ -248,8 +265,8 @@ function _on_edit_save(evt) {
       // did save
       save_btn.disabled = false;
       cancel_btn.disabled = false;
-      _edit_mode_toggle(false);
       delete state._orig_snapshot;
+      return _edit_mode_toggle(false, true);
     })
     .catch(function(err) {
       save_btn.disabled = false;
@@ -263,12 +280,37 @@ function _on_edit_cancel(evt) {
   editor_helper.on_restore(tree)
     .then(function() {
       // restore will stop => auto toggle off
-      // _edit_mode_toggle(false);
+      return _edit_mode_toggle(false, false);
+    })
+    .then(function() {
       return _restore_snapshot(state._orig_snapshot)
         .then(function() {
           delete state._orig_snapshot;
         });
     })
     .catch(handle_error);
+}
+function _take_snapshot() {
+  var tree = state.positions[0].tree,
+      new_tree = _clone_tree(tree),
+      new_tree_elm = tree_element.cloneNode()
+  tree_mk_list_base(new_tree, new_tree_elm); // re-create
+  if(tree.dom_element)
+    new_tree_elm.tree_height = tree.dom_element.tree_height;
+  return {
+    tree: new_tree,
+    positions: _state_redefine_positions(state.positions, new_tree)
+  };
+}
+function _restore_snapshot(snapshot) {
+  return stop(state)
+    .then(function() {
+      state = renew_state(state)
+      tree_element.parentNode.replaceChild(snapshot.tree.dom_element, tree_element)
+      tree_element = snapshot.tree.dom_element
+      tree = snapshot.tree
+      state.positions = snapshot.positions
+      return start(state)
+    });
 }
 /** <Edit Mode/> **/

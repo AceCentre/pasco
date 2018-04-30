@@ -340,10 +340,51 @@ function _napi_remove_key_command() {
   }
 }
 function _start_prepare() {
+  if(!state.edit_mode && state.mode == 'auto' && config.auto_back_at_end) {
+    var tree = state.positions[0].tree;
+    var content_template,
+        tmp = document.querySelector('#tree-node-template');
+    if(tmp)
+      content_template = _.template(tmp.innerHTML);
+    _start_auto_insert_back(tree, content_template);
+  }
   return _napi_add_key_command();
 }
 function _stop_prepare() {
+  if(!state.edit_mode && state.mode == 'auto' && config.auto_back_at_end) {
+    var tree = state.positions[0].tree;
+    _stop_auto_remove_back(tree);
+  }
   return _napi_remove_key_command();
+}
+
+function _start_auto_insert_back(tree, content_template) {
+  _.each(tree.nodes, function(anode) {
+    if(!anode.is_leaf) {
+      anode._back_node = tree_add_node(anode, null, {
+        _more_meta: {
+          istmp: true
+        },
+        meta: {
+          'back-n-branch': '1'
+        },
+        text: _t('Back')
+      }, content_template);
+      _start_auto_insert_back(anode, content_template);
+    }
+  });
+}
+
+function _stop_auto_remove_back(tree) {
+  _.each(tree.nodes, function(anode) {
+    if(anode._back_node) {
+      tree_remove_node(anode._back_node);
+      delete anode._back_node;
+    }
+    if(!anode.is_leaf) {
+      _stop_auto_remove_back(anode);
+    }
+  });
 }
 
 /**
@@ -418,29 +459,6 @@ function renew_state(_state) {
 
 function _clean_state(_state) {
   _update_active_positions(_state, []);
-}
-
-function _take_snapshot() {
-  var tree = state.positions[0].tree,
-      new_tree = _clone_tree(tree),
-      new_tree_elm = tree_element.cloneNode()
-  tree_mk_list_base(new_tree, new_tree_elm); // re-create
-  if(tree.dom_element)
-    new_tree_elm.tree_height = tree.dom_element.tree_height;
-  return {
-    tree: new_tree,
-    positions: _state_redefine_positions(state.positions, new_tree)
-  };
-}
-function _restore_snapshot(snapshot) {
-  return stop(state)
-    .then(function() {
-      tree_element.parentNode.replaceChild(snapshot.tree.dom_element, tree_element)
-      tree_element = snapshot.tree.dom_element
-      tree = snapshot.tree
-      state.positions = snapshot.positions
-      return start(state)
-    });
 }
 
 function _on_navbtns_tstart(evt) {
@@ -685,7 +703,7 @@ function _update_active_positions_tree() {
         node = pos.index == -1 ?
                (pos.tree.nodes.length > 0 ?
                 pos.tree.nodes[0] : null) : _get_current_node(pos),
-        ul = pos.tree.dom_element.querySelector(':scope > .children'),
+        ul = pos.tree.nodes_ul_dom_element,
         el = node ? node.dom_element : null,
         height = el ? el.offsetHeight : 0,
         offY = el ? el.offsetTop : 0,
@@ -857,9 +875,9 @@ function _get_current_node(position) {
   }
 }
 
-function _get_node_attr_inherits_full(name) {
-  for(var i = state.positions.length - 1; i >= 0; i--) {
-    var pos = state.positions[i];
+function _get_node_attr_inherits_full(positions, name) {
+  for(var i = positions.length - 1; i >= 0; i--) {
+    var pos = positions[i];
     if(pos.index == -1) { // special case, at root
       var node = pos.tree.nodes[pos.index],
           val = node.meta[name]
@@ -875,6 +893,16 @@ function _get_node_attr_inherits_full(name) {
   }
   return null;
 }
+
+function _meta_as_int(v, default_val) {
+  if(v == null)
+    return default_val;
+  var i = parseInt(v);
+  if(isNaN(i))
+    return default_val;
+  return i;
+}
+
 function _meta_true_check(v) {
   return v == 'true' || v == '';
 }
@@ -905,6 +933,55 @@ function _tree_go_out() {
   return _scan_move();
 }
 
+function _in_check_spell_finish(atree) {
+  if(!_meta_true_check(atree.meta['spell-finish'])) {
+    // continue check
+    var tmp = _get_node_attr_inherits_full(state.positions, 'spell-branch');
+    if(tmp && _meta_true_check(tmp[0])) {
+      // continue it
+      var idx = state.positions.indexOf(tmp[1]);
+      state.positions = state.positions.slice(0, idx + 1);
+      if(tmp[2] != null) {
+        state.positions.push({
+          tree: tmp[2],
+          index: 0
+        });
+      }
+      // concat and spell each letter
+      var concat_letters = tmp[1]._concat_letters;
+      if(!concat_letters)
+        concat_letters = tmp[1]._concat_letters = []
+      var letter = atree.meta['spell-letter'] || atree.text;
+      concat_letters.push(letter)
+      var msg;
+      {
+        var idx = concat_letters.lastIndexOf(' ');
+        if(idx != -1) {
+          msg = concat_letters.slice(0, idx).join('') + ' ' +
+            concat_letters.slice(idx + 1).join(' ');
+        } else {
+          msg = concat_letters.join(' ');
+        }
+      }
+      return _notify_move(_get_current_node(), atree, {
+        main_override_msg: msg
+      });
+    }
+  }
+}
+function _in_check_back_n_branch(atree) {
+  var i = _meta_as_int(atree.meta['back-n-branch'], null);
+  if(i == null)
+    return;
+  if(state.positions.length <= i + 1) {
+    i = state.positions.length - 1;
+  }
+  while(i-- > 0) {
+    var last_pos = state.positions.pop();
+  }
+  return _scan_move();
+}
+
 function _tree_go_in() {
   if(!state.can_move)
     return Promise.resolve();
@@ -918,47 +995,19 @@ function _tree_go_in() {
   var atree = _get_current_node();
   if(atree.is_leaf) {
     // is leaf node, select
-    // check for specific case
 
     // for edit_mode do nothing
     if(state.edit_mode)
       return Promise.resolve();
-    
+
+    // special case
     // explicit finish check
-    if(!_meta_true_check(atree.meta['spell-finish'])) {
-      // continue check
-      tmp = _get_node_attr_inherits_full('spell-branch');
-      if(tmp && _meta_true_check(tmp[0])) {
-        // continue it
-        var idx = state.positions.indexOf(tmp[1]);
-        state.positions = state.positions.slice(0, idx + 1);
-        if(tmp[2] != null) {
-          state.positions.push({
-            tree: tmp[2],
-            index: 0
-          });
-        }
-        // concat and spell each letter
-        var concat_letters = tmp[1]._concat_letters;
-        if(!concat_letters)
-          concat_letters = tmp[1]._concat_letters = []
-        var letter = atree.meta['spell-letter'] || atree.text;
-        concat_letters.push(letter)
-        var msg;
-        {
-          var idx = concat_letters.lastIndexOf(' ');
-          if(idx != -1) {
-            msg = concat_letters.slice(0, idx).join('') + ' ' +
-              concat_letters.slice(idx + 1).join(' ');
-          } else {
-            msg = concat_letters.join(' ');
-          }
-        }
-        return _notify_move(_get_current_node(), atree, {
-          main_override_msg: msg
-        });
-      }
-    }
+    var res;
+    if((res = _in_check_spell_finish(atree)) != null)
+      return res;
+    if((res = _in_check_back_n_branch(atree)) != null)
+      return res;
+    
     // finish it
     // on auto mode stop iteration and on any key restart
     return stop()
@@ -970,7 +1019,7 @@ function _tree_go_in() {
         var popup = document.querySelector('#popup-message-wrp'),
             popup_mtext = popup ? popup.querySelector('.main-text') : null,
             popup_visible = false;
-        tmp = _get_node_attr_inherits_full('spell-branch');
+        tmp = _get_node_attr_inherits_full(state.positions, 'spell-branch');
         if(tmp && tmp[1]._concat_letters) {
           var msg = tmp[1]._concat_letters.join('');
           speak_callable = _move_sub_speak2.bind(atree, 'main', msg);

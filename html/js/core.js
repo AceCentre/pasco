@@ -131,7 +131,6 @@ function initialize_app() {
     return Promise.resolve();
   }
 }
-
 function tree_mk_list_base(tree, el, content_template) {
   el.target_node = tree
   tree.dom_element = el;
@@ -169,6 +168,7 @@ function tree_mk_list_base(tree, el, content_template) {
   if(!tree.is_leaf) {
     var nodes = tree.nodes,
         ul = newEl('ul');
+    tree.nodes_ul_dom_element = ul;
     ul.classList.add('children');
     for(var i = 0, len = nodes.length; i < len; ++i) {
       var node = nodes[i],
@@ -198,6 +198,48 @@ function parse_dom_tree_subrout_parse_text(text) {
     meta: meta,
     _more_meta: _more_meta
   }
+}
+function tree_remove_node(node) {
+  var parent = node.parent,
+      idx = parent.nodes.indexOf(node);
+  if(idx != -1) {
+    parent.nodes.splice(idx, 1);
+  }
+  node.deleted = true;
+  node.dom_element.parentNode.removeChild(node.dom_element)
+  if(parent.nodes.length == 0) {
+    delete parent.nodes
+    parent.is_leaf = true
+  }
+}
+function tree_add_node(parent_node, at, data, content_template) {
+  // data can contain (_more_meta, meta, text, nodes)
+  var node = {
+    is_leaf: !data.nodes || data.nodes.length == 0,
+    level: parent_node.level + 1,
+    text: data.text,
+    meta: data.meta,
+    _more_meta: data._more_meta,
+    parent: parent_node
+  };
+  if(at == null) {
+    at = parent_node.nodes.length;
+  } else if(at > parent_node.nodes.length || at < 0) {
+    throw new Error("`at` should be in range of parent's nodes");
+  }
+  var after_node;
+  if(at < parent_node.nodes.length) {
+    after_node = at.parent_node.nodes[at];
+  }
+  parent_node.nodes.splice(at, 0, node);
+  var li = newEl('li');
+  if(after_node) {
+    parent_node.nodes_ul_dom_element.insertBefore(li, after_node.dom_element);
+  } else {
+    parent_node.nodes_ul_dom_element.appendChild(li);
+  }
+  tree_mk_list_base(node, li, content_template);
+  return node;
 }
 function parse_dom_tree(el, continue_at, tree) {
   continue_at = continue_at || { i: 0 };
@@ -921,10 +963,10 @@ function set_needs_update_collapsables() {
 }
 
 function update_collapsables() {
-  var elms = document.querySelectorAll('.collapsable');
+  var elms = document.querySelectorAll('.x-collapsable');
   for(var i = 0, len = elms.length; i < len; i++) {
     var elm = elms[i];
-    if(!elm.classList.contains('collapse')) {
+    if(!elm.classList.contains('x-collapse')) {
       update_collapsable(elm);
     }
   }
@@ -934,7 +976,7 @@ function update_collapsable(elm) {
   var tmp = elm;
   var set_height_queue = [];
   while(tmp != null && tmp.nodeType == document.ELEMENT_NODE) {
-    if(tmp.classList.contains('collapsable')) {
+    if(tmp.classList.contains('x-collapsable')) {
       set_height_queue.push(update_collapsable_subrout(tmp));
     }
     tmp = tmp.parentNode;
@@ -961,12 +1003,12 @@ function update_collapsable_subrout(elm) {
 }
 
 function collapsable_toggle(toggle_el, toggle) {
-  var contains_collapse = toggle_el.classList.contains('collapse');
+  var contains_collapse = toggle_el.classList.contains('x-collapse');
   toggle = toggle == null ? !contains_collapse : toggle
   if(toggle_el._collapsable_timeout != null)
     clearTimeout(toggle_el._collapsable_timeout);
   if(toggle && contains_collapse) {
-    toggle_el.classList.remove('collapse')
+    toggle_el.classList.remove('x-collapse')
     update_collapsable(toggle_el);
   } else if(!toggle && !contains_collapse) {
     toggle_el.style.display = 'none';
@@ -974,7 +1016,7 @@ function collapsable_toggle(toggle_el, toggle) {
       update_collapsable(toggle_el.parentNode);
     toggle_el.style.display = '';
     toggle_el._collapsable_timeout = setTimeout(function() {
-      toggle_el.classList.add('collapse')
+      toggle_el.classList.add('x-collapse')
       delete toggle_el._collapsable_timeout;
     }, 10);
   }
@@ -1038,12 +1080,15 @@ function _tree_to_markdown_subrout_meta_html(anode) {
   return null;
 }
 function _tree_to_markdown_subrout_node(node, level, md_lines) {
-  var auditory_cue_in_text = node._more_meta['auditory-cue-in-text'],
-      text = level > 0 ?
+  var text = level > 0 ?
              (node.text +
-              (auditory_cue_in_text ?
+              (node._more_meta['auditory-cue-in-text'] ?
                '('+node.meta['auditory-cue']+')' : '')) : null,
       meta_html = _tree_to_markdown_subrout_meta_html(node);
+  if(node._more_meta.istmp) {
+    // temporary nodes will not be listed for next save
+    return;
+  }
   var line = (text != null ? '#'.repeat(level) + ' ' + text : '') +
       (meta_html ? ' ' + meta_html : '');
   if(line) {
