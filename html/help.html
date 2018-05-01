@@ -44,25 +44,43 @@
       </ol>
 	  </p>
 	  <h2 x-l10n>Advanced editing</h2>
-	  <p x-l10n>In the config it's possible to import and export your own language tree. This is simply a text file. There are two ways you can make this:
+	  <p x-l10n>In the config it's possible to import and export your own language tree. This is simply a text file. There are two ways you can make this:</p>
 	  <ol>
         <li x-l10n>Within MindNode. A mindmap editor. Create your list then export to Markdown and import this file</li>
         <li x-l10n>Within a plain text editor (e.g. Notepad). Simply indent lines using the tab key under each heading. You can look at an example <a href="https://gist.githubusercontent.com/willwade/c4b96b99c1788b168f4b244f99f82baf/raw/0943dbaad21c4d72ba40ed4f8aeeaee7967bfb75/PlainTextTreeExample.txt">here</a>
 	  </ol>
-	  Copy and paste the file (either the markdown file - or the indented text file) into the <b>Tree</b> in the Config. 
-	  </p>
-	  <p x-l10n>	  
-	  As well as the indented or markdown text there are some additional commands you can add to the file.
-	  These are meta-data commands and cue commands
-	  
-	  Here are the meta-data commands:
-	   <ul>
-        <li>meta data-spell-letter=" "</li>
-        <li>meta data-spell-finish</li>
-		<li></li>
-	   </ul>	  
-	    
-	  </p>
+	  <p>Copy and paste the file (either the markdown file - or the indented text file) into the <b>Tree</b> in the Config. </p>
+	  <p x-l10n>
+	    As well as the indented or markdown text there are some additional commands you can add to the file. These are meta-data commands and cue commands
+      </p>
+      <h3 x-l10n>Metadata</h3>
+      <p x-l10n>The following is an example markdown for a metadata in a node</p>
+      <pre># I have something to say&lt;meta data-audio="some/audio/file.mp3"&gt;</pre>
+	  <dl>
+        <dt>auditory-cue="&lt;TEXT&gt;"</dt>
+        <dd>It's the replacement text for utterance for cue.</dd>
+      </dl>
+      <h4 x-l10n>Spell metadata</h4>
+      <p x-l10n>Spelling function is builtin pasco, here are metadata for installing it</p>
+	  <dl>
+        <dt>spell-letter="&lt;A LETTER&gt;"</dt>
+        <dd>It's the replacement for the text existed in that node. Instead this value will be added to list of letters</dd>
+        <dt>spell-finish</dt>
+        <dd>The option to end the spell round</dd>
+        <dt>spell-delchar</dt>
+        <dd>The option to remove last inserted character in spelling queue</dd>
+        <dt>spell-branch</dt>
+        <dd>Considers all leaf of that branch to be as spell letters, It used for defining where spell function should be used.</dd>
+	  </dl>
+      <h4 x-l10n>Audio metadata</h4>
+	  <dl>
+        <dt>audio="&lt;PATH/TO/AUDIO/FILE&gt;"</dt>
+        <dd>Plays the selected audio for cue and main voice</dd>
+        <dt>cue-audio="&lt;PATH/TO/AUDIO/FILE&gt;"</dt>
+        <dd>Plays the selected audio for cue voice</dd>
+        <dt>main-audio="&lt;PATH/TO/AUDIO/FILE&gt;"</dt>
+        <dd>Plays the selected audio for main voice</dd>
+      </dl>
       <h2 x-l10n>Credits</h2>
       <ul>
         <li>Inspiration and reason: Clients of the Ace Centre, https://acecentre.org.uk</li>

@@ -545,20 +545,37 @@ function insert_config() {
                        config.auto_keys['13'].func == 'tree_go_in' ? 'enter' :
                        (config.auto_keys['32'] &&
                         config.auto_keys['32'].func == 'tree_go_in' ? 'space':
-                        null))
+                        null)),
+        secondary_to_move = (forward_key == 'enter' ?
+                             config.auto_keys['32'] &&
+                             config.auto_keys['32'].func == 'tree_go_next' :
+                             (forward_key == 'space' ? 
+                              config.auto_keys['13'] &&
+                              config.auto_keys['13'].func == 'tree_go_next' :
+                              false));
+      
     $form.find('[name=_auto_forward_key]').each(function() {
       this.checked = this.value == forward_key
-    })
+    });
+    $form.find('[name=_auto_secondary_key_move]').prop('checked', secondary_to_move);
   }
   if(config.switch_keys) {
     var forward_key = (config.switch_keys['13'] &&
                        config.switch_keys['13'].func == 'tree_go_in'?'enter':
                        (config.switch_keys['32'] &&
                         config.switch_keys['32'].func == 'tree_go_in'?'space':
-                        null))
+                        null)),
+        secondary_to_move = (forward_key == 'enter' ?
+                             config.switch_keys['32'] &&
+                             config.switch_keys['32'].func == 'tree_go_next' :
+                             (forward_key == 'space' ? 
+                              config.switch_keys['13'] &&
+                              config.switch_keys['13'].func == 'tree_go_next' :
+                              false));
     $form.find('[name=_switch_forward_key]').each(function() {
       this.checked = this.value == forward_key
     })
+    $form.find('[name=_switch_secondary_key_move]').prop('checked', secondary_to_move);
   }
   _.each(_voice_id_links, function(alink) {
     var propname = (speaku.is_native ? '' : 'alt_') + 'voiceId',
@@ -601,37 +618,51 @@ function do_save_config($form, _config, hdlerr) {
     // specific
     if(!is_quick_setup) {
       var $inp = $form.find('[name=_auto_forward_key]:checked'),
+          secondary_key_to_move = $form.find('[name=_auto_secondary_key_move]').prop('checked'),
           keys = null;
       switch($inp.val()) {
       case 'enter':
         keys = {
-          '32': { 'func': 'tree_go_out', 'comment': 'space' },
           '13': { 'func': 'tree_go_in', 'comment': 'enter' }
         }
+        if(secondary_key_to_move)
+          keys['32'] = { 'func': 'tree_go_next', 'comment': 'space' };
+        else
+          keys['32'] = { 'func': 'tree_go_out', 'comment': 'space' };
         break;
       case 'space':
         keys = {
-          '32': { 'func': 'tree_go_in', 'comment': 'space' },
-          '13': { 'func': 'tree_go_out', 'comment': 'enter' }
+          '32': { 'func': 'tree_go_in', 'comment': 'space' }
         }
+        if(secondary_key_to_move)
+          keys['13'] = { 'func': 'tree_go_next', 'comment': 'enter' };
+        else
+          keys['13'] = { 'func': 'tree_go_out', 'comment': 'enter' };
         break;
       }
       if(keys)
         _config.auto_keys = Object.assign((_config.auto_keys || {}), keys);
       $inp = $form.find('[name=_switch_forward_key]:checked');
+      secondary_key_to_move = $form.find('[name=_switch_secondary_key_move]').prop('checked');
       keys = null;
       switch($inp.val()) {
       case 'enter':
         keys = {
-          '32': { 'func': 'tree_go_out', 'comment': 'space' },
           '13': { 'func': 'tree_go_in', 'comment': 'enter' }
         }
+        if(secondary_key_to_move)
+          keys['32'] = { 'func': 'tree_go_next', 'comment': 'space' };
+        else
+          keys['32'] = { 'func': 'tree_go_out', 'comment': 'space' };
         break;
       case 'space':
         keys = {
-          '32': { 'func': 'tree_go_in', 'comment': 'space' },
-          '13': { 'func': 'tree_go_out', 'comment': 'enter' }
+          '32': { 'func': 'tree_go_in', 'comment': 'space' }
         }
+        if(secondary_key_to_move)
+          keys['13'] = { 'func': 'tree_go_next', 'comment': 'enter' };
+        else
+          keys['13'] = { 'func': 'tree_go_out', 'comment': 'enter' };
         break;
       }
       if(keys)
