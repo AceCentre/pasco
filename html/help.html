@@ -39,11 +39,13 @@
       <p>
       <b>pasco</b> is not designed to meet all and every communication aid users needs. Its fundamentally designed to suit early switch scanning users who also need <b>auditory cues</b>. Despite this it can be used in a range of ways. Find the relevant section below for some help and some common tips. 
       <ol>
+      	<li><a href="#config-auditorycue">How to setup for auditory cues</a></li>
       	<li><a href="#config-examples">Configurations for different use cases</a>
       	<ul>
       		<li><a href="#config-single-switch">A Single Switch user</a></li>
       		<li><a href="#config-twoswitch">A Two-Switch user</a></li>
       		<li><a href="#config-nav">Someone who controls the up/down keys on a remote control</a></li>
+      		<li><a href="#config-numkeys">Someone who can control the arrow keys of a external (Bluetooth or wired) keyboard</li>
       		<li><a href="#config-non-native">A non-native communicator</a></li>
       	</ul>
       	</li>
@@ -54,7 +56,9 @@
       	<li><a href="#licence">Licence</a></li>
       </ol>
 	  </p>
-	  <h2 x-l10n><a name="config-examples"></a>Configurations for different use cases</h2>
+	  <h2><a name="config-auditorycue"></a>How to setup for auditory cues</h2>
+	  <p>pasco is designed to work well with an external headphone or speaker so the person communicating can only hear the cue rather than others in their environment hearing the cue constantly. <b>Please note. This feature is only available on iOS at present</b>. To do this plug in a wired headphone or speaker to the device (<b>it does not work on bluetooth speakers yet!</b>). When you do this all sound, by default, will now be directed to your headphones. To redirect the Main voice to the speaker of the iPhone/iPad you need to check the box to <b>redirect the output</b> in the <b>Config</b>-><b>Speech</b>.</p>
+	  <h2><a name="config-examples"></a>Configurations for different use cases</h2>
 	  <h3><a name="config-single-switch"></a>A Single Switch user</h3>
 	  <p>If someone is operating a single button and has learnt the basics of simple automatic scanning then they can use pasco to make their needs known. A video explaining scanning can be found <a href="https://www.youtube.com/watch?v=g4CwiMHuTjo">here</a>. To configure pasco for this within the <b>Config</b> Screen change it to <b>"Automatic-Scanning"</b> Under <b>"Switch Access"</b>. There are some options available when you do this.
 	  	
@@ -67,7 +71,7 @@
 	  There are some other settings too which are not specific to single switch scanning:
 	  
 	  <ul>
-	  	<li><b>Switch Key to move forward</b> Many switch boxes (the piece of equipment that connects your switch to the computer) use space or enter as the emulated key press. Which emulated key press are you using?</li>
+	  	<li><b>Switch key to select items</b> Many switch boxes (the piece of equipment that connects your switch to the computer) use space or enter as the emulated key press. Which emulated key press are you using? This will be the key that selects items</li>
 	  	<li><b>First Time Run (Cue Voice)</b> It can be useful to have a cue for the first time the scan goes through each level of your vocabulary. This may go a lot faster than the regular scan rate. This is called the <b>First time Run</b>. By turning this on you can change the rate and a different voice if required</li>
 	  	<li><b>Ignore second hits(ms)</b> If the user has difficulty pressing the switch once - or for example tremors on a switch - increasing this time can help. It ignores second hits of the switch if they are within the time period selected</li>
 	  	<li><b>Ignore key presses under n ms</b> This setting tells the app to ignore short switch presses. You can alter this time as you need to. </li>
@@ -80,7 +84,8 @@
 	  <p>
 	  Some people may use two switches. One switch will move through the items - with a second switch selecting them. This is called <b>Two-switch</b> or <b>Manual</b> scanning. To configure pasco for this within the <b>Config</b> Screen change it to <b>"Manual"</b> Under <b>"Switch Access"</b>. There are some options available when you do this.
 	  <ul>
-	  	<li><b>Switch Key to move forward</b> Many switch boxes (the piece of equipment that connects your switch to the computer) use space or enter as the emulated key press. Which emulated key press are you using?</li>
+	  	<li><b>Switch key to select items</b> Many switch boxes (the piece of equipment that connects your switch to the computer) use space or enter as the emulated key press. Which emulated key press are you using? This will be the key that selects items. </li>
+	  	<li><b>Move with the other switch (Step scanning)</b>You will need to select this if you are using two switch scanning. What does this button do? Lets imagine you select "Space" as your selection key. Checking this box will make "Enter" your move key. Equally if you have "Enter" as your selection key it makes "Space" the move key. </li>
 	  	<li><b>First Time Run (Cue Voice)</b> It can be useful to have a cue for the first time the scan goes through each level of your vocabulary. This may go a lot faster than the regular scan rate. This is called the <b>First time Run</b>. By turning this on you can change the rate and a different voice if required</li>
 	  	<li><b>Ignore second hits(ms)</b> If the user has difficulty pressing the switch once - or for example tremors on a switch - increasing this time can help. It ignores second hits of the switch if they are within the time period selected</li>
 	  	<li><b>Ignore key presses under n ms</b> This setting tells the app to ignore short switch presses. You can alter this time as you need to. </li>
@@ -95,6 +100,14 @@
 	  </p>
 	  <p>The navigation arrow allows you to go up,down, left and right through the language of your vocabulary</p>
 	  <p>Once on you can press and hold on the 4 way arrow to move the navigation tool around the screen to where you need it - and resize it. To resize it press and hold on the middle of the arrow then grab the edge of the dotted line surrounding it to resize the tool. </p>
+	  
+	  <h3><a name="config-numspeech"></a>Someone who can control the arrow keys of a external (Bluetooth or wired) keyboard</h3>
+	  <p>
+	  Some individuals can operate an external number pad (like <a href="https://www.amazon.co.uk/Satechi®-Bluetooth-Wireless-Notebook-Compatible/dp/B011AO91GI/ref=sr_1_46?ie=UTF8&qid=1525248689&sr=8-46&keywords=bluetooth+pad">this</a>) - where one or more fingers can operate the arrow keys. This can be placed in the correct place - and mounted if required. 	  
+	  </p>
+	  <p>To use this, pair with your device (iPhone, iPad or other device using pasco). Make sure your numlock setting is on so you can use the arrow keys. The arrows allows you to go up,down, left and right through the language of your vocabulary</p>
+	
+	  	  
 	  <h3><a name="config-non-native"></a>A non-native Communicator</h3>
 	  <p>Some people may understand one language but need to communicate to others in a different language. Pasco allows you to do this by changing the voice of the cue (the voice that the pasco user would hear) - and the main voice (the voice that others would hear). There are two ways you can achieve this with pasco
 
