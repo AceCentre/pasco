@@ -2,7 +2,7 @@
 
   function filename_friendly(s) {
     return s.replace(/[ \(\)\[\]\*\#\@\!\$\%\^\&\+\=\/\\]/g, '_')
-      .replace(/[\r\n\t]/g, '');
+      .replace(/[\r\n\t'"]/g, '');
   }
 
   function find_unique_filename(dir, basename, ext, extra, try_len) {
