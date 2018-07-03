@@ -5,14 +5,16 @@
   "description": "Phrase Auditory Scanning COmmunicator. Intended to be cross-platform",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "author": "Apache Cordova Team",
   "license": "Apache-2.0",
   "dependencies": {
     "audscan-cordova-plugin": "git+https://github.com/hosseinamin/audscan-cordova-plugin.git",
     "browser-sync": "^2.23.6",
-    "cheerio": "^0.19.0",
+    "cheerio": "^0.20.0",
     "cordova": "^8.0.0",
     "cordova-ios": "^4.5.4",
     "cordova-plugin-browsersync": "^1.1.0",
@@ -28,7 +30,8 @@
     "npm": "^2.15.12",
     "plist": "^1.2.0",
     "q": "^1.5.1",
-    "uuid": "^3.1.0"
+    "uuid": "^3.1.0",
+    "snyk": "^1.88.0"
   },
   "cordova": {
     "plugins": {
@@ -45,5 +48,6 @@
     "platforms": [
       "ios"
     ]
-  }
+  },
+  "snyk": true
 }
