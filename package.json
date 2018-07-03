@@ -12,7 +12,9 @@
     "dev-bs": "browser-sync start -c bs-config.js",
     "build": "gulp lessc-all",
     "cordova-dist": "gulp cordova-dist",
-    "watch-cordova-dist": "gulp watch-cordova-dist"
+    "watch-cordova-dist": "gulp watch-cordova-dist",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -30,6 +32,8 @@
     "gulp": "^3.9.1",
     "gulp-less": "^4.0.0",
     "gulp-sourcemaps": "^2.6.0",
-    "plist": "3.0.1"
-  }
+    "plist": "3.0.1",
+    "snyk": "^1.88.0"
+  },
+  "snyk": true
 }
