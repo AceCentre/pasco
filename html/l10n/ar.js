@@ -64,7 +64,7 @@
     'Voice': 'صوت',
     'Volume': 'مقدار',
     'Pitch': 'رمية',
-    'Hitting 1 will go to previous and 2 to next. Also W/S, Up/Down arrow will work.': 'ضرب 1 سيذهب إلى السابق و 2 إلى التالي. أيضا W / S ، ستعمل أعلى / أسفل السهم.',
+    'Using a keyboard: Hitting 1 will go to previous and 2 to next. Also keys W/S, Up/Down arrow will work to navigate the tree': 'ضرب 1 سيذهب إلى السابق و 2 إلى التالي. أيضا W / S ، ستعمل أعلى / أسفل السهم.',
     'Switch key to move forward': 'مفتاح التبديل للمضي قدما',
     'Ignore second hits(ms)': 'تجاهل النتائج الثانية (بالميلي ثانية)',
     'Ignore key presses under n ms': 'تجاهل الضغوط الرئيسية تحت n ms',

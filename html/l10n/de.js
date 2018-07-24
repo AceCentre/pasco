@@ -64,7 +64,7 @@
     'Voice': 'Voz',
     'Volume': 'Volumen',
     'Pitch': 'Tono',
-    'Hitting 1 will go to previous and 2 to next. Also W/S, Up/Down arrow will work.': 'Golpear 1 irá al anterior y 2 al próximo. También W / S, flecha arriba / abajo funcionará.',
+    'Using a keyboard: Hitting 1 will go to previous and 2 to next. Also keys W/S, Up/Down arrow will work to navigate the tree': 'Golpear 1 irá al anterior y 2 al próximo. También W / S, flecha arriba / abajo funcionará.',
     'Switch key to move forward': 'Cambiar la tecla para avanzar',
     'Ignore second hits(ms)': 'Ignorar segundos aciertos (ms)',
     'Ignore key presses under n ms': 'Ignore las pulsaciones de tecla en n ms',
