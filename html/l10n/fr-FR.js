@@ -84,7 +84,7 @@
     'Pragmatic Phrases': 'Frases pragmáticas',
     'Spell by blocks': 'Hechizo por bloques',
     'Spell by blocks in Frequency': 'Hechizo por bloques en Frecuencia',
-    'Load Default': 'Defecto de carga',
+    'Load Selected': 'Defecto de carga',
     'Revert': 'revertir',
     'Save Tree': 'Guardar árbol'
   };

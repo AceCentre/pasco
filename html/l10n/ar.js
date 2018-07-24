@@ -84,7 +84,7 @@
     'Pragmatic Phrases': 'العبارات البراغماتية',
     'Spell by blocks': 'تهجئة كتل',
     'Spell by blocks in Frequency': 'تهجئة كتل في التردد',
-    'Load Default': 'حمل الإفتراضي',
+    'Load Selected': 'حمل الإفتراضي',
     'Revert': 'العودة',
     'Save Tree': 'حفظ الشجرة'
   };
