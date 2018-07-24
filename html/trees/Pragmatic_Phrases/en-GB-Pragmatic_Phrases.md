@@ -1,7 +1,7 @@
 # I have something to say
 
 
-## Quick Chat
+## Quick Messages
 
 ### more
 
