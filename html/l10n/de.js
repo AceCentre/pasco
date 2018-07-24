@@ -15,10 +15,10 @@
 	icu.getDecimalFormat = function(places) { var retVal = {}; retVal.format = function(n) { var ns = n < 0 ? Math.abs(n).toFixed(places) : n.toFixed(places); var ns2 = ns.split('.'); s = ns2[0]; var d = ns2[1]; var rgx = /(\d+)(\d{3})/;while(rgx.test(s)){s = s.replace(rgx, '$1' + nfs["grouping_separator"] + '$2');} return (n < 0 ? nfs["minus"] : "") + s + nfs["decimal_separator"] + d;}; return retVal; };
 	icu.getDecimalFormatSymbols = function() { return nfs; };
 	icu.getIntegerFormat = function() { var retVal = {}; retVal.format = function(i) { var s = i < 0 ? Math.abs(i).toString() : i.toString(); var rgx = /(\d+)(\d{3})/;while(rgx.test(s)){s = s.replace(rgx, '$1' + nfs["grouping_separator"] + '$2');} return i < 0 ? nfs["minus"] + s : s;}; return retVal; };
-	icu.getLanguage = function() { return "ro" };
-	icu.getLanguageName = function() { return "limba română" };
-	icu.getLocale = function() { return "ro" };
-	icu.getLocaleName = function() { return "limba română" };
+	icu.getLanguage = function() { return "de" };
+	icu.getLanguageName = function() { return "Deutsch" };
+	icu.getLocale = function() { return "de" };
+	icu.getLocaleName = function() { return "Deutsch" };
 
   icu.rtl = false;
   icu.dictionary = {
