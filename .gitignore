@@ -2,4 +2,6 @@
 node_modules/
 html/bower_components/
 dist/
+.DS_Store
+*/.DS_Store
 

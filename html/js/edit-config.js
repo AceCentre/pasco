@@ -86,6 +86,7 @@ function start() {
     $pbwrp.find('.play-btn').click(function() {
       $pbwrp.find('.play-btn').addClass('hide');
       $pbwrp.find('.stop-btn').removeClass('hide');
+      var $inp = $form.find('[name='+alink[1]+']');
       if($inp.length > 0 && $inp.val())
         opts.voiceId = $inp.val();
       $inp = $form.find('[name="'+alink[0]+'.volume"]');
