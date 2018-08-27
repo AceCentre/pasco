@@ -53,6 +53,7 @@
         <splash src="res/screens/ios/Default-568h@2x~iphone.png" width="640" height="1136"/>
         <splash src="res/screens/ios/Default-667h.png" width="750" height="1334"/>
         <splash src="res/screens/ios/Default-736h.png" width="1242" height="2208"/>
+        <splash src="res/screens/ios/Default-2436h.png" width="1125" height="2436"/>
     </platform>
     <platform name="windows">
         <splash height="300" src="res/screens/windows/SplashScreen.scale-100.png" width="620" />
