@@ -22,7 +22,13 @@ Run the following
 * cd cordova
 * cordova platform add ios
 * cordova run
-* 
+
+# If you are having problems building
+
+* npm install --upgrade cordova@latest
+* npm install --upgrade cordova-ios@latest
+* npm install --upgrade deploy-ios
+* npm install cordova-icon 
 
 # Config
 
