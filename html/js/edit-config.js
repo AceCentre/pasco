@@ -102,6 +102,9 @@ function start() {
       $inp = $form.find('[name="'+alink[0]+'.delay"]');
       if($inp.length > 0  && parseFloat($inp.val()) >= 0)
         opts.delay = parseFloat($inp.val());
+      $inp = $form.find('[name="'+alink[0]+'.override_to_speaker"]');
+      if($inp.length > 0)
+        opts.override_to_speaker = !!$inp[0].checked;
       speaku.simple_speak(text, opts)
         .then(function(){
           $pbwrp.find('.play-btn').removeClass('hide');
