@@ -6,8 +6,17 @@ body {
   }
 }
 
+.relative {
+  position: relative;
+}
+
 .body-navbar-fixed {
 	padding-top: 70px;
+  .anchor {
+    display: block;
+    position: absolute;
+    top: -70px;
+  }
 }
 
 /* help bootstrap */
@@ -94,6 +103,9 @@ html.ios {
   @media (min-height: 630px) and (max-width: 400px) {
     .body-navbar-fixed {
 	    padding-top: 85px;
+      .anchor {
+        top: -85px;
+      }
     }
     .main-top-navbar {
       padding-top: 35px;
