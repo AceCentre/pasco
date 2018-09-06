@@ -11,10 +11,10 @@
   "license": "Apache-2.0",
   "dependencies": {
     "audscan-cordova-plugin": "git+https://github.com/hosseinamin/audscan-cordova-plugin.git",
-    "browser-sync": "^2.23.6",
+    "browser-sync": "^2.24.7",
     "cheerio": "^0.19.0",
     "cordova": "^8.0.0",
-    "cordova-ios": "^4.5.4",
+    "cordova-ios": "^4.5.5",
     "cordova-plugin-browsersync": "^1.1.0",
     "cordova-plugin-device": "^1.1.7",
     "cordova-plugin-file": "^6.0.1",
@@ -28,7 +28,8 @@
     "npm": "^2.15.12",
     "plist": "^1.2.0",
     "q": "^1.5.1",
-    "uuid": "^3.1.0"
+    "uuid": "^3.1.0",
+    "cordova-plugin-splashscreen": "^5.0.2"
   },
   "cordova": {
     "plugins": {
@@ -40,7 +41,8 @@
       "cordova-plugin-file": {},
       "cordova-plugin-media": {
         "KEEP_AVAUDIOSESSION_ALWAYS_ACTIVE": "YES"
-      }
+      },
+      "cordova-plugin-splashscreen": {}
     },
     "platforms": [
       "ios"
