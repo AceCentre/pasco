@@ -313,12 +313,31 @@ function _napi_add_key_command() {
     var delegates = config._keyhit_delegates[state.mode];
     var promises = [];
     for(var key in delegates) {
-      let input = NativeAccessApi.keyInputByCode[key];
-      if(input) {
-        promises.push(napi.add_key_command(input))
+      if (delegates.hasOwnProperty(key)) {
+        var input = NativeAccessApi.keyInputByCode[key];
+        if(input) {
+          promises.push(napi.add_key_command(input))
+        }
       }
     }
     return Promise.all(promises);
+    /*
+    var keys = Object.keys(delegates);
+    return next();
+    function next() {
+      var key = keys.shift();
+      if (!key) {
+        return Promise.resolve();
+      }
+      var input = NativeAccessApi.keyInputByCode[key];
+      if (!input) {
+        return next();
+      }
+      console.log("add_key_command", input);
+      return napi.add_key_command(input)
+        .then(next);
+    }
+    */
   } else {
     return Promise.resolve();
   }
@@ -329,12 +348,31 @@ function _napi_remove_key_command() {
     var delegates = config._keyhit_delegates[state.mode];
     var promises = [];
     for(var key in delegates) {
-      var input = NativeAccessApi.keyInputByCode[key];
-      if(input) {
-        promises.push(napi.remove_key_command(input));
+      if (delegates.hasOwnProperty(key)) {
+        var input = NativeAccessApi.keyInputByCode[key];
+        if(input) {
+          promises.push(napi.remove_key_command(input));
+        }
       }
     }
     return Promise.all(promises);
+    /*
+    var keys = Object.keys(delegates);
+    return next();
+    function next() {
+      var key = keys.shift();
+      if (!key) {
+        return Promise.resolve();
+      }
+      var input = NativeAccessApi.keyInputByCode[key];
+      if (!input) {
+        return next();
+      }
+      console.log("remove_key_command", input);
+      return napi.remove_key_command(input)
+        .then(next);
+    }
+    */
   } else {
     return Promise.resolve();
   }
@@ -1063,7 +1101,7 @@ function _start_at_next_action(atree) {
       tmp.removeEventListener('click', onscreen_nav_click, false)
     }
     window.removeEventListener('keydown', onkeydown, false);
-    window.removeEventListener('x-keycommand', onkeydown, false);
+    document.removeEventListener('x-keycommand', onkeydown, false);
   }
   function onscreen_nav_click() {
     clear()
@@ -1081,7 +1119,7 @@ function _start_at_next_action(atree) {
         tmp.addEventListener('click', onscreen_nav_click, false)
       }
       window.addEventListener('keydown', onkeydown, false);
-      window.addEventListener('x-keycommand', onkeydown, false);
+      document.addEventListener('x-keycommand', onkeydown, false);
     });
 }
 function _tree_go_in() {
