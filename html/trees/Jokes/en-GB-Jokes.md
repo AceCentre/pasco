@@ -8,7 +8,7 @@ Knock Knock
 		Actually, its kangaroo<meta data-main-audio="trees/Jokes/Actually_Its_Kangaroo.mp3">
 	Deja<meta data-main-audio="trees/Jokes/Deja.mp3"> 
 		Knock Knock
-			Deja
+			Deja<meta data-main-audio="trees/Jokes/Deja.mp3"> 
 				Knock Knock
 					Are you bored yet?<meta data-main-audio="trees/Jokes/Are_you_bored_yet.mp3">
 	Ho-Ho
@@ -23,8 +23,8 @@ Knock Knock
 		No! You're a poo!
 	Spell
 		W H O
-	Water
-		Waterloo<meta data-main-audio="trees/Jokes/waterloo_I_was_defeated.mp3">
+	Water<meta data-main-audio="trees/Jokes/Water.mp3">
+		Waterloo song <meta data-main-audio="trees/Jokes/waterloo_I_was_defeated.mp3">
 	Snow
 		Snow use. I forgot my name again		 
 	Harry
