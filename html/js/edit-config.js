@@ -1,6 +1,6 @@
-var config_fn, tree_fn;
-var speaku, config, config_data, orig_tree_data, tree_data, voices, napi,
-    is_quick_setup;
+var config_fn, tree_fn, trees_info_fn;
+var speaku, config, config_data, trees_info, tree_data,
+    voices, napi, is_quick_setup;
 // start
 Promise.all([
   window.cordova ? NativeAccessApi.onready() : Promise.resolve(),
@@ -11,9 +11,11 @@ Promise.all([
     }, false);
   })
 ])
+  .then(bind_dom_event_handlers)
   .then(initialize_app)
   .catch(handle_error_checkpoint())
   .then(function() {
+    trees_info_fn = default_trees_info_fn;
     config_fn = default_config;
     napi = new NativeAccessApi();
     speaku = new SpeakUnit(napi);
@@ -33,10 +35,21 @@ Promise.all([
   })
   .then(function() {
     return prepare_tree(config.tree || window.default_tree)
-      .catch(handle_error_checkpoint())
-      .then(function(info) {
-        tree_fn = info.tree_fn;
-      });
+        .catch(handle_error_checkpoint())
+        .then(function(info) {
+          tree_fn = info.tree_fn;
+          return get_file_json(trees_info_fn)
+            .then(function (_trees_info) { trees_info = _trees_info; })
+            .catch(function (error) {
+              console.warn("Could not load trees_info file, " + trees_info_fn, error);
+              trees_info = { list: [
+                {
+                  name: info.dirname,
+                  tree_fn: info.tree_fn,
+                }
+              ] };
+            });
+        });
   })
   .then(function() {
     return Promise.all([
@@ -49,7 +62,7 @@ Promise.all([
         }),
       get_file_data(config.tree||tree_fn)
         .catch(handle_error_checkpoint())
-        .then(function(_data) { tree_data = _data; orig_tree_data = _data; })
+        .then(function(_data) { tree_data = _data; })
     ]);
   })
   .then(function() {
@@ -70,8 +83,16 @@ function _fix_config(cfg) {
   }
 }
 
+function bind_dom_event_handlers () {
+  $('#tree-tools-toggle').click(function ($evt) {
+    $evt.preventDefault();
+    collapsable_toggle($('#tree-tools')[0]);
+  });
+}
+
 function start() {
   is_quick_setup = $('form[name=quick-setup]').length > 0;
+  _start_subrout_tree_selection();
   // insert voice options
   var $form = $(is_quick_setup ? 'form[name=quick-setup]' : 'form[name=edit-config]').first(),
       voices_by_id = _.object(_.map(voices, function(voice) { return [voice.id,voice] }));
@@ -143,11 +164,10 @@ function start() {
   
   insert_config()
   if(!is_quick_setup) {
-    insert_tree_data()
+    set_tree_data(tree_data);
 
     $('#tree-revert').on('click', function() {
-      tree_data = orig_tree_data
-      $('form[name=edit-tree] [name=tree-input]').val(tree_data);
+      set_tree_data(tree_data);
     });
     
     config_auto_save_init();
@@ -433,6 +453,152 @@ function start() {
   });
 }
 
+function _save_trees_info (trees_info) {
+  return set_file_data(trees_info_fn, JSON.stringify(trees_info, null, "  "));
+}
+
+function _start_subrout_tree_selection () {
+  // update tree select options
+  update_tree_name_selection_update();
+  $('#tree-name-input').on('change', function ($evt) {
+    var selm = this,
+        new_tree_fn = selm.value,
+        $form = $('form[name=edit-tree]').first(),
+        $tree_input = $form.find('[name=tree-input]');
+    $tree_input.prop('disabled', true);
+    prepare_tree(new_tree_fn)
+      .catch(handle_error_checkpoint())
+      .then(function(info) {
+        tree_fn = info.tree_fn;
+        return get_file_data(tree_fn)
+          .catch(handle_error_checkpoint())
+      })
+      .then(function(_data) { set_tree_data(_data); })
+      .catch(handle_error)
+      .then(function () {
+        $tree_input.prop('disabled', false);
+      });
+  });
+  $('#tree-new-btn').on('click', function ($evt) {
+    bootbox.prompt(_t("Please write a name for the new tree"), function (name) {
+      if (!name) {
+        update_alert(false, _t("Empty name is not allowed"));
+      } else {
+        $('#tree-delete-btn').prop('disabled', true);
+        $('#tree-name-input').prop('disabled', true);
+        var tmp = fs_friendly_name(name);
+        prepare_tree(tmp + '/' + tmp + '.md')
+          .catch(handle_error_checkpoint())
+          .then(function (info) {
+            var trees_info_orig = JSON.stringify(trees_info);
+            var tree_info = {
+              name: name,
+              tree_fn: info.tree_fn,
+            };
+            trees_info.list.push(tree_info);
+            return set_file_data(info.tree_fn, "")
+              .then(function () {
+                return _save_trees_info(trees_info)
+                  .catch(function (err) {
+                    trees_info = JSON.parse(trees_info_orig);
+                    throw err;
+                  });
+              })
+              .then(function () {
+                tree_fn = tree_info.tree_fn;
+                set_tree_data("");
+                update_tree_name_selection_update();
+                update_alert(true);
+              });
+          })
+          .catch(function (err) {
+            update_alert(false, err);
+          })
+          .then(function () {
+            $('#tree-delete-btn').prop('disabled', false);
+            $('#tree-name-input').prop('disabled', false);
+          });
+      }
+    });
+  });
+  $('#tree-delete-btn').on('click', function ($evt) {
+    if (trees_info.list.length == 1) {
+      update_alert(false, _t("Could not delete the last item. Try the New button"))
+    } else {
+      bootbox.confirm(_t("Are you sure you want to delete this item?"), function(confirmed) {
+        if (confirmed) {
+          $('#tree-delete-btn').prop('disabled', true);
+          $('#tree-name-input').prop('disabled', true);
+          var tree_info_idx = _.findIndex(trees_info.list, function(a) { return a.tree_fn == tree_fn; });
+          if (tree_info_idx == -1) {
+            update_alert(false, _t("Could not delete, tree info not found!"))
+          } else {
+            var tree_info = trees_info.list[tree_info_idx];
+            var promise;
+            if (window.cordova) {
+              promise = cordova_rmdir_rec(window.cordova_user_dir_prefix + tree_info.dirname);
+            } else {
+              promise = unset_file(tree_info.tree_fn);
+            }
+            promise
+              .then(function () {
+                var trees_info_orig = JSON.stringify(trees_info);
+                trees_info.list.splice(tree_info_idx, 1);
+                var next_tree_info = trees_info.list.length > tree_info_idx ?
+                    trees_info.list[tree_info_idx] :
+                    trees_info.list[trees_info.list.length - 1];
+                tree_fn = next_tree_info.tree_fn;
+                return _save_trees_info(trees_info)
+                  .catch(function (err) {
+                    trees_info = JSON.parse(trees_info_orig);
+                    throw err;
+                  })
+                  .then(function () {
+                    if (tree_info.tree_fn == config.tree) {
+                      config.tree = tree_fn;
+                      var $form = $('form[name=edit-config]').first();
+                      $form.find('[name=tree]').val(config.tree);
+                      return do_save_config($form, null, false);
+                    }
+                  });
+              })
+              .then(function () {
+                update_tree_name_selection_update();
+                update_alert(true);
+              })
+              .catch(function (err) {
+                update_alert(false, err);
+              })
+              .then(function () {
+                $('#tree-delete-btn').prop('disabled', false);
+                $('#tree-name-input').prop('disabled', false);
+              });
+          }
+        }
+      });
+    }
+  });
+}
+
+function update_tree_name_selection_update () {
+  $('.tree-name-selection').each(function () {
+    var $sel = $(this), config_tree = config.tree || window.default_tree;
+    $sel.html('');
+    _.each(trees_info.list, function (item) {
+      var $opt = $('<option/>')
+          .attr('value', item.tree_fn)
+          .text(item.name)
+          .appendTo($sel);
+      if ($sel[0].id == 'tree-name-input') {
+        $opt.attr('selected', item.tree_fn == tree_fn ? "" : undefined);
+      } else {
+        $opt.attr('selected', item.tree_fn == config_tree ? "" : undefined);
+      }
+    });
+  });
+}
+
+
 function get_default_tree(name, locale) {
   return get_file_data('trees/' + name + '/' + locale + '-' + name + '.md')
     .catch(function(err) {
@@ -592,7 +758,8 @@ function insert_config() {
     .trigger('change');
 }
 
-function insert_tree_data() {
+function set_tree_data (_tree_data) {
+  tree_data = _tree_data;
   var $form = $('form[name=edit-tree]').first()
   $form.find('[name=tree-input]').val(tree_data)
 }
@@ -601,11 +768,13 @@ function save_config(evt) {
   if(evt)
     evt.preventDefault();
   var $form = $('form[name=edit-config]').first()
-  var _config = JSON.parse(config_data);
-  return do_save_config($form, _config, true);
+  return do_save_config($form, null, true);
 }
 
 function do_save_config($form, _config, hdlerr) {
+  if (!_config) { // when _config is null use config_data default behavior
+    _config = JSON.parse(config_data);
+  }
   // validate & apply input
   try {
     $form.find('input,select,textarea').each(function() {
@@ -703,8 +872,10 @@ function do_save_config($form, _config, hdlerr) {
   }
   // then save
   // console.log(_config)
-  return set_file_data(config_fn, JSON.stringify(_config, null, "  "))
+  var _config_data = JSON.stringify(_config, null, "  ");
+  return set_file_data(config_fn, _config_data)
     .then(function() {
+      config_data = _config_data
       config = _config
       if(hdlerr) {
         update_alert(true);
@@ -728,7 +899,7 @@ function save_quick_setup(evt) {
   }
   var _config = JSON.parse(config_data);
   _config.__did_quick_setup = true;
-  return do_save_config($form, _config)
+  return do_save_config($form, _config, false)
     .then(function() {
       var locale = config.locale;
       var name = $('#tree-default-select').val();
@@ -758,6 +929,7 @@ function update_alert(success, err) {
       .html('<strong>Saved!</strong>')
       .toggleClass('alert-hidden', false);
   } else {
+    console.error(err);
     $('.settings-danger-alert .alert-danger')
       .html(error_to_html(err))
       .toggleClass('alert-hidden', false);

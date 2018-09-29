@@ -10,10 +10,17 @@ document.addEventListener('deviceready', function() {
 window.newEl = document.createElement.bind(document);
 window.default_locale = 'en-GB';
 window.default_config = 'config.json';
+window.default_trees_info_fn = 'trees-info.json';
 window.host_tree_dir_prefix = 'trees/';
 window.trees_table_fn = 'trees_table.json';
 window.default_tree = window.host_tree_dir_prefix + 'default/default.md';
 window.cordova_user_dir_prefix = 'cdvfile://localhost/persistent/';
+
+function fs_friendly_name (s) {
+  return s.replace(/^[a-z]{1,10}\:\/\//i,"").replace(/\?.*$/,"")
+    .replace(/[ \(\)\[\]\*\#\@\!\$\%\^\&\+\=\/\\:]/g, '_')
+    .replace(/[\r\n\t]/g, '');
+}
 
 /**
  * determines place of tree and prepares it if default does not exists
@@ -34,9 +41,7 @@ function prepare_tree(tree_fn) {
     dirname = 'default';
   }
   // make dirname fs friendly
-  dirname = dirname.replace(/^[a-z]{1,10}\:\/\//i,"").replace(/\?.*$/,"")
-    .replace(/[ \(\)\[\]\*\#\@\!\$\%\^\&\+\=\/\\:]/g, '_')
-    .replace(/[\r\n\t]/g, '');
+  dirname = fs_friendly_name(dirname);
   // for cordova
   if(window.cordova) {
     var path = tree_fn,
@@ -117,6 +122,10 @@ function initialize_app() {
       localStorage.setItem('file_'+key, data);
       return Promise.resolve();
     }
+    function delete_entry(key) {
+      localStorage.removeItem('file_'+key);
+      return Promise.resolve();
+    }
     window.get_file_json = function(key) {
       return new_read(key) 
         .then(function(data) {
@@ -128,6 +137,7 @@ function initialize_app() {
     }
     window.get_file_data = new_read
     window.set_file_data = new_write
+    window.unset_file = delete_entry
     return Promise.resolve();
   }
 }
@@ -352,14 +362,28 @@ function domlocalize() {
     var elm = elms[i],
         l10n = elm.getAttribute('x-l10n'),
         l10n_cached = elm.getAttribute('x--l10n'),
-        l10n_input = l10n_cached||l10n||elm.textContent.trim(),
-        localized = _t(l10n_input);
-    if(!l10n || localized != l10n) {
-      elm.textContent = localized;
-      if(!l10n && !l10n_cached)
-        elm.setAttribute('x--l10n', l10n_input);
+        l10n_input = l10n_cached||l10n||elm.textContent.trim();
+    if (l10n != '#NULL#') {
+      var localized = _t(l10n_input);
+      if(!l10n || localized != l10n) {
+        elm.textContent = localized;
+        if(!l10n && !l10n_cached)
+          elm.setAttribute('x--l10n', l10n_input);
+      }
     }
   }
+  _.each(document.querySelectorAll('.has-l10n-attr'), function (elm) {
+    var newattrs = [];
+    _.each(elm.attributes, function (attr) {
+      var prefix_const = 'x-l10n-';
+      if (attr.name.indexOf(prefix_const) == 0 &&
+          attr.name.length > prefix_const.length) {
+        var name = attr.name.substr(prefix_const.length);
+        newattrs.push([name, _t(attr.value)]);
+      }
+    });
+    _.each(newattrs, function (attr) { elm.setAttribute(attr[0], attr[1]); });
+  });
 }
 
 function load_script(fn) {
@@ -400,11 +424,11 @@ function handle_error(err) {
     console.error("checkpoint:", err.checkpoint_stack);
     alert(err.error+'');
     console.error(err.error)
-    throw err.error;
+    // throw err.error;
   } else {
     alert(err);
     console.error(err);
-    throw err;
+    // throw err;
   }
 }
 
@@ -430,6 +454,20 @@ function delete_file(url, options) {
       options.method = 'DELETE'
     return read_file(url, options);
   }  
+}
+
+function cordova_rmdir_rec(path) {
+  return new Promise(function (resolve, reject) {
+    function onEntry(entry) {
+      entry.removeRecursively(function() {
+        console.log("Remove Recursively Succeeded");
+      }, onFail);
+    }
+    function onFail(err) {
+      reject(new Error("Fail to delete `" + url + "` -- " + err.code + ", " + err.message));
+    }
+    window.resolveLocalFileSystemURL(path, onEntry, onFail);
+  });
 }
 
 function cordova_mkdir(path) {
@@ -936,6 +974,7 @@ function read_json(url, options) {
 window.get_file_json = read_json
 window.get_file_data = read_file
 window.set_file_data = write_file
+window.unset_file = delete_file
 
 
 
@@ -1004,7 +1043,7 @@ function update_collapsable_subrout(elm) {
 
 function collapsable_toggle(toggle_el, toggle) {
   var contains_collapse = toggle_el.classList.contains('x-collapse');
-  toggle = toggle == null ? !contains_collapse : toggle
+  toggle = toggle == null ? contains_collapse : toggle
   if(toggle_el._collapsable_timeout != null)
     clearTimeout(toggle_el._collapsable_timeout);
   if(toggle && contains_collapse) {

@@ -4,9 +4,15 @@ const gulp = require('gulp')
 const sourcemaps = require('gulp-sourcemaps')
 const spawn = require('child_process').spawn;
  
-let lessfiles = ['main','edit-config','common'];
+let lessfiles = ['main','edit-config', 'common'];
+let lessc_all_cond = ['common'];
 
 [...lessfiles,'all'].forEach((name) => {
+  let all = false;
+  if (typeof name == 'object') {
+    all = name.all;
+    name = name.name;
+  }
   let files = (name == 'all' ? lessfiles : [name])
       .map((s)=>'html/less/'+s+'.less')
   var running = false;
@@ -27,7 +33,7 @@ gulp.task('less-watch', ['lessc-all'], () => {
     var name = lessfiles
         .find((s) => event.path.endsWith(s+'.less') ||
               event.path.indexOf(s+'/') != -1);
-    if(name) {
+    if(name && lessc_all_cond.indexOf(name) == -1) {
       gulp.run('lessc-'+name);
     } else {
       gulp.run('lessc-all');
