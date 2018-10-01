@@ -22,6 +22,19 @@ function fs_friendly_name (s) {
     .replace(/[\r\n\t]/g, '');
 }
 
+function get_trees_info (trees_info_fn) {
+  return get_file_json(trees_info_fn)
+    .catch(function (error) {
+      console.warn("Could not load trees_info file, " + trees_info_fn, error);
+      return { list: [
+        {
+          name: info.dirname,
+          tree_fn: info.tree_fn,
+        }
+      ] };
+    })
+}
+
 /**
  * determines place of tree and prepares it if default does not exists
  */
@@ -422,8 +435,8 @@ function handle_error_checkpoint() {
 function handle_error(err) {
   if(err.withcheckpoint) {
     console.error("checkpoint:", err.checkpoint_stack);
-    alert(err.error+'');
     console.error(err.error)
+    alert(err.error+'');
     // throw err.error;
   } else {
     alert(err);
@@ -705,11 +718,9 @@ proto.init = function() {
             try {
               self.is_native = false
               self.responsiveVoice = responsiveVoice
-              if(responsiveVoice.voiceSupport()) {
-                resolve(self);
-              } else {
-                reject("No supported speaker found!");
-              }
+              responsiveVoiceFix(responsiveVoice);
+              // voiceSupport check removed, it is not the indicator for responsiveVoice compatibility
+              resolve(self);
             } catch(err) {
               reject(err);
             }
@@ -717,9 +728,26 @@ proto.init = function() {
           script.onerror = function() {
             reject("Could not load responsivevoice code");
           };
-          script.src = "//code.responsivevoice.org/responsivevoice.js";
+          script.src = "https://code.responsivevoice.org/responsivevoice.js";
           document.body.appendChild(script);
         });
+        function responsiveVoiceFix (rv) {
+          var orgiFallback_audioPool_getAudio = rv.fallback_audioPool_getAudio;
+          rv.fallback_audioPool_getAudio = function () {
+            if (rv.fallback_audiopool_index >= rv.fallback_audiopool.length) {
+              rv.fallback_audiopool = [];
+            }
+            return orgiFallback_audioPool_getAudio.apply(this, arguments);
+          }
+          var origClearFallbackPool = rv.clearFallbackPool;
+          rv.clearFallbackPool = function () {
+            _.each(rv.fallback_audiopool, function (audio) {
+              audio.pause();
+            });
+            rv.fallback_audiopool = [];
+            return origClearFallbackPool.apply(this, arguments);
+          }
+        }
       }
     });
 }
@@ -773,6 +801,7 @@ proto.start_speaking = function(speech, opts) {
     delete opts.rateMul
     var voiceId = opts.voiceId;
     delete opts.voiceId;
+    delete opts.override_to_speaker;
     // TODO:: control audio playback,
     // delay can be implemented if access to audio playback is at this level
     var retobj = {};
@@ -1061,7 +1090,43 @@ function collapsable_toggle(toggle_el, toggle) {
   }
 }
 
-function parse_tree(tree_element, data) {
+function tree_traverse_nodes_async (tree, callable) {
+  var promise = tree_traverse_nodes_async_subrout(tree, callable, 0);
+  return promise ? promise : Promise.resolve();
+}
+
+function tree_traverse_nodes_async_subrout (tree, callable, i) {
+  while (tree.nodes && i < tree.nodes.length) {
+    var node = tree.nodes[i];
+    var promise = callable(node, i, tree.nodes);
+    if (!promise) {
+      promise = tree_traverse_nodes_async_subrout(node, callable, 0); // process sub-nodes
+      i++;
+      if (promise) {
+        return promise.then(function (tmp) {
+          return tree_traverse_nodes_async_subrout(tree, callable, i); // continue
+        });
+      }
+    } else {
+      return promise.then(function (tmp) {
+        i = tmp == null ? i + 1 : tmp;
+        if (tmp < 0) { // less than zero means 
+          return;
+        }
+        promise = tree_traverse_nodes_async_subrout(node, callable, 0) // process sub-nodes
+        if (promise) {
+          return promise.then(function () {
+            return tree_traverse_nodes_async_subrout(tree, callable, i); // continue
+          });
+        } else {      
+          return tree_traverse_nodes_async_subrout(tree, callable, i); // continue
+        }
+      });
+    }
+  }
+}
+
+function _parse_tree_subrout(tree_element, data) {
   // #46 \t to h1-6
   data = data.replace(/^(\t{1,6})(.+)/gm, function(all, tabs, text) {
     var tmp = text.trim();
@@ -1084,11 +1149,16 @@ function parse_tree(tree_element, data) {
     })
   });
   tree_element.innerHTML = html_data;
+  var tree = parse_dom_tree(tree_element);
+  return tree;
+}
+
+function parse_tree(tree_element, data) {
+  var tree = _parse_tree_subrout(tree_element, data);
   var content_template,
       tmp = document.querySelector('#tree-node-template');
   if(tmp)
     content_template = _.template(tmp.innerHTML);
-  var tree = parse_dom_tree(tree_element);
   tree_element.innerHTML = ''; // clear all
   tree_mk_list_base(tree, tree_element, content_template); // re-create
   tree_element.tree_height = window.innerHeight;
