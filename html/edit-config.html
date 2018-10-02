@@ -19,6 +19,7 @@
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="bower_components/bootstrap-waitingfor/build/bootstrap-waitingfor.min.js"></script>
+    <script src="bower_components/bootbox.js/bootbox.js"></script>
     <!-- bootstrap includes end -->
     <link rel="stylesheet" href="fonts/fontawesome/css/fontawesome-all.min.css">
 
@@ -40,7 +41,16 @@
     <div class="container edit-config-container">
       <form name="edit-config">
       <div class="row">
-        <div class="col-xs-12">
+        <div class="col-sm-6">
+          <div class="row">
+            <div class="col-xs-12">
+              <h3 x-l10n>Active Tree</h3>
+              <select name="tree" class="form-control tree-name-selection">
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6">
           <h3 x-l10n>On-Screen Navigation</h3>
           <div class="row m-b-10">
             <div class="col-xs-12">
@@ -327,44 +337,57 @@
         <div class="row">
           <div class="col-xs-12">
             <hr />
+          </div>
+          <div class="col-sm-4 col-md-6">
             <h3 x-l10n>Tree</h3>
           </div>
+          <div class="col-sm-8 col-md-6">
+            <div class="tree-tools-toggle-wrp">
+              <a id="tree-tools-toggle" href><i class="fa fa-bars fa-2x"></i></a>
+            </div>
+            <div id="tree-tools" class="row x-collapsable">
+              <div class="col-sm-8 col-md-8">
+                <div class="form-group">
+                  <select id="tree-default-select" class="form-control">
+                    <option value="" x-l10n>Choose a default tree</option>
+                    <option value="Jokes" x-l10n>Jokes</option>
+                    <option value="Adult_Starter" x-l10n>Adult Starter</option>
+                    <option value="Simple_Adult_Starter_Chinese_Main" x-l10n>Simple Adult Starter - Chinese Main</option>
+                    <option value="Pragmatic_Phrases" x-l10n>Pragmatic Phrases</option>
+                    <option value="Spell_by_blocks" x-l10n>Spell by blocks</option>
+                    <option value="Spell_by_blocks_in_frequency" x-l10n>Spell by blocks in Frequency</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-4 col-md-4">
+                <button id="tree-default-select-load-btn" type="button" class="btn btn-success" x-l10n>Load Selected</button>
+              </div>
+              <div class="col-xs-12 m-xs-t-10">
+                <div id="tree-export-btn" class="btn btn-primary" x-l10n>Export</div>
+                <div id="tree-import-btn" class="btn btn-primary"><span x-l10n>Import</span><input type="file" id="tree-import-inp"></div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="row">
-          <div class="col-sm-4 col-md-4">
+        <div class="row m-lg-t-10">
+          <div class="col-sm-3">
             <div class="form-group">
-              <select id="tree-default-select" class="form-control">
-                <option value="" x-l10n>Choose a default tree</option>
-                <option value="Jokes" x-l10n>Jokes</option>
-                <option value="Adult_Starter" x-l10n>Adult Starter</option>
-                <option value="Simple_Adult_Starter_Chinese_Main" x-l10n>Simple Adult Starter - Chinese Main</option>
-                <option value="Pragmatic_Phrases" x-l10n>Pragmatic Phrases</option>
-                <option value="Spell_by_blocks" x-l10n>Spell by blocks</option>
-                <option value="Spell_by_blocks_in_frequency" x-l10n>Spell by blocks in Frequency</option>
+              <select id="tree-name-input" class="form-control tree-name-selection">
               </select>
             </div>
           </div>
-          <div class="col-sm-3 col-md-2">
-            <button id="tree-default-select-load-btn" type="button" class="btn btn-success" x-l10n>Load Selected</button>
+          <div class="col-sm-9 save-section">
+            <button id="tree-new-btn" type="button" class="btn btn-primary" x-l10n>New</button>
+            <button id="tree-delete-btn" type="button" class="btn btn-danger" x-l10n>Delete</button>
+            <button id="tree-revert" type="button" class="btn btn-default" x-l10n>Revert</button>
+            <button type="submit" class="btn btn-success" x-l10n>Save Tree</button>
           </div>
         </div>
         <div class="row">
-          <div class="col-xs-12">
-            <div id="tree-export-btn" class="btn btn-primary" x-l10n>Export</div>
-            <div id="tree-import-btn" class="btn btn-primary"><span x-l10n>Import</span><input type="file" id="tree-import-inp"></div>
-          </div>
-        </div>
-        <div class="row m-t-10">
-          <div class="col-xs-12">
+          <div class="col-xs-12 m-xs-t-10">
             <div id="tree-input-wrp" class="form-group">
               <textarea id="tree-input" name="tree-input" class="form-control" rows="20" required></textarea>
             </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-xs-12 save-section">
-            <button id="tree-revert" type="button" class="btn btn-default" x-l10n>Revert</button>
-            <button type="submit" class="btn btn-success" x-l10n>Save Tree</button>
           </div>
         </div>
       </form>

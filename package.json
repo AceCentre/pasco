@@ -25,11 +25,12 @@
   },
   "homepage": "https://github.com/willwade/pasco#readme",
   "dependencies": {
-    "browser-sync": "^2.18.12",
+    "browser-sync": "^2.24.7",
     "concurrently": "^3.4.0",
     "gulp": "^3.9.1",
     "gulp-less": "^4.0.0",
     "gulp-sourcemaps": "^2.6.0",
+    "natives": "^1.1.5",
     "plist": "3.0.1"
   }
 }

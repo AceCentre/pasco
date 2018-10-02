@@ -941,8 +941,10 @@ function _meta_as_int(v, default_val) {
   return i;
 }
 
-function _meta_true_check(v) {
-  return v == 'true' || v == '';
+function _meta_true_check(v, default_val) {
+  if (v == null)
+    return default_val;
+  return v === 'true' || v === '';
 }
 
 function _on_override_go_in_or_out() {
@@ -1074,6 +1076,86 @@ function _in_check_back_n_branch(atree) {
   }
   return _scan_move();
 }
+
+function _in_override_change_tree (atree) {
+  var another_tree = atree.meta['change-tree'];
+  if (another_tree) {
+    return _in_override_change_tree_subrout(atree, another_tree);
+  }
+  var another_tree_name = atree.meta['change-tree-by-name'];
+  if (another_tree_name) {
+    return get_trees_info(default_trees_info_fn)
+      .then(function (trees_info) {
+        another_tree_name = another_tree_name.toLowerCase();
+        var tree_info = _.find(trees_info.list, function (a) { return a.name.toLowerCase() == another_tree_name; });
+        if (tree_info) {
+          return _in_override_change_tree_subrout(atree, tree_info.tree_fn);
+        } else {
+          return _notify_move(_get_current_node(), atree, {
+            main_override_msg: _t("Could not find tree with this name")
+          });
+        }
+      });
+  }
+}
+
+function _in_override_change_tree_subrout (atree, another_tree) {
+  var current_tree = config.tree || window.default_tree;
+  if (another_tree === current_tree) {
+    return _notify_move(_get_current_node(), atree, {
+      main_override_msg: _t("This tree is already running")
+    });
+  } else {
+    return prepare_tree(another_tree)
+      .then(function (info) {
+        var telm = newEl('div');
+        telm.setAttribute('class', tree_element.getAttribute('class'));
+        var current_config_tree = config.tree;
+        config.tree = info.tree_fn;
+        return load_tree(telm, info.tree_fn)
+          .catch(function (err) {
+            config.tree = current_config_tree;
+            throw err;
+          })
+          .catch(handle_error_checkpoint())
+          .then(function(_tree) {
+            var _config = JSON.parse(config_json);
+            _config.tree = info.tree_fn;
+            var _config_data = JSON.stringify(_config, null, "  ");
+            // save config with new tree
+            return set_file_data(config_fn, _config_data)
+              .catch(handle_error_checkpoint())
+              .then(function () {
+                // stop current running tree
+                stop()
+                  .then(function () {
+                    tree_fn = info.tree_fn;
+                    editor_helper.audio_save_dir = info.audio_dir;
+                    tree = _tree;
+                    // start again with new tree
+                    tree_element.id = 'old-tree';
+                    telm.id = 'tree';
+                    tree_element.parentNode.insertBefore(telm, tree_element);
+                    tree_element.parentNode.removeChild(tree_element);
+                    tree_element = telm;
+                    renew_state();
+                    state = _clean_state(state);
+                    return start();
+                  })
+                  .catch(handle_error);
+                return Promise.resolve();
+              });
+          });
+      })
+      .catch(function (err) {
+        console.error(err);
+        return _notify_move(_get_current_node(), atree, {
+          main_override_msg: _t("Could not change to this tree")
+        });
+      });
+  }
+}
+
 function _start_at_next_action(atree) {
   // start again, on demand
   function finish() {
@@ -1122,6 +1204,13 @@ function _start_at_next_action(atree) {
       document.addEventListener('x-keycommand', onkeydown, false);
     });
 }
+
+var _tree_go_in_override_functions = [
+  _in_check_back_n_branch,
+  _in_check_spell_finish, _in_check_spell_delchar,
+  _in_check_spell_default,
+  _in_override_change_tree,
+];
 function _tree_go_in() {
   if(!state.can_move)
     return Promise.resolve();
@@ -1139,17 +1228,11 @@ function _tree_go_in() {
     // for edit_mode do nothing
     if(state.edit_mode)
       return Promise.resolve();
-
-    // special case
     // explicit finish check
-    var override_functions = [
-      _in_check_back_n_branch,
-      _in_check_spell_finish, _in_check_spell_delchar,
-      _in_check_spell_default
-    ];
+    // special case
     var res;
-    for(var i = 0, len = override_functions.length; i < len; i++) {
-      if((res = override_functions[i](atree)) != null)
+    for(var i = 0, len = _tree_go_in_override_functions.length; i < len; i++) {
+      if((res = _tree_go_in_override_functions[i](atree)) != null)
         return res;
     }
     // finish it
@@ -1290,6 +1373,10 @@ function eval_config(config) {
   return config;
 }
 
+var _tree_dynamic_nodes_module_map = {
+  'trees-switcher': _trees_switcher_dynamic_nodes
+};
+
 function load_tree(tree_element, fn) {
   if(typeof fn != 'string') {
     tree = fn;
@@ -1298,9 +1385,67 @@ function load_tree(tree_element, fn) {
   }
   return get_file_data(fn)
     .then(function(data) {
-      return parse_tree(tree_element, data);
+      var tree = _parse_tree_subrout(tree_element, data);
+      return tree_traverse_nodes_async(tree, function (node, i, nodes) {
+        var dyn_name = node.meta.dyn;
+        if (dyn_name && !node._more_meta._dyn_generated) {
+          var module = _tree_dynamic_nodes_module_map[dyn_name];
+          if (module) {
+            var replace_node_b = _meta_true_check(node.meta['dyn-replace-node'], false),
+                insert_in_b = _meta_true_check(node.meta['dyn-insert-in'], true);
+            if (!replace_node_b && !insert_in_b) {
+              return Promise.resolve();
+            }
+            return module(node)
+              .then(function (res) {
+                var parent;
+                node._more_meta._dyn_generated = true;
+                if (replace_node_b) {
+                  parent = node.parent;
+                  _.each(res.nodes, function (cnode) {
+                    _setup_node(cnode, parent);
+                    nodes.splice(i++, 0, cnode);
+                  });
+                  nodes.splice(i, 1);
+                  return i;
+                } else if (insert_in_b && res.nodes && res.nodes.length > 0) {
+                  parent = node;
+                  if (!node.nodes)
+                    node.nodes = [];
+                  node.is_leaf = false;
+                  _.each(res.nodes, function (cnode) {
+                    _setup_node(cnode, parent);
+                    node.nodes.push(cnode);
+                  });
+                }
+              });
+          }
+        }
+        return Promise.resolve();
+      })
+        .then(function () {
+          // rest of parse_tree
+          var content_template,
+              tmp = document.querySelector('#tree-node-template');
+          if(tmp)
+            content_template = _.template(tmp.innerHTML);
+          tree_element.innerHTML = ''; // clear all
+          tree_mk_list_base(tree, tree_element, content_template); // re-create
+          tree_element.tree_height = window.innerHeight;
+          return tree;
+        });
     })
-    .catch(handle_error_checkpoint());
+  function _setup_node (anode, parent) {
+    anode.parent = parent;
+    anode.level = parent.level + 1;
+    if (!anode.meta)
+      anode.meta = {};
+    if (!anode._more_meta)
+      anode._more_meta = {};
+    if (anode.nodes) {
+      _.each(anode.nodes, function (a) { _setup_node(a, anode); });
+    }
+  }
 }
 
 function _clone_tree(tree) {
@@ -1349,4 +1494,27 @@ function xscale_from_percentage_floor(percentage, step, decres) {
   } else {
     return v+'';
   }
+}
+
+function _trees_switcher_dynamic_nodes(anode) {
+  var current_tree = config.tree || window.default_tree;
+  return get_trees_info(default_trees_info_fn)
+    .then(function (trees_info) {
+      return {
+        nodes: _.filter(
+          _.map(trees_info.list, function (item) {
+            if (item.tree_fn == current_tree)
+              return null;
+            return {
+              is_leaf: true,
+              text: item.name,
+              meta: {
+                'change-tree': item.tree_fn
+              },
+            };
+          }),
+          function (v) { return !!v; } // remove null node
+        ),              
+      };
+    });
 }

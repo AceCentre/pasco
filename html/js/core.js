@@ -10,10 +10,30 @@ document.addEventListener('deviceready', function() {
 window.newEl = document.createElement.bind(document);
 window.default_locale = 'en-GB';
 window.default_config = 'config.json';
+window.default_trees_info_fn = 'trees-info.json';
 window.host_tree_dir_prefix = 'trees/';
 window.trees_table_fn = 'trees_table.json';
 window.default_tree = window.host_tree_dir_prefix + 'default/default.md';
 window.cordova_user_dir_prefix = 'cdvfile://localhost/persistent/';
+
+function fs_friendly_name (s) {
+  return s.replace(/^[a-z]{1,10}\:\/\//i,"").replace(/\?.*$/,"")
+    .replace(/[ \(\)\[\]\*\#\@\!\$\%\^\&\+\=\/\\:]/g, '_')
+    .replace(/[\r\n\t]/g, '');
+}
+
+function get_trees_info (trees_info_fn) {
+  return get_file_json(trees_info_fn)
+    .catch(function (error) {
+      console.warn("Could not load trees_info file, " + trees_info_fn, error);
+      return { list: [
+        {
+          name: info.dirname,
+          tree_fn: info.tree_fn,
+        }
+      ] };
+    })
+}
 
 /**
  * determines place of tree and prepares it if default does not exists
@@ -34,9 +54,7 @@ function prepare_tree(tree_fn) {
     dirname = 'default';
   }
   // make dirname fs friendly
-  dirname = dirname.replace(/^[a-z]{1,10}\:\/\//i,"").replace(/\?.*$/,"")
-    .replace(/[ \(\)\[\]\*\#\@\!\$\%\^\&\+\=\/\\:]/g, '_')
-    .replace(/[\r\n\t]/g, '');
+  dirname = fs_friendly_name(dirname);
   // for cordova
   if(window.cordova) {
     var path = tree_fn,
@@ -117,6 +135,10 @@ function initialize_app() {
       localStorage.setItem('file_'+key, data);
       return Promise.resolve();
     }
+    function delete_entry(key) {
+      localStorage.removeItem('file_'+key);
+      return Promise.resolve();
+    }
     window.get_file_json = function(key) {
       return new_read(key) 
         .then(function(data) {
@@ -128,6 +150,7 @@ function initialize_app() {
     }
     window.get_file_data = new_read
     window.set_file_data = new_write
+    window.unset_file = delete_entry
     return Promise.resolve();
   }
 }
@@ -352,14 +375,28 @@ function domlocalize() {
     var elm = elms[i],
         l10n = elm.getAttribute('x-l10n'),
         l10n_cached = elm.getAttribute('x--l10n'),
-        l10n_input = l10n_cached||l10n||elm.textContent.trim(),
-        localized = _t(l10n_input);
-    if(!l10n || localized != l10n) {
-      elm.textContent = localized;
-      if(!l10n && !l10n_cached)
-        elm.setAttribute('x--l10n', l10n_input);
+        l10n_input = l10n_cached||l10n||elm.textContent.trim();
+    if (l10n != '#NULL#') {
+      var localized = _t(l10n_input);
+      if(!l10n || localized != l10n) {
+        elm.textContent = localized;
+        if(!l10n && !l10n_cached)
+          elm.setAttribute('x--l10n', l10n_input);
+      }
     }
   }
+  _.each(document.querySelectorAll('.has-l10n-attr'), function (elm) {
+    var newattrs = [];
+    _.each(elm.attributes, function (attr) {
+      var prefix_const = 'x-l10n-';
+      if (attr.name.indexOf(prefix_const) == 0 &&
+          attr.name.length > prefix_const.length) {
+        var name = attr.name.substr(prefix_const.length);
+        newattrs.push([name, _t(attr.value)]);
+      }
+    });
+    _.each(newattrs, function (attr) { elm.setAttribute(attr[0], attr[1]); });
+  });
 }
 
 function load_script(fn) {
@@ -398,13 +435,13 @@ function handle_error_checkpoint() {
 function handle_error(err) {
   if(err.withcheckpoint) {
     console.error("checkpoint:", err.checkpoint_stack);
-    alert(err.error+'');
     console.error(err.error)
-    throw err.error;
+    alert(err.error+'');
+    // throw err.error;
   } else {
     alert(err);
     console.error(err);
-    throw err;
+    // throw err;
   }
 }
 
@@ -430,6 +467,20 @@ function delete_file(url, options) {
       options.method = 'DELETE'
     return read_file(url, options);
   }  
+}
+
+function cordova_rmdir_rec(path) {
+  return new Promise(function (resolve, reject) {
+    function onEntry(entry) {
+      entry.removeRecursively(function() {
+        console.log("Remove Recursively Succeeded");
+      }, onFail);
+    }
+    function onFail(err) {
+      reject(new Error("Fail to delete `" + url + "` -- " + err.code + ", " + err.message));
+    }
+    window.resolveLocalFileSystemURL(path, onEntry, onFail);
+  });
 }
 
 function cordova_mkdir(path) {
@@ -667,11 +718,9 @@ proto.init = function() {
             try {
               self.is_native = false
               self.responsiveVoice = responsiveVoice
-              if(responsiveVoice.voiceSupport()) {
-                resolve(self);
-              } else {
-                reject("No supported speaker found!");
-              }
+              responsiveVoiceFix(responsiveVoice);
+              // voiceSupport check removed, it is not the indicator for responsiveVoice compatibility
+              resolve(self);
             } catch(err) {
               reject(err);
             }
@@ -679,9 +728,26 @@ proto.init = function() {
           script.onerror = function() {
             reject("Could not load responsivevoice code");
           };
-          script.src = "//code.responsivevoice.org/responsivevoice.js";
+          script.src = "https://code.responsivevoice.org/responsivevoice.js";
           document.body.appendChild(script);
         });
+        function responsiveVoiceFix (rv) {
+          var orgiFallback_audioPool_getAudio = rv.fallback_audioPool_getAudio;
+          rv.fallback_audioPool_getAudio = function () {
+            if (rv.fallback_audiopool_index >= rv.fallback_audiopool.length) {
+              rv.fallback_audiopool = [];
+            }
+            return orgiFallback_audioPool_getAudio.apply(this, arguments);
+          }
+          var origClearFallbackPool = rv.clearFallbackPool;
+          rv.clearFallbackPool = function () {
+            _.each(rv.fallback_audiopool, function (audio) {
+              audio.pause();
+            });
+            rv.fallback_audiopool = [];
+            return origClearFallbackPool.apply(this, arguments);
+          }
+        }
       }
     });
 }
@@ -735,6 +801,7 @@ proto.start_speaking = function(speech, opts) {
     delete opts.rateMul
     var voiceId = opts.voiceId;
     delete opts.voiceId;
+    delete opts.override_to_speaker;
     // TODO:: control audio playback,
     // delay can be implemented if access to audio playback is at this level
     var retobj = {};
@@ -936,6 +1003,7 @@ function read_json(url, options) {
 window.get_file_json = read_json
 window.get_file_data = read_file
 window.set_file_data = write_file
+window.unset_file = delete_file
 
 
 
@@ -1004,7 +1072,7 @@ function update_collapsable_subrout(elm) {
 
 function collapsable_toggle(toggle_el, toggle) {
   var contains_collapse = toggle_el.classList.contains('x-collapse');
-  toggle = toggle == null ? !contains_collapse : toggle
+  toggle = toggle == null ? contains_collapse : toggle
   if(toggle_el._collapsable_timeout != null)
     clearTimeout(toggle_el._collapsable_timeout);
   if(toggle && contains_collapse) {
@@ -1022,7 +1090,43 @@ function collapsable_toggle(toggle_el, toggle) {
   }
 }
 
-function parse_tree(tree_element, data) {
+function tree_traverse_nodes_async (tree, callable) {
+  var promise = tree_traverse_nodes_async_subrout(tree, callable, 0);
+  return promise ? promise : Promise.resolve();
+}
+
+function tree_traverse_nodes_async_subrout (tree, callable, i) {
+  while (tree.nodes && i < tree.nodes.length) {
+    var node = tree.nodes[i];
+    var promise = callable(node, i, tree.nodes);
+    if (!promise) {
+      promise = tree_traverse_nodes_async_subrout(node, callable, 0); // process sub-nodes
+      i++;
+      if (promise) {
+        return promise.then(function (tmp) {
+          return tree_traverse_nodes_async_subrout(tree, callable, i); // continue
+        });
+      }
+    } else {
+      return promise.then(function (tmp) {
+        i = tmp == null ? i + 1 : tmp;
+        if (tmp < 0) { // less than zero means 
+          return;
+        }
+        promise = tree_traverse_nodes_async_subrout(node, callable, 0) // process sub-nodes
+        if (promise) {
+          return promise.then(function () {
+            return tree_traverse_nodes_async_subrout(tree, callable, i); // continue
+          });
+        } else {      
+          return tree_traverse_nodes_async_subrout(tree, callable, i); // continue
+        }
+      });
+    }
+  }
+}
+
+function _parse_tree_subrout(tree_element, data) {
   // #46 \t to h1-6
   data = data.replace(/^(\t{1,6})(.+)/gm, function(all, tabs, text) {
     var tmp = text.trim();
@@ -1045,11 +1149,16 @@ function parse_tree(tree_element, data) {
     })
   });
   tree_element.innerHTML = html_data;
+  var tree = parse_dom_tree(tree_element);
+  return tree;
+}
+
+function parse_tree(tree_element, data) {
+  var tree = _parse_tree_subrout(tree_element, data);
   var content_template,
       tmp = document.querySelector('#tree-node-template');
   if(tmp)
     content_template = _.template(tmp.innerHTML);
-  var tree = parse_dom_tree(tree_element);
   tree_element.innerHTML = ''; // clear all
   tree_mk_list_base(tree, tree_element, content_template); // re-create
   tree_element.tree_height = window.innerHeight;
