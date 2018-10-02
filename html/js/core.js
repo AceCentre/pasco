@@ -375,13 +375,23 @@ function domlocalize() {
     var elm = elms[i],
         l10n = elm.getAttribute('x-l10n'),
         l10n_cached = elm.getAttribute('x--l10n'),
-        l10n_input = l10n_cached||l10n||elm.textContent.trim();
+        text = elm.textContent.trim(),
+        l10n_input = l10n_cached||l10n||text,
+        default_l10n = elm.getAttribute('x--l10n-default');
     if (l10n != '#NULL#') {
       var localized = _t(l10n_input);
+      // initialize x--l10n-default if needed
+      if (!default_l10n && l10n && text &&
+          localized == l10n && l10n != text) {
+        default_l10n = elm.textContent;
+        elm.setAttribute('x--l10n-default', default_l10n);
+      }
       if(!l10n || localized != l10n) {
         elm.textContent = localized;
         if(!l10n && !l10n_cached)
           elm.setAttribute('x--l10n', l10n_input);
+      } else if (l10n && l10n != default_l10n) {
+        elm.textContent = default_l10n;
       }
     }
   }
