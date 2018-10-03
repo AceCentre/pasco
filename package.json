@@ -16,14 +16,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/willwade/pasco.git"
+    "url": "git+https://github.com/AceCentre/pasco.git"
   },
   "author": "Hossein Amin <hossein@aminbros.com>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/willwade/pasco/issues"
+    "url": "https://github.com/AceCentre/pasco/issues"
   },
-  "homepage": "https://github.com/willwade/pasco#readme",
+  "homepage": "https://github.com/AceCentre/pasco#readme",
   "dependencies": {
     "browser-sync": "^2.24.7",
     "concurrently": "^3.4.0",
