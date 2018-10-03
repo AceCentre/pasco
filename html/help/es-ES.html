@@ -9,6 +9,8 @@
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, viewport-fit=cover">
 
+    <base href=".."><!-- paths are relative to parent directory -->
+
     <title x-l10n="help_title">pasco - Help</title>
 
     <link rel="stylesheet" href="css/common.css">
@@ -36,15 +38,14 @@
       </div>
     </nav>
     <div class="container">
+      <div id="toc">
+      </div>
+      <h1>es-ES version</h1>
       <p>
       <b>pasco</b> is not designed to meet all and every communication aid users needs. Its fundamentally designed to suit early switch scanning users who also need <b>auditory cues</b>. Despite this it can be used in a range of ways. Find the relevant section below for some help and some common tips. 
 	  </p>
       <div id="tocwrp"></div>
-	    <hr />
-    <h2 class="relative"><a class="anchor" name="example-video"><a/>Example Video</h2>
-    <div class="video-iframe-wrp">
-      <iframe class="video-iframe" src="https://www.youtube.com/embed/Bey4XXJAqS8" width="420" height="315"></iframe>
-    </div>
+	  <hr />
 	  <h2 class="relative"><a class="anchor" name="config-auditorycue"></a>How to setup for auditory cues</h2>
 	  <p>pasco is designed to work well with an external headphone or speaker so the person communicating can only hear the cue rather than others in their environment hearing the cue constantly. <b>Please note. This feature is only available on iOS at present</b>. To do this plug in a wired headphone or speaker to the device (<b>it does not work on bluetooth speakers yet!</b>). When you do this all sound, by default, will now be directed to your headphones. To redirect the Main voice to the speaker of the iPhone/iPad you need to check the box to <b>redirect the output</b> in the <b>Config</b>-><b>Speech</b>.</p>
 	  <hr />
