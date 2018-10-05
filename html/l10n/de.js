@@ -94,7 +94,17 @@
     "Import": "Einführen",
     "New": "Neu",
     "Delete": "Löschen",
-    "Helpers": "Helfer"
+    "Helpers": "Helfer",
+    "English (UK)": "Englisch UK)",
+    "German": "Deutsche",
+    "Arabic": "Arabisch",
+    "Spanish": "Spanisch",
+    "Gujarati": "Gujarati",
+    "Grey-Red": "Grau-Rot",
+    "Yellow-Black": "Gelb Schwarz",
+    "Black-Yellow": "Schwarz Gelb",
+    "Mint": "Minze",
+    "Active Tree": "Aktiver Baum"
   };
 
 })();

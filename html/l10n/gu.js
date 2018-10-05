@@ -22,7 +22,7 @@
 
   icu.rtl = false;
   icu.dictionary = {
-    "help_title": "પાસ્કો - સહાય",
+    "help_title": "pasco - સહાય",
     "Toggle navigation": "નેવિગેશન ટૉગલ કરો",
     "Start": "શરૂઆત",
     "CONTRIBUTORS": "ફાળો આપનારા",
@@ -94,7 +94,17 @@
     "Import": "આયાત કરો",
     "New": "નવું",
     "Delete": "કાઢી નાખો",
-    "Helpers": "સહાયક"
+    "Helpers": "સહાયક",
+    "English (UK)": "અંગ્રેજી (યુકે)",
+    "German": "જર્મન",
+    "Arabic": "અરબી",
+    "Spanish": "સ્પેનિશ",
+    "Gujarati": "ગુજરાતી",
+    "Grey-Red": "ગ્રે-રેડ",
+    "Yellow-Black": "યલો-બ્લેક",
+    "Black-Yellow": "બ્લેક-યલો",
+    "Mint": "મિન્ટ",
+    "Active Tree": "સક્રિય વૃક્ષ"
    };
   
 })();
