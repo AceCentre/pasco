@@ -22,7 +22,7 @@
 
   icu.rtl = false;
   icu.dictionary = {
-    "﻿help_title": "પાસ્કો - સહાય",
+    "help_title": "પાસ્કો - સહાય",
     "Toggle navigation": "નેવિગેશન ટૉગલ કરો",
     "Start": "શરૂઆત",
     "CONTRIBUTORS": "ફાળો આપનારા",
@@ -86,7 +86,15 @@
     "Spell by blocks in Frequency": "ફ્રીક્વન્સીમાં બ્લોક્સ દ્વારા જોડણી કરો",
     "Load Selected": "પસંદ કરેલ લોડ",
     "Revert": "પાછા ફરો",
-    "Save Tree": "વૃક્ષ સાચવો"
+    "Save Tree": "વૃક્ષ સાચવો",
+    "Back option for all branches": "બધા શાખાઓ માટે પાછા વિકલ્પ",
+    "Switch key to select items": "વસ્તુઓ પસંદ કરવા માટે કી સ્વિચ કરો",
+    "Move with the other switch (Step scanning)": "બીજા સ્વીચ (પગલા સ્કેનિંગ) સાથે ખસેડો",
+    "Export": "નિકાસ",
+    "Import": "આયાત કરો",
+    "New": "નવું",
+    "Delete": "કાઢી નાખો",
+    "Helpers": "સહાયક"
    };
   
 })();
