@@ -105,7 +105,8 @@
     "Black-Yellow": "أصفر مسود",
     "Mint": "نعناع",
     "Which tree is currently active?": "",
-    "Active Tree": "شجرة نشطة"
+    "Active Tree": "شجرة نشطة",
+    "French": "الفرنسية"
   };
 
 })();

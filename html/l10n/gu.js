@@ -104,7 +104,8 @@
     "Yellow-Black": "યલો-બ્લેક",
     "Black-Yellow": "બ્લેક-યલો",
     "Mint": "મિન્ટ",
-    "Active Tree": "સક્રિય વૃક્ષ"
+    "Active Tree": "સક્રિય વૃક્ષ",
+    "French":"ફ્રેન્ચ"
    };
   
 })();

@@ -95,7 +95,7 @@
     "New": "Nuevo",
     "Delete": "Borrar",
     "Helpers": "Ayudantes",
-    "English (UK)": "Inglés del Reino Unido)",
+    "English (UK)": "Inglés (Reino Unido)",
     "German": "alemán",
     "Arabic": "Arábica",
     "Spanish": "Español",
@@ -104,7 +104,8 @@
     "Yellow-Black": "Amarillo-negro",
     "Black-Yellow": "Amarillo negro",
     "Mint": "menta",
-    "Active Tree": "Árbol activo"
+    "Active Tree": "Árbol activo",
+    "French":"Francés"
   };
 
 })();
