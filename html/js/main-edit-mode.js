@@ -38,6 +38,7 @@ function _edit_mode_toggle(b, restart) {
         state.silent_mode = b
         state.mode = b ? 'switch' : config.mode || 'auto'
         state.edit_mode = b
+        _tree_update_subdyn(tree, { disable_dyn: state.edit_mode });
         // check if positions are still valid
         validate_positions(state.positions);
         return start(state)

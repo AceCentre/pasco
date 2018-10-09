@@ -159,34 +159,32 @@ function tree_mk_list_base(tree, el, content_template) {
   tree.dom_element = el;
   el.classList.add('level-' + tree.level);
   el.classList.add('node')
-  if(tree.text) {
-    var text = tree.text;
-    if(content_template) {
-      var cel = newEl('div');
-      cel.classList.add('content');
-      el.appendChild(cel);
-      tree.content_element = cel;
-      var tmp = newEl('div');
-      tmp.textContent = text;
-      cel.innerHTML = content_template({
-        text: tmp.innerHTML,
-        tree: tree
-      });
-      var txtel = cel.querySelector('.text');
-      if(txtel) {
-        tree.txt_dom_element = txtel;
-      }
-    } else {
-      var cel = newEl('div');
-      cel.classList.add('content');
-      el.appendChild(cel);
-      tree.content_element = cel;
-      var txtel = newEl('p');
-      txtel.classList.add('text');
-      txtel.textContent = text;
-      cel.appendChild(txtel);
+  var text = tree.text || '';
+  if(content_template) {
+    var cel = newEl('div');
+    cel.classList.add('content');
+    el.appendChild(cel);
+    tree.content_element = cel;
+    var tmp = newEl('div');
+    tmp.textContent = text;
+    cel.innerHTML = content_template({
+      text: tmp.innerHTML,
+      tree: tree
+    });
+    var txtel = cel.querySelector('.text');
+    if(txtel) {
       tree.txt_dom_element = txtel;
     }
+  } else {
+    var cel = newEl('div');
+    cel.classList.add('content');
+    el.appendChild(cel);
+    tree.content_element = cel;
+    var txtel = newEl('p');
+    txtel.classList.add('text');
+    txtel.textContent = text;
+    cel.appendChild(txtel);
+    tree.txt_dom_element = txtel;
   }
   if(!tree.is_leaf) {
     var nodes = tree.nodes,
@@ -352,8 +350,8 @@ function parse_dom_tree(el, continue_at, tree) {
     if(cnode.nodeType == Node.ELEMENT_NODE) {
       if((match = cnode.nodeName.match(_parse_dom_tree_pttrn01)) ||
          _parse_dom_tree_pttrn02.test(cnode.nodeName)) { // branch
-          var level = match ? parseInt(match[1]) : tree.level + 1,
-              is_list = !match;
+        var level = match ? parseInt(match[1]) : tree.level + 1,
+            is_list = !match;
         if(level > tree.level) {
           var txt_dom_el = is_list ? cnode.querySelector(":scope > p") : cnode,
               txt_elm_content;
@@ -381,6 +379,8 @@ function parse_dom_tree(el, continue_at, tree) {
           if(is_list) {
             tree.nodes.push(parse_dom_tree(cnode, null, anode));
           } else {
+            // process inner nodes
+            parse_dom_tree(cnode, null, anode);
             continue_at.i += 1;
             tree.nodes.push(parse_dom_tree(el, continue_at, anode));
           }
