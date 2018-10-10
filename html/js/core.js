@@ -1226,17 +1226,18 @@ function tree_traverse_nodes_async_subrout (tree, callable, i) {
 
 function _parse_tree_subrout(tree_element, data) {
   // #46 \t to h1-6
-  data = data.replace(/^(\t{1,6})(.+)/gm, function(all, tabs, text) {
+  data = data.replace(/^(\t{1,})(.+)/gm, function(all, tabs, text) {
     var tmp = text.trim();
     if(!tmp || tmp[0] == '-') {
       return all;
     }
-    return '#' + '#'.repeat(tabs.length) + ' ' + tmp;
+    return '    '.repeat(tabs.length) + '- ' + tmp;
   });
   // start of line with a letter or number is h1
   data = data.replace(/^\s*[^\#\@\<\-\*\_\ \t\n\r]/gm, function(all) {
-    return '# ' + all;
+    return '- ' + all;
   });
+  console.log(data)
   var html_data = new showdown.Converter().makeHtml(data);
   html_data = sanitizeHtml(html_data, {
     allowedTags:
