@@ -1,5 +1,5 @@
 var config_fn, tree_fn, config, tree, state = null, tree_element, napi, speaku,
-    config_json, tree_contentsize_xstep = 50;
+    config_json, words_cache = {}, tree_contentsize_xstep = 50;
 Promise.all([
   window.cordova ? NativeAccessApi.onready() : Promise.resolve(),
   new Promise(function(resolve) { // domready
@@ -96,7 +96,10 @@ Promise.all([
     document.body.classList.remove('notready');
   })
   .then(start)
-  .catch(handle_error);
+  .catch(function (err) {
+    document.body.classList.remove('notready');
+    handle_error(err);
+  });
 
 window.addEventListener('unload', function() {
   if(speaku && speaku.is_native && speaku.synthesizer) {
@@ -235,11 +238,14 @@ function start(_state) {
         _state.auto_next_dead = false
         auto_next();
       }
-      if(state.positions[state.positions.length - 1].index != -1)
-        _tree_position_update();
-      else
-        _update_active_positions();
-      delete state._start_promise;
+      return _before_changeposition()
+        .then(function () {
+          if(state.positions[state.positions.length - 1].index != -1)
+            _tree_position_update();
+          else
+            _update_active_positions();
+          delete state._start_promise;
+        });
     });
   function auto_next() {
     if(_state._stopped)
@@ -416,7 +422,7 @@ function _start_auto_insert_back(tree, content_template) {
 function _stop_auto_remove_back(tree) {
   _.each(tree.nodes, function(anode) {
     if(anode._back_node) {
-      tree_remove_node(anode._back_node);
+      tree_remove_node_from_parent(anode._back_node);
       delete anode._back_node;
     }
     if(!anode.is_leaf) {
@@ -642,41 +648,40 @@ function _on_keyhit(ev) {
 }
 
 function _before_new_move() {
-  var promise = speaku.stop_speaking();
-  var el;
-  while((el = state._highlighted_elements.pop()))
-    el.classList.remove('highlight' || config.highlight_class);
-  return promise;
+  return speaku.stop_speaking()
+    .then(function () {
+      var el;
+      while((el = state._highlighted_elements.pop()))
+        el.classList.remove('highlight' || config.highlight_class);
+    });
 }
 
 function _new_move_start(moveobj) {
-  return new Promise(function(retResolve, retReject) {
-    var promise = new Promise(function(resolve) {
-      setTimeout(function() {
-        var running_move;
-        _.each(moveobj.steps, function(astep) {
-          promise = promise
-            .then(function() {
-              if(running_move == state._running_move)
-                return astep(moveobj);
-              // otherwise move has stopped....
-            });
-        });
-        var prev_running_move = state._running_move
-        running_move = state._running_move = promise
+  return unboundPromise()
+    .then(function (defer) {
+      var promise = defer[0], resolve = defer[1], reject = defer[2];
+      var running_move;
+      _.each(moveobj.steps, function(astep) {
+        promise = promise
           .then(function() {
             if(running_move == state._running_move)
-              state._running_move = null;
-          })
-          .then(retResolve, retReject);
-        if(prev_running_move) {
-          prev_running_move.then(resolve)
-        } else {
-          resolve();
-        }
-      }, 0);
+              return astep(moveobj);
+            // otherwise move has stopped....
+          });
+      });
+      var prev_running_move = state._running_move
+      running_move = state._running_move = promise
+        .then(function() {
+          if(running_move == state._running_move)
+            state._running_move = null;
+        });
+      if(prev_running_move) {
+        prev_running_move.then(resolve, reject)
+      } else {
+        resolve();
+      }
+      return promise;
     });
-  });
 }
 
 function _new_move_init(node) {
@@ -686,9 +691,20 @@ function _new_move_init(node) {
   };
 }
 
+function _add_on_next_update_active_positions (_state, callable) {
+  _state = _state || state
+  var list = _state.on_next_update_active_positions =
+      _state.on_next_update_active_positions  || [];
+  list.push(callable);
+}
+
 function _update_active_positions(_state, positions) {
   _state = _state || state
   positions = positions || _state.positions
+  if (_state.on_next_update_active_positions) {
+    _.each(_state.on_next_update_active_positions, function (f) { f(); });
+    delete _state.on_next_update_active_positions;
+  }
   var dom_elements = _.map(positions, function(pos) { return pos.tree.dom_element; });
   for(var i = 0; i < _state._active_elements.length; ) {
     var ael = _state._active_elements[i];
@@ -916,13 +932,13 @@ function _get_current_node(position) {
 function _get_node_attr_inherits_full(positions, name) {
   for(var i = positions.length - 1; i >= 0; i--) {
     var pos = positions[i];
-    if(pos.index == -1) { // special case, at root
+    if(pos.index != -1) {
       var node = pos.tree.nodes[pos.index],
           val = node.meta[name]
       if(val !== undefined && val != 'inherit') {
         return [ val, pos, node ];
       }
-    } else {
+    } else { // special case, at root
       var val = pos.tree.meta[name];
       if(val !== undefined && val != 'inherit') {
         return [ val, pos, null ];
@@ -957,20 +973,49 @@ function _on_override_go_in_or_out() {
   return null;
 }
 
+var _tree_go_out_override_functions = [
+  _on_override_go_in_or_out,
+];
+
+function _before_pop_position (n) {
+  for (var i = 0, len = Math.min(n, state.positions.length); i < len; i++) {
+    if(state.positions.length > i + 1) {
+      var oldpos = state.positions[state.positions.length - 1 - i];
+      if (_meta_true_check(oldpos.tree.meta['spell-branch'], false)) {
+        var ppos = state.positions[state.positions.length - 2 - i];
+        if (_meta_true_check(oldpos.tree.meta['spell-update-dyn-onchange'])) {
+          ppos._dyndirty = true;
+        }
+        delete ppos._concat_letters;
+      }
+    }
+  }
+}
+
 function _tree_go_out() {
   if(!state.can_move)
     return Promise.resolve();
+  // special case
   var res;
-  if((res = _on_override_go_in_or_out()) != null) {
-    return res;
+  for(var i = 0, len = _tree_go_out_override_functions.length; i < len; i++) {
+    if((res = _tree_go_out_override_functions[i]()) != null)
+      return res;
   }
-  if(state.positions.length > 1) {
-    state.positions.pop();
-  } else {
-    // no more way, start at top (reset)
-    state.positions[0].index = 0;
-  }
-  return _scan_move();
+  return _do_tree_go_out();
+}
+
+function _do_tree_go_out () {
+  _before_pop_position();
+  return _before_changeposition()
+    .then(function () {
+      if(state.positions.length > 1) {
+        state.positions.pop();
+      } else {
+        // no more way, start at top (reset)
+        state.positions[0].index = 0;
+      }
+      return _scan_move();
+    }); 
 }
 
 function _in_check_spell_delchar(atree) {
@@ -985,6 +1030,10 @@ function _in_check_spell_delchar(atree) {
         var letter;
         while((letter = concat_letters.pop()) == ' ')
           ;
+        var tnode = tmp[2] == null ? tmp[1] : tmp[2];
+        if (_meta_true_check(tnode.meta['spell-update-dyn-onchange'])) {
+          tmp[1]._dyndirty = true;
+        }
       }
       var msg, idx = concat_letters.lastIndexOf(' ');
       if(idx != -1) {
@@ -999,82 +1048,113 @@ function _in_check_spell_delchar(atree) {
     }
   }
 }
-function _in_check_spell_finish(atree) {
-  if(_meta_true_check(atree.meta['spell-finish'])) {
-    // display continue-concat if any
-    var popup = document.querySelector('#popup-message-wrp'),
-        popup_mtext = popup ? popup.querySelector('.main-text') : null,
-        tmp = _get_node_attr_inherits_full(state.positions, 'spell-branch');
-    if(tmp && tmp[1]._concat_letters) {
-      var msg = tmp[1]._concat_letters.join('');
-      if(popup && popup_mtext) {
-        popup_mtext.textContent = msg
-        popup.classList.remove('hide');
-        setTimeout(function() {
-          popup.classList.add('visible');
-        }, 10);
-      }
-      delete tmp[1]._concat_letters;
-      return stop()
-        .then(function() {
-          if(atree.content_element)
-            atree.content_element.classList.add('selected' || config.selected_class);
-          // speak it
-          return _move_sub_speak2.call(atree, 'main', msg)
-            .then(function() {
-              _start_at_next_action(atree)
-            });
-        });
+function _in_spell_finish(atree) {
+  // display continue-concat if any
+  var popup = document.querySelector('#popup-message-wrp'),
+      popup_mtext = popup ? popup.querySelector('.main-text') : null,
+      tmp = _get_node_attr_inherits_full(state.positions, 'spell-branch');
+  if(tmp && tmp[1]._concat_letters) {
+    var msg = tmp[1]._concat_letters.join('');
+    if(popup && popup_mtext) {
+      popup_mtext.textContent = msg
+      popup.classList.remove('hide');
+      setTimeout(function() {
+        popup.classList.add('visible');
+      }, 10);
     }
+    delete tmp[1]._concat_letters;
+    return stop()
+      .then(function() {
+        if(atree.content_element)
+          atree.content_element.classList.add('selected' || config.selected_class);
+        // speak it
+        return _move_sub_speak2.call(atree, 'main', msg)
+          .then(function() {
+            _start_at_next_action(atree)
+          });
+      });
+  } else {
+    return _notify_move(_get_current_node(), atree, {
+      main_override_msg: _t("Nothing selected")
+    });
   }
 }
 function _in_check_spell_default(atree) {
+  // spell-finish can also contain spell-word/letter
+  if (_meta_true_check(atree.meta['spell-finish']) &&
+      (!atree.meta['spell-word'] || atree.meta['spell-letter'])) {
+    return _in_spell_finish(atree);
+  }
   // continue check
   var tmp = _get_node_attr_inherits_full(state.positions, 'spell-branch');
   if(tmp && _meta_true_check(tmp[0])) {
-    // continue it
-    var idx = state.positions.indexOf(tmp[1]);
-    state.positions = state.positions.slice(0, idx + 1);
-    if(tmp[2] != null) {
-      state.positions.push({
-        tree: tmp[2],
-        index: 0
-      });
-    } else {
-      state.positions[0].index = 0;
-    }
-    // concat and spell each letter
     var concat_letters = tmp[1]._concat_letters;
     if(!concat_letters)
       concat_letters = tmp[1]._concat_letters = []
-    var letter = atree.meta['spell-letter'] || atree.text;
-    concat_letters.push(letter)
-    var msg;
-    {
-      var idx = concat_letters.lastIndexOf(' ');
-      if(idx != -1) {
-        msg = concat_letters.slice(0, idx).join('') + ' ' +
-          concat_letters.slice(idx + 1).join(' ');
+    if (atree.meta['spell-word']) {
+      // spell-word replaces existing letters until last word
+      var last_word_idx = concat_letters.lastIndexOf(' ');
+      if (last_word_idx == -1) {
+        concat_letters.splice(0, concat_letters.length); // empty the list
       } else {
-        msg = concat_letters.join(' ');
+        concat_letters.splice(last_word_idx, concat_letters.length - last_word_idx, ' ');
       }
+      concat_letters.push(atree.meta['spell-word']);
+    } else {
+      var letter = atree.meta['spell-letter'] || atree.text;
+      concat_letters.push(letter)
     }
-    return _notify_move(_get_current_node(), atree, {
-      main_override_msg: msg
-    });
+    if (_meta_true_check(atree.meta['spell-finish'])) {
+      return _in_spell_finish(atree);
+    }
+    var tnode = tmp[2] == null ? tmp[1] : tmp[2];
+    if (_meta_true_check(tnode.meta['spell-update-dyn-onchange'])) {
+      tmp[1]._dyndirty = true;
+    }
+    // continue it
+    return _before_changeposition()
+      .then(function () {
+        var idx = state.positions.indexOf(tmp[1]);
+        state.positions = state.positions.slice(0, idx + 1);
+        if(tmp[2] != null) {
+          state.positions.push({
+            tree: tmp[2],
+            index: 0
+          });
+        } else {
+          state.positions[0].index = 0;
+        }
+        var msg;
+        {
+          var idx = concat_letters.lastIndexOf(' ');
+          if(idx != -1) {
+            msg = concat_letters.slice(0, idx).join('') + ' ' +
+              concat_letters.slice(idx + 1).join(' ');
+          } else {
+            msg = concat_letters.join(' ');
+          }
+        }
+        return _notify_move(_get_current_node(), atree, {
+          main_override_msg: msg
+        });
+      });
   }
 }
 function _in_check_back_n_branch(atree) {
   var i = _meta_as_int(atree.meta['back-n-branch'], null);
-  if(i == null)
+  if(i == null || !(i > 0))
     return;
-  if(state.positions.length <= i + 1) {
-    i = state.positions.length - 1;
-  }
-  while(i-- > 0) {
-    var last_pos = state.positions.pop();
-  }
-  return _scan_move();
+  _before_pop_position(i);
+  return _before_changeposition()
+    .then(function () {
+      if(state.positions.length <= i + 1) {
+        i = state.positions.length - 1;
+      }
+      while(i-- > 0) {
+        var last_pos = state.positions.pop();
+      }
+      return _scan_move();
+    });
 }
 
 function _in_override_change_tree (atree) {
@@ -1138,8 +1218,7 @@ function _in_override_change_tree_subrout (atree, another_tree) {
                     tree_element.parentNode.insertBefore(telm, tree_element);
                     tree_element.parentNode.removeChild(tree_element);
                     tree_element = telm;
-                    renew_state();
-                    state = _clean_state(state);
+                    _clean_state(state);
                     return start();
                   })
                   .catch(handle_error);
@@ -1172,6 +1251,8 @@ function _start_at_next_action(atree) {
           }, 500); // wait for hide transition 
         }
         _clean_state()
+        // update tree dyn, before start again
+        _tree_update_subdyn(tree);
         return start(); // start over
       });
   }
@@ -1205,9 +1286,31 @@ function _start_at_next_action(atree) {
     });
 }
 
-var _tree_go_in_override_functions = [
+function _before_changeposition () {
+  var subdyn_tree;
+  for (var i = 0, len = state.positions.length; i < len; i++) {
+    var pos = state.positions[i];
+    if (!subdyn_tree && pos._dyndirty) {
+      if(pos.index != -1) {
+        subdyn_tree = pos.tree.nodes[pos.index];
+      } else { // special case, at root
+        subdyn_tree = pos.tree;
+      }
+    }
+    delete pos._dyndirty;
+  }
+  if (subdyn_tree) {
+    return _tree_update_subdyn(subdyn_tree, {
+      changing_position: true,
+      disable_dyn: state.edit_mode
+    });
+  }
+  return Promise.resolve();
+}
+
+var _tree_select_override_functions = [
   _in_check_back_n_branch,
-  _in_check_spell_finish, _in_check_spell_delchar,
+  _in_check_spell_delchar,
   _in_check_spell_default,
   _in_override_change_tree,
 ];
@@ -1228,11 +1331,27 @@ function _tree_go_in() {
     // for edit_mode do nothing
     if(state.edit_mode)
       return Promise.resolve();
+
+    // TODO:: This is an un-used feature, Remove it if there's no need for it in future
+    // dyn-setdirty-relative-onselect requires the tree to update dynnodes
+    // relative within the selected position on next update of position
+    var tmp = _get_node_attr_inherits_full(state.positions, 'dyn-setdirty-onselect');
+    if (tmp && _meta_true_check(tmp[0])) {
+      var idx = state.positions.indexOf(tmp[1]);
+      for (var i = idx; i >= 0; i--) {
+        var pos = state.positions[i];
+        pos._dyndirty = true;
+        if (!_meta_true_check(pos.tree.meta['dyn-setdirty-onselect'], false)) {
+          break;
+        }
+      }
+    }
+    
     // explicit finish check
     // special case
     var res;
-    for(var i = 0, len = _tree_go_in_override_functions.length; i < len; i++) {
-      if((res = _tree_go_in_override_functions[i](atree)) != null)
+    for(var i = 0, len = _tree_select_override_functions.length; i < len; i++) {
+      if((res = _tree_select_override_functions[i](atree)) != null)
         return res;
     }
     // finish it
@@ -1250,35 +1369,41 @@ function _tree_go_in() {
   } else {
     if(atree.nodes.length == 0)
       return Promise.resolve(); // has no leaf, nothing to do
-    state.positions.push({
-      tree: atree,
-      index: 0
-    });
-    var delay = state.mode == 'auto' ? config.auto_next_atfirst_delay || 0 : 0;
-    return _notify_move(_get_current_node(), atree, { delay: delay });
+    return _before_changeposition()
+      .then(function () {
+        state.positions.push({
+          tree: atree,
+          index: 0
+        });
+        var delay = state.mode == 'auto' ? config.auto_next_atfirst_delay || 0 : 0;
+        return _notify_move(_get_current_node(), atree, { delay: delay });
+      });
   }
 }
 function _tree_move(node) {
   if(!state.can_move)
     return Promise.resolve();
-  var positions = [],
-      tmp0 = node,
-      tmp = node.parent;
-  while(tmp != null) {
-    var idx = tmp.nodes.indexOf(tmp0)
-    if(idx == -1)
-      throw new Error("Corrupt tree!");
-    positions.unshift({
-      tree: tmp,
-      index: idx
-    })
-    tmp0 = tmp
-    tmp = tmp.parent
-  }
-  if(positions.length == 0)
-    throw new Error("the node should belong to a tree");
-  state.positions = positions
-  return _scan_move()
+  return _before_changeposition()
+    .then(function () {
+      var positions = [],
+          tmp0 = node,
+          tmp = node.parent;
+      while(tmp != null) {
+        var idx = tmp.nodes.indexOf(tmp0)
+        if(idx == -1)
+          throw new Error("Corrupt tree!");
+        positions.unshift({
+          tree: tmp,
+          index: idx
+        })
+        tmp0 = tmp
+        tmp = tmp.parent
+      }
+      if(positions.length == 0)
+        throw new Error("the node should belong to a tree");
+      state.positions = positions
+      return _scan_move()
+    });
 }
 function _tree_position_update() {
   return _scan_move()
@@ -1374,55 +1499,206 @@ function eval_config(config) {
 }
 
 var _tree_dynamic_nodes_module_map = {
-  'trees-switcher': _trees_switcher_dynamic_nodes
+  'trees-switcher': {
+    render: _trees_switcher_dynamic_nodes,
+  },
+  'spell-word-prediction': {
+    render: _word_prediction_dynamic_nodes,
+  },
+  'spell-letter-prediction': {
+    render: _letter_prediction_dynamic_nodes,
+  },
 };
+
+function words_cmp (a, b) {
+  if(a.v < b.v) {
+    return -1
+  }
+  if(a.v > b.v) {
+    return 1
+  }
+  return 0
+}
+
+function mk_words_weight_cmp (asc) {
+  var mul = asc ? 1 : -1;
+  return function (a, b) {
+    return mul * (a.w - b.w);
+  }
+}
+
+function get_words (url) {
+  if (words_cache[url]) {
+    return words_cache[url];
+  }
+  return words_cache[url] = get_file_json(url)
+    .then(function (data) {
+      var words = data.words;
+      // verify words is sorted
+      var notsorted = false;
+      for (var i = 0; i + 1 < words.length; i++) {
+        var w0 = words[i].v, w1 = words[i+1].v;
+        if (words_cmp(w0, w1) > 0) {
+          notsorted = true;
+          break;
+        }
+      }
+      // if not, sort it
+      if (!notsorted) {
+        words.sort(words_cmp);
+      }
+      return data;
+    })
+    .catch(function (err) {
+      delete words_cache[url];
+      throw err;
+    });
+}
+
+function _get_current_spell_txt () {
+  var txt = '';
+  if (state && !state._stopped) {
+    // _get_node_attr_inherits_full has not used, since this function
+    // has called at the time of updating dyn.
+    var tmp = _.filter(state.positions, function (a) { return !!a._concat_letters; });
+    if(tmp.length > 0) {
+      tmp = tmp[tmp.length-1]._concat_letters.join('').split(' ');
+      txt = tmp[tmp.length-1];
+    }
+  }
+  return txt;
+}
+var _prediction_spell_words_max_memory = 20;
+function _get_prediction_spell_words (words_file, txt) {
+  return get_words(words_file)
+    .then(function (wdata) {
+      wdata._cache = wdata._cache || {};
+      wdata._memory_stack = wdata._memory_stack || [];
+      if (wdata._cache[txt]) {
+        return wdata._cache[txt];
+      }
+      if (!txt) { // empty, simple solution would empty output
+        return { words: [] };
+      }
+      while (wdata._memory_stack.length >= _prediction_spell_words_max_memory) {
+        var tmp = wdata._memory_stack.shift();
+        delete wdata._cache[tmp];
+      }
+      var txtlen = txt.length;
+      function _cmp (a) {
+        var tmp = a.v.substr(0, txtlen)
+        if(tmp < txt) {
+          return -1;
+        }
+        if(tmp > txt) {
+          return 1;
+        }
+        return 0;
+      }
+      wdata._memory_stack.push(txt);
+      // for SortedArrayFuncs lt/gt target is known to _cmp, thus null given as target
+      var words = wdata.words,
+          oneidx = SortedArrayFuncs.eq(words, null, _cmp);
+      if (oneidx == -1) {
+        return wdata._cache[txt] = { words: [] }; // no result
+      }
+      var sidx = oneidx, eidx = oneidx;
+      // expand to edges
+      while (sidx > 0 && _cmp(words[sidx-1]) == 0) {
+        sidx--;
+      }
+      while (eidx > 0 && _cmp(words[eidx+1]) == 0) {
+        eidx++;
+      }
+      var subwords = words.slice(sidx, eidx + 1),
+          subwdata = { words: subwords };
+      return wdata._cache[txt] = subwdata;
+    });
+}
+
+function _word_prediction_dynamic_nodes (anode) {
+  var words_file = anode.meta['words-file'] || config.words_file;
+  if (!words_file) {
+    throw new Error("No words file given for dyn=\"spell-word-prediction\"");
+  }
+  var txt = _get_current_spell_txt(),
+      max_nodes = anode.meta['max-nodes'] || 3;
+  return _get_prediction_spell_words(words_file, txt)
+    .then(function (subwdata) {
+      if (!subwdata.words_sorted) {
+        subwdata.words_sorted = [].concat(subwdata.words);
+        subwdata.words_sorted.sort(mk_words_weight_cmp(false));
+      }
+      return {
+        nodes: _.map(subwdata.words_sorted.slice(0, max_nodes), function(word) {
+          return {
+            text: word.v,
+            meta: {
+              'spell-word': word.v,
+              'spell-finish': anode.meta['spell-finish'],
+            }
+          };
+        }),
+      };
+    });
+}
+
+function _letter_prediction_dynamic_nodes (anode) {
+  var words_file = anode.meta['words-file'] || config.words_file;
+  if (!words_file) {
+    throw new Error("No words file given for dyn=\"spell-word-prediction\"");
+  }
+  var alphabet = anode.meta['alphabet'] || config.alphabet ||
+                 'abcdefghijklmnopqrstuvwxyz', 
+      txt = _get_current_spell_txt();
+  if (typeof alphabet == 'string') {
+    if (alphabet.indexOf(',') != -1) {
+      alphabet = alphabet.split(',');
+    } else {
+      alphabet.split('');
+    }
+  }
+  return _get_prediction_spell_words(words_file, txt)
+    .then(function (subwdata) {
+      if (!subwdata.alphabet_sorted) {
+        subwdata.alphabet_sorted = _.map(alphabet, function (a) {
+          return [ a, _.reduce(
+            _.map(
+              _.filter(subwdata.words, function(w){return w.v[txt.length]==a;}),
+              function (a) { return a.w; }
+            ),
+            function (a, b) { return a + b; }, 0) ];
+        }).sort(function (a, b) { // sort desc order by weight, letter
+          if (a[1] == b[1]) {
+            if(a[0] < b[0]) {
+              return -1;
+            }
+            if(a[0] > b[0]) {
+              return 1;
+            }
+            return 0;
+          }
+          return b[1] - a[1];
+        });
+      }
+      return {
+        nodes: _.map(subwdata.alphabet_sorted, function(v) {
+          return { text: v[0] };
+        }),
+      };
+    });
+}
 
 function load_tree(tree_element, fn) {
   if(typeof fn != 'string') {
     tree = fn;
-    tree_element.innerText = "Tree given in config";
+    tree_element.innerText = "No tree given in config";
     return Promise.resolve();
   }
   return get_file_data(fn)
     .then(function(data) {
       var tree = _parse_tree_subrout(tree_element, data);
-      return tree_traverse_nodes_async(tree, function (node, i, nodes) {
-        var dyn_name = node.meta.dyn;
-        if (dyn_name && !node._more_meta._dyn_generated) {
-          var module = _tree_dynamic_nodes_module_map[dyn_name];
-          if (module) {
-            var replace_node_b = _meta_true_check(node.meta['dyn-replace-node'], false),
-                insert_in_b = _meta_true_check(node.meta['dyn-insert-in'], true);
-            if (!replace_node_b && !insert_in_b) {
-              return Promise.resolve();
-            }
-            return module(node)
-              .then(function (res) {
-                var parent;
-                node._more_meta._dyn_generated = true;
-                if (replace_node_b) {
-                  parent = node.parent;
-                  _.each(res.nodes, function (cnode) {
-                    _setup_node(cnode, parent);
-                    nodes.splice(i++, 0, cnode);
-                  });
-                  nodes.splice(i, 1);
-                  return i;
-                } else if (insert_in_b && res.nodes && res.nodes.length > 0) {
-                  parent = node;
-                  if (!node.nodes)
-                    node.nodes = [];
-                  node.is_leaf = false;
-                  _.each(res.nodes, function (cnode) {
-                    _setup_node(cnode, parent);
-                    node.nodes.push(cnode);
-                  });
-                }
-              });
-          }
-        }
-        return Promise.resolve();
-      })
+      return _tree_dynupdate(tree)
         .then(function () {
           // rest of parse_tree
           var content_template,
@@ -1434,18 +1710,70 @@ function load_tree(tree_element, fn) {
           tree_element.tree_height = window.innerHeight;
           return tree;
         });
-    })
-  function _setup_node (anode, parent) {
-    anode.parent = parent;
-    anode.level = parent.level + 1;
-    if (!anode.meta)
-      anode.meta = {};
-    if (!anode._more_meta)
-      anode._more_meta = {};
-    if (anode.nodes) {
-      _.each(anode.nodes, function (a) { _setup_node(a, anode); });
+    });
+}
+
+function _tree_dynupdate (atree) {
+  return tree_traverse_nodes_async(atree, function (node, i, nodes) {
+    var dyn_name = node.meta.dyn;
+    if (dyn_name) {
+      var module = _tree_dynamic_nodes_module_map[dyn_name];
+      if (module) {
+        return module.render(node)
+          .then(function (res) {
+            _.each(res.nodes, function (cnode) {
+              tree_setup_node(cnode, node.parent);
+              cnode._more_meta._isdynnode = true;
+              cnode._more_meta._dynnode = node;
+              nodes.splice(i++, 0, cnode);
+            });
+            // delete node.parent;
+            nodes.splice(i, 1);
+            return i;
+          });
+      }
+    }
+  });
+}
+
+function _tree_update_subdyn (atree, options) {
+  options = options || {}
+  function undyn (atree) {
+    if (!atree.is_leaf) {
+      atree.nodes = [].concat(atree.static_nodes);
+      _.each(atree.nodes, undyn);
     }
   }
+  undyn(atree);
+  return (options.disable_dyn ? Promise.resolve() : _tree_dynupdate(atree))
+    .then(function () {
+      var content_template,
+          tmp = document.querySelector('#tree-node-template');
+      if(tmp)
+        content_template = _.template(tmp.innerHTML);
+      if (tree_element == atree.dom_element) {
+        tree_element.innerHTML = ''; // clear all
+        tree_mk_list_base(atree, tree_element, content_template); // re-create
+        tree_element.tree_height = window.innerHeight;
+        finish();
+        return;
+      }
+      var elm = newEl('li'),
+          atree_dom_element = atree.dom_element,
+          parentNode = atree_dom_element.parentNode;
+      tree_mk_list_base(atree, elm, content_template); // re-create
+      if (options.changing_position) {
+        _add_on_next_update_active_positions(state, finish);
+      } else {
+        finish();
+      }
+      function finish () {
+        if (parentNode) {
+          parentNode.insertBefore(elm, atree_dom_element);
+          parentNode.removeChild(atree_dom_element);
+        }
+      }
+    });
 }
 
 function _clone_tree(tree) {
@@ -1506,7 +1834,6 @@ function _trees_switcher_dynamic_nodes(anode) {
             if (item.tree_fn == current_tree)
               return null;
             return {
-              is_leaf: true,
               text: item.name,
               meta: {
                 'change-tree': item.tree_fn
