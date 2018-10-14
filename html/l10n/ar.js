@@ -80,7 +80,7 @@
     "Locale": "مكان",
     "Save Config": "حفظ التكوين",
     "Tree": "شجرة",
-    "Choose a default tree": "اختر شجرة افتراضية",
+    "Choose an example tree": "اختر شجرة المثال",
     "Pragmatic Phrases": "العبارات البراغماتية",
     "Spell by blocks": "تهجئة كتل",
     "Spell by blocks in Frequency": "تهجئة كتل في التردد",
@@ -104,7 +104,6 @@
     "Yellow-Black": "أصفر أسود",
     "Black-Yellow": "أصفر مسود",
     "Mint": "نعناع",
-    "Which tree is currently active?": "",
     "Active Tree": "شجرة نشطة",
     "French": "الفرنسية"
   };

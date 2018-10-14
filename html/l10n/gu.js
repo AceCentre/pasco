@@ -22,7 +22,7 @@
 
   icu.rtl = false;
   icu.dictionary = {
-    "help_title": "pasco - સહાય",
+    "help_title": "પાસ્કો - સહાય",
     "Toggle navigation": "નેવિગેશન ટૉગલ કરો",
     "Start": "શરૂઆત",
     "CONTRIBUTORS": "ફાળો આપનારા",
@@ -80,7 +80,7 @@
     "Locale": "લોકેલ",
     "Save Config": "સાચવો રૂપરેખા",
     "Tree": "વૃક્ષ",
-    "Choose a default tree": "મૂળભૂત વૃક્ષ પસંદ કરો",
+    "Choose an example tree": "ઉદાહરણ વૃક્ષ પસંદ કરો",
     "Pragmatic Phrases": "વ્યવહારિક શબ્દસમૂહો",
     "Spell by blocks": "બ્લોક્સ દ્વારા જોડણી",
     "Spell by blocks in Frequency": "ફ્રીક્વન્સીમાં બ્લોક્સ દ્વારા જોડણી કરો",
@@ -105,7 +105,7 @@
     "Black-Yellow": "બ્લેક-યલો",
     "Mint": "મિન્ટ",
     "Active Tree": "સક્રિય વૃક્ષ",
-    "French":"ફ્રેન્ચ"
+    "French": "ફ્રેન્ચ"
    };
   
 })();

@@ -80,7 +80,7 @@
     "Locale": "Lieu",
     "Save Config": "Enregistrer la configuration",
     "Tree": "Arbre",
-    "Choose a default tree": "Choisissez une arborescence par défaut",
+    "Choose an example tree": "Choisissez un exemple d'arbre",
     "Pragmatic Phrases": "Phrases pragmatiques",
     "Spell by blocks": "Épeler par blocs",
     "Spell by blocks in Frequency": "Épeler par blocs dans la fréquence",
@@ -95,7 +95,7 @@
     "New": "Nouveau",
     "Delete": "Effacer",
     "Helpers": "Aides",
-    "English (UK)": "Anglais (Royaume-Uni)",
+    "English (UK)": "Anglais Royaume-Uni)",
     "German": "allemand",
     "Arabic": "arabe",
     "Spanish": "Espanol",
@@ -105,7 +105,7 @@
     "Black-Yellow": "Noir jaune",
     "Mint": "menthe",
     "Active Tree": "Arbre actif",
-    "French":"Français"
+    "French": "français"
   };
 
 })();

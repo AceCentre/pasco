@@ -22,7 +22,7 @@
 
   icu.rtl = false;
   icu.dictionary = {
-    'help_title': 'PASCO - Ayuda',
+    "help_title": "PASCO - Ayuda",
     "Toggle navigation": "Navegación de palanca",
     "Start": "Comienzo",
     "CONTRIBUTORS": "COLABORADORES",
@@ -80,7 +80,7 @@
     "Locale": "Lugar",
     "Save Config": "Guardar configuración",
     "Tree": "Árbol",
-    "Choose a default tree": "Elija un árbol predeterminado",
+    "Choose an example tree": "Elige un árbol de ejemplo",
     "Pragmatic Phrases": "Frases pragmáticas",
     "Spell by blocks": "Hechizo por bloques",
     "Spell by blocks in Frequency": "Hechizo por bloques en Frecuencia",
@@ -95,7 +95,7 @@
     "New": "Nuevo",
     "Delete": "Borrar",
     "Helpers": "Ayudantes",
-    "English (UK)": "Inglés (Reino Unido)",
+    "English (UK)": "Inglés del Reino Unido)",
     "German": "alemán",
     "Arabic": "Arábica",
     "Spanish": "Español",
@@ -105,7 +105,7 @@
     "Black-Yellow": "Amarillo negro",
     "Mint": "menta",
     "Active Tree": "Árbol activo",
-    "French":"Francés"
+    "French": "Francés"
   };
 
 })();

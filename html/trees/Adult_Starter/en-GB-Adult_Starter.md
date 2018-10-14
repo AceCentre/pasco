@@ -36,7 +36,8 @@ Feelings
 	I'm Bored
 	I'm sad
 	I'm Angry
-I will spell it<meta data-spell-branch>
+I will spell it<meta data-spell-branch  data-spell-update-dyn-onchange>
+	<meta data-dyn="spell-word-prediction" data-words-file="trees/Spell_Prediction/bncfrequency.json" data-max-nodes="3" data-spell-finish>
 	a to h
 		a
 		b
