@@ -105,7 +105,12 @@
     "Black-Yellow": "Amarillo negro",
     "Mint": "menta",
     "Active Tree": "Árbol activo",
-    "French": "Francés"
+    "French": "francés",
+    "Jokes": "Chistes",
+    "Adult Starter": "Arranque adulto",
+    "Simple Adult Starter": "Arrancador simple para adultos",
+    "Simple Adult Starter - Chinese Main": "Arrancador Adulto Simple - Chino Principal",
+    "Welsh":"Galés"
   };
 
 })();

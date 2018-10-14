@@ -105,7 +105,12 @@
     "Black-Yellow": "બ્લેક-યલો",
     "Mint": "મિન્ટ",
     "Active Tree": "સક્રિય વૃક્ષ",
-    "French": "ફ્રેન્ચ"
+    "French": "ફ્રેન્ચ",
+    "Jokes": "ટુચકાઓ",
+    "Adult Starter": "પુખ્ત સ્ટાર્ટર",
+    "Simple Adult Starter": "સરળ પુખ્ત સ્ટાર્ટર",
+    "Simple Adult Starter - Chinese Main": "સિમ્પલ એડલ્ટ સ્ટાર્ટર - ચીની મુખ્ય",
+    "Welsh":"વેલ્શ"
    };
   
 })();

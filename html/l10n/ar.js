@@ -105,7 +105,12 @@
     "Black-Yellow": "أصفر مسود",
     "Mint": "نعناع",
     "Active Tree": "شجرة نشطة",
-    "French": "الفرنسية"
+    "French": "الفرنسية",
+    "Jokes": "نكات",
+    "Adult Starter": "كاتب الكبار",
+    "Simple Adult Starter": "بسيطة الكبار كاتب",
+    "Simple Adult Starter - Chinese Main": "بسيطة الكبار كاتب - الصينية الرئيسية",
+    "Welsh": "الويلزية"
   };
 
 })();

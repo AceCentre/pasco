@@ -105,7 +105,12 @@
     "Black-Yellow": "Schwarz Gelb",
     "Mint": "Minze",
     "Active Tree": "Aktiver Baum",
-    "French": "Französisch"
+    "French": "Französisch",
+    "Jokes": "Witze",
+    "Adult Starter": "Erwachsener Starter",
+    "Simple Adult Starter": "Einfacher Erwachsener Starter",
+    "Simple Adult Starter - Chinese Main": "Einfacher Erwachsener Starter - Chinese Main",
+    "Welsh":"Walisisch"
   };
 
 })();
