@@ -2,6 +2,7 @@ window.help_files = {
   'en': 'help.html',
   'es-ES': 'help/es-ES.html'
 };
+var config;
 Promise.all([
   window.cordova ? NativeAccessApi.onready() : Promise.resolve(),
   new Promise(function(resolve) { // domready
@@ -13,7 +14,8 @@ Promise.all([
 ])
   .then(initialize_app)
   .then(function() { return get_file_json(default_config); })
-  .then(function(config) {
+  .then(function(_config) {
+    config = _config;
     var locale = config.locale||default_locale;
 
     var help_file = help_files[locale];
@@ -47,7 +49,7 @@ Promise.all([
   })
   .catch(function(err) {
     console.error(err);
-    console.warn("Could not find file for l10n " + config.locale||default_locale);
+    console.warn("Could not find file for l10n " + (config ? config.locale||default_locale : ", Could not load config!"));
     document.body.style.display = '';
   });
 
