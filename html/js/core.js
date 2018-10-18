@@ -1237,7 +1237,6 @@ function _parse_tree_subrout(tree_element, data) {
   data = data.replace(/^\s*[^\#\@\<\-\*\_\ \t\n\r]/gm, function(all) {
     return '- ' + all;
   });
-  console.log(data)
   var html_data = new showdown.Converter().makeHtml(data);
   html_data = sanitizeHtml(html_data, {
     allowedTags:
