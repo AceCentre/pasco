@@ -12,7 +12,6 @@ window.default_locale = 'en-GB';
 window.default_config = 'config.json';
 window.default_trees_info_fn = 'trees-info.json';
 window.host_tree_dir_prefix = 'trees/';
-window.trees_table_fn = 'trees_table.json';
 window.default_tree = window.host_tree_dir_prefix + 'default/default.md';
 window.cordova_user_dir_prefix = 'cdvfile://localhost/persistent/';
 
@@ -41,6 +40,9 @@ function get_trees_info (trees_info_fn) {
 function prepare_tree(tree_fn) {
   if(!tree_fn)
     throw new Error("Invalid argument");
+  if (window.cordova && tree_fn.indexOf(window.cordova_user_dir_prefix) == 0) {
+    tree_fn = tree_fn.substr(window.cordova_user_dir_prefix.length);
+  }
   var parts = tree_fn.split('/'),
       basename = parts[parts.length - 1],
       dirname = parts.slice(0, parts.length - 1).join("/");
@@ -54,20 +56,27 @@ function prepare_tree(tree_fn) {
     dirname = 'default';
   }
   // make dirname fs friendly
-  dirname = fs_friendly_name(dirname);
+  var dirpath = dirname = fs_friendly_name(dirname);
   // for cordova
   if(window.cordova) {
-    var path = tree_fn,
-        newdir = window.cordova_user_dir_prefix + dirname,
-        newpath = newdir + '/' + basename,
-        audio_dir = newdir + '/audio';
+    var path = tree_fn;
+    dirpath = window.cordova_user_dir_prefix + dirname;
+    var newpath = dirpath + '/' + basename,
+        audio_dir = dirpath + '/audio';
     return new Promise(function(resolve, reject) {
       window.resolveLocalFileSystemURL(newpath, resolve, continue_proc);
       function continue_proc(err) {
         // if not found
-        cordova_mkdir(newdir)
+        cordova_mkdir(dirpath)
           .then(function() {
             return read_file(path)
+          })
+          .catch(function(err) {
+            if (err.caused_by && err.caused_by.code == 1) { // not found
+              return ""; // write empty file
+            } else {
+              throw err;
+            }
           })
           .then(function(data) {
             return write_file(newpath, data)
@@ -81,23 +90,21 @@ function prepare_tree(tree_fn) {
       .then(function() {
         return {
           tree_fn: newpath,
-          basename: basename,
-          dirname: dirname,
+          dirpath: dirpath,
           audio_dir: audio_dir
         };
       });
   } else {
     return Promise.resolve({
       tree_fn: tree_fn,
-      basename: basename,
-      dirname: dirname,
+      dirpath: dirpath,
       audio_dir: null // Not implemented
     });
   }
 }
 
 function initialize_app() {
-  var replaceFileKeys = ['default_config'];
+  var replaceFileKeys = ['default_config','default_trees_info_fn'];
   // for cordova
   if(window.cordova) {
     var promises = [];
@@ -108,10 +115,19 @@ function initialize_app() {
         new Promise(function(resolve, reject) {
           window.resolveLocalFileSystemURL(newpath, resolve, continue_proc);
           function continue_proc(err) {
-            // if not found
+            // if not found, write it, if it exists
             read_file(path)
-              .then(function(data) {
-                return write_file(newpath, data)
+              .catch(function (err) {
+                if (err.caused_by && err.caused_by.code == 1) { // not found
+                  return {__notfound:true};
+                } else {
+                  throw err;
+                }
+              })
+              .then(function (data) {
+                if (!data.__notfound) {
+                  return write_file(newpath, data)
+                }
               })
               .then(resolve, reject);
           }
@@ -530,17 +546,24 @@ function handle_error_checkpoint() {
   }
 }
 
-function handle_error(err) {
+function handle_error_data (err) {
   if(err.withcheckpoint) {
-    console.error("checkpoint:", err.checkpoint_stack);
-    console.error(err.error)
-    alert(err.error+'');
-    // throw err.error;
+    return {
+      error: [ "checkpoint:", err.checkpoint_stack, err.error ],
+      alert:err.error+''
+    };
   } else {
-    alert(err);
-    console.error(err);
-    // throw err;
+    return {
+      error: [ err ],
+      alert:err
+    };
   }
+}
+
+function handle_error (err) {
+  var data = handle_error_data(err);
+  console.error.apply(console, data.error);
+  alert(err.alert);
 }
 
 function delete_file(url, options) {
@@ -570,12 +593,12 @@ function delete_file(url, options) {
 function cordova_rmdir_rec(path) {
   return new Promise(function (resolve, reject) {
     function onEntry(entry) {
-      entry.removeRecursively(function() {
-        console.log("Remove Recursively Succeeded");
-      }, onFail);
+      entry.removeRecursively(resolve, onFail);
     }
     function onFail(err) {
-      reject(new Error("Fail to delete `" + url + "` -- " + err.code + ", " + err.message));
+      var newerr = new Error("Fail to delete `" + path + "` -- " + err.code + ", " + err.message);
+      newerr.caused_by = err;
+      reject(newerr);
     }
     window.resolveLocalFileSystemURL(path, onEntry, onFail);
   });
@@ -619,8 +642,9 @@ function write_file(url, data, options) {
             };
 
             fileWriter.onerror = function(err) {
-              console.error(err);
-              reject("Fail to write `" + url + "` -- " + err.message)
+              var newerr = new Error("Fail to write `" + url + "` -- " + (err.message || err.code))
+              newerr.caused_by = err;
+              reject(newerr)
             };
 
             if(!(data instanceof Blob)) {
@@ -703,8 +727,10 @@ function read_file(url, options) {
 
       }
       function onFail(err) {
-        console.error(err);
-        reject(new Error("Fail to load `" + url + "` -- " + err.code))
+        // err contains {code}. more info https://github.com/apache/cordova-plugin-file#list-of-error-codes-and-meanings
+        var newerr = new Error("Fail to load `" + url + "` -- " + err.code)
+        newerr.caused_by = err;
+        reject(newerr)
       }
       window.resolveLocalFileSystemURL(url, onSuccess, onFail);
     } else {
@@ -1019,7 +1045,6 @@ proto._cordova_play_audio = function(src, opts) {
       play_opts.overrideToSpeaker = true;
     media.play(play_opts);
   });
-  
 }
 
 proto.stop_audio = function() {

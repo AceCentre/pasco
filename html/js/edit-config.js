@@ -1,4 +1,4 @@
-var config_fn, tree_fn, trees_info_fn;
+var config_fn, ptree_info, trees_info_fn;
 var speaku, config, config_data, trees_info, tree_data,
     voices, napi, is_quick_setup;
 // start
@@ -37,7 +37,7 @@ Promise.all([
     return prepare_tree(config.tree || window.default_tree)
         .catch(handle_error_checkpoint())
         .then(function(info) {
-          tree_fn = info.tree_fn;
+          ptree_info = info;
           return get_file_json(trees_info_fn)
             .then(function (_trees_info) { trees_info = _trees_info; })
             .catch(function (error) {
@@ -60,7 +60,7 @@ Promise.all([
         .catch(function(err) {
           console.warn(err);
         }),
-      get_file_data(config.tree||tree_fn)
+      get_file_data(ptree_info.tree_fn)
         .catch(handle_error_checkpoint())
         .then(function(_data) { tree_data = _data; })
     ]);
@@ -188,24 +188,15 @@ function start() {
     waitingDialog.show();
 	  zip.createWriter(new zip.BlobWriter(), function(zipWriter) {
       var elm = newEl('div'), tree,
-          parts = tree_fn.split('/'),
-          basename = parts[parts.length - 1],
-          treename = parts.length > 1 ? parts[parts.length - 2] : null;
-      if(!treename) {
-        treename = 'default';
-      }
+          parts = ptree_info.tree_fn.split('/'),
+          basename = parts[parts.length - 1];
       Promise.resolve()
         .then(function() {
           tree = parse_tree(elm, tree_data);
-          return new Promise(function(resolve, reject) {
-            zipWriter.add(treename + '/' + basename, new zip.BlobReader(new Blob([tree_data], {type:'text/markdown'})), resolve);
-          });
-        })
-        .then(function() {
           if(window.cordova) {
             var export_list = [],
                 actions = [];
-            tree_export_prepare(treename, tree, export_list);
+            tree_export_prepare(ptree_info, tree, export_list)
             _.each(export_list, function(item) {
               actions.push(function() {
                 return get_file_data(item.val, { responseType: 'blob' })
@@ -221,10 +212,17 @@ function start() {
                   });
               });
             });
-            return serial_promise(actions)
+            return serial_promise(actions);
           } else {
             return Promise.resolve([]);
           }
+        })
+        .then(function () {
+          return new Promise(function(resolve, reject) {
+            // save modified tree
+            var tree_md = tree_to_markdown(tree);
+            zipWriter.add(basename, new zip.BlobReader(new Blob([tree_md], {type:'text/markdown'})), resolve);
+          });
         })
         .catch(function(err) {
           console.error(err);
@@ -284,8 +282,8 @@ function start() {
       }
     }, function(err) {
       waitingDialog.hide();
-      console.error(err);
-      update_alert(false, new Error("Could not create zip writer"));
+      console.error(update);
+      alert_err(false, new Error("Could not create zip writer"));
     });
   });
   $('#save-file--share-btn').on('click', function($evt) {
@@ -330,103 +328,122 @@ function start() {
         reader.readAsText(file); 
       } else {
         waitingDialog.show();
-	      zip.createReader(new zip.BlobReader(file), function(zipReader) {
-          var all = {};
-		      zipReader.getEntries(function(entries) {
-            _.each(entries, function(entry) {
-              var parts = entry.filename.split('/'),
-                  basename = parts[parts.length - 1],
-                  dirname = parts.slice(0, parts.length - 1).join("/"),
-                  first_dirname = parts.length > 1 ? parts[0] : '';
-              if(first_dirname) {
-                var tree = all[first_dirname];
-                if(!tree) {
-                  tree = all[first_dirname] = {
-                    tree_mds: [],
-                    files: {}
-                  };
-                }
-                if(first_dirname == dirname &&
-                   basename.indexOf('.md') == basename.length - 3) {
-                  tree.tree_mds.push(entry);
-                }
-                tree.files[entry.filename] = entry;
-              }
-            });
-            // simple extract, use first tree and first tree_md
-            var thetree;
-            var thetreename;
-            for(var key in all) {
-              if(all.hasOwnProperty(key) && all[key].tree_mds.length > 0) {
-                thetreename = key;
-                thetree = all[key];
-              }
+        return new Promise(function (resolve, reject) {
+	        zip.createReader(new zip.BlobReader(file), function(zipReader) {
+            var onrootreject = [];
+            function _root_reject (err) {
+              onend();
+              reject(err);
+              _.each(onrootreject, function() { onrootreject() });
             }
-            if(!thetree) {
-              onend()
-              update_alert(false, new Error("No tree found in zip file"));
-            } else {
-              var tree_md_file = thetree.tree_mds[0];
-			        tree_md_file.getData(new zip.BlobWriter('text/markdown'), function(blob) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                  var elm = newEl('div'), tree;
-                  Promise.resolve()
+		        zipReader.getEntries(function(entries) {
+              var mdfiles = _.filter(entries, function (entry) {
+                return entry.filename.indexOf('.md') != -1;
+              });
+              var filesmap = _.object(_.map(entries, function (entry) {
+                return [ entry.filename, entry ];
+              }));
+              if(mdfiles.length == 0) {
+                _root_reject({ __msg: "No tree found in zip file" });
+              } else {
+                var tree_md_file = mdfiles[0],
+                    tree_md_dir = window.path.dirname(tree_md_file.filename);
+			          tree_md_file.getData(new zip.BlobWriter('text/markdown'), function(blob) {
+                  var reader = new FileReader();
+                  reader.onload = function(e) {
+                    var elm = newEl('div'), tree_obj;
+                    Promise.resolve()
                     .then(function() {
-                      tree = parse_tree(elm, reader.result);
+                      tree_obj = parse_tree(elm, reader.result);
                       if(window.cordova) {
                         var import_list = [],
                             actions = [];
-                        tree_import_prepare(thetreename, tree, import_list);
+                        tree_import_prepare(tree_obj, import_list);
                         _.each(import_list, function(item) {
                           actions.push(function() {
-                            var entry = thetree.files[thetreename + '/' + item.val];
+                            var tmp = item.val;
+                            if (tmp.indexOf("://") == -1) {
+                              tmp = window.path.resolve("/" + tree_md_dir, tmp);
+                              if (tmp[0] == "/") {
+                                tmp = tmp.substr(1);
+                              }
+                            }
+                            var entry = filesmap[tmp];
                             if(entry) {
                               return new Promise(function(resolve, reject) {
                                 entry.getData(new zip.BlobWriter('application/octet-stream'), function(blob) {
+                                  var idx = onrootreject.indexOf(rootdidreject);
+                                  if (idx != -1) {
+                                    onrootreject.splice(idx, 1);
+                                  }
                                   set_file_data(item.newval, blob)
+                                    .catch(handle_error_checkpoint())
                                     .then(resolve, reject);
-			                          }, reject);
-                              });
+			                          });
+                                onrootreject.push(rootdidreject);
+                                function rootdidreject() {
+                                  // prevent un-resolved promise
+                                  reject({ __ignore_error: true });
+                                }
+                              })
                             } else {
                               // revert
                               item.tree.meta[item.meta_name] = item.val;
                             }
                           });
                         });
-                        return serial_promise(actions)
+                        return serial_promise(actions);
                       } else {
                         return Promise.resolve([]);
                       }
                     })
-                    .catch(function(err) {
-                      console.error(err);
-                      onend()
-                      update_alert(false, new Error("Could not parse tree"));
-                      return false;
-                    })
-                     .then(function(res) {
-                       if(res === false)
-                         return;
-                       var tree_md = tree_to_markdown(tree);
-                       $('form[name=edit-tree] [name=tree-input]').val(tree_md)
-                       return save_tree()
-                         .then(onend, onend);
-                     });
-                };
-                reader.readAsText(blob);
-              });
+                      .then(function () {
+                        onend();
+                        resolve(tree_obj);
+                      })
+                      .catch(function (err) {
+                        if (err.__ignore_error) {
+                          return;
+                        }
+                        _root_reject(err);
+                      });
+                  };
+                  reader.readAsText(blob);
+                });
+              }
+		        });
+            function onend() {
+              zipReader.close();
             }
-		      });
-          function onend() {
-            waitingDialog.hide();
-            zipReader.close();
-          }
-        }, onerror);
-        function onerror(err) {
+          }, function (err) {
+            err = err || new Error("Unknown error");
+            err.__msg = "Could not load input zip file";
+            err.__iserror = true;
+            _root_reject(err);
+          });
+        })
+          .catch(function(err) {
+            if (!err.__msg || err.__iserror) {
+              var data = handle_error_data(err);
+              console.error.apply(console, data.error);
+            }
+            update_alert(false, err.__msg || "Could not parse tree");
+            didfinish();
+            return false;
+          })
+          .then(function(tree) {
+            if(tree === false)
+              return;
+            var tree_md = tree_to_markdown(tree);
+            $('form[name=edit-tree] [name=tree-input]').val(tree_md)
+            return save_tree()
+              .then(didfinish, function (err) {
+                console.error(err);
+                didfinish();
+              });
+          });
+        function didfinish () {
           waitingDialog.hide();
-          console.error(err);
-          update_alert(false, new Error("Could not load input zip file"));
         }
       }
     }
@@ -469,8 +486,8 @@ function _start_subrout_tree_selection () {
     prepare_tree(new_tree_fn)
       .catch(handle_error_checkpoint())
       .then(function(info) {
-        tree_fn = info.tree_fn;
-        return get_file_data(tree_fn)
+        ptree_info = info;
+        return get_file_data(info.tree_fn)
           .catch(handle_error_checkpoint())
       })
       .then(function(_data) { set_tree_data(_data); })
@@ -491,11 +508,7 @@ function _start_subrout_tree_selection () {
           .catch(handle_error_checkpoint())
           .then(function (info) {
             var trees_info_orig = JSON.stringify(trees_info);
-            var tree_info = {
-              name: name,
-              tree_fn: info.tree_fn,
-            };
-            trees_info.list.push(tree_info);
+            trees_info.list.push({ name: name, tree_fn: info.tree_fn });
             return set_file_data(info.tree_fn, "")
               .then(function () {
                 return _save_trees_info(trees_info)
@@ -505,7 +518,7 @@ function _start_subrout_tree_selection () {
                   });
               })
               .then(function () {
-                tree_fn = tree_info.tree_fn;
+                ptree_info = info;
                 set_tree_data("");
                 update_tree_name_selection_update();
                 update_alert(true);
@@ -527,35 +540,41 @@ function _start_subrout_tree_selection () {
     } else {
       bootbox.confirm(_t("Are you sure you want to delete this item?"), function(confirmed) {
         if (confirmed) {
-          $('#tree-delete-btn').prop('disabled', true);
-          $('#tree-name-input').prop('disabled', true);
-          var tree_info_idx = _.findIndex(trees_info.list, function(a) { return a.tree_fn == tree_fn; });
-          if (tree_info_idx == -1) {
+          var ptree_info_idx = _.findIndex(trees_info.list, function(a) { return a.tree_fn == ptree_info.tree_fn; });
+          if (ptree_info_idx == -1) {
             update_alert(false, _t("Could not delete, tree info not found!"))
           } else {
-            var tree_info = trees_info.list[tree_info_idx];
+            $('#tree-delete-btn').prop('disabled', true);
+            $('#tree-name-input').prop('disabled', true);
+            var tinfo = trees_info.list[ptree_info_idx];
             var promise;
             if (window.cordova) {
-              promise = cordova_rmdir_rec(window.cordova_user_dir_prefix + tree_info.dirname);
+              promise = cordova_rmdir_rec(ptree_info.dirpath);
             } else {
-              promise = unset_file(tree_info.tree_fn);
+              promise = unset_file(tinfo.tree_fn);
             }
             promise
               .then(function () {
                 var trees_info_orig = JSON.stringify(trees_info);
-                trees_info.list.splice(tree_info_idx, 1);
-                var next_tree_info = trees_info.list.length > tree_info_idx ?
-                    trees_info.list[tree_info_idx] :
+                trees_info.list.splice(ptree_info_idx, 1);
+                var nexttinfo = trees_info.list.length > ptree_info_idx ?
+                    trees_info.list[ptree_info_idx] :
                     trees_info.list[trees_info.list.length - 1];
-                tree_fn = next_tree_info.tree_fn;
                 return _save_trees_info(trees_info)
                   .catch(function (err) {
                     trees_info = JSON.parse(trees_info_orig);
                     throw err;
                   })
                   .then(function () {
-                    if (tree_info.tree_fn == config.tree) {
-                      config.tree = tree_fn;
+                    return change_tree(nexttinfo.tree_fn)
+                      .catch(function (err) {
+                        console.error("Could not load tree (after delete), " + nexttinfo.tree_fn);
+                        return change_tree(window.default_tree);
+                      });
+                  })
+                  .then(function () {
+                    if (tinfo.tree_fn == config.tree) {
+                      config.tree = ptree_info.tree_fn;
                       var $form = $('form[name=edit-config]').first();
                       $form.find('[name=tree]').val(config.tree);
                       return do_save_config($form, null, false);
@@ -590,7 +609,7 @@ function update_tree_name_selection_update () {
           .text(item.name)
           .appendTo($sel);
       if ($sel[0].id == 'tree-name-input') {
-        $opt.attr('selected', item.tree_fn == tree_fn ? "" : undefined);
+        $opt.attr('selected', item.tree_fn == ptree_info.tree_fn ? "" : undefined);
       } else {
         $opt.attr('selected', item.tree_fn == config_tree ? "" : undefined);
       }
@@ -622,7 +641,7 @@ function serial_promise(funcs) {
     if(func) {
       var promise = func();
       func = funcs.shift();
-      return promise;
+      return promise ? promise.then(subrout) : subrout(promise);
     } else {
       return results;
     }
@@ -630,15 +649,46 @@ function serial_promise(funcs) {
 }
 
 var audio_meta_list = [ 'audio', 'cue-audio', 'main-audio' ];
-function tree_import_prepare(name, tree, import_list) {
+function tree_import_prepare(tree, import_list) {
   if(tree.meta) {
     _.each(audio_meta_list, function(audio_meta) {
       var val = tree.meta[audio_meta];
-      if(val) {
-        if(window.cordova) {
-          tree.meta[audio_meta] = window.cordova_user_dir_prefix +
-            name + '/' + val;
-          import_list.push({
+      if (val && window.cordova && val.indexOf("://") == -1 &&
+          val.indexOf("..") == -1 &&
+          _.find(import_list, function (a) { return a.val == val; }) == null) {
+        tree.meta[audio_meta] = ptree_info.dirpath + '/' + val;
+        import_list.push({
+          tree: tree,
+          meta_name: audio_meta,
+          val: val,
+          newval: tree.meta[audio_meta]
+        });
+      }
+    });
+  }
+  if(tree.nodes)
+    _.each(tree.nodes, function(a) { tree_import_prepare(a, import_list); });
+}
+function tree_export_prepare(ptree_info, tree, export_files) {
+  if(tree.meta) {
+    _.each(audio_meta_list, function(audio_meta) {
+      var val = tree.meta[audio_meta];
+      if(val && window.cordova &&
+         _.find(export_files, function (a) { return a.val ==val; }) == null) {
+        if(val.indexOf(ptree_info.dirpath) == 0) {
+          var newval = val.substr(ptree_info.dirpath.length);
+          if (newval[0] == '/')
+            newval = newval.substr(1);
+          tree.meta[audio_meta] = newval;
+          export_files.push({
+            tree: tree,
+            meta_name: audio_meta,
+            val: val,
+            newval: tree.meta[audio_meta]
+          });
+        } else {
+          tree.meta[audio_meta] = 'audio/' + fs_friendly_name(val);
+          export_files.push({
             tree: tree,
             meta_name: audio_meta,
             val: val,
@@ -649,31 +699,7 @@ function tree_import_prepare(name, tree, import_list) {
     });
   }
   if(tree.nodes)
-    _.each(tree.nodes, function(a) { tree_import_prepare(name, a, import_list); });
-}
-function tree_export_prepare(name, tree, export_files) {
-  var tree_prefix = window.cordova ?
-      window.cordova_user_dir_prefix + name + '/' : null;
-  if(tree.meta) {
-    _.each(audio_meta_list, function(audio_meta) {
-      var val = tree.meta[audio_meta];
-      if(val) {
-        if(window.cordova) {
-          if(val.indexOf(tree_prefix) == 0) {
-            tree.meta[audio_meta] = val.substr(tree_prefix.length);
-            export_files.push({
-              tree: tree,
-              meta_name: audio_meta,
-              val: val,
-              newval: tree.meta[audio_meta]
-            });
-          }
-        }
-      }
-    });
-  }
-  if(tree.nodes)
-    _.each(tree.nodes, function(a) { tree_import_prepare(name, a, export_files); });
+    _.each(tree.nodes, function(a) { tree_export_prepare(ptree_info, a, export_files); });
 }
 
 function validate_number(v, name) {
@@ -756,6 +782,20 @@ function insert_config() {
   $form.find('[name=_cue_first_active]')
     .prop('checked', !!config.auditory_cue_first_run_voice_options)
     .trigger('change');
+}
+
+function change_tree (tree_fn) {
+  return prepare_tree(tree_fn)
+    .catch(handle_error_checkpoint())
+    .then(function(info) {
+      return get_file_data(info.tree_fn)
+        .catch(handle_error_checkpoint())
+        .then(function(_data) {
+          ptree_info = info;
+          tree_data = _data;
+          return set_tree_data(tree_data);
+        });
+    });
 }
 
 function set_tree_data (_tree_data) {
@@ -905,7 +945,7 @@ function save_quick_setup(evt) {
       var name = $('#tree-default-select').val();
       return get_default_tree(name, locale)
         .then(function(data) {
-          return set_file_data(tree_fn, data);
+          return set_file_data(ptree_info.tree_fn, data);
         });
     })
     .then(function() {
@@ -973,7 +1013,7 @@ function save_tree(evt) {
   tree_data = $form.find('[name=tree-input]').val()
   // then save
   $form.find('.save-section .alert').html('').toggleClass('alert-hidden', true)
-  return set_file_data(tree_fn, tree_data)
+  return set_file_data(ptree_info.tree_fn, tree_data)
     .then(function() {
       update_alert(true);
     })

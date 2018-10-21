@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/AceCentre/pasco#readme",
   "dependencies": {
+    "path-browserify": "^1.0.0",
     "plist": "3.0.1",
     "sorted-array-functions": "^1.2.0"
   },
