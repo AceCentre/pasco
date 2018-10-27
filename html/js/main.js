@@ -827,6 +827,10 @@ function _move_sub_speak(text, voice_options) {
   }
   if(this.meta['audio']) {
     return speaku.play_audio(this.meta['audio'], voice_options)
+      .catch(function (err) {
+        console.error(err);
+        return speaku.simple_speak(_t("Could not play the input audio"), voice_options);
+      });
   } else {
     return speaku.simple_speak(text, voice_options);
   }
@@ -854,7 +858,11 @@ function _move_sub_speak2(type, override_msg) {
     audio = null;
   }
   if(audio) {
-    return  speaku.play_audio(audio, opts);
+    return  speaku.play_audio(audio, opts)
+      .catch(function (err) {
+        console.error(err);
+        return speaku.simple_speak(_t("Could not play the input audio"), opts);
+      });
   } else if(text) {
     return speaku.simple_speak(text, opts);
   }
