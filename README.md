@@ -15,8 +15,8 @@ You can try out a limited version of pasco on the web at [app.pasco.chat](https:
 
 ### Prerequisites
 
-* Node
-* Bower
+* [Node](https://nodejs.org)
+* [Bower](https://bower.io)
 
 If developing the iOS build you will also need:
 
@@ -70,10 +70,6 @@ ArrowRight or D -> Go into or select
 ArrowLeft or A -> Go out
 ```
 
-## Deployment
-
-Add additional notes about how to deploy this on a live system
-
 ## Built With
 
 * [FontAwesome](http://fontawesome.com) - For some of the icons
@@ -92,7 +88,7 @@ We would LOVE your contributions. Please feel free to fork the project and we wo
 
 ## License
 
-This project is licensed under the GNU GPL v3 - see the [LICENSE.txt](LICENSE.txt) file for details
+This project is licensed under the GNU GPL v3 - see the [LICENSE.txt](https://github.com/AceCentre/pasco/blob/master/LICENCE.txt) file for details
 
 ## Acknowledgments
 
