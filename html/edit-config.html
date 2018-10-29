@@ -93,7 +93,7 @@
               <div class="form-group">
                 <label for="auto_next_atfirst_delay" x-l10n>Delay at first item (ms)</label>
                 <input type="number" id="auto_next_atfirst_delay" name="auto_next_atfirst_delay" class="form-control" value="10" data-validator="number" data-dependent="#auto_next_atfirst_delay_range">
-                <input type="range" id="auto_next_atfirst_delay_range" class="form-control btn-lg" type="range" step="1" min="0" max="2000" data-dependent="#auto_next_atfirst_delay">
+                <input type="range" id="auto_next_atfirst_delay_range" class="form-control btn-lg" type="range" step="100" min="0" max="2000" data-dependent="#auto_next_atfirst_delay">
               </div>
             </div>
             <div class="col-sm-4">
@@ -142,7 +142,7 @@
                   <div class="form-group">
                     <label for="auto_next_first_run_delay" x-l10n>Auto-scanning delay (ms)</label>
                     <input type="number" id="auto_next_first_run_delay" name="auto_next_first_run_delay" class="form-control" value="0" data-validator="number" data-dependent="#auto_next_first_run_delay_range">
-                    <input type="range" id="auto_next_first_run_delay_range" class="form-control btn-lg" type="range" step="1" min="0" max="2000" data-dependent="#auto_next_first_run_delay">
+                    <input type="range" id="auto_next_first_run_delay_range" class="form-control btn-lg" type="range" step="100" min="0" max="6000" data-dependent="#auto_next_first_run_delay">
                   </div>
                 </div>
                 <div class="col-sm-6">
@@ -306,6 +306,7 @@
                 <select class="form-control" id="theme" name="theme">
                   <option value="default" x-l10n>Default</option>
                   <option value="light" x-l10n>Light</option>
+                  <option value="lightbold" x-l10n>Light-Bold</option>
                   <option value="greyred" x-l10n>Grey-Red</option>
                   <option value="dark" x-l10n>Dark</option>
                   <option value="yb" x-l10n>Yellow-Black</option>
