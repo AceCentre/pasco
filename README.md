@@ -27,7 +27,7 @@ Run the following
 
 * npm install --upgrade cordova@latest
 * npm install --upgrade cordova-ios@latest
-* npm install --upgrade deploy-ios
+* npm install --upgrade ios-deploy
 * npm install cordova-icon 
 
 # Config
