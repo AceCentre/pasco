@@ -110,7 +110,9 @@
     "Adult Starter": "Adult Starter",
     "Simple Adult Starter": "Entrée simple adulte",
     "Simple Adult Starter - Chinese Main": "Simple Adult Starter - Main Chinois",
-    "Welsh": "Gallois"
-  };
+    "Welsh": "gallois",
+    "Light-Bold": "Gras clair",
+    "Spell by Word/Letter Prediction": "Orthographe par mot / lettre"
+};
 
 })();

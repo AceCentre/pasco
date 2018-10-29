@@ -110,7 +110,9 @@
     "Adult Starter": "Erwachsener Starter",
     "Simple Adult Starter": "Einfacher Erwachsener Starter",
     "Simple Adult Starter - Chinese Main": "Einfacher Erwachsener Starter - Chinese Main",
-    "Welsh":"Walisisch"
-  };
+    "Welsh": "Walisisch",
+    "Light-Bold": "Licht-Fett",
+    "Spell by Word/Letter Prediction": "Buchstabiere durch Wort- / Buchstabenvorhersage"
+};
 
 })();

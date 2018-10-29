@@ -110,7 +110,9 @@
     "Adult Starter": "Dechreuwr Oedolion",
     "Simple Adult Starter": "Cychwyn Cychwynnol Oedolion",
     "Simple Adult Starter - Chinese Main": "Dechreuwr Oedolion Syml - Prif Dseiniaidd",
-    "Welsh":"Cymreig"
+    "Welsh": "Cymraeg",
+    "Light-Bold": "Golau-Bold",
+    "Spell by Word/Letter Prediction": "Sillafu yn ôl Word / Letter Prediction"
 };
 
 })();

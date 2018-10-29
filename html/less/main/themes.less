@@ -6,6 +6,11 @@
 @theme-light-secondary: #D6602B;
 @theme-light-hint: #F0C000;
 
+@theme-lightbold-bg: #C8F2FD;
+@theme-lightbold-primary: #001401;
+@theme-lightbold-secondary: #D6602B;
+@theme-lightbold-hint: #F0C000;
+
 @theme-greyred-bg: #F4F4F4;
 @theme-greyred-primary: #FF4136;
 @theme-greyred-secondary: #000000;
@@ -46,6 +51,21 @@
 body.theme-light {
   background-color: @theme-light-bg;
   color: @theme-light-primary;
+  #tree ul.children {
+    background-color: @theme-light-bg;
+    .highlight {
+      color: @theme-light-secondary;
+    }
+    .selected {
+      color: @theme-light-hint;
+    }
+  }
+}
+
+body.theme-lightbold {
+  background-color: @theme-light-bg;
+  color: @theme-light-primary;
+  font-weight: bold;
   #tree ul.children {
     background-color: @theme-light-bg;
     .highlight {

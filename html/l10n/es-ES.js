@@ -110,7 +110,9 @@
     "Adult Starter": "Arranque adulto",
     "Simple Adult Starter": "Arrancador simple para adultos",
     "Simple Adult Starter - Chinese Main": "Arrancador Adulto Simple - Chino Principal",
-    "Welsh":"Galés"
-  };
+    "Welsh": "galés",
+    "Light-Bold": "Light-Bold",
+    "Spell by Word/Letter Prediction": "Hechizo por palabra / letra predicción"
+};
 
 })();

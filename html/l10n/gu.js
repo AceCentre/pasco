@@ -110,7 +110,9 @@
     "Adult Starter": "પુખ્ત સ્ટાર્ટર",
     "Simple Adult Starter": "સરળ પુખ્ત સ્ટાર્ટર",
     "Simple Adult Starter - Chinese Main": "સિમ્પલ એડલ્ટ સ્ટાર્ટર - ચીની મુખ્ય",
-    "Welsh":"વેલ્શ"
-   };
+    "Welsh": "વેલ્શ",
+    "Light-Bold": "પ્રકાશ-બોલ્ડ",
+    "Spell by Word/Letter Prediction": "શબ્દ / પત્ર આગાહી દ્વારા જોડણી કરો"
+};
   
 })();

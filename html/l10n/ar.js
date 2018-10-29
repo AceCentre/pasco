@@ -110,7 +110,9 @@
     "Adult Starter": "كاتب الكبار",
     "Simple Adult Starter": "بسيطة الكبار كاتب",
     "Simple Adult Starter - Chinese Main": "بسيطة الكبار كاتب - الصينية الرئيسية",
-    "Welsh": "الويلزية"
-  };
+    "Welsh": "الويلزية",
+    "Light-Bold": "ضوء جريئة",
+    "Spell by Word/Letter Prediction": "تهجئة كلمة / خطاب التنبؤ"
+};
 
 })();
