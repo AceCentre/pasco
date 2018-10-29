@@ -78,7 +78,7 @@ ArrowLeft or A -> Go out
 
 ## Contributing
 
-We would LOVE your contributions. Please feel free to fork the project and we would to see your Pull Requests. Take a look at the [issue queue](https://github.com/acecentre/pasco/issues) if you want something to get started on.
+We would 💛 your contributions. Please feel free to fork the project and we would to see your Pull Requests. Take a look at the [issue queue](https://github.com/acecentre/pasco/issues) if you want something to get started on. If GitHub isn't your thing and you want to give us feedback - [drop us a line](https://acecentre.org.uk/contact/)
 
 
 ## Authors
