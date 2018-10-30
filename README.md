@@ -20,6 +20,8 @@ You can try out a limited version of pasco on the web at [app.pasco.chat](https:
 | Cue / Main voice splitting between headphone and speaker     | ✅   |  ❎  |
 | Import/Export of Vocab tree                                  | ✅   |  ✅  |
 | Offline support                                              | ✅   |  ✅  |
+| In-App Editing                                               | ✅   |  ✅  |
+| In-App Voice Recording                                       | ✅   |  ❎  |
 
 
 ## Developing 
