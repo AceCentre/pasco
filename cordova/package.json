@@ -12,7 +12,7 @@
     "dependencies": {
         "audscan-cordova-plugin": "git+https://github.com/hosseinamin/audscan-cordova-plugin.git",
         "browser-sync": "^2.26.3",
-        "cheerio": "^0.22.0",
+        "cheerio": "^0.19.0",
         "cordova-ios": "^4.5.5",
         "cordova-plugin-browsersync": "^1.1.0",
         "cordova-plugin-device": "^1.1.7",

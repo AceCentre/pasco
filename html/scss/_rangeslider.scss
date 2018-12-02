@@ -2,7 +2,7 @@
     position: relative;
     display: block;
     cursor: pointer;
-    height: 40px;
+    height: 44px;
     width: 100%;
 }
 .rangeslider__fill,
@@ -18,8 +18,8 @@
 }
 .rangeslider__handle {
     will-change: width, height, top;
-    width: 20px;
-    height: 20px;
+    width: 21px;
+    height: 21px;
     position: absolute;
     top: 50%;
     background: #29e;

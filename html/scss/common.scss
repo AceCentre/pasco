@@ -12,6 +12,10 @@ body {
   position: relative;
 }
 
+body.quick-setup {
+  padding-top: 30px;
+}
+
 .body-navbar-fixed {
 	padding-top: 70px;
   .anchor {
@@ -33,6 +37,9 @@ body {
 }
 .m-t-10 {
   margin-top: 10px;
+}
+.m-t-15 {
+  margin-top: 15px;
 }
 .nav {
   position: relative;
@@ -102,7 +109,13 @@ html.ios {
   .modal-dialog {
     margin-top: 30px;
   }
+  .body-navbar-fixed .navbar-fixed-top {
+    padding-top: 20px;
+  }
   @media (min-height: 630px) and (max-width: 400px) {
+    body.quick-setup {
+      padding-top: 60px;
+    }
     .body-navbar-fixed {
 	    padding-top: 85px;
       .anchor {
