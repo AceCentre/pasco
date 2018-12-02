@@ -1122,11 +1122,12 @@ function _in_check_spell_default(atree) {
     // continue it
     return _before_changeposition()
       .then(function () {
-        var idx = state.positions.indexOf(tmp[1]);
+        var tmp2 = _get_node_attr_inherits_full(state.positions, 'stay-in-branch') || tmp;
+        var idx = state.positions.indexOf(tmp2[1]);
         state.positions = state.positions.slice(0, idx + 1);
-        if(tmp[2] != null) {
+        if(tmp2[2] != null) {
           state.positions.push({
-            tree: tmp[2],
+            tree: tmp2[2],
             index: 0
           });
         } else {
@@ -1161,7 +1162,11 @@ function _in_check_back_n_branch(atree) {
       while(i-- > 0) {
         var last_pos = state.positions.pop();
       }
-      return _scan_move();
+      if (atree.meta['back-n-branch-notify']) {
+        return _notify_move(_get_current_node(), atree);
+      } else {
+        return _scan_move();
+      }
     });
 }
 
@@ -1316,11 +1321,32 @@ function _before_changeposition () {
   return Promise.resolve();
 }
 
+function _in_check_stay_in_branch (atree) {
+  var stayinbranch = _get_node_attr_inherits_full(state.positions, 'stay-in-branch');
+  if (stayinbranch) {
+    return _before_changeposition()
+      .then(function () {
+        var idx = state.positions.indexOf(stayinbranch[1]);
+        state.positions = state.positions.slice(0, idx + 1);
+        if(stayinbranch[2] != null) {
+          state.positions.push({
+            tree: stayinbranch[2],
+            index: 0
+          });
+        } else {
+          state.positions[0].index = 0;
+        }
+        return _notify_move(_get_current_node(), atree);
+      });
+  }
+}
+
 var _tree_select_override_functions = [
   _in_check_back_n_branch,
   _in_check_spell_delchar,
   _in_check_spell_default,
   _in_override_change_tree,
+  _in_check_stay_in_branch,
 ];
 function _tree_go_in() {
   if(!state.can_move)
@@ -1669,24 +1695,25 @@ function _letter_prediction_dynamic_nodes (anode) {
   return _get_prediction_spell_words(words_file, txt)
     .then(function (subwdata) {
       if (!subwdata.alphabet_sorted) {
-        subwdata.alphabet_sorted = _.map(alphabet, function (a) {
-          return [ a, _.reduce(
+        subwdata.alphabet_sorted = _.map(_.range(alphabet.length), function(i) {
+          var a = alphabet[i];
+          return [ a, i, _.reduce(
             _.map(
               _.filter(subwdata.words, function(w){return w.v[txt.length]==a;}),
               function (a) { return a.w; }
             ),
             function (a, b) { return a + b; }, 0) ];
         }).sort(function (a, b) { // sort desc order by weight, letter
-          if (a[1] == b[1]) {
-            if(a[0] < b[0]) {
+          if (a[2] == b[2]) {
+            if(a[1] < b[1]) {
               return -1;
             }
-            if(a[0] > b[0]) {
+            if(a[1] > b[1]) {
               return 1;
             }
             return 0;
           }
-          return b[1] - a[1];
+          return b[2] - a[2];
         });
       }
       return {

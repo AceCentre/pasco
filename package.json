@@ -25,25 +25,29 @@
   },
   "homepage": "https://github.com/AceCentre/pasco#readme",
   "dependencies": {
+    "jquery": "^3.3.1",
     "path-browserify": "^1.0.0",
     "plist": "3.0.1",
+    "rangeslider-js": "^3.2.1",
     "sorted-array-functions": "^1.2.0"
   },
   "devDependencies": {
-    "gulp": "^4.0.0",
-    "gulp-less": "^4.0.0",
-    "gulp-sourcemaps": "^2.6.0",
-    "gulp-rename": "^1.4.0",
-    "uglifyjs-webpack-plugin": "^2.0.1",
-    "webpack": "^4.20.2",
-    "webpack-stream": "^5.1.1",
     "@babel/core": "^7.0.0-beta.51",
     "@babel/plugin-transform-runtime": "^7.0.0-beta.51",
     "@babel/preset-env": "^7.0.0-beta.51",
     "@babel/runtime": "^7.0.0-beta.51",
     "babel-loader": "^8.0.0-beta.4",
-    "natives": "^1.1.5",
     "browser-sync": "^2.26.0",
-    "concurrently": "^3.4.0"
+    "concurrently": "^3.4.0",
+    "gulp": "^4.0.0",
+    "gulp-rename": "^1.4.0",
+    "gulp-sass": "^4.0.2",
+    "gulp-sourcemaps": "^2.6.0",
+    "natives": "^1.1.5",
+    "node-sass": "^4.10.0",
+    "node-sass-package-importer": "^5.2.0",
+    "uglifyjs-webpack-plugin": "^2.0.1",
+    "webpack": "^4.20.2",
+    "webpack-stream": "^5.1.1"
   }
 }
