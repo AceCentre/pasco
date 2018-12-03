@@ -199,6 +199,8 @@
           promises.push(delete_file(tree.meta[name]));
         if(audio_reverts[name] !== true) // true is for first record
           tree.meta[name] = audio_reverts[name];
+        else
+          delete tree.meta[name];
       }
       delete tree._more_meta.audio_reverts;
     }

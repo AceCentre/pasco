@@ -7,8 +7,12 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const sourcemaps = require('gulp-sourcemaps');
 const rename = require('gulp-rename');
 const path = require('path');
-const less = require('gulp-less')
-const spawn = require('child_process').spawn;
+const { spawn, fork } = require('child_process');
+const sass = require('gulp-sass');
+const packageImporter = require('node-sass-package-importer');
+sass.compiler = require('node-sass');
+
+let gulp_bin = path.resolve(__dirname, "./node_modules/.bin/gulp");
 
 let jsfiles = {};
 if (!('NO_NODELIB' in process.env))
@@ -45,41 +49,42 @@ let webpackConfig = {
     ],
   },
 };
- 
-let lessfiles = ['main','edit-config', 'common'];
-let lessc_all_cond = ['common'];
 
-[...lessfiles,'all'].forEach((name) => {
+let sassfiles = ['main','edit-config', 'common'];
+
+[...sassfiles,'all'].forEach((name) => {
   let all = false;
   if (typeof name == 'object') {
     all = name.all;
     name = name.name;
   }
-  let files = (name == 'all' ? lessfiles : [name])
-      .map((s)=>'html/less/'+s+'.less')
+  let files = (name == 'all' ? sassfiles : [name])
+      .map((s)=>'html/scss/'+s+'.scss')
   var running = false;
-  gulp.task('lessc-'+name, () => {
+  gulp.task('sass-'+name, () => {
     return gulp.src(files)
       .pipe(sourcemaps.init())
-      .pipe(less({
-        paths: ['html/less']
-      }))
+      .pipe(
+        sass({
+          importer: packageImporter(),
+        })
+          .on('error', sass.logError)
+      )
       .pipe(sourcemaps.write('../css/'))
       .pipe(gulp.dest('html/css/'));
   });
 });
 
-gulp.task('less-watch', gulp.series('lessc-all', () => {
-  var watcher = gulp.watch('html/less/**/*.less');
+gulp.task('sass-watch', gulp.series('sass-all', () => {
+  var watcher = gulp.watch('html/scss/**/*.scss');
   watcher.on('change', function(event) {
-    var name = lessfiles
-        .find((s) => event.path.endsWith(s+'.less') ||
-              event.path.indexOf(s+'/') != -1);
-    if(name && lessc_all_cond.indexOf(name) == -1) {
-      gulp.run('lessc-'+name);
-    } else {
-      gulp.run('lessc-all');
-    }
+    var chp = fork(gulp_bin, [ 'sass-all' ]);
+    chp.on('exit', (code) => {
+      cordova_dist_running = false;
+      if(code != 0) {
+        throw new Error("gulp sass-" + name + " output code " + code);
+      }
+    });
   })
 }));
 
@@ -142,13 +147,9 @@ gulp.task('build-script-dev:watch', function () {
 
 var cordova_dist_running = false;
 var sh_bin = '/bin/sh';
-gulp.task('cordova-dist', gulp.series('lessc-all', 'build-script-dev', (done) => {
-  if(cordova_dist_running)
-    return done();
-  cordova_dist_running = true;
+gulp.task('cordova-dist', gulp.series('sass-all', 'build-script-dev', (done) => {
   var chp = spawn(sh_bin, [ __dirname + '/scripts/push-cordova', __dirname + '/cordova/www/' ]);
   chp.on('exit', (code) => {
-    cordova_dist_running = false;
     if(code == 0) {
       done();
     } else {
@@ -156,23 +157,34 @@ gulp.task('cordova-dist', gulp.series('lessc-all', 'build-script-dev', (done) =>
     }
   });
 }));
+
 gulp.task('watch-cordova-dist', gulp.series('cordova-dist', () => {
-  var watcher = gulp.watch('html/**/*{.less,.html,.json,.js}');
+  var watcher = gulp.watch('html/**/*{.scss,.html,.json,.js}');
   watcher.on('change', (event) => {
-    gulp.run('cordova-dist');
+    if (cordova_dist_running) {
+      return;
+    }
+    cordova_dist_running = true;
+    var chp = fork(gulp_bin, [ 'cordova-dist' ]);
+    chp.on('exit', (code) => {
+      cordova_dist_running = false;
+      if(code != 0) {
+        throw new Error("push-cordova output code " + code);
+      }
+    });
   });
 }));
 
-gulp.task('dev', gulp.series('lessc-all', gulp.parallel('less-watch', 'build-script-dev:watch')));
+gulp.task('dev', gulp.series('sass-all', gulp.parallel('sass-watch', 'build-script-dev:watch')));
 
-gulp.task('build-prod', gulp.series(/*'script-lint', */'build-script-prod', 'lessc-all'));
-gulp.task('build-dev', gulp.series(/*'script-lint', */'build-script-dev', 'lessc-all'));
+gulp.task('build-prod', gulp.series(/*'script-lint', */'build-script-prod', 'sass-all'));
+gulp.task('build-dev', gulp.series(/*'script-lint', */'build-script-dev', 'sass-all'));
 
 gulp.task('default', function (done) {
   console.log(`
    Available commands:
-     - lessc-[name]
-     - lessc-all
+     - sass-[name]
+     - sass-all
      - script-lint
      - build-script-dev
      - build-script-prod

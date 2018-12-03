@@ -1,9 +1,12 @@
 @import "common";
 
-@import "main/editor";
+@import "editor";
+@import "themes";
 
-@import "main/themes";
-@import "../bower_components/bootstrap/less/variables";
+// @import "../bower_components/bootstrap/less/variables";
+$btn-default-color:     #333;
+$btn-danger-bg:          #d9534f;
+$btn-success-bg:         #5cb85c;
 
 html.ios,
 html.ios body {
@@ -217,23 +220,23 @@ body.rtl #tree {
       top: 50%;
       left: 0px;
       transform: translate(0, -50%);
-      color: @btn-danger-bg;
+      color: $btn-danger-bg;
     }
     .node-setting {
-      color: @btn-default-color;
+      color: $btn-default-color;
       top: 0px;
       right: 0px;
     }
     .add-node-before,
     .add-node-after,
     .add-child-node {
-      color: @btn-success-bg;
+      color: $btn-success-bg;
     }
   }
 
   &.edit-mode {
     ul.children {
-      max-width: calc(~"100vw - 80px");
+      max-width: calc(#{"100vw - 80px"});
     }
     &.current > ul.children,
     .current > ul.children {

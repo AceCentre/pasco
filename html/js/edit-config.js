@@ -170,7 +170,7 @@ function start() {
       set_tree_data(tree_data);
     });
     
-    config_auto_save_init();
+    // config_auto_save_init();
     $form.on('submit', save_config)
     $('form[name=edit-tree]').on('submit', save_tree)
   } else {
@@ -990,7 +990,16 @@ function update_alert(success, err) {
 function config_auto_save_init() {
   var $form = $('form[name=edit-config]').first()
   $form.on('input', 'input', onchange);
-  $form.on('change', 'select,input[type=checkbox],input[type=radio]', onchange);
+  $form.on('change', 'select,input[type=checkbox],input[type=radio],input[type=range]', onchange);
+  // rangeslider emits change event programmatically, Thus require capture
+  // parameter of event listener to be true
+  if ($form[0] && $form[0].addEventListener) {
+    $form[0].addEventListener("change", function (evt) {
+      if (evt.target.nodeName == "INPUT" && evt.target.type == "range") {
+        onchange();
+      }
+    }, true);
+  }
   function onchange() {
     _config_autosave_start_countdown();
   }
@@ -1048,28 +1057,49 @@ $(document).on('change', 'input[type=checkbox],input[type=radio]', function() {
     }
   }
 });
-$(document).on('input', 'input[type=number],input[type=range]', function() {
-  var $elm = $(this);
-  if($elm.data('dependent')) {
-    var $other = $($elm.data('dependent')),
-        val = $elm.val();
-    if(typeof val != 'number')
-      val = parseFloat(val);
-    if(isNaN(val)) {
-      return;
+
+if (document.addEventListener) {
+  document.addEventListener('input', input_dependent_onchange, true);
+} else {
+  $(document).on('input', 'input[type=number],input[type=range]', input_dependent_onchange);
+}
+
+function input_dependent_onchange (evt) {
+  if (evt.target.nodeName == 'INPUT' &&
+      ['number','range'].indexOf(evt.target.type) != -1) {
+    var $elm = $(evt.target);
+    if($elm.data('dependent')) {
+      var $other = $($elm.data('dependent')),
+          val = $elm.val();
+      if(typeof val != 'number')
+        val = parseFloat(val);
+      if(isNaN(val)) {
+        return;
+      }
+      $other.each(function() {
+        var lval = val,
+            max = this.max ? parseFloat(this.max) : NaN,
+            min = this.min ? parseFloat(this.min) : NaN;
+        if(!isNaN(max) && lval > max)
+          lval = max;
+        if(!isNaN(min) && lval < min)
+          lval = min;
+        this.value = lval;
+        if(this.type == 'range' && this['rangeslider-js']) {
+          this['rangeslider-js'].update({ value: this.value });
+        }
+      });
     }
-    $other.each(function() {
-      var lval = val,
-          max = this.max ? parseFloat(this.max) : NaN,
-          min = this.min ? parseFloat(this.min) : NaN;
-      if(!isNaN(max) && lval > max)
-        lval = max;
-      if(!isNaN(min) && lval < min)
-        lval = min;
-      this.value = lval;
-    });
   }
-});
+  if (evt.target.nodeName == 'INPUT') {
+    // data-disp
+    if ($elm.data('disp')) {
+      var $other = $($elm.data('disp')),
+          val = $elm.val();
+      $other.text("[" + val + "]");
+    }
+  }
+}
 
 function _input_set_from_config(element, value) {
   if(['radio','checkbox'].indexOf(element.type) != -1) {
@@ -1083,7 +1113,18 @@ function _input_set_from_config(element, value) {
     element.value = value+'';
   }
   if(['text','number','range'].indexOf(element.type) != -1) {
-    $(element).trigger('input');
+    // element with data-dependent cannot receive the event unless
+    // dispatchEvent with CustomEvent is used
+    if (element.dispatchEvent && window.CustomEvent) {
+      element.dispatchEvent(new CustomEvent("input"));
+    } else {
+      $(element).trigger('input');
+    }
+  }
+  if(['range'].indexOf(element.type) != -1) {
+    if (element['rangeslider-js']) {
+      element['rangeslider-js'].update({ value: element.value });
+    }
   }
 }
 function _input_info_set_config_value(element, info, value) {

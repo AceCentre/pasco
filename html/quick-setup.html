@@ -13,18 +13,13 @@
 
     <!-- <link rel="icon" href="images/favicon.png"> -->
 
-    <!-- bootstrap includes -->
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
-    <script src="bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-    <script src="bower_components/bootstrap-waitingfor/build/bootstrap-waitingfor.min.js"></script>
-    <!-- bootstrap includes end -->
     <link rel="stylesheet" href="css/edit-config.css">
 
     <!-- INJECT HEAD -->
     
   </head>
-  <body class="notready">
+  <body class="notready quick-setup">
     <div class="container edit-config-container">
       <form name="quick-setup">
         <div class="row">
@@ -84,20 +79,20 @@
               </div>
               <div class="col-sm-6">
                 <div class="form-group">
-                  <label for="auditory_cue_voice_options.volume" x-l10n>Volume</label>
-                  <input class="form-control btn-lg" type="range" step="any" min="0" max="1" id="auditory_cue_voice_options.volume" name="auditory_cue_voice_options.volume" data-validator="number">
+                  <label for="auditory_cue_voice_options.volume"><span x-l10n>Volume</span> <span id="disp-auditory_cue_voice_options__volume" class="input-number-disp"></span></label>
+                  <input class="form-control btn-lg" type="range" step="0.01" min="0" max="1" data-default="1" id="auditory_cue_voice_options.volume" name="auditory_cue_voice_options.volume" data-validator="number" data-disp="#disp-auditory_cue_voice_options__volume">
                 </div>
               </div>
               <div class="col-sm-6">
                 <div class="form-group">
-                  <label for="auditory_cue_voice_options.pitch" x-l10n>Pitch</label>
-                  <input class="form-control btn-lg" type="number" step="any" id="auditory_cue_voice_options.pitch" name="auditory_cue_voice_options.pitch" data-validator="number">
+                  <label for="auditory_cue_voice_options.pitch"><span x-l10n>Pitch</span> <span id="disp-auditory_cue_voice_options__pitch" class="input-number-disp"></span></label>
+                  <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="2" data-default="1" id="auditory_cue_voice_options.pitch" name="auditory_cue_voice_options.pitch" data-validator="number" data-disp="#disp-auditory_cue_voice_options__pitch">
                 </div>
               </div>
               <div class="col-sm-6">
                 <div class="form-group">
-                  <label for="auditory_cue_voice_options.rateMul" x-l10n>Rate</label>
-                  <input class="form-control btn-lg" type="number" step="any" id="auditory_cue_voice_options.rateMul" name="auditory_cue_voice_options.rateMul" data-validator="number">
+                  <label for="auditory_cue_voice_options.rateMul"><span x-l10n>Rate</span> <span id="disp-auditory_cue_voice_options__rateMul" class="input-number-disp"></span></label>
+                  <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_cue_voice_options.rateMul" name="auditory_cue_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_cue_voice_options__rateMul">
                 </div>
               </div>
               <div class="col-sm-6 visible-for-ios">
@@ -117,20 +112,20 @@
               </div>
               <div class="col-sm-6">
                 <div class="form-group">
-                  <label for="auditory_main_voice_options.volume" x-l10n>Volume</label>
-                  <input class="form-control btn-lg" type="range" step="any" min="0" max="1" id="auditory_main_voice_options.volume" name="auditory_main_voice_options.volume" data-validator="number">
+                  <label for="auditory_main_voice_options.volume"><span x-l10n>Volume</span> <span id="disp-auditory_main_voice_options__volume" class="input-number-disp"></span></label>
+                  <input class="form-control btn-lg" type="range" step="0.01" min="0" max="1" data-default="1" id="auditory_main_voice_options.volume" name="auditory_main_voice_options.volume" data-validator="number" data-disp="#disp-auditory_main_voice_options__volume">
                 </div>
               </div>
               <div class="col-sm-6">
                 <div class="form-group">
-                  <label for="auditory_main_voice_options.pitch" x-l10n>Pitch</label>
-                  <input class="form-control" type="number" step="any" id="auditory_main_voice_options.pitch" name="auditory_main_voice_options.pitch" data-validator="number">
+                  <label for="auditory_main_voice_options.pitch"><span x-l10n>Pitch</span> <span id="disp-auditory_main_voice_options__pitch" class="input-number-disp"></span></label>
+                  <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="2" data-default="1" id="auditory_main_voice_options.pitch" name="auditory_main_voice_options.pitch" data-validator="number" data-disp="#disp-auditory_main_voice_options__pitch">
                 </div>
               </div>
               <div class="col-sm-6">
                 <div class="form-group">
-                  <label for="auditory_main_voice_options.rateMul" x-l10n>Rate</label>
-                  <input class="form-control" type="number" step="any" id="auditory_main_voice_options.rateMul" name="auditory_main_voice_options.rateMul" data-validator="number">
+                  <label for="auditory_main_voice_options.rateMul"><span x-l10n>Rate</span> <span id="disp-auditory_main_voice_options__rateMul" class="input-number-disp"></span></label>
+                  <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_main_voice_options.rateMul" name="auditory_main_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_main_voice_options__rateMul">
                 </div>
               </div>
               <div class="col-sm-6 visible-for-ios">
@@ -139,7 +134,7 @@
             </div>
           </div>
         </div>
-        <div class="row m-t-10">
+        <div class="row m-t-15">
           <div class="col-xs-12 save-section">
             <div class="alert-hidden alert alert-danger" role="alert"></div>
             <button type="submit" class="submit-btn btn btn-success btn-lg"><span x-l10n>Start</span> <span class="glyphicon glyphicon-play"></span></button>
@@ -154,6 +149,11 @@
     <script src="js/nodelib.js"></script>
     <script src="js/lib/translate.js"></script>
     <script src="js/lib/sanitize-html.js"></script>
+    <!-- bootstrap includes -->
+    <!-- <script src="bower_components/jquery/dist/jquery.min.js"></script> -->
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="bower_components/bootstrap-waitingfor/build/bootstrap-waitingfor.min.js"></script>
+    <!-- bootstrap includes end -->
     <script src="js/lib/zipjs/zip.js"></script>
     <script>zip.workerScriptsPath = "js/lib/zipjs/";</script>
     <script src="js/NativeAccessApi.js"></script>
