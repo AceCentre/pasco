@@ -22,6 +22,9 @@ You can try out a limited version of pasco on the web at [app.pasco.chat](https:
 | Offline support                                              | ✅   |  ✅  |
 | In-App Editing                                               | ✅   |  ✅  |
 | In-App Voice Recording                                       | ✅   |  ❎  |
+| Adjustable font size and Colour Themes                       | ✅   |  ✅   |
+| Switch Access (1-4)					                       | ✅   |  ✅   |
+| On-Screen navigation tool, Resizable and Draggable           | ✅   |  ✅   |
 
 
 ## Developing 
