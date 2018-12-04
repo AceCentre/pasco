@@ -170,7 +170,7 @@ function start() {
       set_tree_data(tree_data);
     });
     
-    // config_auto_save_init();
+    config_auto_save_init();
     $form.on('submit', save_config)
     $('form[name=edit-tree]').on('submit', save_tree)
   } else {
