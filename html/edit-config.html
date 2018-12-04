@@ -196,7 +196,7 @@
               <div class="form-group">
                 <label for="ignore_second_hits_time" x-l10n>Ignore second hits(ms)</label>
                 <input type="number" id="ignore_second_hits_time" name="ignore_second_hits_time" class="form-control" value="100" data-validator="number" data-dependent="#ignore_second_hits_time_range">
-                <input type="range" id="ignore_second_hits_time_range" class="form-control btn-lg" step="1" min="0" max="2000" data-dependent="#ignore_second_hits_time">
+                <input type="range" id="ignore_second_hits_time_range" class="form-control btn-lg" step="100" min="0" max="2000" data-dependent="#ignore_second_hits_time">
               </div>
             </div>
             <div class="col-sm-1"></div>
@@ -204,7 +204,7 @@
               <div class="form-group hide-for-ios">
                 <label for="ignore_key_release_time" x-l10n>Ignore key presses under n ms</label>
                 <input class="form-control" type="number" id="ignore_key_release_time" name="ignore_key_release_time" value="0" data-validator="number" data-dependent="#ignore_key_release_time_range">
-                <input type="range" id="ignore_key_release_time_range" class="form-control btn-lg" step="1" min="0" max="2000" data-dependent="#ignore_key_release_time">
+                <input type="range" id="ignore_key_release_time_range" class="form-control btn-lg" step="100" min="0" max="2000" data-dependent="#ignore_key_release_time">
               </div>
             </div>
           </div>

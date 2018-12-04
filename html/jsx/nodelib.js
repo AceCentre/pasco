@@ -20,7 +20,10 @@ $(() => {
       }
     }
     rangeslider.create(this, {
-      value: this.value,
+      value: parseFloat(this.value),
+      step: parseFloat(this.step) || 0.01,
+      min: parseFloat(this.min) || 0,
+      max: parseFloat(this.max) || 1,
       onInit: function (value, perc, position) {
         if (has_default_value) {
           this._default_indicator = document.createElement("div");
