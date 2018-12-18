@@ -1,6 +1,6 @@
-- Ortografía con predicción<meta data-spell-branch  data-spell-update-dyn-onchange>
-    - <meta data-dyn="spell-word-prediction" data-words-file="trees/Spell_Prediction/es-subtlex-esp.json" data-max-nodes="3" data-spell-finish>
-    - <meta data-dyn="spell-letter-prediction" data-words-file="trees/Spell_Prediction/es-subtlex-esp.json" data-alphabet="aábcdefghijklmnñoópqrstuüvwxyz">
-	- Espacio <meta data-spell-letter=" ">
-	- Deshacer <meta data-spell-delchar>
-	- Terminar <meta data-spell-finish>
+<meta data-spell-branch  data-spell-update-dyn-onchange>
+- <meta data-dyn="spell-word-prediction" data-words-file="trees/Spell_Prediction/es-subtlex-esp.json" data-max-nodes="3" data-spell-finish>
+- <meta data-dyn="spell-letter-prediction" data-words-file="trees/Spell_Prediction/es-subtlex-esp.json" data-alphabet="aábcdefghijklmnñoópqrstuüvwxyz">
+- Espacio <meta data-spell-letter=" ">
+- Deshacer <meta data-spell-delchar>
+- Terminar <meta data-spell-finish>
