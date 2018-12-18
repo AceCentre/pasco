@@ -900,15 +900,24 @@ proto.start_speaking = function(speech, opts) {
     for(var key in opts)
       if(key.indexOf('alt_') == 0)
         delete opts[key];
-    var spk_opts = {};
-    if(opts.override_to_speaker) {
-      spk_opts.override_to_speaker = opts.override_to_speaker;
+    var override_to_speaker = false,
+        promise = Promise.resolve();
+    if(typeof opts.override_to_speaker != 'undefined') {
+      override_to_speaker = opts.override_to_speaker
       delete opts.override_to_speaker;
     }
-    return self.api.init_utterance(speech, opts)
+    if ((override_to_speaker && !self._last_override_to_speaker) ||
+        (!override_to_speaker && self._last_override_to_speaker)) {
+      self._last_override_to_speaker = override_to_speaker;
+      promise = self.api.override_output_to_speaker(override_to_speaker);
+    }
+    return promise
+      .then(function () {
+        return self.api.init_utterance(speech, opts)
+      })
       .then(function(utterance) {
         return self.api
-          .speak_utterance(self.synthesizer, utterance, spk_opts)
+          .speak_utterance(self.synthesizer, utterance)
           .then(function(){ return utterance; });
       });
   } else {
@@ -1043,6 +1052,7 @@ proto._cordova_play_audio = function(src, opts) {
     var play_opts = {};
     if(opts.override_to_speaker)
       play_opts.overrideToSpeaker = true;
+    self._last_override_to_speaker = !!play_opts.overrideToSpeaker;
     media.play(play_opts);
   });
 }
