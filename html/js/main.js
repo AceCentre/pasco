@@ -946,11 +946,13 @@ function _get_node_attr_inherits_full(positions, name) {
       if(val !== undefined && val != 'inherit') {
         return [ val, pos, node ];
       }
-    } else { // special case, at root
-      var val = pos.tree.meta[name];
-      if(val !== undefined && val != 'inherit') {
-        return [ val, pos, null ];
-      }
+    }
+  }
+  // check root
+  if (positions.length > 0) {
+    var val = positions[0].tree.meta[name];
+    if(val !== undefined && val != 'inherit') {
+      return [ val, positions[0], positions[0].tree ];
     }
   }
   return null;
@@ -992,7 +994,11 @@ function _before_pop_position (n) {
       if (_meta_true_check(oldpos.tree.meta['spell-branch'], false)) {
         var ppos = state.positions[state.positions.length - 2 - i];
         if (_meta_true_check(oldpos.tree.meta['spell-update-dyn-onchange'])) {
-          ppos._dyndirty = true;
+          if (oldpos.tree == state.positions[0].tree) {
+            state._dyndirty = true;
+          } else {
+            ppos._dyndirty = true;
+          }
         }
         delete ppos._concat_letters;
       }
@@ -1038,9 +1044,12 @@ function _in_check_spell_delchar(atree) {
         var letter;
         while((letter = concat_letters.pop()) == ' ')
           ;
-        var tnode = tmp[2] == null ? tmp[1] : tmp[2];
-        if (_meta_true_check(tnode.meta['spell-update-dyn-onchange'])) {
-          tmp[1]._dyndirty = true;
+        if (_meta_true_check(tmp[2].meta['spell-update-dyn-onchange'])) {
+          if (tmp[2] == state.positions[0].tree) {
+            state._dyndirty = true;
+          } else {
+            tmp[1]._dyndirty = true;
+          }
         }
       }
       var msg, idx = concat_letters.lastIndexOf(' ');
@@ -1115,9 +1124,12 @@ function _in_check_spell_default(atree) {
     if (_meta_true_check(atree.meta['spell-finish'])) {
       return _in_spell_finish(atree);
     }
-    var tnode = tmp[2] == null ? tmp[1] : tmp[2];
-    if (_meta_true_check(tnode.meta['spell-update-dyn-onchange'])) {
-      tmp[1]._dyndirty = true;
+    if (_meta_true_check(tmp[2].meta['spell-update-dyn-onchange'])) {
+      if (tmp[2] == state.positions[0].tree) {
+        state._dyndirty = true;
+      } else {
+        tmp[1]._dyndirty = true;
+      }
     }
     // continue it
     return _before_changeposition()
@@ -1125,7 +1137,7 @@ function _in_check_spell_default(atree) {
         var tmp2 = _get_node_attr_inherits_full(state.positions, 'stay-in-branch') || tmp;
         var idx = state.positions.indexOf(tmp2[1]);
         state.positions = state.positions.slice(0, idx + 1);
-        if(tmp2[2] != null) {
+        if(tmp2[2] != state.positions[0].tree) {
           state.positions.push({
             tree: tmp2[2],
             index: 0
@@ -1312,6 +1324,11 @@ function _before_changeposition () {
     }
     delete pos._dyndirty;
   }
+  // check for dyndirty of root
+  if (state._dyndirty) {
+    subdyn_tree = state.positions[0].tree;
+    delete state._dyndirty;
+  }
   if (subdyn_tree) {
     return _tree_update_subdyn(subdyn_tree, {
       changing_position: true,
@@ -1328,7 +1345,7 @@ function _in_check_stay_in_branch (atree) {
       .then(function () {
         var idx = state.positions.indexOf(stayinbranch[1]);
         state.positions = state.positions.slice(0, idx + 1);
-        if(stayinbranch[2] != null) {
+        if(stayinbranch[2] != state.positions[0].tree) {
           state.positions.push({
             tree: stayinbranch[2],
             index: 0
@@ -1374,7 +1391,11 @@ function _tree_go_in() {
       var idx = state.positions.indexOf(tmp[1]);
       for (var i = idx; i >= 0; i--) {
         var pos = state.positions[i];
-        pos._dyndirty = true;
+        if (i == 0) {
+          state._dyndirty = true;
+        } else {
+          pos._dyndirty = true;
+        }
         if (!_meta_true_check(pos.tree.meta['dyn-setdirty-onselect'], false)) {
           break;
         }
