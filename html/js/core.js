@@ -1261,14 +1261,33 @@ function tree_traverse_nodes_async_subrout (tree, callable, i) {
 
 function _parse_tree_subrout(tree_element, data) {
   // #46 \t to h1-6
-  data = data.replace(/^(\t{1,})(.+)/gm, function(all, tabs, text) {
+  var tabsize = 0;
+  data = data.replace(/^([ \t]{1,})(.+)/gm, function(all, indents, text) {
     var tmp = text.trim();
     if(!tmp || tmp[0] == '-') {
       return all;
     }
-    return '    '.repeat(tabs.length) + '- ' + tmp;
+    var level = 0,
+        spaces = 0;
+    for (var i = 0; i < indents.length; i++) {
+      if (indents[i] == "\t") {
+        spaces = 0;
+        level++;
+      } else if (indents[i] == " ") {
+        spaces++;
+        if (tabsize > 0 && spaces >= tabsize) {
+          spaces = 0;
+          level++;
+        }
+      }
+    }
+    if (tabsize == 0 && spaces > 0) {
+      tabsize = Math.min(spaces, 8);
+      level = 1;
+    }
+    return '    '.repeat(level) + '- ' + tmp;
   });
-  // start of line with a letter or number is h1
+  // start of line with a letter or number is level0
   data = data.replace(/^\s*[^\#\@\<\-\*\_\ \t\n\r]/gm, function(all) {
     return '- ' + all;
   });
