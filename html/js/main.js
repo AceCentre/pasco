@@ -868,11 +868,17 @@ function _move_sub_speak2(type, override_msg) {
   }
 }
 
-function _scan_move(node) {
+function _scan_move(node, opts) {
+  opts = opts||{};
   node = node || _get_current_node();
   var moveobj = _new_move_init(node)
+  if(opts.delay > 0) {
+    moveobj.steps.push(function() {
+      return new Promise(function(resolve) { setTimeout(resolve, opts.delay) })
+    })
+  }
   moveobj.steps.push(_move_sub_highlight.bind(node))
-  moveobj.steps.push(_move_sub_speak2.bind(node, 'cue'))
+  moveobj.steps.push(_move_sub_speak2.bind(node, 'cue', opts.cue_override_msg))
   moveobj.node.dom_element.dispatchEvent(new CustomEvent("x-new-move", {
     detail: {
       node: node
@@ -883,6 +889,14 @@ function _scan_move(node) {
 }
 
 function _notify_move(node, notifynode, opts) {
+  if (_meta_true_check(notifynode.meta['no-main'], false)) {
+    return _scan_move(node, opts);
+  } else {
+    return _do_notify_move(node, notifynode, opts);
+  }
+}
+
+function _do_notify_move(node, notifynode, opts) {
   opts = opts||{};
   var moveobj = _new_move_init(node || notifynode)
   moveobj.steps.push(_move_sub_speak2.bind(notifynode, 'main', opts.main_override_msg))
@@ -1059,7 +1073,7 @@ function _in_check_spell_delchar(atree) {
       } else {
         msg = concat_letters.join(' ');
       }
-      return _notify_move(_get_current_node(), atree, {
+      return _do_notify_move(_get_current_node(), atree, {
         main_override_msg: msg
       });
     }
@@ -1091,7 +1105,7 @@ function _in_spell_finish(atree) {
           });
       });
   } else {
-    return _notify_move(_get_current_node(), atree, {
+    return _do_notify_move(_get_current_node(), atree, {
       main_override_msg: _t("Nothing selected")
     });
   }
@@ -1155,7 +1169,7 @@ function _in_check_spell_default(atree) {
             msg = concat_letters.join(' ');
           }
         }
-        return _notify_move(_get_current_node(), atree, {
+        return _do_notify_move(_get_current_node(), atree, {
           main_override_msg: msg
         });
       });
@@ -1175,7 +1189,7 @@ function _in_check_back_n_branch(atree) {
         var last_pos = state.positions.pop();
       }
       if (atree.meta['back-n-branch-notify']) {
-        return _notify_move(_get_current_node(), atree);
+        return _do_notify_move(_get_current_node(), atree);
       } else {
         return _scan_move();
       }
@@ -1196,7 +1210,7 @@ function _in_override_change_tree (atree) {
         if (tree_info) {
           return _in_override_change_tree_subrout(atree, tree_info.tree_fn);
         } else {
-          return _notify_move(_get_current_node(), atree, {
+          return _do_notify_move(_get_current_node(), atree, {
             main_override_msg: _t("Could not find tree with this name")
           });
         }
@@ -1207,7 +1221,7 @@ function _in_override_change_tree (atree) {
 function _in_override_change_tree_subrout (atree, another_tree) {
   var current_tree = config.tree || window.default_tree;
   if (another_tree === current_tree) {
-    return _notify_move(_get_current_node(), atree, {
+    return _do_notify_move(_get_current_node(), atree, {
       main_override_msg: _t("This tree is already running")
     });
   } else {
@@ -1253,7 +1267,7 @@ function _in_override_change_tree_subrout (atree, another_tree) {
       })
       .catch(function (err) {
         console.error(err);
-        return _notify_move(_get_current_node(), atree, {
+        return _do_notify_move(_get_current_node(), atree, {
           main_override_msg: _t("Could not change to this tree")
         });
       });
@@ -1416,7 +1430,8 @@ function _tree_go_in() {
         if(atree.content_element)
           atree.content_element.classList.add('selected' || config.selected_class);
         // speak it
-        return _move_sub_speak2.call(atree, 'main')
+        return (_meta_true_check(atree.meta['no-main'], false) ?
+                Promise.resolve() : _move_sub_speak2.call(atree, 'main'))
           .then(function() {
             _start_at_next_action(atree)
           });
