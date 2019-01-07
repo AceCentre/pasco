@@ -1,3 +1,8 @@
+// underscore template settings use {% instead of <%
+_.templateSettings.escape = /\{%-([\s\S]+?)%\}/g;
+_.templateSettings.evaluate = /\{%([\s\S]+?)%\}/g,
+_.templateSettings.interpolate = /\{%=([\s\S]+?)%\}/g;
+_.templateSettings.variable = "data";
 
 // Cordova specific
 document.addEventListener('deviceready', function() { 
@@ -1015,10 +1020,12 @@ proto.get_voices = function() {
   if(this.is_native) {
     return this.api.get_voices();
   } else {
-    return Promise.resolve(_.map(this.responsiveVoice.getVoices(),function(v) {
+    // this.responsiveVoice.getVoices()
+    return Promise.resolve(_.map(this.responsiveVoice.responsivevoices,function(v) {
       return {
         id: v.name,
-        label: v.name
+        label: v.name,
+        locale: v.lang||''
       };
     }));
   }

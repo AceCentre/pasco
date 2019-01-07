@@ -1,6 +1,6 @@
 var config_fn, ptree_info, trees_info_fn;
 var speaku, config, config_data, trees_info, tree_data,
-    voices, napi, is_quick_setup;
+    all_voices, napi, is_quick_setup;
 // start
 Promise.all([
   window.cordova ? NativeAccessApi.onready() : Promise.resolve(),
@@ -21,7 +21,7 @@ Promise.all([
     speaku = new SpeakUnit(napi);
     return speaku.init()
       .then(function() {
-        return speaku.get_voices().then(function(v) { voices = v })
+        return speaku.get_voices().then(function(v) { all_voices = v })
       });
   })
   // load
@@ -81,6 +81,25 @@ function _fix_config(cfg) {
       "pitch": 1.0
     };
   }
+  // by default add all choices for each voice option
+  _.each(_voice_id_links, function (link) {
+    var name = link[0],
+        voice_options = cfg[name];
+    if (voice_options && !voice_options.locale_voices) {
+      voice_options.locale_voices = _.filter(
+        _.map(all_locale_info, function (linfo) {
+          var opts = _vbl_voice_tmpl_options(linfo.locale);
+          if (opts.length > 0) {
+            var vidname = (speaku.is_native ? '' : 'alt_') + 'voiceId';
+            var ret = { locale: linfo.locale };
+            ret[vidname] = opts[0].value;
+            return ret;
+          }
+        }),
+        function (a) { return !!a; }
+      );
+    }
+  });
 }
 
 function bind_dom_event_handlers () {
@@ -88,6 +107,26 @@ function bind_dom_event_handlers () {
     $evt.preventDefault();
     collapsable_toggle($('#tree-tools')[0]);
   });
+  $('.vbl-btn').on('click', vbl_btn_onclick);
+  function vbl_btn_onclick ($evt) {
+    var vbl_link_id = $($evt.target).data('vbl');
+    var link = _.filter(_voice_id_links, function (a) { return a[0] == vbl_link_id; })[0];
+    if (!link) {
+      console.warn("no link found!");
+      return;
+    }
+    var voice_options = config[vbl_link_id];
+    var label = _t(link[3]);
+    var data = {
+      voices: voice_options.locale_voices || [],
+    };
+    voice_by_locale_init('voice-by-locale', label, data, onchange);
+    function onchange (data) {
+      voice_options.locale_voices = data.voices;
+      var $form = $('form[name=edit-config]').first();
+      do_save_config($form, config, true);
+    }
+  }
 }
 
 function start() {
@@ -95,7 +134,7 @@ function start() {
   _start_subrout_tree_selection();
   // insert voice options
   var $form = $(is_quick_setup ? 'form[name=quick-setup]' : 'form[name=edit-config]').first(),
-      voices_by_id = _.object(_.map(voices, function(voice) { return [voice.id,voice] }));
+      voices_by_id = _.object(_.map(all_voices, function(voice) { return [voice.id,voice] }));
   _.each(_voice_id_links, function(alink) {
     var $inp = $form.find('[name='+alink[1]+']');
     if($inp.length == 0)
@@ -143,7 +182,7 @@ function start() {
     opt.value = ''
     opt.textContent = 'Default'
     $inp.append(opt)
-    _.each(voices, function(voice) {
+    _.each(all_voices, function(voice) {
       var opt = newEl('option')
       opt.value = voice.id
       opt.textContent = voice.label
@@ -712,9 +751,9 @@ var config_validators = {
   'number': validate_number
 };
 var _voice_id_links = [
-  [ 'auditory_main_voice_options', '_main_voice_id', '#auditory-main-playback-wrp' ],
-  [ 'auditory_cue_voice_options', '_cue_voice_id', '#auditory-cue-playback-wrp' ],
-  [ 'auditory_cue_first_run_voice_options', '_cue_first_run_voice_id', '#auditory-cue-first-run-playback-wrp' ],
+  [ 'auditory_main_voice_options', '_main_voice_id', '#auditory-main-playback-wrp', 'Main Voice' ],
+  [ 'auditory_cue_voice_options', '_cue_voice_id', '#auditory-cue-playback-wrp', 'Cue Voice' ],
+  [ 'auditory_cue_first_run_voice_options', '_cue_first_run_voice_id', '#auditory-cue-first-run-playback-wrp', 'Cue First Run Voice' ],
 ];
 
 function insert_config() {
@@ -996,6 +1035,18 @@ function config_auto_save_init() {
   if ($form[0] && $form[0].addEventListener) {
     $form[0].addEventListener("change", function (evt) {
       if (evt.target.nodeName == "INPUT" && evt.target.type == "range") {
+        if (evt.target.type == "range") {
+          var dependent = $(evt.target).data('dependent'),
+              name = evt.target.name;
+          if (!evt.target.name && dependent) {
+            name = $(dependent)[0].name;
+          }
+          var preval = _input_info_parse(name, config).value,
+              val = parseFloat(evt.target.value);
+          if (!isNaN(val) && !isNaN(preval) && Math.abs(preval - val) < 0.001) {
+            return; // ignore small change
+          }
+        }
         onchange();
       }
     }, true);
@@ -1065,9 +1116,9 @@ if (document.addEventListener) {
 }
 
 function input_dependent_onchange (evt) {
+  var $elm = $(evt.target);
   if (evt.target.nodeName == 'INPUT' &&
       ['number','range'].indexOf(evt.target.type) != -1) {
-    var $elm = $(evt.target);
     if($elm.data('dependent')) {
       var $other = $($elm.data('dependent')),
           val = $elm.val();
@@ -1168,4 +1219,133 @@ function _input_info_parse(name, config) {
     name: name,
     value: value
   };
+}
+
+
+/*** Section Voice By Locale ***/
+var all_locale_info = [
+  { locale: "en-GB", label: "English (UK)" },
+  { locale: "de", label: "German" },
+  { locale: "fr-FR", label: "French" },
+  { locale: "es-ES", label: "Spanish" },
+  { locale: "ar", label: "Arabic" },
+  { locale: "gu", label: "Gujarati" },
+  { locale: "cy", label: "Welsh" },
+];
+function voice_by_locale_init (idprefix, label, data, onchange) {
+  $('#' + idprefix + '-title-suffix').text("(" + label + ")");
+  var vidname = (speaku.is_native ? '' : 'alt_') + 'voiceId';
+  var tmpl = _.template($('#' + idprefix + '-vid-template').html());
+  var $list = $('#' + idprefix + '-list');
+  // init existing state
+  $list.html(_.map(data.voices, function (voice) {
+    var linfos = _.filter(all_locale_info, function (linfo) { return linfo.locale == voice.locale });
+    var vlabel = linfos.length > 0 ? linfos[0].label : voice.locale;
+    return tmpl({
+      locale: voice.locale,
+      value: voice[vidname],
+      label: vlabel,
+      options: _vbl_voice_tmpl_options(voice.locale),
+    });
+  }));
+  
+  $('#' + idprefix + '-modal')
+    .off('change', '.' + idprefix + '-vid select')
+    .on('change', '.' + idprefix + '-vid select', didchange);
+  $('#' + idprefix + '-modal')
+    .off('click', '.' + idprefix + '-vid .remove-btn')
+    .on('click', '.' + idprefix + '-vid .remove-btn', remove_clicked);
+  
+  $('#' + idprefix + '-add-btn')
+    .off('click')
+    .on('click', function ($evt) {
+      var locale = $('#' + idprefix + '-add').val();
+      if (!locale) {
+        throw new Error("No locale!");
+      }
+      var options = _vbl_voice_tmpl_options(locale)
+      if (options.length == 0) {
+        update_alert(false, new Error("No option found for this locale!"));
+        return;
+      }
+      var linfos = _.filter(all_locale_info, function (linfo) { return linfo.locale == locale });
+      var vlabel = linfos.length > 0 ? linfos[0].label : locale;
+      var voice = { locale: locale, };
+      voice[vidname] = options[0]?options[0].value:'';
+      data.voices.push(voice);
+      $list.append($(tmpl({
+        locale: voice.locale,
+        value: voice[vidname],
+        label: vlabel,
+        options: options,
+      })));
+      update_add_locale();
+      didchange();
+    });
+  update_add_locale();
+  $('#' + idprefix + '-modal').modal('show');
+  function remove_clicked ($evt) {
+    var locale = $($evt.target).data('locale');
+    if (locale) {
+      var $parent = $($evt.target).parents('.voice-by-locale-vid');
+      if ($parent.length > 0) {
+        var idx = _.findIndex(data.voices, function (voice) {
+          return voice.locale == locale;
+        });
+        data.voices.splice(idx, 1);
+        $parent.remove();
+        update_add_locale();
+        didchange();
+      }
+    }
+  }
+  function didchange () {
+    var voices = _.filter(
+      _.map($('#' + idprefix + '-modal .' + idprefix + '-vid select'), function (elm) {
+        var locale = elm.name.indexOf('voice-id-of-') == 0 ?
+            elm.name.slice('voice-id-of-'.length) : null;
+        if (!locale) {
+          return null;
+        }
+        var tmp = _.filter(data.voices, function (v) { return v.locale == locale; })
+        if (tmp.length == 0) {
+          return null;
+        }
+        var ret = _.extend({}, tmp[0]);
+        ret[vidname] = elm.value;
+        return ret;
+      }),
+      function (v) { return !!v; }
+    );
+    onchange({ voices: voices });
+  }
+  function update_add_locale () {
+    $('#' + idprefix + '-add').html(_.map(all_locale_info, function (linfo) {
+      if (_.filter(data.voices, function (ex) {
+            // cmp of a locale and existing locale
+            // en-GB, en => false (not match)
+            // en, en-GB => true
+            // en-Gb, en-GB => true
+            return !(linfo.locale.indexOf('-') != -1 && ex.locale.indexOf('-') == -1) &&
+              linfo.locale.split('-')[0] == ex.locale.split('-')[0];
+          }).length > 0) {
+        return '';
+      }
+      return '<option value="' + _.escape(linfo.locale) + '">' + _.escape(linfo.label) + '</option>';
+    }).join(""));
+    $('#' + idprefix + '-add-wrp')[$('#' + idprefix + '-add').html().trim() == "" ? 'hide' : 'show']();
+  }
+}
+function _vbl_voice_tmpl_options (locale) {
+  var vlist = _.filter(all_voices, function (v) {
+    return v.locale == locale;
+  });
+  if (vlist.length == 0) {
+    vlist = _.filter(all_voices, function (v) {
+      return v.locale.split('-')[0] == locale.split('-')[0];
+    });
+  }
+  return _.map(vlist, function (v) {
+    return { value: v.id, label: v.label };
+  });
 }

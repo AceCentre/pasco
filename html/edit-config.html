@@ -141,8 +141,11 @@
                 <div class="col-sm-6">
                   <div class="form-group">
                     <label for="_cue_first_run_voice_id" x-l10n>Voice</label>
-                    <select class="form-control" id="_cue_voice_id" name="_cue_first_run_voice_id">
-                    </select>
+                    <div class="select-btn-wrp">
+                      <select class="form-control" id="_cue_first_run_voice_id" name="_cue_first_run_voice_id">
+                      </select>
+                      <button type="button" class="btn btn-primary vbl-btn" data-vbl="auditory_cue_first_run_voice_options"><span class="glyphicon glyphicon-plus"></span></button>
+                    </div>
                   </div>
                 </div>
                 <div class="col-sm-6">
@@ -221,8 +224,11 @@
             <div class="col-sm-6">
               <div class="form-group">
                 <label for="_cue_voice_id" x-l10n>Voice</label>
-                <select class="form-control" id="_cue_voice_id" name="_cue_voice_id">
-                </select>
+                <div class="select-btn-wrp">
+                  <select class="form-control" id="_cue_voice_id" name="_cue_voice_id">
+                  </select>
+                  <button type="button" class="btn btn-primary vbl-btn" data-vbl="auditory_cue_voice_options"><span class="glyphicon glyphicon-plus"></span></button>
+                </div>
               </div>
             </div>
             <div class="col-sm-6">
@@ -254,8 +260,11 @@
             <div class="col-sm-6">
               <div class="form-group">
                 <label for="_main_voice_id" x-l10n>Voice</label>
-                <select class="form-control" id="_main_voice_id" name="_main_voice_id">
-                </select>
+                <div class="select-btn-wrp">
+                  <select class="form-control" id="_main_voice_id" name="_main_voice_id">
+                  </select>
+                  <button type="button" class="btn btn-primary vbl-btn" data-vbl="auditory_main_voice_options"><span class="glyphicon glyphicon-plus"></span></button>
+                </div>
               </div>
             </div>
             <div class="col-sm-6">
@@ -398,13 +407,13 @@
     <div class="settings-alert-wrp settings-danger-alert">
       <div class="settings-alert alert-hidden alert alert-danger" role="alert"></div>
     </div>
-    <!-- Modal -->
+    <!-- Modals -->
     <div id="save-file-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="Save file">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel" x-l10n>Save</h4>
+            <h4 class="modal-title" x-l10n>Save</h4>
           </div>
           <div class="modal-body">
             <div class="row">
@@ -425,6 +434,49 @@
             <button type="button" class="btn btn-default" data-dismiss="modal" x-l10n>Close</button>
             <button type="button" class="btn btn-primary">Apply</button>
             -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="voice-by-locale-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="Voice by locale">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title"><span x-l10n>Voice by locale</span> <span id="voice-by-locale-title-suffix"></span></h4>
+          </div>
+          <div class="modal-body">
+            <script type="text/x-template" id="voice-by-locale-vid-template">
+              <div class="voice-by-locale-vid col-xs-12 col-sm-6">
+                <div class="form-group">
+                  <label for="vbl-voice-id-{%- data.locale %}">{%- data.label %}</label>
+                  <div class="select-btn-wrp">
+                    <select id="vbl-voice-id-{%- data.locale %}" name="voice-id-of-{%- data.locale %}" class="form-control">
+                      {% _.each(data.options, function (option) { %}
+                      <option value="{%- option.value %}" {%- option.value == data.value ? 'selected' : '' %}>{%- option.label %}</option>
+                      {% }); %}
+                    </select>
+                    <button type="button" data-locale="{%- data.locale %}" class="remove-btn btn btn-danger"><span class="glyphicon glyphicon-remove"></span></button>
+                  </div>
+                </div>
+              </div>
+            </script>
+            <div class="row" id="voice-by-locale-list">
+            </div>
+            <div id="voice-by-locale-add-wrp" class="row">
+              <div class="col-xs-12 col-sm-6">
+                <div class="form-group">
+                  <label for="voice-by-locale-add" x-l10n>Add Locale</label>
+                  <div class="select-btn-wrp">
+                    <select id="voice-by-locale-add" name="locale" class="form-control"></select>
+                    <button id="voice-by-locale-add-btn" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" x-l10n>Close</button>
           </div>
         </div>
       </div>

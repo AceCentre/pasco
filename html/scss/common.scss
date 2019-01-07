@@ -228,3 +228,16 @@ html .hide-for-ios {
   border: none;
   max-width: 95%;
 }
+
+.select-btn-wrp {
+  display: flex;
+  flex-direction: row;
+  .form-control {
+    width: auto;
+    flex-grow: 1;
+  }
+  .btn {
+    margin-left: 5px;
+    height: 34px;
+  }
+}

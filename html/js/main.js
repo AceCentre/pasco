@@ -1,5 +1,5 @@
 var config_fn, tree_fn, config, tree, state = null, tree_element, napi, speaku,
-    config_json, words_cache = {}, tree_contentsize_xstep = 50;
+    config_json, words_cache = {}, tree_contentsize_xstep = 50, locale;
 Promise.all([
   window.cordova ? NativeAccessApi.onready() : Promise.resolve(),
   new Promise(function(resolve) { // domready
@@ -65,8 +65,9 @@ Promise.all([
     tree_element = document.querySelector('#tree')
     if(!tree_element)
       return Promise.reject(new Error("Cannot find #tree element"));
+    locale = config.locale||default_locale;
     return Promise.all([
-      initl10n(config.locale||default_locale)
+      initl10n(locale)
         .then(function() {
           domlocalize();
         })
@@ -852,6 +853,16 @@ function _move_sub_speak2(type, override_msg) {
     audio = this.meta['main-audio'] || this.meta['audio'];
     text = this.text;
     break;
+  }
+  // check override voiceId
+  var curlocale = this.meta[type + '-locale'] || this.meta['locale'] || locale;
+  var tmp = _.filter(opts.locale_voices, function (a) { return a.locale == curlocale; });
+  if (tmp.length == 0) {
+    tmp = _.filter(opts.locale_voices, function (a) { return a.locale.split('-')[0] == curlocale.split('-')[0]; });
+  }
+  var vidname = (speaku.is_native ? '' : 'alt_') + 'voiceId';
+  if (tmp.length > 0 && !!tmp[0][vidname]) {
+    opts[vidname] = tmp[0][vidname];
   }
   if(typeof override_msg == 'string') {
     text = override_msg;
