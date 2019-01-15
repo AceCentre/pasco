@@ -5,10 +5,13 @@ _.templateSettings.interpolate = /\{%=([\s\S]+?)%\}/g;
 _.templateSettings.variable = "data";
 
 // Cordova specific
-document.addEventListener('deviceready', function() { 
+document.addEventListener('deviceready', function() {
+  var html = document.querySelector('html')
   if(window.device) {
-    document.querySelector('html').classList
-      .add(window.device.platform.toLowerCase());
+    html.classList.add(window.device.platform.toLowerCase());
+  }
+  if (window.cordova) {
+    html.classList.add('cordova');
   }
 }, false);
 

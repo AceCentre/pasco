@@ -883,6 +883,17 @@ function _scan_move(node, opts) {
   opts = opts||{};
   node = node || _get_current_node();
   var moveobj = _new_move_init(node)
+  var mincuetimeout = null;
+  moveobj.steps.push(function () {
+    if (config.minimum_cue_time > 0) {
+      state.can_move = false;
+      mincuetimeout = setTimeout(function () {
+        state.can_move = true;
+        mincuetimeout = null;
+      }, config.minimum_cue_time);
+    }
+    return Promise.resolve();
+  });
   if(opts.delay > 0) {
     moveobj.steps.push(function() {
       return new Promise(function(resolve) { setTimeout(resolve, opts.delay) })
@@ -896,7 +907,14 @@ function _scan_move(node, opts) {
     }
   }));
   return _before_new_move()
-    .then(_new_move_start.bind(null, moveobj));
+    .then(_new_move_start.bind(null, moveobj))
+    .then(function () {
+      state.can_move = true;
+      if (mincuetimeout != null) {
+        clearTimeout(mincuetimeout);
+      }
+      return Promise.resolve();
+    });
 }
 
 function _notify_move(node, notifynode, opts) {

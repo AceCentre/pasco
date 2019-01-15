@@ -136,11 +136,28 @@ html.ios {
     display: none;
   }
 }
-html .visible-for-ios {
-  display: none;
+html.cordova {
+  .visible-for-cordova {
+    display: block;
+  }
+  .hide-for-cordova {
+    display: none;
+  }
 }
-html .hide-for-ios {
-  display: block;
+
+html {
+  .visible-for-ios {
+    display: none;
+  }
+  .hide-for-ios {
+    display: block;
+  }
+  .visible-for-cordova {
+    display: none;
+  }
+  .hide-for-cordova {
+    display: block;
+  }
 }
 
 .fit-td {

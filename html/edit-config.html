@@ -166,7 +166,7 @@
                     <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_cue_first_run_voice_options.rateMul" name="auditory_cue_first_run_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_cue_first_run_voice_options__rateMul">
                   </div>
                 </div>
-                <div class="col-sm-6 visible-for-ios">
+                <div class="col-sm-6 visible-for-cordova">
                   <label class="checkbox-inline"><input type="checkbox" name="auditory_cue_first_run_voice_options.override_to_speaker"><span x-l10n>Override to speaker</span></label>
                 </div>
               </div>
@@ -197,14 +197,20 @@
           <div class="row">
             <div class="col-sm-4">
               <div class="form-group">
+                <label for="minimum_cue_time" x-l10n>Minimum Cue Time(ms)</label>
+                <input type="number" id="minimum_cue_time" name="minimum_cue_time" class="form-control" value="0" data-validator="number" data-dependent="#minimum_cue_time_range">
+                <input type="range" id="minimum_cue_time_range" class="form-control btn-lg" step="100" min="0" max="3000" data-dependent="#minimum_cue_time">
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="form-group">
                 <label for="ignore_second_hits_time" x-l10n>Ignore second hits(ms)</label>
                 <input type="number" id="ignore_second_hits_time" name="ignore_second_hits_time" class="form-control" value="100" data-validator="number" data-dependent="#ignore_second_hits_time_range">
                 <input type="range" id="ignore_second_hits_time_range" class="form-control btn-lg" step="100" min="0" max="2000" data-dependent="#ignore_second_hits_time">
               </div>
             </div>
-            <div class="col-sm-1"></div>
             <div class="col-sm-4">
-              <div class="form-group hide-for-ios">
+              <div class="form-group hide-for-cordova">
                 <label for="ignore_key_release_time" x-l10n>Ignore key presses under n ms</label>
                 <input class="form-control" type="number" id="ignore_key_release_time" name="ignore_key_release_time" value="0" data-validator="number" data-dependent="#ignore_key_release_time_range">
                 <input type="range" id="ignore_key_release_time_range" class="form-control btn-lg" step="100" min="0" max="2000" data-dependent="#ignore_key_release_time">
@@ -249,7 +255,7 @@
                 <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_cue_voice_options.rateMul" name="auditory_cue_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_cue_voice_options__rateMul">
               </div>
             </div>
-            <div class="col-sm-6 visible-for-ios">
+            <div class="col-sm-6 visible-for-cordova">
               <label class="checkbox-inline"><input type="checkbox" name="auditory_cue_voice_options.override_to_speaker"><span x-l10n>Override to speaker</span></label>
             </div>
           </div>
@@ -285,7 +291,7 @@
                 <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_main_voice_options.rateMul" name="auditory_main_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_main_voice_options__rateMul">
               </div>
             </div>
-            <div class="col-sm-6 visible-for-ios">
+            <div class="col-sm-6 visible-for-cordova">
               <label class="checkbox-inline"><input type="checkbox" name="auditory_main_voice_options.override_to_speaker"><span x-l10n>Override to speaker</span></label>
             </div>
           </div>
@@ -431,14 +437,14 @@
           <div class="modal-body">
             <div class="row">
               <div class="col-xs-12">
-                <p class="visible-for-ios" x-l10n>You can share or save the zip file.<p>
-                <p class="hide-for-ios" x-l10n>Please click on download.<p>
+                <p class="visible-for-cordova" x-l10n>You can share or save the zip file.<p>
+                <p class="hide-for-cordova" x-l10n>Please click on download.<p>
               </div>
             </div>
             <div class="row">
               <div class="col-xs-12">
-                <a id="save-file--open-btn" href class="hide-for-ios btn btn-success btn-lg">Download</a>
-                <a id="save-file--share-btn" href class="visible-for-ios btn btn-primary btn-lg">Share</a>
+                <a id="save-file--open-btn" href class="hide-for-cordova btn btn-success btn-lg">Download</a>
+                <a id="save-file--share-btn" href class="visible-for-cordova btn btn-primary btn-lg">Share</a>
               </div>
             </div>
           </div>

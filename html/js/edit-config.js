@@ -73,6 +73,9 @@ Promise.all([
   .catch(handle_error);
 
 function _fix_config(cfg) {
+  if (cfg.minimum_cue_time == null) {
+    cfg.minimum_cue_time = 0;
+  }
   if(!cfg.auditory_cue_first_run_voice_options &&
      !cfg._auditory_cue_first_run_voice_options) {
     cfg._auditory_cue_first_run_voice_options =  {
