@@ -241,3 +241,11 @@ html .hide-for-ios {
     height: 34px;
   }
 }
+
+.x-horiz-group {
+  display: flex;
+  flex-direction: row;
+  & > * {
+    margin-right: 10px;
+  }
+}

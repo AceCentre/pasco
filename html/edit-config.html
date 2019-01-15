@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-eval' 'unsafe-inline' http://code.responsivevoice.org/responsivevoice.js ws://localhost:3000; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src blob: 'self' 'unsafe-eval' 'unsafe-inline' http://code.responsivevoice.org/responsivevoice.js ws://localhost:3000; style-src 'self' 'unsafe-inline'; media-src blob: *; img-src 'self' data: content:;">
     
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
@@ -348,11 +348,12 @@
           <div class="col-sm-4 col-md-6">
             <h3 x-l10n>Tree</h3>
           </div>
-          <div class="col-sm-8 col-md-6">
+          <div class="col-sm-8 col-md-6 x-horiz-group">
             <div class="tree-tools-toggle-wrp">
-              <a id="tree-tools-toggle" href><i class="fa fa-bars fa-2x"></i></a>
+              <a data-collapse-toggle="#tree-tools" href><i class="fa fa-bars fa-2x"></i></a>
             </div>
-            <div id="tree-tools" class="row x-collapsable">
+            <!-- style (overflow:visible) is optional for visible collapsables -->
+            <div id="tree-tools" class="row x-collapsable" style="overflow:visible">
               <div class="col-sm-8 col-md-8">
                 <div class="form-group">
                   <select id="tree-default-select" class="form-control">
@@ -371,9 +372,21 @@
               <div class="col-sm-4 col-md-4">
                 <button id="tree-default-select-load-btn" type="button" class="btn btn-success" x-l10n>Load Selected</button>
               </div>
-              <div class="col-xs-12 m-xs-t-10">
-                <div id="tree-export-btn" class="btn btn-primary" x-l10n>Export</div>
-                <div id="tree-import-btn" class="btn btn-primary"><span x-l10n>Import</span><input type="file" id="tree-import-inp"></div>
+              <div class="col-xs-12 m-xs-t-10 x-horiz-group">
+                <div class="dropdown">
+                  <button class="btn btn-primary dropdown-toggle" type="button" id="tree-export-dropdown-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span x-l10n>Export</span> <span class="caret"></span></button>
+                  <ul class="dropdown-menu" aria-labelledby="tree-export-dropdown-btn">
+                    <li><a id="tree-export-btn" class="dropdown-item" href x-l10n>Export (zip)</a></li>
+                    <li><a id="tree-export-obz-btn" class="dropdown-item" href x-l10n>Export (obz)</a></li>
+                  </ul>
+                </div>
+                <div class="dropdown">
+                  <button class="btn btn-primary dropdown-toggle" type="button" id="tree-import-dropdown-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span x-l10n>Import</span> <span class="caret"></span></button>
+                  <ul class="dropdown-menu" aria-labelledby="tree-export-dropdown-btn">
+                    <li><a id="tree-import-btn" class="dropdown-item"><span x-l10n>Import (zip)</span><input type="file" id="tree-import-inp" accept=".zip"></a></li>
+                    <li><a id="tree-import-obz-btn" class="dropdown-item"><span x-l10n>Import (obz)</span><input type="file" id="tree-import-obz-inp" accept=".obz"></a></li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -485,17 +498,17 @@
     <!-- MAIN SCRIPTS -->
     <script src="bower_components/underscore/underscore-min.js"></script>
     <script src="bower_components/showdown/dist/showdown.min.js"></script>
-    <script src="js/nodelib.js"></script>
+    <script src="js/lib/zipjs/zip.js"></script>
+    <script>zip.workerScriptsPath = "js/lib/zipjs/";</script>
     <script src="js/lib/translate.js"></script>
     <script src="js/lib/sanitize-html.js"></script>
+    <script src="js/nodelib.js"></script>
     <!-- bootstrap includes -->
     <!-- <script src="bower_components/jquery/dist/jquery.min.js"></script> -->
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="bower_components/bootstrap-waitingfor/build/bootstrap-waitingfor.min.js"></script>
     <script src="bower_components/bootbox.js/bootbox.js"></script>
     <!-- bootstrap includes end -->
-    <script src="js/lib/zipjs/zip.js"></script>
-    <script>zip.workerScriptsPath = "js/lib/zipjs/";</script>
     <script src="js/NativeAccessApi.js"></script>
     <script src="js/core.js"></script>
     <script src="js/edit-config.js"></script>

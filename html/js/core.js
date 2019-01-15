@@ -144,17 +144,47 @@ function initialize_app() {
     });
     return Promise.all(promises);
   } else {
-    function new_read(key) {
+    function new_read(key, options) {
+      options = options || {};
       var result = localStorage.getItem('file_'+key);
       if(result == null) {
-        return read_file(key);
+        var type = localStorage.getItem('filetype_'+key);
+        if (type == "blob") {
+          result = atob(result);
+        }
+        if (options.responseType == "blob") {
+          var contenttype = localStorage.getItem("filecontenttype_"+key);
+          result = new Blob([result], { type: contenttype || 'application/octet-stream' });
+        }
+        return read_file(key, options);
       } else {
         return Promise.resolve(result);
       }
     }
-    function new_write(key, data) {
-      localStorage.setItem('file_'+key, data);
-      return Promise.resolve();
+    function new_write(key, data, options) {
+      options = options || {};
+      var data_type;
+      return new Promise(function (resolve, reject) {
+        if (data instanceof Blob) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            data = btoa(reader.result);
+            data_type = "blob";
+            resolve();
+          }
+          reader.readAsBinaryString(data)
+        } else {
+          resolve();
+        }
+      })
+        .then(function () {
+          localStorage.setItem('file_'+key, data);
+          if (data_type) {
+            localStorage.setItem('filetype_'+key, data_type);
+            localStorage.setItem('filecontenttype_'+key, options.contentType || 'application/octet-stream');
+          }
+          return Promise.resolve();
+        });
     }
     function delete_entry(key) {
       localStorage.removeItem('file_'+key);
@@ -168,6 +198,34 @@ function initialize_app() {
             throw new Error("No input json!, " + key);
           return config;
         });
+    }
+    function _base64ToByteArray(base64) {
+      var binary_string =  window.atob(base64);
+      var len = binary_string.length;
+      var bytes = new Uint8Array( len );
+      for (var i = 0; i < len; i++)        {
+        bytes[i] = binary_string.charCodeAt(i);
+      }
+      return bytes;
+    }
+    window.release_file_url = function (url) {
+      if (url.indexOf("blob:") == 0) {
+        URL.revokeObjectURL(url);
+      }
+    }
+    window.acquire_file_url = function (key) {
+      var result = localStorage.getItem('file_'+key);
+      if(result != null) {
+        var type = localStorage.getItem('filetype_'+key);
+        if (type == "blob") {
+          result = _base64ToByteArray(result).buffer;
+        }
+        var contenttype = localStorage.getItem("filecontenttype_"+key);
+        var blob = new Blob([result], { type: contenttype || 'application/octet-stream' });
+		    return Promise.resolve(URL.createObjectURL(blob));
+      } else {
+        return Promise.resolve(key);
+      }
     }
     window.get_file_data = new_read
     window.set_file_data = new_write
@@ -670,10 +728,24 @@ function write_file(url, data, options) {
     });
   } else {
     // post otherwise
-    options.data = data
     if(!options.method)
       options.method = 'POST'
-    return read_file(url, options);
+    if (data instanceof Blob) {
+      return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          options.data = btoa(reader.result);
+          resolve();
+        }
+        reader.readAsBinaryString(data)
+      })
+        .then(function () {
+          return read_file(url, options);
+        });
+    } else {
+      options.data = data
+      return read_file(url, options);
+    }
   }
 }
 
@@ -747,8 +819,12 @@ function read_file(url, options) {
       xhr.onreadystatechange = function() {
         if(xhr.readyState === XMLHttpRequest.DONE) {
           if(xhr.status >= 200 && xhr.status < 300) {
-            if(options.blobResponse) {
-              resolve(xhr.response);
+            if(!!options.responseType) {
+              if (options.responseType == 'blob' && typeof xhr.response == 'string') {
+                resolve(new Blob([xhr.response]));
+              } else {
+                resolve(xhr.response);
+              }
             } else {
               resolve(xhr.responseText)
             }
@@ -1093,41 +1169,49 @@ proto.play_audio = function(src, opts) {
   self.stop_audio()
   var audio = self._audio_tag = newEl('audio')
   document.body.appendChild(audio)
-  return new Promise(function(resolve, reject) {
-    if(!audio.parentNode) {
-      // stopped
-      return resolve();
-    }
-    if(opts.volume) {
-      audio.setAttribute('volume', opts.volume.toFixed(2)+'');
-      audio.volume = opts.volume;
-    }
-    audio.setAttribute('preload', 'auto')
-    var src_el = newEl('source');
-    src_el.setAttribute('src', src)
-    audio.appendChild(src_el);
-    var stime = new Date().getTime()
-    audio.addEventListener('canplay', function() {
-      var diff = new Date().getTime() - stime;
-      if(diff >= opts.delay * 1000) {
-        audio.play()
-      } else {
-        setTimeout(function() {
-          audio.play()
-        }, opts.delay * 1000 - diff);
-      }
-    }, false);
-    audio.addEventListener('error', function() {
-      reject(audio.error);
-    }, false);
-    audio.addEventListener('ended', function() {
-      audio.pause()
-      if(audio.parentNode)
-        audio.parentNode.removeChild(audio);
-      resolve()
-    }, false);
-    self._audio_onstop_callback = resolve
-  });
+  return acquire_file_url(src)
+    .then(function (src) {
+      return new Promise(function(resolve, reject) {
+        if(!audio.parentNode) {
+          // stopped
+          release_file_url(src);
+          return resolve();
+        }
+        if(opts.volume) {
+          audio.setAttribute('volume', opts.volume.toFixed(2)+'');
+          audio.volume = opts.volume;
+        }
+        audio.setAttribute('preload', 'auto')
+        var src_el = newEl('source');
+        src_el.setAttribute('src', src)
+        audio.appendChild(src_el);
+        var stime = new Date().getTime()
+        audio.addEventListener('canplay', function() {
+          var diff = new Date().getTime() - stime;
+          if(diff >= opts.delay * 1000) {
+            audio.play()
+          } else {
+            setTimeout(function() {
+              audio.play()
+            }, opts.delay * 1000 - diff);
+          }
+        }, false);
+        audio.addEventListener('error', function() {
+          reject(audio.error);
+        }, false);
+        function onResolve () {
+          audio.pause()
+          release_file_url(src);
+          if(audio.parentNode)
+            audio.parentNode.removeChild(audio);
+          resolve()
+        }
+        audio.addEventListener('ended', function() {
+          onResolve()
+        }, false);
+        self._audio_onstop_callback = onResolve
+      });
+    });
 }
 
 function read_json(url, options) {
@@ -1140,6 +1224,8 @@ function read_json(url, options) {
     });
 }
 
+window.acquire_file_url = function (a) { return Promise.resolve(a); }
+window.release_file_url = function () { };
 window.get_file_json = read_json
 window.get_file_data = read_file
 window.set_file_data = write_file
@@ -1148,13 +1234,18 @@ window.unset_file = delete_file
 
 
 document.addEventListener('click', function(evt) {
-  var el = evt.target;
-  var toggle_sel = el.getAttribute('data-collapse-toggle');
-  if(toggle_sel) {
-    var toggle_el = document.querySelector(toggle_sel);
-    if(toggle_el) {
-      collapsable_toggle(toggle_el);
+  var elm = evt.target;
+  var parent_check_len = 4;
+  while (elm && elm.nodeType == 1 && --parent_check_len > 0) {
+    var toggle_sel = elm.getAttribute('data-collapse-toggle');
+    if(toggle_sel) {
+      var toggle_elm = document.querySelector(toggle_sel);
+      if(toggle_elm) {
+        evt.preventDefault();
+        collapsable_toggle(toggle_elm);
+      }
     }
+    elm = elm.parentNode;
   }
 }, false);
 
@@ -1215,15 +1306,24 @@ function collapsable_toggle(toggle_el, toggle) {
   toggle = toggle == null ? contains_collapse : toggle
   if(toggle_el._collapsable_timeout != null)
     clearTimeout(toggle_el._collapsable_timeout);
+  if (toggle_el._collapsable_timeout2 != null)
+    clearTimeout(toggle_el._collapsable_timeout2);
   if(toggle && contains_collapse) {
     toggle_el.classList.remove('x-collapse')
     update_collapsable(toggle_el);
+    toggle_el._collapsable_timeout2 = setTimeout(function() {
+      delete toggle_el._collapsable_timeout2;
+      // add inline style overflow: visible
+      toggle_el.style.overflow = 'visible';
+    }, 500);
   } else if(!toggle && !contains_collapse) {
     toggle_el.style.display = 'none';
     if(toggle_el.parentNode)
       update_collapsable(toggle_el.parentNode);
     toggle_el.style.display = '';
     toggle_el._collapsable_timeout = setTimeout(function() {
+      // remove inline style overflow
+      toggle_el.style.overflow = '';
       toggle_el.classList.add('x-collapse')
       delete toggle_el._collapsable_timeout;
     }, 10);
@@ -1371,7 +1471,7 @@ function _tree_to_markdown_subrout_node(node, level, md_lines) {
     md_lines.push("") // empty line
   }
   if(!node.is_leaf) {
-    _.each(node.nodes, function(anode) {
+    _.each(node.static_nodes || node.nodes, function(anode) {
       _tree_to_markdown_subrout_node(anode, level + 1, md_lines);
     });
   }
