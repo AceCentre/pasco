@@ -292,8 +292,9 @@ async function obz_import_tree (tree, board, getboard, state) {
       } else if (button.load_board.url) {
         inner_board = await getboard("url", button.load_board.url);
       }
-      if (inner_board) {
+      if (inner_board && state.inboardids.indexOf(inner_board.id) == -1) {
         let inner_state = _.extend({}, state);
+        inner_state.inboardids = [inner_board.id].concat(state.inboardids);
         await obz_import_tree(anode, inner_board, getboard, inner_state);
       }
     } else {
@@ -385,7 +386,7 @@ export async function pasco_import_obz (obzblob, treefn) {
   };
   let ptree_info = await prepare_tree(treefn);
   // import tree data from boards
-  await obz_import_tree(tree, board, getboard, {});
+  await obz_import_tree(tree, board, getboard, {inboardids:[board.id]});
   // prepare import_list for saving (sound files)
   let import_list = [];
   tree_import_prepare(ptree_info, tree, import_list);
