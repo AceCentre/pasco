@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-eval' 'unsafe-inline' http://code.responsivevoice.org/responsivevoice.js ws://localhost:3000; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src blob: 'self' 'unsafe-eval' 'unsafe-inline' http://code.responsivevoice.org/responsivevoice.js ws://localhost:3000; style-src 'self' 'unsafe-inline'; media-src blob: *; img-src 'self' data: content:;">
     
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
@@ -95,7 +95,7 @@
                   <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_cue_voice_options.rateMul" name="auditory_cue_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_cue_voice_options__rateMul">
                 </div>
               </div>
-              <div class="col-sm-6 visible-for-ios">
+              <div class="col-sm-6 visible-for-cordova">
                 <label class="checkbox-inline"><input type="checkbox" name="auditory_cue_voice_options.override_to_speaker" checked="True"><span x-l10n>Override to speaker</span></label>
               </div>
             </div>
@@ -128,7 +128,7 @@
                   <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_main_voice_options.rateMul" name="auditory_main_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_main_voice_options__rateMul">
                 </div>
               </div>
-              <div class="col-sm-6 visible-for-ios">
+              <div class="col-sm-6 visible-for-cordova">
                 <label class="checkbox-inline"><input type="checkbox" name="auditory_main_voice_options.override_to_speaker" checked="True"><span x-l10n>Override to speaker</span></label>
               </div>
             </div>

@@ -1,5 +1,5 @@
 var config_fn, tree_fn, config, tree, state = null, tree_element, napi, speaku,
-    config_json, words_cache = {}, tree_contentsize_xstep = 50;
+    config_json, words_cache = {}, tree_contentsize_xstep = 50, locale;
 Promise.all([
   window.cordova ? NativeAccessApi.onready() : Promise.resolve(),
   new Promise(function(resolve) { // domready
@@ -65,8 +65,9 @@ Promise.all([
     tree_element = document.querySelector('#tree')
     if(!tree_element)
       return Promise.reject(new Error("Cannot find #tree element"));
+    locale = config.locale||default_locale;
     return Promise.all([
-      initl10n(config.locale||default_locale)
+      initl10n(locale)
         .then(function() {
           domlocalize();
         })
@@ -853,6 +854,16 @@ function _move_sub_speak2(type, override_msg) {
     text = this.text;
     break;
   }
+  // check override voiceId
+  var curlocale = this.meta[type + '-locale'] || this.meta['locale'] || locale;
+  var tmp = _.filter(opts.locale_voices, function (a) { return a.locale == curlocale; });
+  if (tmp.length == 0) {
+    tmp = _.filter(opts.locale_voices, function (a) { return a.locale.split('-')[0] == curlocale.split('-')[0]; });
+  }
+  var vidname = (speaku.is_native ? '' : 'alt_') + 'voiceId';
+  if (tmp.length > 0 && !!tmp[0][vidname]) {
+    opts[vidname] = tmp[0][vidname];
+  }
   if(typeof override_msg == 'string') {
     text = override_msg;
     audio = null;
@@ -868,21 +879,53 @@ function _move_sub_speak2(type, override_msg) {
   }
 }
 
-function _scan_move(node) {
+function _scan_move(node, opts) {
+  opts = opts||{};
   node = node || _get_current_node();
   var moveobj = _new_move_init(node)
+  var mincuetimeout = null;
+  moveobj.steps.push(function () {
+    if (config.minimum_cue_time > 0) {
+      state.can_move = false;
+      mincuetimeout = setTimeout(function () {
+        state.can_move = true;
+        mincuetimeout = null;
+      }, config.minimum_cue_time);
+    }
+    return Promise.resolve();
+  });
+  if(opts.delay > 0) {
+    moveobj.steps.push(function() {
+      return new Promise(function(resolve) { setTimeout(resolve, opts.delay) })
+    })
+  }
   moveobj.steps.push(_move_sub_highlight.bind(node))
-  moveobj.steps.push(_move_sub_speak2.bind(node, 'cue'))
+  moveobj.steps.push(_move_sub_speak2.bind(node, 'cue', opts.cue_override_msg))
   moveobj.node.dom_element.dispatchEvent(new CustomEvent("x-new-move", {
     detail: {
       node: node
     }
   }));
   return _before_new_move()
-    .then(_new_move_start.bind(null, moveobj));
+    .then(_new_move_start.bind(null, moveobj))
+    .then(function () {
+      state.can_move = true;
+      if (mincuetimeout != null) {
+        clearTimeout(mincuetimeout);
+      }
+      return Promise.resolve();
+    });
 }
 
 function _notify_move(node, notifynode, opts) {
+  if (_meta_true_check(notifynode.meta['no-main'], false)) {
+    return _scan_move(node, opts);
+  } else {
+    return _do_notify_move(node, notifynode, opts);
+  }
+}
+
+function _do_notify_move(node, notifynode, opts) {
   opts = opts||{};
   var moveobj = _new_move_init(node || notifynode)
   moveobj.steps.push(_move_sub_speak2.bind(notifynode, 'main', opts.main_override_msg))
@@ -946,11 +989,13 @@ function _get_node_attr_inherits_full(positions, name) {
       if(val !== undefined && val != 'inherit') {
         return [ val, pos, node ];
       }
-    } else { // special case, at root
-      var val = pos.tree.meta[name];
-      if(val !== undefined && val != 'inherit') {
-        return [ val, pos, null ];
-      }
+    }
+  }
+  // check root
+  if (positions.length > 0) {
+    var val = positions[0].tree.meta[name];
+    if(val !== undefined && val != 'inherit') {
+      return [ val, positions[0], positions[0].tree ];
     }
   }
   return null;
@@ -992,7 +1037,11 @@ function _before_pop_position (n) {
       if (_meta_true_check(oldpos.tree.meta['spell-branch'], false)) {
         var ppos = state.positions[state.positions.length - 2 - i];
         if (_meta_true_check(oldpos.tree.meta['spell-update-dyn-onchange'])) {
-          ppos._dyndirty = true;
+          if (oldpos.tree == state.positions[0].tree) {
+            state._dyndirty = true;
+          } else {
+            ppos._dyndirty = true;
+          }
         }
         delete ppos._concat_letters;
       }
@@ -1038,9 +1087,12 @@ function _in_check_spell_delchar(atree) {
         var letter;
         while((letter = concat_letters.pop()) == ' ')
           ;
-        var tnode = tmp[2] == null ? tmp[1] : tmp[2];
-        if (_meta_true_check(tnode.meta['spell-update-dyn-onchange'])) {
-          tmp[1]._dyndirty = true;
+        if (_meta_true_check(tmp[2].meta['spell-update-dyn-onchange'])) {
+          if (tmp[2] == state.positions[0].tree) {
+            state._dyndirty = true;
+          } else {
+            tmp[1]._dyndirty = true;
+          }
         }
       }
       var msg, idx = concat_letters.lastIndexOf(' ');
@@ -1050,7 +1102,7 @@ function _in_check_spell_delchar(atree) {
       } else {
         msg = concat_letters.join(' ');
       }
-      return _notify_move(_get_current_node(), atree, {
+      return _do_notify_move(_get_current_node(), atree, {
         main_override_msg: msg
       });
     }
@@ -1082,7 +1134,7 @@ function _in_spell_finish(atree) {
           });
       });
   } else {
-    return _notify_move(_get_current_node(), atree, {
+    return _do_notify_move(_get_current_node(), atree, {
       main_override_msg: _t("Nothing selected")
     });
   }
@@ -1115,9 +1167,12 @@ function _in_check_spell_default(atree) {
     if (_meta_true_check(atree.meta['spell-finish'])) {
       return _in_spell_finish(atree);
     }
-    var tnode = tmp[2] == null ? tmp[1] : tmp[2];
-    if (_meta_true_check(tnode.meta['spell-update-dyn-onchange'])) {
-      tmp[1]._dyndirty = true;
+    if (_meta_true_check(tmp[2].meta['spell-update-dyn-onchange'])) {
+      if (tmp[2] == state.positions[0].tree) {
+        state._dyndirty = true;
+      } else {
+        tmp[1]._dyndirty = true;
+      }
     }
     // continue it
     return _before_changeposition()
@@ -1125,7 +1180,7 @@ function _in_check_spell_default(atree) {
         var tmp2 = _get_node_attr_inherits_full(state.positions, 'stay-in-branch') || tmp;
         var idx = state.positions.indexOf(tmp2[1]);
         state.positions = state.positions.slice(0, idx + 1);
-        if(tmp2[2] != null) {
+        if(tmp2[2] != state.positions[0].tree) {
           state.positions.push({
             tree: tmp2[2],
             index: 0
@@ -1143,7 +1198,7 @@ function _in_check_spell_default(atree) {
             msg = concat_letters.join(' ');
           }
         }
-        return _notify_move(_get_current_node(), atree, {
+        return _do_notify_move(_get_current_node(), atree, {
           main_override_msg: msg
         });
       });
@@ -1163,7 +1218,7 @@ function _in_check_back_n_branch(atree) {
         var last_pos = state.positions.pop();
       }
       if (atree.meta['back-n-branch-notify']) {
-        return _notify_move(_get_current_node(), atree);
+        return _do_notify_move(_get_current_node(), atree);
       } else {
         return _scan_move();
       }
@@ -1184,7 +1239,7 @@ function _in_override_change_tree (atree) {
         if (tree_info) {
           return _in_override_change_tree_subrout(atree, tree_info.tree_fn);
         } else {
-          return _notify_move(_get_current_node(), atree, {
+          return _do_notify_move(_get_current_node(), atree, {
             main_override_msg: _t("Could not find tree with this name")
           });
         }
@@ -1195,7 +1250,7 @@ function _in_override_change_tree (atree) {
 function _in_override_change_tree_subrout (atree, another_tree) {
   var current_tree = config.tree || window.default_tree;
   if (another_tree === current_tree) {
-    return _notify_move(_get_current_node(), atree, {
+    return _do_notify_move(_get_current_node(), atree, {
       main_override_msg: _t("This tree is already running")
     });
   } else {
@@ -1241,7 +1296,7 @@ function _in_override_change_tree_subrout (atree, another_tree) {
       })
       .catch(function (err) {
         console.error(err);
-        return _notify_move(_get_current_node(), atree, {
+        return _do_notify_move(_get_current_node(), atree, {
           main_override_msg: _t("Could not change to this tree")
         });
       });
@@ -1312,6 +1367,11 @@ function _before_changeposition () {
     }
     delete pos._dyndirty;
   }
+  // check for dyndirty of root
+  if (state._dyndirty) {
+    subdyn_tree = state.positions[0].tree;
+    delete state._dyndirty;
+  }
   if (subdyn_tree) {
     return _tree_update_subdyn(subdyn_tree, {
       changing_position: true,
@@ -1328,7 +1388,7 @@ function _in_check_stay_in_branch (atree) {
       .then(function () {
         var idx = state.positions.indexOf(stayinbranch[1]);
         state.positions = state.positions.slice(0, idx + 1);
-        if(stayinbranch[2] != null) {
+        if(stayinbranch[2] != state.positions[0].tree) {
           state.positions.push({
             tree: stayinbranch[2],
             index: 0
@@ -1374,7 +1434,11 @@ function _tree_go_in() {
       var idx = state.positions.indexOf(tmp[1]);
       for (var i = idx; i >= 0; i--) {
         var pos = state.positions[i];
-        pos._dyndirty = true;
+        if (i == 0) {
+          state._dyndirty = true;
+        } else {
+          pos._dyndirty = true;
+        }
         if (!_meta_true_check(pos.tree.meta['dyn-setdirty-onselect'], false)) {
           break;
         }
@@ -1395,7 +1459,8 @@ function _tree_go_in() {
         if(atree.content_element)
           atree.content_element.classList.add('selected' || config.selected_class);
         // speak it
-        return _move_sub_speak2.call(atree, 'main')
+        return (_meta_true_check(atree.meta['no-main'], false) ?
+                Promise.resolve() : _move_sub_speak2.call(atree, 'main'))
           .then(function() {
             _start_at_next_action(atree)
           });

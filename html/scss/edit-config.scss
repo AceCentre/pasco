@@ -38,7 +38,8 @@ input[type=range].form-control:active {
   padding: 1px 12px;
 }
 
-#tree-import-btn {
+#tree-import-btn,
+#tree-import-obz-btn {
   position: relative;
   overflow: hidden;
   input[type=file] {
@@ -63,7 +64,4 @@ form[name="quick-setup"] {
 
 .tree-tools-toggle-wrp {
   float: left;
-}
-#tree-tools {
-  margin-left: 40px;
 }

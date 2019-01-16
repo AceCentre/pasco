@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-eval' 'unsafe-inline' http://code.responsivevoice.org/responsivevoice.js ws://localhost:3000; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src blob: 'self' 'unsafe-eval' 'unsafe-inline' http://code.responsivevoice.org/responsivevoice.js ws://localhost:3000; style-src 'self' 'unsafe-inline'; media-src blob: *; img-src 'self' data: content:;">
     
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
@@ -141,8 +141,11 @@
                 <div class="col-sm-6">
                   <div class="form-group">
                     <label for="_cue_first_run_voice_id" x-l10n>Voice</label>
-                    <select class="form-control" id="_cue_voice_id" name="_cue_first_run_voice_id">
-                    </select>
+                    <div class="select-btn-wrp">
+                      <select class="form-control" id="_cue_first_run_voice_id" name="_cue_first_run_voice_id">
+                      </select>
+                      <button type="button" class="btn btn-primary vbl-btn" data-vbl="auditory_cue_first_run_voice_options"><span class="glyphicon glyphicon-plus"></span></button>
+                    </div>
                   </div>
                 </div>
                 <div class="col-sm-6">
@@ -163,7 +166,7 @@
                     <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_cue_first_run_voice_options.rateMul" name="auditory_cue_first_run_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_cue_first_run_voice_options__rateMul">
                   </div>
                 </div>
-                <div class="col-sm-6 visible-for-ios">
+                <div class="col-sm-6 visible-for-cordova">
                   <label class="checkbox-inline"><input type="checkbox" name="auditory_cue_first_run_voice_options.override_to_speaker"><span x-l10n>Override to speaker</span></label>
                 </div>
               </div>
@@ -194,14 +197,20 @@
           <div class="row">
             <div class="col-sm-4">
               <div class="form-group">
+                <label for="minimum_cue_time" x-l10n>Minimum Cue Time(ms)</label>
+                <input type="number" id="minimum_cue_time" name="minimum_cue_time" class="form-control" value="0" data-validator="number" data-dependent="#minimum_cue_time_range">
+                <input type="range" id="minimum_cue_time_range" class="form-control btn-lg" step="100" min="0" max="3000" data-dependent="#minimum_cue_time">
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="form-group">
                 <label for="ignore_second_hits_time" x-l10n>Ignore second hits(ms)</label>
                 <input type="number" id="ignore_second_hits_time" name="ignore_second_hits_time" class="form-control" value="100" data-validator="number" data-dependent="#ignore_second_hits_time_range">
                 <input type="range" id="ignore_second_hits_time_range" class="form-control btn-lg" step="100" min="0" max="2000" data-dependent="#ignore_second_hits_time">
               </div>
             </div>
-            <div class="col-sm-1"></div>
             <div class="col-sm-4">
-              <div class="form-group hide-for-ios">
+              <div class="form-group hide-for-cordova">
                 <label for="ignore_key_release_time" x-l10n>Ignore key presses under n ms</label>
                 <input class="form-control" type="number" id="ignore_key_release_time" name="ignore_key_release_time" value="0" data-validator="number" data-dependent="#ignore_key_release_time_range">
                 <input type="range" id="ignore_key_release_time_range" class="form-control btn-lg" step="100" min="0" max="2000" data-dependent="#ignore_key_release_time">
@@ -221,8 +230,11 @@
             <div class="col-sm-6">
               <div class="form-group">
                 <label for="_cue_voice_id" x-l10n>Voice</label>
-                <select class="form-control" id="_cue_voice_id" name="_cue_voice_id">
-                </select>
+                <div class="select-btn-wrp">
+                  <select class="form-control" id="_cue_voice_id" name="_cue_voice_id">
+                  </select>
+                  <button type="button" class="btn btn-primary vbl-btn" data-vbl="auditory_cue_voice_options"><span class="glyphicon glyphicon-plus"></span></button>
+                </div>
               </div>
             </div>
             <div class="col-sm-6">
@@ -243,7 +255,7 @@
                 <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_cue_voice_options.rateMul" name="auditory_cue_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_cue_voice_options__rateMul">
               </div>
             </div>
-            <div class="col-sm-6 visible-for-ios">
+            <div class="col-sm-6 visible-for-cordova">
               <label class="checkbox-inline"><input type="checkbox" name="auditory_cue_voice_options.override_to_speaker"><span x-l10n>Override to speaker</span></label>
             </div>
           </div>
@@ -254,8 +266,11 @@
             <div class="col-sm-6">
               <div class="form-group">
                 <label for="_main_voice_id" x-l10n>Voice</label>
-                <select class="form-control" id="_main_voice_id" name="_main_voice_id">
-                </select>
+                <div class="select-btn-wrp">
+                  <select class="form-control" id="_main_voice_id" name="_main_voice_id">
+                  </select>
+                  <button type="button" class="btn btn-primary vbl-btn" data-vbl="auditory_main_voice_options"><span class="glyphicon glyphicon-plus"></span></button>
+                </div>
               </div>
             </div>
             <div class="col-sm-6">
@@ -276,7 +291,7 @@
                 <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_main_voice_options.rateMul" name="auditory_main_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_main_voice_options__rateMul">
               </div>
             </div>
-            <div class="col-sm-6 visible-for-ios">
+            <div class="col-sm-6 visible-for-cordova">
               <label class="checkbox-inline"><input type="checkbox" name="auditory_main_voice_options.override_to_speaker"><span x-l10n>Override to speaker</span></label>
             </div>
           </div>
@@ -339,11 +354,12 @@
           <div class="col-sm-4 col-md-6">
             <h3 x-l10n>Tree</h3>
           </div>
-          <div class="col-sm-8 col-md-6">
+          <div class="col-sm-8 col-md-6 x-horiz-group">
             <div class="tree-tools-toggle-wrp">
-              <a id="tree-tools-toggle" href><i class="fa fa-bars fa-2x"></i></a>
+              <a data-collapse-toggle="#tree-tools" href><i class="fa fa-bars fa-2x"></i></a>
             </div>
-            <div id="tree-tools" class="row x-collapsable">
+            <!-- style (overflow:visible) is optional for visible collapsables -->
+            <div id="tree-tools" class="row x-collapsable" style="overflow:visible">
               <div class="col-sm-8 col-md-8">
                 <div class="form-group">
                   <select id="tree-default-select" class="form-control">
@@ -362,9 +378,21 @@
               <div class="col-sm-4 col-md-4">
                 <button id="tree-default-select-load-btn" type="button" class="btn btn-success" x-l10n>Load Selected</button>
               </div>
-              <div class="col-xs-12 m-xs-t-10">
-                <div id="tree-export-btn" class="btn btn-primary" x-l10n>Export</div>
-                <div id="tree-import-btn" class="btn btn-primary"><span x-l10n>Import</span><input type="file" id="tree-import-inp"></div>
+              <div class="col-xs-12 m-xs-t-10 x-horiz-group">
+                <div class="dropdown">
+                  <button class="btn btn-primary dropdown-toggle" type="button" id="tree-export-dropdown-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span x-l10n>Export</span> <span class="caret"></span></button>
+                  <ul class="dropdown-menu" aria-labelledby="tree-export-dropdown-btn">
+                    <li><a id="tree-export-btn" class="dropdown-item" href x-l10n>Export (zip)</a></li>
+                    <li><a id="tree-export-obz-btn" class="dropdown-item" href x-l10n>Export (obz)</a></li>
+                  </ul>
+                </div>
+                <div class="dropdown">
+                  <button class="btn btn-primary dropdown-toggle" type="button" id="tree-import-dropdown-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span x-l10n>Import</span> <span class="caret"></span></button>
+                  <ul class="dropdown-menu" aria-labelledby="tree-export-dropdown-btn">
+                    <li><a id="tree-import-btn" class="dropdown-item"><span x-l10n>Import (zip)</span><input type="file" id="tree-import-inp" accept=".zip"></a></li>
+                    <li><a id="tree-import-obz-btn" class="dropdown-item"><span x-l10n>Import (obz)</span><input type="file" id="tree-import-obz-inp" accept=".obz"></a></li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -398,25 +426,25 @@
     <div class="settings-alert-wrp settings-danger-alert">
       <div class="settings-alert alert-hidden alert alert-danger" role="alert"></div>
     </div>
-    <!-- Modal -->
+    <!-- Modals -->
     <div id="save-file-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="Save file">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel" x-l10n>Save</h4>
+            <h4 class="modal-title" x-l10n>Save</h4>
           </div>
           <div class="modal-body">
             <div class="row">
               <div class="col-xs-12">
-                <p class="visible-for-ios" x-l10n>You can share or save the zip file.<p>
-                <p class="hide-for-ios" x-l10n>Please click on download.<p>
+                <p class="visible-for-cordova" x-l10n>You can share or save the zip file.<p>
+                <p class="hide-for-cordova" x-l10n>Please click on download.<p>
               </div>
             </div>
             <div class="row">
               <div class="col-xs-12">
-                <a id="save-file--open-btn" href class="hide-for-ios btn btn-success btn-lg">Download</a>
-                <a id="save-file--share-btn" href class="visible-for-ios btn btn-primary btn-lg">Share</a>
+                <a id="save-file--open-btn" href class="hide-for-cordova btn btn-success btn-lg">Download</a>
+                <a id="save-file--share-btn" href class="visible-for-cordova btn btn-primary btn-lg">Share</a>
               </div>
             </div>
           </div>
@@ -429,21 +457,64 @@
         </div>
       </div>
     </div>
+    <div id="voice-by-locale-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="Voice by locale">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title"><span x-l10n>Voice by locale</span> <span id="voice-by-locale-title-suffix"></span></h4>
+          </div>
+          <div class="modal-body">
+            <script type="text/x-template" id="voice-by-locale-vid-template">
+              <div class="voice-by-locale-vid col-xs-12 col-sm-6">
+                <div class="form-group">
+                  <label for="vbl-voice-id-{%- data.locale %}">{%- data.label %}</label>
+                  <div class="select-btn-wrp">
+                    <select id="vbl-voice-id-{%- data.locale %}" name="voice-id-of-{%- data.locale %}" class="form-control">
+                      {% _.each(data.options, function (option) { %}
+                      <option value="{%- option.value %}" {%- option.value == data.value ? 'selected' : '' %}>{%- option.label %}</option>
+                      {% }); %}
+                    </select>
+                    <button type="button" data-locale="{%- data.locale %}" class="remove-btn btn btn-danger"><span class="glyphicon glyphicon-remove"></span></button>
+                  </div>
+                </div>
+              </div>
+            </script>
+            <div class="row" id="voice-by-locale-list">
+            </div>
+            <div id="voice-by-locale-add-wrp" class="row">
+              <div class="col-xs-12 col-sm-6">
+                <div class="form-group">
+                  <label for="voice-by-locale-add" x-l10n>Add Locale</label>
+                  <div class="select-btn-wrp">
+                    <select id="voice-by-locale-add" name="locale" class="form-control"></select>
+                    <button id="voice-by-locale-add-btn" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" x-l10n>Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- INJECT SCRIPTS -->
     <!-- MAIN SCRIPTS -->
     <script src="bower_components/underscore/underscore-min.js"></script>
     <script src="bower_components/showdown/dist/showdown.min.js"></script>
-    <script src="js/nodelib.js"></script>
+    <script src="js/lib/zipjs/zip.js"></script>
+    <script>zip.workerScriptsPath = "js/lib/zipjs/";</script>
     <script src="js/lib/translate.js"></script>
     <script src="js/lib/sanitize-html.js"></script>
+    <script src="js/nodelib.js"></script>
     <!-- bootstrap includes -->
     <!-- <script src="bower_components/jquery/dist/jquery.min.js"></script> -->
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="bower_components/bootstrap-waitingfor/build/bootstrap-waitingfor.min.js"></script>
     <script src="bower_components/bootbox.js/bootbox.js"></script>
     <!-- bootstrap includes end -->
-    <script src="js/lib/zipjs/zip.js"></script>
-    <script>zip.workerScriptsPath = "js/lib/zipjs/";</script>
     <script src="js/NativeAccessApi.js"></script>
     <script src="js/core.js"></script>
     <script src="js/edit-config.js"></script>
