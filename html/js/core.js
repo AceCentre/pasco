@@ -984,16 +984,15 @@ proto.start_speaking = function(speech, opts) {
     for(var key in opts)
       if(key.indexOf('alt_') == 0)
         delete opts[key];
-    var override_to_speaker = false,
+    var override_output = null,
         promise = Promise.resolve();
-    if(typeof opts.override_to_speaker != 'undefined') {
-      override_to_speaker = opts.override_to_speaker
-      delete opts.override_to_speaker;
+    if(typeof opts.override_output != 'undefined') {
+      override_output = opts.override_output
+      delete opts.override_output;
     }
-    if ((override_to_speaker && !self._last_override_to_speaker) ||
-        (!override_to_speaker && self._last_override_to_speaker)) {
-      self._last_override_to_speaker = override_to_speaker;
-      promise = self.api.override_output_to_speaker(override_to_speaker);
+    if (typeof self._last_override_output == 'undefined' || self._last_override_output != override_output) {
+      self._last_override_output = override_output;
+      promise = self.api.override_output(override_output);
     }
     return promise
       .then(function () {
@@ -1018,7 +1017,7 @@ proto.start_speaking = function(speech, opts) {
     delete opts.rateMul
     var voiceId = opts.voiceId;
     delete opts.voiceId;
-    delete opts.override_to_speaker;
+    delete opts.override_output;
     // TODO:: control audio playback,
     // delay can be implemented if access to audio playback is at this level
     var retobj = {};
@@ -1121,26 +1120,35 @@ proto._cordova_stop_audio = function() {
 
 proto._cordova_play_audio = function(src, opts) {
   var self = this;
-  return new Promise(function(resolve, reject) {
-    self._cordova_stop_audio()
-    src = _cordova_fix_url(src)
-    var media = self._cordova_media = 
-        new Media(src,
-                  function() {
-                    resolve()
-                  },
-                  function(err) {
-                    reject("Error loading media: " + src +
-                           ", error: " + err.code);
-                  });
-    if(opts.volume)
-      media.setVolume(opts.volume)
-    var play_opts = {};
-    if(opts.override_to_speaker)
-      play_opts.overrideToSpeaker = true;
-    self._last_override_to_speaker = !!play_opts.overrideToSpeaker;
-    media.play(play_opts);
-  });
+  self._cordova_stop_audio()
+  var override_output = null,
+      promise = Promise.resolve();
+  if(typeof opts.override_output != 'undefined') {
+    override_output = opts.override_output
+    delete opts.override_output;
+  }
+  if (typeof self._last_override_output == 'undefined' || self._last_override_output != override_output) {
+    self._last_override_output = override_output;
+    promise = self.api.override_output(override_output);
+  }
+  return promise
+    .then(function () {
+      return new Promise(function(resolve, reject) {
+        src = _cordova_fix_url(src)
+        var media = self._cordova_media = 
+            new Media(src,
+                      function() {
+                        resolve()
+                      },
+                      function(err) {
+                        reject("Error loading media: " + src +
+                               ", error: " + err.code);
+                      });
+        if(opts.volume)
+          media.setVolume(opts.volume)
+        media.play();
+      })
+    });
 }
 
 proto.stop_audio = function() {
@@ -1163,7 +1171,7 @@ proto.stop_audio = function() {
 
 
 proto.play_audio = function(src, opts) {
-  opts = opts || {};
+  opts = Object.assign({}, opts)
   if(window.cordova && window.Media) {
     // alternative approach
     return this._cordova_play_audio(src, opts)
