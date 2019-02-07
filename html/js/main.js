@@ -1569,7 +1569,11 @@ function eval_config(config) {
       "66": { func: _tree_go_in } // B
     })
   };
-  config._onscreen_navigation = config.onscreen_navigation == 'enable';
+    // Hossein's quick fix.. 
+    if (!("66" in config._keyhit_delegates.auto))
+    config._keyhit_delegates.auto["66"] = { func: _tree_go_in };
+    if (!("66" in config._keyhit_delegates.switch))
+    config._keyhit_delegates.switch["66"] = { func: _tree_go_in };
   // add styles
   var styles = Array.isArray(config.style) ? config.style :
       (config.style ? [ config.style ] : []),
