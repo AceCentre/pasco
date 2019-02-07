@@ -1555,6 +1555,7 @@ function eval_config(config) {
       "37": { func: _tree_go_out }, // ArrowLeft
       "68": { func: _tree_go_in }, // D
       "65": { func: _tree_go_out }, // A
+      "66": { func: _tree_go_in } // B      
     }),
     'switch': keys_from_config('switch', {
       "39": { func: _tree_go_in }, // ArrowRight
@@ -1565,6 +1566,7 @@ function eval_config(config) {
       "68": { func: _tree_go_in }, // D
       "83": { func: _tree_go_next }, // S
       "65": { func: _tree_go_out }, // A
+      "66": { func: _tree_go_in } // B
     })
   };
   config._onscreen_navigation = config.onscreen_navigation == 'enable';
