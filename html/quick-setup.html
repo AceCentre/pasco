@@ -95,8 +95,15 @@
                   <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_cue_voice_options.rateMul" name="auditory_cue_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_cue_voice_options__rateMul">
                 </div>
               </div>
-              <div class="col-sm-6 visible-for-cordova">
-                <label class="checkbox-inline"><input type="checkbox" name="auditory_cue_voice_options.override_to_speaker" checked="True"><span x-l10n>Override to speaker</span></label>
+              <div class="col-sm-12 hide-for-non-cordova-ios">
+                <div class="form-group">
+                  <label>Override output</label>
+                  <div class="radio-group">
+                    <label class="radio-inline"><input type="radio" name="auditory_cue_voice_options.override_output" value=""><span x-l10n>None</span></label>
+                    <label class="radio-inline"><input type="radio" name="auditory_cue_voice_options.override_output" value="builtinspeaker"><span x-l10n>Builtin Speaker</span></label>
+                    <label class="radio-inline"><input type="radio" name="auditory_cue_voice_options.override_output" value="headphone"><span x-l10n>Headphone</span></label>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -128,8 +135,14 @@
                   <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_main_voice_options.rateMul" name="auditory_main_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_main_voice_options__rateMul">
                 </div>
               </div>
-              <div class="col-sm-6 visible-for-cordova">
-                <label class="checkbox-inline"><input type="checkbox" name="auditory_main_voice_options.override_to_speaker" checked="True"><span x-l10n>Override to speaker</span></label>
+            <div class="col-sm-12 hide-for-non-cordova-ios">
+              <div class="form-group">
+                <label>Override output</label>
+                <div class="radio-group">
+                  <label class="radio-inline"><input type="radio" name="auditory_main_voice_options.override_output" value=""><span x-l10n>None</span></label>
+                  <label class="radio-inline"><input type="radio" name="auditory_main_voice_options.override_output" value="builtinspeaker"><span x-l10n>Builtin Speaker</span></label>
+                  <label class="radio-inline"><input type="radio" name="auditory_main_voice_options.override_output" value="headphone"><span x-l10n>Headphone</span></label>
+                </div>
               </div>
             </div>
           </div>

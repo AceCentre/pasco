@@ -40,7 +40,7 @@
     'is_software_keyboard_visible',
     'request_audio_record_permission',
     'add_key_command', 'remove_key_command',
-    'override_output_to_speaker',
+    'override_output', 'ios_open_manage_output_audio_view'
   ];
 
   for(var i = 0, len = direct_delegates.length; i < len; ++i)

@@ -60,6 +60,9 @@
             <div class="col-sm-6">
               <label class="m-t-10 m-b-10 checkbox-inline"><input type="checkbox" name="back_at_end"><span x-l10n>Back option for all branches</span></label>
             </div>
+            <div class="col-sm-6 hide-for-non-cordova-ios">
+              <button id="ios-open-route-view" type="button" class="btn btn-primary">Open output audio manager</button>
+            </div>
           </div>
         </div>
       </div>
@@ -166,8 +169,15 @@
                     <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_cue_first_run_voice_options.rateMul" name="auditory_cue_first_run_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_cue_first_run_voice_options__rateMul">
                   </div>
                 </div>
-                <div class="col-sm-6 visible-for-cordova">
-                  <label class="checkbox-inline"><input type="checkbox" name="auditory_cue_first_run_voice_options.override_to_speaker"><span x-l10n>Override to speaker</span></label>
+                <div class="col-sm-12 hide-for-non-cordova-ios">
+                  <div class="form-group">
+                    <label>Override output</label>
+                    <div class="radio-group">
+                      <label class="radio-inline"><input type="radio" name="auditory_cue_first_run_voice_options.override_output" value=""><span x-l10n>None</span></label>
+                      <label class="radio-inline"><input type="radio" name="auditory_cue_first_run_voice_options.override_output" value="builtinspeaker"><span x-l10n>Builtin Speaker</span></label>
+                      <label class="radio-inline"><input type="radio" name="auditory_cue_first_run_voice_options.override_output" value="headphone"><span x-l10n>Headphone</span></label>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -210,7 +220,7 @@
               </div>
             </div>
             <div class="col-sm-4">
-              <div class="form-group hide-for-cordova">
+              <div class="form-group hide-for-cordova-ios">
                 <label for="ignore_key_release_time" x-l10n>Ignore key presses under n ms</label>
                 <input class="form-control" type="number" id="ignore_key_release_time" name="ignore_key_release_time" value="0" data-validator="number" data-dependent="#ignore_key_release_time_range">
                 <input type="range" id="ignore_key_release_time_range" class="form-control btn-lg" step="100" min="0" max="2000" data-dependent="#ignore_key_release_time">
@@ -255,8 +265,15 @@
                 <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_cue_voice_options.rateMul" name="auditory_cue_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_cue_voice_options__rateMul">
               </div>
             </div>
-            <div class="col-sm-6 visible-for-cordova">
-              <label class="checkbox-inline"><input type="checkbox" name="auditory_cue_voice_options.override_to_speaker"><span x-l10n>Override to speaker</span></label>
+            <div class="col-sm-12 hide-for-non-cordova-ios">
+              <div class="form-group">
+                <label>Override output</label>
+                <div class="radio-group">
+                  <label class="radio-inline"><input type="radio" name="auditory_cue_voice_options.override_output" value=""><span x-l10n>None</span></label>
+                  <label class="radio-inline"><input type="radio" name="auditory_cue_voice_options.override_output" value="builtinspeaker"><span x-l10n>Builtin Speaker</span></label>
+                  <label class="radio-inline"><input type="radio" name="auditory_cue_voice_options.override_output" value="headphone"><span x-l10n>Headphone</span></label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -291,8 +308,15 @@
                 <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_main_voice_options.rateMul" name="auditory_main_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_main_voice_options__rateMul">
               </div>
             </div>
-            <div class="col-sm-6 visible-for-cordova">
-              <label class="checkbox-inline"><input type="checkbox" name="auditory_main_voice_options.override_to_speaker"><span x-l10n>Override to speaker</span></label>
+            <div class="col-sm-12 hide-for-non-cordova-ios">
+              <div class="form-group">
+                <label>Override output</label>
+                <div class="radio-group">
+                  <label class="radio-inline"><input type="radio" name="auditory_main_voice_options.override_output" value=""><span x-l10n>None</span></label>
+                  <label class="radio-inline"><input type="radio" name="auditory_main_voice_options.override_output" value="builtinspeaker"><span x-l10n>Builtin Speaker</span></label>
+                  <label class="radio-inline"><input type="radio" name="auditory_main_voice_options.override_output" value="headphone"><span x-l10n>Headphone</span></label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -437,14 +461,14 @@
           <div class="modal-body">
             <div class="row">
               <div class="col-xs-12">
-                <p class="visible-for-cordova" x-l10n>You can share or save the zip file.<p>
+                <p class="hide-for-non-cordova" x-l10n>You can share or save the zip file.<p>
                 <p class="hide-for-cordova" x-l10n>Please click on download.<p>
               </div>
             </div>
             <div class="row">
               <div class="col-xs-12">
                 <a id="save-file--open-btn" href class="hide-for-cordova btn btn-success btn-lg">Download</a>
-                <a id="save-file--share-btn" href class="visible-for-cordova btn btn-primary btn-lg">Share</a>
+                <a id="save-file--share-btn" href class="hide-for-non-cordova btn btn-primary btn-lg">Share</a>
               </div>
             </div>
           </div>

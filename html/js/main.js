@@ -1594,12 +1594,6 @@ function eval_config(config) {
   }
   if(!('can_edit' in config))
     config.can_edit = true;
-  config._has_override_to_speaker = _.filter([
-    'auditory_main_voice_options', 'auditory_cue_voice_options',
-    'auditory_cue_first_run_voice_options'
-  ], function(name) {
-    return config[name] && !!config[name].override_to_speaker;
-  }).length > 0;
   return config;
 }
 

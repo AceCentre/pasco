@@ -107,6 +107,12 @@ function _fix_config(cfg) {
 }
 
 function bind_dom_event_handlers () {
+  $('#ios-open-route-view').click(function ($evt) {
+    $evt.preventDefault();
+    if (speaku.is_native) {
+      speaku.api.ios_open_manage_output_audio_view()
+    }
+  });
   $('.vbl-btn').on('click', vbl_btn_onclick);
   function vbl_btn_onclick ($evt) {
     var vbl_link_id = $($evt.target).data('vbl');
@@ -1366,7 +1372,7 @@ function _vbl_voice_tmpl_options (locale) {
   });
   if (vlist.length == 0) {
     vlist = _.filter(all_voices, function (v) {
-      return v.locale.split('-')[0] == locale.split('-')[0];
+      return (v.locale+"").split('-')[0] == locale.split('-')[0];
     });
   }
   return _.map(vlist, function (v) {

@@ -7,7 +7,7 @@
     <author email="hossein@aminbros.com" href="https://github.com/hosseinamin/">
         Hossein Amin
     </author>
-    <preference name="KeepAVAudioSessionAlwaysActive" value="true" />
+    <preference name="CordovaMediaIgnoreAVAudioSession" value="true" />
     <preference name="KeyboardDisplayRequiresUserAction" value="false" />
     <preference name="DisallowOverscroll" value="true" />
     <preference name="MediaPlaybackRequiresUserAction" value="false" />

@@ -129,7 +129,7 @@ html.ios {
       margin-top: 100px;
     }
   }
-  .visible-for-ios {
+  .hide-for-non-ios {
     display: block;
   }
   .hide-for-ios {
@@ -137,22 +137,35 @@ html.ios {
   }
 }
 html.cordova {
-  .visible-for-cordova {
+  .hide-for-non-cordova {
     display: block;
   }
   .hide-for-cordova {
     display: none;
   }
 }
-
+html.cordova.ios {
+  .hide-for-non-cordova-ios {
+    display: block;
+  }
+  .hide-for-cordova-ios {
+    display: none;
+  }
+}
 html {
-  .visible-for-ios {
+  .hide-for-non-cordova-ios {
+    display: none;
+  }
+  .hide-for-cordova-ios {
+    display: block;
+  }
+  .hide-for-non-ios {
     display: none;
   }
   .hide-for-ios {
     display: block;
   }
-  .visible-for-cordova {
+  .hide-for-non-cordova {
     display: none;
   }
   .hide-for-cordova {
