@@ -263,8 +263,9 @@ function start(_state) {
       } else {
         run()
       }
-    }, (is_first_run(_state) ? config.auto_next_first_run_delay : null) ||
-       config.auto_next_delay || 500);
+    }, (is_first_run(_state) && !!config.auditory_cue_first_run_voice_options ?
+        config.auto_next_first_run_delay : null) ||
+          config.auto_next_delay || 500);
     function run() {
       if(_state._stopped)
         return; // stop the loop
@@ -1555,7 +1556,7 @@ function eval_config(config) {
       "37": { func: _tree_go_out }, // ArrowLeft
       "68": { func: _tree_go_in }, // D
       "65": { func: _tree_go_out }, // A
-      "66": { func: _tree_go_in } // B      
+      "66": { func: _tree_go_in }, // B      
     }),
     'switch': keys_from_config('switch', {
       "39": { func: _tree_go_in }, // ArrowRight
@@ -1566,14 +1567,15 @@ function eval_config(config) {
       "68": { func: _tree_go_in }, // D
       "83": { func: _tree_go_next }, // S
       "65": { func: _tree_go_out }, // A
-      "66": { func: _tree_go_in } // B
+      "66": { func: _tree_go_in }, // B
     })
   };
     // Hossein's quick fix.. 
-    if (!("66" in config._keyhit_delegates.auto))
-    config._keyhit_delegates.auto["66"] = { func: _tree_go_in };
-    if (!("66" in config._keyhit_delegates.switch))
-    config._keyhit_delegates.switch["66"] = { func: _tree_go_in };
+    if (!("66" in config._keyhit_delegates['auto']))
+    config._keyhit_delegates['auto']["66"] = { func: _tree_go_in };
+    if (!("66" in config._keyhit_delegates['switch']))
+    config._keyhit_delegates['switch']["66"] = { func: _tree_go_in };
+  config._onscreen_navigation = config.onscreen_navigation == 'enable';
   // add styles
   var styles = Array.isArray(config.style) ? config.style :
       (config.style ? [ config.style ] : []),
