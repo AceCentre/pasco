@@ -349,6 +349,7 @@ export async function pasco_import_obz (obzblob, treefn) {
       throw new Error("!rootfn or !boardsfn{}");
     }
   } catch (err) {
+    console.error(err);
     throw new ImportError("Could not parse manifest.json");
   }
   let board = await zipentry_get_board(filesmap[rootfn], rootfn);
