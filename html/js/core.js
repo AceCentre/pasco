@@ -984,15 +984,15 @@ proto.start_speaking = function(speech, opts) {
     for(var key in opts)
       if(key.indexOf('alt_') == 0)
         delete opts[key];
-    var override_output = null,
+    var audio_behavior = null,
         promise = Promise.resolve();
-    if(typeof opts.override_output != 'undefined') {
-      override_output = opts.override_output
-      delete opts.override_output;
+    if(typeof opts.audio_behavior != 'undefined') {
+      audio_behavior = opts.audio_behavior
+      delete opts.audio_behavior;
     }
-    if (typeof self._last_override_output == 'undefined' || self._last_override_output != override_output) {
-      self._last_override_output = override_output;
-      promise = self.api.override_output(override_output);
+    if (typeof self._last_audio_behavior == 'undefined' || self._last_audio_behavior != audio_behavior) {
+      self._last_audio_behavior = audio_behavior;
+      promise = self.api.set_audio_behavior(audio_behavior);
     }
     return promise
       .then(function () {
@@ -1017,7 +1017,7 @@ proto.start_speaking = function(speech, opts) {
     delete opts.rateMul
     var voiceId = opts.voiceId;
     delete opts.voiceId;
-    delete opts.override_output;
+    delete opts.audio_behavior;
     // TODO:: control audio playback,
     // delay can be implemented if access to audio playback is at this level
     var retobj = {};
@@ -1121,15 +1121,15 @@ proto._cordova_stop_audio = function() {
 proto._cordova_play_audio = function(src, opts) {
   var self = this;
   self._cordova_stop_audio()
-  var override_output = null,
+  var audio_behavior = null,
       promise = Promise.resolve();
-  if(typeof opts.override_output != 'undefined') {
-    override_output = opts.override_output
-    delete opts.override_output;
+  if(typeof opts.audio_behavior != 'undefined') {
+    audio_behavior = opts.audio_behavior
+    delete opts.audio_behavior;
   }
-  if (typeof self._last_override_output == 'undefined' || self._last_override_output != override_output) {
-    self._last_override_output = override_output;
-    promise = self.api.override_output(override_output);
+  if (typeof self._last_audio_behavior == 'undefined' || self._last_audio_behavior != audio_behavior) {
+    self._last_audio_behavior = audio_behavior;
+    promise = self.api.set_audio_behavior(audio_behavior);
   }
   return promise
     .then(function () {

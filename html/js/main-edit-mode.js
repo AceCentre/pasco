@@ -33,6 +33,15 @@ function _edit_mode_toggle(b, restart) {
   var promise;
   if(restart) {
     promise = stop()
+      .then(function () {
+        if (b) { // edit-mode
+          if (speaku && speaku.is_native) {
+            var audio_behavior = "playandrecord";
+            speaku._last_audio_behavior = audio_behavior;
+            return speaku.api.set_audio_behavior(audio_behavior);
+          }
+        }
+      })
       .then(function() {
         state = renew_state(state)
         state.silent_mode = b
