@@ -73,47 +73,6 @@ function _edit_mode_toggle(b, restart) {
   }
 }
 
-function _remove_child_node(parent, idx) {
-  var node = parent.nodes[idx]
-  parent.nodes.splice(idx, 1);
-  node.dom_element.parentNode.removeChild(node.dom_element)
-  if(parent.nodes.length == 0) {
-    delete parent.nodes
-    parent.is_leaf = true
-  }
-}
-function _add_new_node(parent, index, override) {
-  var ul = parent.nodes_ul_dom_element;
-  if(!ul) {
-    ul = newEl('ul')
-    ul.classList.add('children')
-    parent.dom_element.appendChild(ul)
-  }
-  if(!parent.nodes)
-    parent.nodes = [];
-  parent.is_leaf = false;
-  if(index > parent.nodes.length)
-    throw new Error("index out of range!");
-  var new_node = {
-    text: 'New',
-    meta: {},
-    _more_meta: {},
-    level: parent.level + 1,
-    parent: parent,
-    is_leaf: true
-  };
-  if(override)
-    new_node = Object.assign(new_node, override);
-  var new_li = newEl('li');
-  tree_mk_list_base(new_node, new_li);
-  var node_after = parent.nodes[index]
-  if(!node_after)
-    ul.appendChild(new_li);
-  else
-    ul.insertBefore(new_li, node_after.dom_element);
-  parent.nodes.splice(index, 0, new_node);
-  return new_node
-}
 function _edit_mode_select(node) {
   if(state._selected_node == node)
     return; // already selected
@@ -196,30 +155,46 @@ function _edit_mode_on_tree_click(evt) {
   }
   if(elm == null || !node || !node.parent) // not found or invalid
     return;
+  var content_template,
+      tmp = document.querySelector('#tree-node-template'),
+      new_node_data = {
+        text: 'New',
+        meta: {},
+        _more_meta: {},
+      };
+  if(tmp)
+    content_template = _.template(tmp.innerHTML);
+  else
+    throw new Error("Could not found #tree-node-template");
   if(btn) {
     if(btn.classList.contains('add-node-before')) {
       var idx = node.parent.nodes.indexOf(node)
       if(idx == -1)
         throw new Error("Corrupt tree!");
-      var new_node = _add_new_node(node.parent, idx)
+      var new_node = tree_add_node(node.parent, idx,
+                                   new_node_data, content_template);
       _tree_move(new_node) // is silent move
     } else if(btn.classList.contains('add-node-after')) {
       var idx = node.parent.nodes.indexOf(node)
       if(idx == -1)
         throw new Error("Corrupt tree!");
-      var new_node = _add_new_node(node.parent, idx + 1)
+      var new_node = tree_add_node(node.parent, idx + 1,
+                                   new_node_data, content_template);
       _tree_move(new_node) // is silent move
     } else if(btn.classList.contains('add-child-node')) {
-      var new_node = _add_new_node(node, node.nodes ? node.nodes.length : 0)
+      var new_node = tree_add_node(node, node.nodes ? node.nodes.length : null,
+                                   new_node_data, content_template);
       _tree_move(new_node) // is silent move
     } else if(btn.classList.contains('remove-node')) {
       var idx = node.parent.nodes.indexOf(node)
       if(idx == -1)
         throw new Error("Corrupt tree!");
       var parent = node.parent;
-      _remove_child_node(parent, idx);
-      var anode = !parent.nodes || idx >= parent.nodes.length ||
-          parent.nodes.length == 0 ? parent : parent.nodes[idx]
+      tree_remove_node_from_parent(node);
+      // move to another node
+      var anode = !parent.nodes || parent.nodes.length == 0 ? parent :
+          (idx >= parent.nodes.length ?
+           parent.nodes[parent.nodes.length-1] : parent.nodes[idx]);
       _tree_move(anode) // is silent move
     } else if(btn.classList.contains('node-setting')) {
       // bootstrap modal

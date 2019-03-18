@@ -313,8 +313,8 @@ function tree_add_node(parent_node, at, data, content_template) {
     parent: parent_node
   };
   if(at == null) {
-    at = parent_node.nodes.length;
-  } else if(at > parent_node.nodes.length || at < 0) {
+    at = parent_node.nodes ? parent_node.nodes.length : 0;
+  } else if(!parent_node.nodes || at > parent_node.nodes.length || at < 0) {
     throw new Error("`at` should be in range of parent's nodes");
   }
   if (parent_node.is_leaf) {
