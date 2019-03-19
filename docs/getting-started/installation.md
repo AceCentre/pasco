@@ -51,9 +51,9 @@ Depending on which device you are using these screens may look slightly differen
 
 ### What do all these options mean? 
 
-For a full guide on all of the configuration options [read this guide](/tips-n-tricks/configuration-options.html). The options seen on this screen are seen below:
+For a full guide on all of the configuration options [read this guide](/advanced/configuration-options.html). The options seen on this screen are seen below:
 
-* **locale** Which language are you wanting the app to be setup in? Changing this will change the language of all the menu items and configuration buttons.  
+* **Locale** Which language are you wanting the app to be setup in? Changing this will change the language of all the menu items and configuration buttons.  
 * **Choose an example tree** "Trees" are what other communication apps call "Pagesets" or "Gridsets" or similar. We call them "Trees" in pasco because it defines how language is navigated - like an ever expanding network of branches. Here we have some example trees to get you started. Choose one to see some examples of pasco. 
 * **Automatic Scanning or Manual**. Choose **Manual** if you want to try it out without a switch - or if you wish to try it with two or more switches. If you want to use it with one switch select **Automatic scanning**. When you do this, make sure your switch is set to **Enter** 
 * **Cue Voice** is the voice to hear the auditory cue. Typically a user may hear what they can select right now with a cue (sometimes called **Private voice**). You can choose the voice, the rate, pitch and volume of this voice. You can try an example of the settings by pressing the **Green play** button
@@ -68,8 +68,48 @@ Once you have pressed the Green "Start" button at the bottom of the quick setup 
 The screen has two main components. The grey **navigation bar** at the top where you can access "Configuration", "Help" and "Edit" options, and the main **language display** area. 
 
 
+Let's now give you a quick overview of the parts of the screen.
 
+### The navigation menu
+
+![Navigation Menu](../img/screenshots/nav-menu.png)
+
+The navigation menu (**see left**) is a small 4-way directional navigational tool to allow a communication partner to navigate the currently loaded language tree. Pressing up - moves up in the current branch, down - moves down and left will move into the next branch - if available - or select the current item. Right will go back a level - if there is a level to go to. 
+
+::: tip 
+Although originally designed for the communication partner we have found some clients who have a small thumb movement to be able to use this 
+:::
+
+#### To Resize and Move the navigational menu
+
+Simply press and hold and then release. It can take a little while to work out the timing. When you release you are looking for a dotted line to appear around the cursor (see **right** above). By dragging the corners you can resize the menu - larger or smaller. Want to get it back to the default size? Hit the **reset** button in the middle when in this resizing mode.
+
+To move the menu press and hold on it as above and simply drag it to somewhere you need it on-screen
  
+### The Edit button
+
+![Edit Button](../img/screenshots/edit-button.png)
+
+Pressing the **edit button** (the small pencil icon in the grey bar at the top of the screen) gives you access to a language editor. 
+
+::: tip Want to stop someone accessing these buttons? 
+Check out **Guided Access** on iOS. Its a really neat built-in way to hide elements on the screen and lock a user into a app. Read about how to set it up [here](https://support.apple.com/en-us/HT202612). 
+:::
+
+
+When in edit mode - select an item in your language and press the small green plus signs to add an item or the red minus sign to remove an item. Simply write your message. If you want a different cue for the item simply type it in brackets. E.g. If you wanted the main message to be ``hello, how are you?`` but the cue to be ``hi`` you could write in your box ``hello, how are you?(hi)``
+
+::: warning You can't view cues or advanced meta-data commands in edit mode 
+We want to make pasco as simple to use as possible. By providing some other means to view the cue would make this messy. So right now you can just listen for the cue - and edit if you don't like what you hear
+:::
+
+[![Image from Gyazo](https://i.gyazo.com/8a9dccac31914e1d745e9ce85f99e74a.gif)](https://gyazo.com/8a9dccac31914e1d745e9ce85f99e74a)
+
+Note it can be difficult to navigate to somewhere else in your tree on iOS - so do have the Navigation menu available to you when using this mode - it really helps!
+
+As well as adding or removing phrases you can also add or remove recorded messages on iOS. To do this - select an item and you should see a small "spanner" item at the top right of the dotted area around the word/phrase selected. Tap this and you can now press the record button to add your own recorded main or cue voice. 
+
+<a href="https://gyazo.com/66b921ac472ef785f87b537392d7cc75"><video alt="Video from Gyazo" width="472" autoplay muted loop playsinline controls><source src="https://i.gyazo.com/66b921ac472ef785f87b537392d7cc75.mp4" type="video/mp4" /></video></a>
 
 
 

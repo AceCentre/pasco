@@ -65,7 +65,9 @@ It looks a little easier to read - but be **warned** - spaces and tabs at the be
 
 Pasco natively supports the [open board format](https://www.openboardformat.org).  To use this simply upload your board(s) as a 'obz' file in the **Configuration** screen - and hopefully it should work! Note that we of course strip images - and right now there is no built in 'cue' for items. We use the label for this.  
 
-To export - select **Export** in the **Configuration** screen and select 'obz' format. 
+To export - select **Export** in the **Configuration** screen and select 'obz' format. You will need a way of sharing this file - either via email or your files app (and then dropbox etc) to make use of this outside of your iPad. Note it exports all your sound files too.  
 
 ![Setup screen](../img/screenshots/export-obz.png)
+
+[![Image from Gyazo](https://i.gyazo.com/e21b312aa955ef896c71faf724015948.gif)](https://gyazo.com/e21b312aa955ef896c71faf724015948)
 
