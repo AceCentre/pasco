@@ -45,7 +45,7 @@ module.exports = {
       },
       {
         title: '✨ Tips & Tricks ',
-        collapsable: false,
+        collapsable: true,
         children: [
           ['/tips-n-tricks/ios-switch-scanning', 'iOS Switch Scanning & pasco'],
           ['/tips-n-tricks/external-speakers', 'Tips on using Bluetooth & Wired speakers'],
@@ -56,11 +56,12 @@ module.exports = {
       },
       {
         title: '🥼 Advanced ',
-        collapsable: false,
+        collapsable: true,
         children: [
           ['/advanced/configuration-options', 'Configuration Options'],
           ['/advanced/tree-file-details', 'Language/Tree file details'],
           ['/advanced/meta-data-commands', 'Meta-Data Commands'],
+          ['/advanced/developing', 'Development Guide'],
         ]
       },
     ]
