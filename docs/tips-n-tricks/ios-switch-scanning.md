@@ -7,3 +7,4 @@ In pasco you can either use our built-in scanning methods - or use the ios scann
 ::: warning This is far from perfect
 To make this easier Apple really need to allow a long-press to toggle turning a defined recipe on or off. But you can't do that yet. Want it? [Please tell them](http://bugreport.apple.com) 
 :::
+
