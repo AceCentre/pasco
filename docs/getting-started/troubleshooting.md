@@ -1,22 +1,21 @@
 # 🤔 Troubleshooting
 
-> Below are solutions to some common issues that you may experience when working with RelayKeys.
+> Below are solutions to some common issues that you may experience when working with pasco.
 
 ::: warning Premium Support
 AceCentre is a charity and we are providing this as-is. If you need something urgently and can pay we ask you to donate to us - or another developer to help fix your problem
 :::
 
-## Installation Issues
+## Sound issues
 
-### I can install it - but when I send keystrokes nothing is appearing on the second device?
+### I have a bluetooth speaker connected but its coming out the device (or vice versa)
 
-Try and go through these steps:
-1. **Is your relaykeys stick properly attached?** Make sure the blue light is showing. If not you may have a loose connection somewhere
-2. **Is it paired and connected?** - you will know this if the blue light is steady (_not_ flashing) on the relaykeys stick
-3. **check your COM port**. Lastly it may be that the software cannot find the RelayKeys stick in its list of COM ports. [Read this guide](/cli/relaykeys-cfg.html#dev-defining-your-port-of-the-relaykeys-hardware) to manually configure and **fix** your COM port. 
+Its fair to say **we haven't nailed bluetooth speakers yet**. Its tough
 
-### So I send LSHIFT,2 and I was expecting " but I get a @ - What gives? 
+## Editing issues
 
-We don't support different keyboard layouts yet. Be aware that LSHIFT,' will send " and LSHIFT,2 will send @.
+### How do I get the keyboard to edit text? 
 
+Press and hold the small arrow in the bottom right of the keyboard. 
+ 
 

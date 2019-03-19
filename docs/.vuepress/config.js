@@ -1,6 +1,6 @@
 module.exports = {
   base: '/pasco/',
-  title: 'pasco Docs',
+  title: 'pasco',
   description: 'Communication for Physically and Visually impaired',
   ga: 'UA-24637628-7',
   plugins: [
@@ -33,7 +33,7 @@ module.exports = {
     // ⌨️ 🧠 📡 🤖 ✨ 💥 🔥 🌈 ⭐️ 🍄 🍹 🎱 🎨 🏆 🚨 🚀 💡 ⚙️ 🔮 🛠 🔑 🎁 🎈 🎀 ❤️ 💯
     sidebar: [
       {
-        title: '⌨️ Getting Started',
+        title: '🎬 Getting Started',
         collapsable: false,
         children: [
           ['/getting-started/introduction', 'Introduction'],
@@ -41,6 +41,26 @@ module.exports = {
           ['/getting-started/contributing', 'Contributing'],
           ['/getting-started/supporting-pasco', 'Supporting pasco'],
           ['/getting-started/troubleshooting', 'Troubleshooting'],
+        ]
+      },
+      {
+        title: '✨ Tips & Tricks ',
+        collapsable: false,
+        children: [
+          ['/tips-n-tricks/ios-switch-scanning', 'iOS Switch Scanning & pasco'],
+          ['/tips-n-tricks/external-speakers', 'Tips on using Bluetooth & Wired speakers'],
+          ['/tips-n-tricks/editing-with-mindnode', 'Using MindNode to make your language tree'],
+          ['/tips-n-tricks/editing-with-texteditor', 'Using a text editor to make your lanuage tree'],
+          ['/tips-n-tricks/example-usages', 'Examples of pasco in use'],
+        ]
+      },
+      {
+        title: '🥼 Advanced ',
+        collapsable: false,
+        children: [
+          ['/advanced/configuration-options', 'Configuration Options'],
+          ['/advanced/tree-file-details', 'Language/Tree file details'],
+          ['/advanced/meta-data-commands', 'Meta-Data Commands'],
         ]
       },
     ]

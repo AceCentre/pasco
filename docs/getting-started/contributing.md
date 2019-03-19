@@ -4,23 +4,15 @@
 
 ## User stories
 
-So you use RelayKeys? Like what we are doing? Got a real problem that needs fixing but don't understand all this code stuff? Please [get in touch](https://acecentre.org.uk/contact/). We will try and help - but please note; **this is very much a open source, and fundraised project**. If you can please consider donating the project
+So you use pasco? Like what we are doing? Got a real problem that needs fixing but don't understand all this code stuff? Please [get in touch](https://acecentre.org.uk/contact/). We will try and help - but please note; **this is very much a open source, and fundraised project**. If you can please consider donating the project
 
 
-## RelayKeys Repository
+## pasco Repository
 
 
-### [acecentre/relaykeys](https://github.com/acecentre/relaykeys)
+### [acecentre/pasco](https://github.com/acecentre/pasco)
 
-This is the home to the project. Please fork and make changes on this project going forward. A quick overview of the contents:
-
-* **arduino/** contains sketches to make the board work. A massive thanks to Adafruit as the nrf52840 is _their_ board with _their_ firmware and this code is largley _their_ example code. We have added mouse functionality
-* **docs/** The folder containing the docs (these docs that you are reading!). Its all made with [vuepress](https://vuepress.vuejs.org/guide/#how-it-works).
-* **resources/** a dumping ground of resources/tools that may be useful in development. Of Note is [demoSerial.py](https://github.com/AceCentre/RelayKeys/blob/master/resources/demoSerial.py) - a way of programming this without the board to hand on Linux/Mac. Also see [viewComPorts.py](https://github.com/AceCentre/RelayKeys/blob/master/resources/viewComPorts.py) to debug your COM Ports
-* blehid.py - this is the module used in relaykeysclient and relaykeysd. If you want to view things like keycode conversion and the like - see here. 
-* buildinstaller.py - this is a script that "builds" the pyinstaller binaries - and the NSIS setup.exe. 
-* relaykeys-cli.py - the CLI programme
-* relaykeys.py - the original code we used to test this. Redundant largely now - but if you want to get your head around how all this works look here first 
+This is the home to the project. Please fork and make changes on this project going forward. 
 
 
 ## Simple Pull Requests
@@ -28,7 +20,7 @@ This is the home to the project. Please fork and make changes on this project go
 Before we get into the full-blown "proper" way to do a pull request, let's quickly cover an easier method you can use for _small_ fixes. This way is especailly useful for fixing quick typos in the docs, but is not as safe for code changes since it bypasses validation and linting.
 
 1. Sign in to GitHub
-2. Go to the file you want to edit (eg: [this page](https://github.com/acecentre/relaykeys/docs/blob/master/feature-requests.md))
+2. Go to the file you want to edit (eg: [this page](https://github.com/acecentre/pasco/docs/blob/master/feature-requests.md))
 3. Click the pencil icon to "Edit this file"
 4. Make any changes
 5. Describe and submit your changes within "Propose file change"
@@ -83,7 +75,7 @@ A local git repo can have multiple remotes. While it's not very common to push y
 
 ```bash
 # Add 'upstream' to remotes
-git remote add upstream git@github.com:acecentre/relaykeys.git
+git remote add upstream git@github.com:acecentre/pasco.git
 ```
 
 When you want to update your fork with the latest changes from the upstream project, you first have to fetch all the (new) branches and commits by running
@@ -159,7 +151,7 @@ The main thing to be aware of when submitting a new acecentre feature request, i
 
 ### Browsing Existing Requests
 
-Before adding a new request, you should also first [search](https://github.com/acecentre/relaykeys/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc) to see if it has already been submitted. All feature requests should include the `enhancement` label, so you can filter by that. And remember to also check _closed_ issues since your feature might have already been submitted in the past and either [rejected](#Our-80/20-Rule) or already implemented.
+Before adding a new request, you should also first [search](https://github.com/acecentre/pasco/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc) to see if it has already been submitted. All feature requests should include the `enhancement` label, so you can filter by that. And remember to also check _closed_ issues since your feature might have already been submitted in the past and either [rejected](#Our-80/20-Rule) or already implemented.
 
 Also, if you want to see the most highly requested features you can sort by `:+1:` (the thumbs-up emoji).
 

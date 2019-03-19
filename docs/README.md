@@ -1,8 +1,8 @@
 ---
 home: true
-heroImage: /hero.png
+heroImage: /img/icon.png
 actionText: Get Started →
-actionLink: /guide/
+actionLink: /getting-started/introduction.html
 footer: MIT Licensed | Copyright © 2018-present Evan You
 ---
 
@@ -12,35 +12,19 @@ footer: MIT Licensed | Copyright © 2018-present Evan You
 
 <div class="features">
   <div class="feature">
-    <h2>Simplicity First</h2>
-    <p>Minimal setup with markdown-centered project structure helps you focus on writing.</p>
+    <h2>Auditory First</h2>
+    <p>AAC for Auditory and Physically impaired first. Other solutions exist for other purposes. pasco is not a tool to meet all needs</p>
   </div>
   <div class="feature">
-    <h2>Vue-Powered</h2>
-    <p>Enjoy the dev experience of Vue + webpack, use Vue components in markdown, and develop custom themes with Vue.</p>
+    <h2>Flexible and powerful configuration</h2>
+    <p>Need a cue in one language and main voice in another? Need recorded sounds and voices for the cue and different ones for the main? Need next letter word prediction? pasco has you covered for features not available elsewhere</p>
   </div>
   <div class="feature">
-    <h2>Performant</h2>
-    <p>VuePress generates pre-rendered static HTML for each page, and runs as an SPA once a page is loaded.</p>
+    <h2>Open</h2>
+    <p>pasco is being developed in the open. Want changes? Ask for them? Worried about obsolence? Pasco is here for good. </p>
   </div>
 </div>
 
-### As Easy as 1, 2, 3
-
-``` bash
-# install
-yarn global add vuepress # OR npm install -g vuepress
-
-# create a markdown file
-echo '# Hello VuePress' > README.md
-
-# start writing
-vuepress dev
-
-# build to static files
-vuepress build
-```
-
 ::: warning COMPATIBILITY NOTE
-VuePress requires Node.js >= 8.
+pasco is working best on iOS right now. Other platforms to follow.. 
 :::
