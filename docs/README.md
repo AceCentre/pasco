@@ -1,14 +1,10 @@
 ---
 home: true
-heroImage: /img/icon.png
+heroImage: /icon.png
 actionText: Get Started →
 actionLink: /getting-started/introduction.html
-footer: MIT Licensed | Copyright © 2018-present Evan You
+footer: MIT Licensed | Copyright © 2019 Ace Centre 
 ---
-
-<div style="text-align: center">
-  <Bit/>
-</div>
 
 <div class="features">
   <div class="feature">
