@@ -6,6 +6,9 @@
 
 **pasco is an open-source unique communication solution aimed at individuals who have a physical and visual impairment.** 
 
+## A quick overview 
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/x3wvfkmH3TE" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ### What makes it **unique**?
 
