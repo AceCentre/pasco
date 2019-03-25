@@ -17,5 +17,6 @@ Its fair to say **we haven't nailed bluetooth speakers yet**. Its tough
 ### How do I get the keyboard to edit text? 
 
 Press and hold the small arrow in the bottom right of the keyboard. 
- 
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/JkphCUnpTeA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe> 
 

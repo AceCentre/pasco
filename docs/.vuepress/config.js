@@ -38,6 +38,7 @@ module.exports = {
         children: [
           ['/getting-started/introduction', 'Introduction'],
           ['/getting-started/installation', 'Installation'],
+          ['/getting-started/configuration-options', 'Configuration Options'],
           ['/getting-started/contributing', 'Contributing'],
           ['/getting-started/supporting-pasco', 'Supporting pasco'],
           ['/getting-started/troubleshooting', 'Troubleshooting'],
@@ -58,7 +59,6 @@ module.exports = {
         title: '🥼 Advanced ',
         collapsable: true,
         children: [
-          ['/advanced/configuration-options', 'Configuration Options'],
           ['/advanced/tree-file-details', 'Language/Tree file details'],
           ['/advanced/meta-data-commands', 'Meta-Data Commands'],
           ['/advanced/developing', 'Development Guide'],
