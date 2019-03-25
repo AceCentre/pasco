@@ -1,5 +1,7 @@
 # Configuration Options
 
+[[toc]]
+
 ## Active Tree
 
 Allows a user to switch the current active Tree. This means you could have one tree for social chat, another with spelling and another for a particular school or workplace. But more importantly it allows you to switch between a English only tree and a foreign language tree. More information, including how a user can switch without going into the configuration screen can be read [here](/advanced/tree-file-details.html). 
@@ -52,7 +54,7 @@ It is sometimes useful to have a delay at the first item in each level of the br
 The time the scanner moves from one item to a next automatically. Want it to scan quicker/faster? Move it down. Want it to scan slower? Move it up. 
 
 
-![Automatic scanning](../img/screenshots/config-automatic.png)
+![Automatic scanning](../img/screenshots/config-automatic.jpeg)
 
 #### First time run (Cue Voice)
 
@@ -72,7 +74,7 @@ Whether you are in Manual or Automatic scanning - and you are using a switch box
  
 The most common usage though for anything other than automatic scanning is to setup **2 switch scanning** (aka **Step Scanning**). In this setup the user has one switch to **Move** and another to **Select**. For this use a switch box and set one switch to be **'Space'** and the other as **'Enter'**. In the configuration screen set which one you wish to be the **Select** and then select the checkbox which says **Move with the other switch (Step scanning)**. 
 
-![2 switch setup](../img/screenshots/config-2switch.png)
+![2 switch setup](../img/screenshots/config-2switch.jpeg)
 
 
 #### Minimum Cue Time (ms) (Default: 0 ms)
