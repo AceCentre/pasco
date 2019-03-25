@@ -9,7 +9,7 @@ Allows a user to switch the current active Tree. This means you could have one t
 
 ## On-Screen Navigation
 
-Enable or disable the 4-way navigation tool. Remember - you can reposition this just by dragging it - and resize it by pressing and holding on the tool - then dragging one of the corners
+Enable or disable the 4-way navigation tool. Remember - you can reposition this just by dragging it - and resize it by pressing and holding on the tool - then dragging one of the corners. Have a watch of [this video](https://youtu.be/0BW-iez_IuQ?t=38) to see how it works. 
 
 ## Helpers
 
@@ -36,7 +36,7 @@ By default switch access is set to **Manual** - which would allow someone to use
 
 #### Automatic-Scanning 
 
-Automatic scanning, often called **"1 switch scanning"** allows a user with one switch to navigate pasco. The computer moves through each item so the user doesnt have to - and only selects the one they want when ready.
+Automatic scanning, often called **"1 switch scanning"** allows a user with one switch to navigate pasco. The computer moves through each item so the user doesn't have to - and only selects the one they want when ready.
 
 Be aware - you need to select which switch key selects (moves forward) - which you can do in the option "Switch key to select items".  There are then some options you can configure:
 
@@ -62,7 +62,7 @@ For many people who are visually impaired its useful to 'hear' the items at each
 
 
 ::: tip 
-This won't increase the speed of any recorded messages* **Note: This option is only available for automatic scanning.
+This won't increase the speed of any recorded messages. **Note:** This option is only available for automatic scanning.
 :::
 
 
