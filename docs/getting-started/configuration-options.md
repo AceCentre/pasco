@@ -5,7 +5,7 @@
 Allows a user to switch the current active Tree. This means you could have one tree for social chat, another with spelling and another for a particular school or workplace. But more importantly it allows you to switch between a English only tree and a foreign language tree. More information, including how a user can switch without going into the configuration screen can be read [here](/advanced/tree-file-details.html). 
 
 
-## On-Screen Navigation (Off by default)
+## On-Screen Navigation
 
 Enable or disable the 4-way navigation tool. Remember - you can reposition this just by dragging it - and resize it by pressing and holding on the tool - then dragging one of the corners
 
@@ -56,7 +56,12 @@ The time the scanner moves from one item to a next automatically. Want it to sca
 
 #### First time run (Cue Voice)
 
-For many people who are visually impaired its useful to 'hear' the items at each selected branch. This is like someone who is using their eyes to visually scan the interface. It give the user a fast way of scanning the items. If you turn this on we recommend making as fast as you can before the voice becomes hard to understand. ***Tip: This won't increase the speed of any recorded messages* **Note: This option is only available for automatic scanning**. 
+For many people who are visually impaired its useful to 'hear' the items at each selected branch. This is like someone who is using their eyes to visually scan the interface. It give the user a fast way of scanning the items. If you turn this on we recommend making as fast as you can before the voice becomes hard to understand. 
+
+
+::: tip 
+This won't increase the speed of any recorded messages* **Note: This option is only available for automatic scanning.
+:::
 
 
 #### Switch key to select items
@@ -73,7 +78,12 @@ The most common usage though for anything other than automatic scanning is to se
 #### Minimum Cue Time (ms) (Default: 0 ms)
 
 
-By turning this on it stops the user selecting a large number of items in the tree before hearing the cue. You can change the default time here. **Tip: You probably want to keep it under 500ms other wise it can feel laggy**/
+By turning this on it stops the user selecting a large number of items in the tree before hearing the cue. You can change the default time here. 
+
+::: tip 
+You probably want to keep it under 500ms other wise it can feel laggy
+:::
+
 
 #### Ignore second hits (ms) (Default: 100 ms)
 
