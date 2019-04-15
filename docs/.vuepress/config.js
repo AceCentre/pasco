@@ -22,7 +22,7 @@ module.exports = {
   themeConfig: {
     lastUpdated: 'Last Updated',
     repo: 'acecentre/pasco',
-    logo: 'AceLogo.png',
+    logo: '/img/AceLogo.png',
     docsDir: 'docs',
     editLinks: true,
     serviceWorker: true,
