@@ -104,6 +104,10 @@ function _fix_config(cfg) {
       );
     }
   });
+  if (!cfg.keys) {
+    cfg.keys = cfg.switch_keys || cfg.auto_keys || {};
+    cfg.keys["66"] = { "func": "tree_go_in", "label": "b" };
+  }
 }
 
 function bind_dom_event_handlers () {
@@ -163,10 +167,84 @@ function bind_dom_event_handlers () {
         });
     }
   });
+  bind_configure_actions();
+}
+
+function submenu_set_active (name) {
+  var isactive = $('.x-navbar .head .page-head[data-name="'+name+'"]').hasClass('active');
+  if (isactive) {
+    return;
+  }
+  var promises = [];
+  $('.edit-config-container .page-sect').each(function () {
+    var $this = $(this);
+    if ($this.hasClass('active') && name != $this.data('name')) {
+      promises.push(new Promise(function (resolve) {
+        $this.fadeOut(300, resolve);
+      }));
+    }
+  });
+  Promise.all(promises)
+    .then(function () {
+      if (!name) {
+        $('.x-navbar .head .main-head').show();
+        $('.x-navbar .back-btn').hide();
+        $('.edit-config-container .submenu').removeClass('has-active');
+      } else {
+        $('.x-navbar .head .main-head').hide();
+        $('.x-navbar .back-btn').show();
+        $('.edit-config-container .submenu').addClass('has-active');
+      }
+      $('.x-navbar .head .page-head').each(function () {
+        var $this = $(this);
+        $this.toggleClass('active', name == $this.data('name'));
+      });
+      $('.edit-config-container .submenu a').each(function () {
+        var $this = $(this);
+        $this.toggleClass('active', name == $this.data('name'));
+      });
+      $('.edit-config-container .page-sect').each(function () {
+        var $this = $(this);
+        $this.toggleClass('active', name == $this.data('name'));
+        if (name == $this.data('name')) {
+          $this.hide().fadeIn(300);
+          $this.find('.x-collapsable').each(function () {
+            update_collapsable(this);
+          });
+        }
+      });
+    });
+}
+
+function submenu_init () {
+  $('.edit-config-container .submenu a').on('click', function ($evt) {
+    $evt.preventDefault();
+    var $this = $(this);
+    var name = $this.data('name');
+    history.replaceState({}, name, '#!' + name);
+    submenu_set_active(name);
+  });
+  $('.back-btn').on('click', function ($evt) {
+    $evt.preventDefault();
+    history.replaceState({}, name, location.pathname);
+    submenu_set_active("");
+  });
+  window.addEventListener('popstate', updatestate);
+  setTimeout(updatestate, 1000);
+  function updatestate () {
+    if (location.hash.indexOf("#!") == 0) {
+      submenu_set_active(location.hash.substr(2));
+    } else {
+      submenu_set_active("");
+    }
+  }
 }
 
 function start() {
   is_quick_setup = $('form[name=quick-setup]').length > 0;
+  if (!is_quick_setup) {
+    submenu_init();
+  }
   _start_subrout_tree_selection();
   // insert voice options
   var $form = $(is_quick_setup ? 'form[name=quick-setup]' : 'form[name=edit-config]').first(),
@@ -805,43 +883,6 @@ function insert_config() {
     }
   });
   // specific
-  if(config.auto_keys) {
-    var forward_key = (config.auto_keys['13'] &&
-                       config.auto_keys['13'].func == 'tree_go_in' ? 'enter' :
-                       (config.auto_keys['32'] &&
-                        config.auto_keys['32'].func == 'tree_go_in' ? 'space':
-                        null)),
-        secondary_to_move = (forward_key == 'enter' ?
-                             config.auto_keys['32'] &&
-                             config.auto_keys['32'].func == 'tree_go_next' :
-                             (forward_key == 'space' ? 
-                              config.auto_keys['13'] &&
-                              config.auto_keys['13'].func == 'tree_go_next' :
-                              false));
-      
-    $form.find('[name=_auto_forward_key]').each(function() {
-      this.checked = this.value == forward_key
-    });
-    $form.find('[name=_auto_secondary_key_move]').prop('checked', secondary_to_move);
-  }
-  if(config.switch_keys) {
-    var forward_key = (config.switch_keys['13'] &&
-                       config.switch_keys['13'].func == 'tree_go_in'?'enter':
-                       (config.switch_keys['32'] &&
-                        config.switch_keys['32'].func == 'tree_go_in'?'space':
-                        null)),
-        secondary_to_move = (forward_key == 'enter' ?
-                             config.switch_keys['32'] &&
-                             config.switch_keys['32'].func == 'tree_go_next' :
-                             (forward_key == 'space' ? 
-                              config.switch_keys['13'] &&
-                              config.switch_keys['13'].func == 'tree_go_next' :
-                              false));
-    $form.find('[name=_switch_forward_key]').each(function() {
-      this.checked = this.value == forward_key
-    })
-    $form.find('[name=_switch_secondary_key_move]').prop('checked', secondary_to_move);
-  }
   _.each(_voice_id_links, function(alink) {
     var propname = (speaku.is_native ? '' : 'alt_') + 'voiceId',
         part = config[alink[0]] || config['_' + alink[0]],
@@ -898,58 +939,6 @@ function do_save_config($form, _config, hdlerr) {
       }
     });
     // specific
-    if(!is_quick_setup) {
-      var $inp = $form.find('[name=_auto_forward_key]:checked'),
-          secondary_key_to_move = $form.find('[name=_auto_secondary_key_move]').prop('checked'),
-          keys = null;
-      switch($inp.val()) {
-      case 'enter':
-        keys = {
-          '13': { 'func': 'tree_go_in', 'comment': 'enter' }
-        }
-        if(secondary_key_to_move)
-          keys['32'] = { 'func': 'tree_go_next', 'comment': 'space' };
-        else
-          keys['32'] = { 'func': 'tree_go_out', 'comment': 'space' };
-        break;
-      case 'space':
-        keys = {
-          '32': { 'func': 'tree_go_in', 'comment': 'space' }
-        }
-        if(secondary_key_to_move)
-          keys['13'] = { 'func': 'tree_go_next', 'comment': 'enter' };
-        else
-          keys['13'] = { 'func': 'tree_go_out', 'comment': 'enter' };
-        break;
-      }
-      if(keys)
-        _config.auto_keys = Object.assign((_config.auto_keys || {}), keys);
-      $inp = $form.find('[name=_switch_forward_key]:checked');
-      secondary_key_to_move = $form.find('[name=_switch_secondary_key_move]').prop('checked');
-      keys = null;
-      switch($inp.val()) {
-      case 'enter':
-        keys = {
-          '13': { 'func': 'tree_go_in', 'comment': 'enter' }
-        }
-        if(secondary_key_to_move)
-          keys['32'] = { 'func': 'tree_go_next', 'comment': 'space' };
-        else
-          keys['32'] = { 'func': 'tree_go_out', 'comment': 'space' };
-        break;
-      case 'space':
-        keys = {
-          '32': { 'func': 'tree_go_in', 'comment': 'space' }
-        }
-        if(secondary_key_to_move)
-          keys['13'] = { 'func': 'tree_go_next', 'comment': 'enter' };
-        else
-          keys['13'] = { 'func': 'tree_go_out', 'comment': 'enter' };
-        break;
-      }
-      if(keys)
-        _config.switch_keys = Object.assign((_config.switch_keys || {}), keys);
-    }
     _.each(_voice_id_links, function(alink) {
       var $inp = $form.find('[name='+alink[1]+']');
       if($inp.length == 0)
@@ -1089,7 +1078,7 @@ function _config_autosave_start_countdown() {
   if(window.__config_autosave_timeout)
     clearTimeout(window.__config_autosave_timeout);
   window.__config_autosave_timeout = setTimeout(function() {
-    $('form[name=edit-config] button[type=submit]').first().click();
+    $('form[name=edit-config]').submit();
     delete window.__config_autosave_timeout;
   }, 500);
 }
@@ -1250,6 +1239,153 @@ function _input_info_parse(name, config) {
     value: value
   };
 }
+function bind_configure_actions () {
+  $('.configure-actions-wrp').find('button[data-action]')
+    .click(function ($evt) {
+      var $this = $(this);
+      configure_action_init($this.data('action'), $this.text());
+    });
+}
+function configure_action_init (action, label) {
+  var initial_config_keys = Object.assign({}, config.keys);
+  var idprefix = 'configure-action';
+  $('#' + idprefix + '-title-suffix').text('(' + label + ')');
+  var key_tmpl = _.template($('#' + idprefix + '-key-template').html());
+  var $key_list = $('#' + idprefix + '-key-list');
+  var keys_obj = [];
+  var id = 1;
+  var config_keys = config.keys || {};
+  for (var key in config_keys) {
+    if (config_keys.hasOwnProperty(key)) {
+      var ckey = config_keys[key];
+      if (ckey.func == action) {
+        delete initial_config_keys[key];
+        keys_obj.push({
+          key: key,
+          label: ckey.label,
+          id: id++,
+        });
+      }
+    }
+  }
+  key_list_update();
+  $('#' + idprefix + '-key-list')
+    .off('click', '.remove-btn')
+    .on('click', '.remove-btn', remove_btn_clicked);
+  $('#' + idprefix + '-key-list')
+    .off('click', '.key-btn')
+    .on('click', '.key-btn', key_btn_clicked);
+  $('#' + idprefix + '-key-add-btn')
+    .off('click')
+    .on('click', function ($evt) {
+      var nextid = 1;
+      _.each(keys_obj, function (a) { nextid = nextid <= a.id ? a.id+1 : nextid; });
+      var key_obj = {
+        key: '',
+        label: '',
+        id: nextid,
+      };
+      keys_obj.push(key_obj);
+      var $keywrp = $(key_tmpl(key_obj));
+      $key_list.append($keywrp);
+      if ($keywrp.find('.key-btn').length > 0) {
+        key_btn_clicked.call($keywrp.find('.key-btn')[0]);
+      }
+    });
+  $('#' + idprefix + '-save-btn')
+    .off('click')
+    .on('click', function ($evt) {
+      var config_keys = Object.assign({}, initial_config_keys);
+      _.each(keys_obj, function (key_obj) {
+        config_keys[key_obj.key+''] = {
+          func: action,
+          label: key_obj.label,
+        };
+      });
+      var _config = JSON.parse(config_data);
+      _config.keys = config_keys;
+      var $form = $('form[name=edit-config]').first()
+      do_save_config($form, _config, true);
+      $('#' + idprefix + '-modal').modal('hide');
+    });
+  $('#' + idprefix + '-modal').modal('show');
+  function key_btn_clicked () {
+    var $this = $(this);
+    if ($this.hasClass('is-waiting')) {
+      return;
+    }
+    var id = $this.parent().parent().data('id');
+    document._configure_action_key_id = parseInt(id);
+    $this.addClass('is-waiting');
+    napi_add_key_command()
+      .then(function () {
+        document.addEventListener('mousedown', key_onmousedown, true);
+        document.addEventListener('keydown', key_onkeydown, true);
+        document.addEventListener('keyup', key_onkeyup, true);
+        document.addEventListener('x-keycommand', key_onkeycommand, true);
+      });
+  }
+  function key_onmousedown ($evt) {
+    $evt.preventDefault();
+    var key, label;
+    if ($evt.button == 0) {
+      key = "Click";
+      label = "Click";
+    } else if ($evt.button == 2) {
+      key = "RightClick";
+      label = "Right Click";
+    }
+    _register_key(key, label);
+  }
+  function key_onkeydown ($evt) {
+    $evt.preventDefault();
+    var label = $evt.key;
+    var substitute_labels = {
+      " ": "Space",
+    };
+    if (label in substitute_labels) {
+      label = substitute_labels[label];
+    }
+    _register_key(($evt.charCode || $evt.keyCode)+'', label);
+  }
+  function key_onkeyup ($evt) {
+    $evt.preventDefault();
+  }
+  function key_onkeycommand (evt) {
+    if(!NativeAccessApi.keyCodeByInput.hasOwnProperty(ev.detail.input))
+      return;
+    var code = NativeAccessApi.keyCodeByInput[ev.detail.input];
+    _register_key(code, ev.detail.input);
+  }
+  function _register_key (key, label) {
+    var id = document._configure_action_key_id;
+    delete document._configure_action_key_id;
+    var key_obj = _.find(keys_obj, function(a) { return id == a.id; });
+    if (key_obj != null) {
+      key_obj.key = key;
+      key_obj.label = label;
+      key_list_update(); // simple update
+    }
+    napi_remove_key_command()
+      .then(function () {
+        document.removeEventListener('mousedown', key_onmousedown, true);
+        document.removeEventListener('keydown', key_onkeydown, true);
+        document.removeEventListener('keyup', key_onkeyup, true);
+        document.removeEventListener('x-keycommand', key_onkeycommand, true);
+      });
+  }
+  function remove_btn_clicked () {
+    var id = $(this).parent().parent().data('id');
+    var index = _.findIndex(keys_obj, function(a) { return id == a.id; });
+    if (index != -1) {
+      keys_obj.splice(index, 1);
+      key_list_update();
+    }
+  }
+  function key_list_update () {
+    $key_list.html(_.map(keys_obj, function (obj) { return key_tmpl(obj); }));
+  }
+}
 
 
 /*** Section Voice By Locale ***/
@@ -1378,4 +1514,39 @@ function _vbl_voice_tmpl_options (locale) {
   return _.map(vlist, function (v) {
     return { value: v.id, label: v.label };
   });
+}
+
+
+function napi_add_key_command() {
+  if(napi.available) {
+    var promises = [];
+    for(var key in NativeAccessApi.keyInputByCode) {
+      if (NativeAccessApi.keyInputByCode.hasOwnProperty(key)) {
+        var input = NativeAccessApi.keyInputByCode[key];
+        if(input) {
+          promises.push(napi.add_key_command(input))
+        }
+      }
+    }
+    return Promise.all(promises);
+  } else {
+    return Promise.resolve();
+  }
+}
+
+function napi_remove_key_command() {
+  if(napi.available) {
+    var promises = [];
+    for(var key in NativeAccessApi.keyInputByCode) {
+      if (NativeAccessApi.keyInputByCode.hasOwnProperty(key)) {
+        var input = NativeAccessApi.keyInputByCode[key];
+        if(input) {
+          promises.push(napi.remove_key_command(input));
+        }
+      }
+    }
+    return Promise.all(promises);
+  } else {
+    return Promise.resolve();
+  }
 }

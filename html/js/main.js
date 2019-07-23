@@ -1,5 +1,6 @@
 var config_fn, tree_fn, config, tree, state = null, tree_element, napi, speaku,
-    config_json, words_cache = {}, tree_contentsize_xstep = 50, locale;
+    config_json, words_cache = {}, tree_contentsize_xstep = 50, locale,
+    tree_wrp_element;
 Promise.all([
   window.cordova ? NativeAccessApi.onready() : Promise.resolve(),
   new Promise(function(resolve) { // domready
@@ -43,6 +44,7 @@ Promise.all([
     return get_file_json(config_fn)
       .then(function(_config) {
         config = _config;
+        _main_fix_config(config);
         config_json = JSON.stringify(config);
         return eval_config(config);
       })
@@ -63,8 +65,9 @@ Promise.all([
   .then(function() {
     // load tree
     tree_element = document.querySelector('#tree')
-    if(!tree_element)
-      return Promise.reject(new Error("Cannot find #tree element"));
+    tree_wrp_element = document.querySelector('#tree-wrp')
+    if(!tree_element || !tree_wrp_element)
+      return Promise.reject(new Error("Cannot find #tree and/or #tree-wrp element"));
     locale = config.locale||default_locale;
     return Promise.all([
       initl10n(locale)
@@ -102,6 +105,13 @@ Promise.all([
     handle_error(err);
   });
 
+function _main_fix_config (cfg) {
+  if (!cfg.keys) {
+    cfg.keys = cfg.switch_keys || cfg.auto_keys || {};
+    cfg.keys["66"] = { "func": "tree_go_in", "label": "b" }
+  }
+}
+
 window.addEventListener('unload', function() {
   if(speaku && speaku.is_native && speaku.synthesizer) {
     speaku.api.release_synthesizer(speaku.synthesizer);
@@ -121,7 +131,7 @@ document.addEventListener('touchmove', function(evt) {
 
 /* execution code start */
 
-var _modes = ['auto', 'switch'],
+var _modes = ['auto', 'switch', 'wheel'],
     _all_delegates = {
       "tree_go_in": _tree_go_in, "tree_go_out": _tree_go_out,
       "tree_go_previous": _tree_go_previous, "tree_go_next": _tree_go_next,
@@ -153,7 +163,7 @@ var _modes = ['auto', 'switch'],
 
 
 window.addEventListener('x-keycommand', function(ev) {
-  if(state && state._keyhit_off)
+  if(!state || state._keyhit_off)
     return;
   if(!NativeAccessApi.keyCodeByInput.hasOwnProperty(ev.detail.input))
     return;
@@ -171,7 +181,7 @@ window.addEventListener('x-keycommand', function(ev) {
   }
 }, false);
 window.addEventListener('keydown', function(ev) {
-  if(state && state._keyhit_off)
+  if(!state || state._keyhit_off)
     return;
   var code = ev.charCode || ev.keyCode;
   // look for delegate calls
@@ -206,16 +216,23 @@ function start(_state) {
     _active_elements: [],
     _highlighted_elements: [],
     _auto_next_rem_loops: config.auto_next_loops || 0,
-    _stop_callbacks: []
+    _stop_callbacks: [],
+    _wheel_delta: [ 0, 0 ],
   };
   if(_modes.indexOf(state.mode) == -1)
     throw new Error("Unknown mode " + state.mode);
   return state._start_promise = _start_prepare()
     .then(function() {
-      tree_element.addEventListener('x-mode-change', _on_mode_change, false);
+      if ("Click" in config._keyhit_delegates ||
+          "RightClick" in config._keyhit_delegates) {
+        tree_wrp_element.addEventListener('click', _tree_on_click, false);
+      }
       document.addEventListener('x-keycommand', _on_xkeycommand, false);
       window.addEventListener('keydown', _on_keydown, false);
       window.addEventListener('resize', _tree_needs_resize, false);
+      if (state.mode == 'wheel') {
+        document.addEventListener('wheel', _on_wheel, false);
+      }
       var tmp = document.querySelector('#navbtns')
       if(tmp && config._onscreen_navigation) {
         if(window.device && window.device.platform.toLowerCase() == 'ios') {
@@ -318,7 +335,7 @@ function start(_state) {
 
 function _napi_add_key_command() {
   if(napi.available) {
-    var delegates = config._keyhit_delegates[state.mode];
+    var delegates = config._keyhit_delegates;
     var promises = [];
     for(var key in delegates) {
       if (delegates.hasOwnProperty(key)) {
@@ -353,7 +370,7 @@ function _napi_add_key_command() {
 
 function _napi_remove_key_command() {
   if(napi.available) {
-    var delegates = config._keyhit_delegates[state.mode];
+    var delegates = config._keyhit_delegates;
     var promises = [];
     for(var key in delegates) {
       if (delegates.hasOwnProperty(key)) {
@@ -443,7 +460,10 @@ function stop() {
     return state._stop_promise;
   return state._stop_promise = _stop_prepare()
     .then(function() {
-      tree_element.removeEventListener('x-mode-change', _on_mode_change, false);
+      if ("Click" in config._keyhit_delegates ||
+          "RightClick" in config._keyhit_delegates) {
+        tree_wrp_element.removeEventListener('click', _tree_on_click, false);
+      }
       if(state._next_keyup) {
         window.removeEventListener('keyup', state._next_keyup, false);
         state._next_keyup = null
@@ -451,6 +471,13 @@ function stop() {
       document.removeEventListener('x-keycommand', _on_xkeycommand, false);
       window.removeEventListener('keydown', _on_keydown, false);
       window.removeEventListener('resize', _tree_needs_resize, false);
+      if (state.mode == 'wheel') {
+        if (state._wheel_timeout != null) {
+          clearTimeout(state._wheel_timeout);
+          state._wheel_timeout = null;
+        }
+        document.removeEventListener('wheel', _on_wheel, false);
+      }
       var tmp = document.querySelector('#navbtns')
       if(tmp && config._onscreen_navigation) {
         if(window.device && window.device.platform.toLowerCase() == 'ios') {
@@ -485,15 +512,6 @@ function is_first_run(_state) {
   // check if the current cycle is the first one
   _state = _state || state
   return state._auto_next_rem_loops == config.auto_next_loops
-}
-
-function _on_mode_change() {
-  stop()
-    .then(function() {
-      state = renew_state(state)
-      return start(state);
-    })
-    .catch(handle_error);
 }
 
 function renew_state(_state) {
@@ -582,6 +600,25 @@ function _on_xkeycommand(evt) {
   }
 }
 
+function _tree_on_click (evt) {
+  console.log(state.edit_mode, config._keyhit_delegates);
+  if (state.edit_mode) {
+    return; // skip
+  }
+  var delegate;
+  if ("Click" in config._keyhit_delegates && evt.button == 0) {
+    delegate = config._keyhit_delegates.Click;
+  } else if ("RightClick" in config._keyhit_delegates && evt.button == 2) {
+    delegate = config._keyhit_delegates.RightClick;
+  }
+  if(delegate) {
+    evt.preventDefault();
+    var ret = delegate.func(evt);
+    if(ret && ret.catch)
+      ret.catch(handle_error);
+  }
+}
+
 function _on_keydown(down_ev) {
   if(!state || state._keyhit_off)
     return;
@@ -598,10 +635,13 @@ function _on_keydown(down_ev) {
     _on_keyhit(down_ev);
   } else {
     // follow delegate rules
+    /* DISABLED, flip of keys in rtl mode can be source for confusion.
     if(window.icu && icu.rtl && _keys_for_rtl.hasOwnProperty(downcode+'')) {
       downcode = _keys_for_rtl[downcode];
     }
-    var delegate = config._keyhit_delegates[state.mode][downcode+''];
+    */
+    var delegatemap = config._keyhit_delegates;
+    var delegate = delegatemap[downcode+''];
     if(delegate) {
       if(delegate.preventDefault)
         down_ev.preventDefault();
@@ -610,9 +650,11 @@ function _on_keydown(down_ev) {
       window.removeEventListener('keyup', state._next_keyup, false);
     state._next_keyup = function(ev) {
       var upcode = ev.charCode || ev.keyCode;
+      /* DISABLED, flip of keys in rtl mode can be source for confusion.
       if(window.icu && icu.rtl && _keys_for_rtl.hasOwnProperty(upcode+'')) {
         upcode = _keys_for_rtl[upcode];
       }
+      */
       if(upcode != 0 && upcode != downcode) {
         return; // LIMIT:: single key at a time
       }
@@ -630,15 +672,47 @@ function _on_keydown(down_ev) {
   window.addEventListener('keyup', state._next_keyup, false);
 }
 
+function _on_wheel (evt) {
+  if(!state || state._wheel_off)
+    return;
+  // clear wheel delta after 3s
+  if (state._wheel_timeout != null) {
+    clearTimeout(state._wheel_timeout);
+  }
+  state._wheel_timeout = setTimeout(function () {
+    state._wheel_delta = [ 0, 0 ];
+    state._wheel_timeout = null;
+  }, 3000);
+  state._wheel_delta = [ state._wheel_delta[0] + evt.deltaX,
+                         state._wheel_delta[1] + evt.deltaY ];
+  var x_threshold = config.wheel_x_threshold || 30;
+  if (Math.abs(state._wheel_delta[0]) > x_threshold) {
+    (state._wheel_delta[0] > 0 && !config.wheel_x_reverse ?
+     _tree_go_in() : _tree_go_out())
+      .catch(handle_error);
+    state._wheel_delta = [ 0, 0 ];
+  }
+  var y_threshold = config.wheel_y_threshold || 30;
+  if (Math.abs(state._wheel_delta[1]) > y_threshold) {
+    var n = Math[state._wheel_delta[1] < 0 ? "ceil" : "floor"](state._wheel_delta[1] / y_threshold) * (config.wheel_y_reverse ? -1 : 1);
+    _tree_go_n_steps(n)
+      .catch(handle_error);
+    state._wheel_delta = [ 0, 0 ];
+  }
+}
+
 function _on_keyhit(ev) {
-  if(state && state._keyhit_off)
+  if(!state || state._keyhit_off)
     return;
   var code = ev.charCode || ev.keyCode;
+  /* DISABLED, flip of keys in rtl mode can be source for confusion.
   if(window.icu && icu.rtl && _keys_for_rtl.hasOwnProperty(code+'')) {
     code = _keys_for_rtl[code];
   }
+  */
   // look for delegate calls
-  var delegate = config._keyhit_delegates[state.mode][code+''];
+  var delegatemap = config._keyhit_delegates;
+  var delegate = delegatemap[code+''];
   if(delegate) {
     if(delegate.preventDefault === undefined ||
        delegate.preventDefault)
@@ -1334,6 +1408,9 @@ function _start_at_next_action(atree) {
     }
     window.removeEventListener('keydown', onkeydown, false);
     document.removeEventListener('x-keycommand', onkeydown, false);
+    if (state.mode == 'wheel') {
+      document.removeEventListener('wheel', tmp_onwheel, false);
+    }
   }
   function onscreen_nav_click() {
     clear()
@@ -1344,6 +1421,18 @@ function _start_at_next_action(atree) {
     clear()
     finish()
   }
+  let wheeldelta = [ 0, 0 ];
+  function tmp_onwheel (evt) {
+    wheeldelta = [ wheeldelta[0] + evt.deltaX,
+                   wheeldelta[1] + evt.deltaY ];
+    var x_threshold = config.wheel_x_threshold || 30
+    var y_threshold = config.wheel_y_threshold || 30
+    if (Math.abs(wheeldelta[0]) > x_threshold ||
+        Math.abs(wheeldelta[1]) > x_threshold) {
+      clear()
+      finish()
+    }
+  }
   return _napi_add_key_command()
     .then(function() {
       tmp = document.querySelector('#navbtns')
@@ -1351,7 +1440,10 @@ function _start_at_next_action(atree) {
         tmp.addEventListener('click', onscreen_nav_click, false)
       }
       window.addEventListener('keydown', onkeydown, false);
-      document.addEventListener('x-keycommand', onkeydown, false);
+      document.addEventListener('x-keycommand', onkeydown, false); 
+      if (state.mode == 'wheel') {
+        document.addEventListener('wheel', tmp_onwheel, false);
+      }
     });
 }
 
@@ -1534,6 +1626,18 @@ function _tree_go_next() {
   }
   return _scan_move()
 }
+function _tree_go_n_steps (n) {
+  if(!state.can_move)
+    return Promise.resolve();
+  var position = _get_current_position();
+  position.index += n;
+  if(position.index >= position.tree.nodes.length) {
+    position.index = position.index % position.tree.nodes.length;
+  } else if (position.index < 0) {
+    position.index = Math.ceil(Math.abs(position.index) / position.tree.nodes.length) * position.tree.nodes.length + position.index;
+  }
+  return _scan_move()
+}
 
 /* execution code end */
 
@@ -1550,31 +1654,31 @@ function eval_config(config) {
         return val;
       }) : _default;
   }
-  config._keyhit_delegates = {
-    auto: keys_from_config('auto', {
-      "39": { func: _tree_go_in }, // ArrowRight
-      "37": { func: _tree_go_out }, // ArrowLeft
-      "68": { func: _tree_go_in }, // D
-      "65": { func: _tree_go_out }, // A
-      "66": { func: _tree_go_in }, // B      
-    }),
-    'switch': keys_from_config('switch', {
-      "39": { func: _tree_go_in }, // ArrowRight
-      "37": { func: _tree_go_out }, // ArrowLeft
-      "38": { func: _tree_go_previous }, // ArrowUp
-      "40": { func: _tree_go_next }, // ArrowDown
-      "87": { func: _tree_go_previous }, // W
-      "68": { func: _tree_go_in }, // D
-      "83": { func: _tree_go_next }, // S
-      "65": { func: _tree_go_out }, // A
-      "66": { func: _tree_go_in }, // B
-    })
+  var default_keys = {
+    "39": { func: _tree_go_in }, // ArrowRight
+    "37": { func: _tree_go_out }, // ArrowLeft
+    "38": { func: _tree_go_previous }, // ArrowUp
+    "40": { func: _tree_go_next }, // ArrowDown
+    "87": { func: _tree_go_previous }, // W
+    "68": { func: _tree_go_in }, // D
+    "83": { func: _tree_go_next }, // S
+    "65": { func: _tree_go_out }, // A
+    "66": { func: _tree_go_in }, // B
   };
-    // Hossein's quick fix.. 
-    if (!("66" in config._keyhit_delegates['auto']))
-    config._keyhit_delegates['auto']["66"] = { func: _tree_go_in };
-    if (!("66" in config._keyhit_delegates['switch']))
-    config._keyhit_delegates['switch']["66"] = { func: _tree_go_in };
+  config._keyhit_delegates = config.keys ?
+    _.mapObject(config.keys, function(val, key) {
+      if(val.func in _all_delegates) {
+        val.func = _all_delegates[val.func]
+      } else {
+        throw new Error("key has no func!, " + JSON.stringify(val))
+      }
+      return val;
+    }) : default_keys;
+  /* No longer is needed
+  // Hossein's quick fix..
+    if (!("66" in config._keyhit_delegates))
+    config._keyhit_delegates["66"] = { func: _tree_go_in };
+  */
   config._onscreen_navigation = config.onscreen_navigation == 'enable';
   // add styles
   var styles = Array.isArray(config.style) ? config.style :

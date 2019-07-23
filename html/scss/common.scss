@@ -17,11 +17,11 @@ body.quick-setup {
 }
 
 .body-navbar-fixed {
-	padding-top: 70px;
+	padding-top: 50px;
   .anchor {
     display: block;
     position: absolute;
-    top: -70px;
+    top: -50px;
   }
 }
 
@@ -117,7 +117,7 @@ html.ios {
       padding-top: 60px;
     }
     .body-navbar-fixed {
-	    padding-top: 85px;
+	    padding-top: 65px;
       .anchor {
         top: -85px;
       }
@@ -188,34 +188,37 @@ html {
     display: block;
   }
 }
-
 .x-navbar {
   .head {
-    h1 {
+    h1, h2 {
       color: #777;
       margin: 0;
       padding: 5px;
       font-family: "Source Sans Pro", Arial, sans-serif;
       font-weight: 700;
-      font-size: 30px;
+      font-size: 1.9em;
       line-height: 1.2;
+    }
+    h2 {
+      font-size: 1.7em;
     }
   }
   padding: 0;
   margin: 0;
+  padding-left: 15px;
+  padding-right: 15px;
   list-style: none;
   display: flex;
   flex-direction: row;
+  align-items: center;
+  min-height: 50px;
   .icon-btn {
     margin-left: 8px;
     margin-right: 8px;
     padding-left: 6px;
     padding-right: 6px;
     display: inline-block;
-    height: 100%;
-    .fa, .far {
-      padding-top: 10px;
-    }
+    height: 100
   }
   .disabled {
     color: #777;
@@ -240,14 +243,6 @@ html {
   .m-xs-t-10 {
     margin-top: 10px;
   }
-}
-@media (max-width: 1199px) { /* bootstrap lg < */
-  .m-lg-t-10 {
-    margin-top: 10px;
-  }
-}
-@media (min-width: 768px) { /* bootstrap sm > */
-
 }
 
 .video-iframe-wrp {
