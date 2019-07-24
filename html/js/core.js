@@ -629,7 +629,7 @@ function handle_error_data (err) {
 function handle_error (err) {
   var data = handle_error_data(err);
   console.error.apply(console, data.error);
-  alert(err.alert);
+  alert(err.alert ? err.alert : err+"");
 }
 
 function delete_file(url, options) {

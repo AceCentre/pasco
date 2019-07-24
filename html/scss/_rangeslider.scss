@@ -1,8 +1,12 @@
+.rtl .rangeslider__fill,
+.rtl .rangeslider__handle {
+  left: 0px;
+}
 .rangeslider {
     position: relative;
     display: block;
     cursor: pointer;
-    height: 44px;
+    height: 50px;
     width: 100%;
 }
 .rangeslider__fill,
@@ -18,8 +22,8 @@
 }
 .rangeslider__handle {
     will-change: width, height, top;
-    width: 21px;
-    height: 21px;
+    width: 25px;
+    height: 25px;
     position: absolute;
     top: 50%;
     background: #29e;
