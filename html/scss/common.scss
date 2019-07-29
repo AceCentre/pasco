@@ -17,7 +17,7 @@ body.quick-setup {
 }
 
 .body-navbar-fixed {
-	padding-top: 50px;
+  padding-top: 50px;
   .anchor {
     display: block;
     position: absolute;
@@ -102,6 +102,9 @@ body.quick-setup {
   z-index: 100;
 }
 html.ios {
+  .body-navbar-fixed {
+    padding-top: 70px;
+  }
   .main-top-navbar {
     padding-top: 20px;
     min-height: 70px;

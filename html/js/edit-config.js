@@ -106,6 +106,15 @@ function _fix_config(cfg) {
   });
   if (!cfg.keys) {
     cfg.keys = cfg.switch_keys || cfg.auto_keys || {};
+    for (var key in cfg.keys) {
+      if (cfg.keys.hasOwnProperty(key)) {
+        var ckey = cfg.keys[key];
+        if (ckey.comment) {
+          ckey.label = ckey.comment;
+          delete ckey.comment;
+        }
+      }
+    }
     cfg.keys["66"] = { "func": "tree_go_in", "label": "b" };
   }
 }
@@ -1352,10 +1361,10 @@ function configure_action_init (action, label) {
     $evt.preventDefault();
   }
   function key_onkeycommand (evt) {
-    if(!NativeAccessApi.keyCodeByInput.hasOwnProperty(ev.detail.input))
+    if(!NativeAccessApi.keyCodeByInput.hasOwnProperty(evt.detail.input))
       return;
-    var code = NativeAccessApi.keyCodeByInput[ev.detail.input];
-    _register_key(code, ev.detail.input);
+    var code = NativeAccessApi.keyCodeByInput[evt.detail.input];
+    _register_key(code, evt.detail.input);
   }
   function _register_key (key, label) {
     var id = document._configure_action_key_id;
