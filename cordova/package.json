@@ -12,10 +12,10 @@
     "dependencies": {
         "audscan-cordova-plugin": "git+https://github.com/hosseinamin/pasco-cordova-plugin.git",
         "browser-sync": "^2.26.7",
-        "cheerio": "^0.19.0",
+        "cheerio": "^0.22.0",
         "cordova": "^8.1.2",
         "cordova-icon": "^1.0.0",
-        "cordova-ios": "^4.5.5",
+        "cordova-ios": "^5.0.1",
         "cordova-plugin-browsersync": "^1.1.0",
         "cordova-plugin-device": "^1.1.7",
         "cordova-plugin-file": "^6.0.1",
@@ -40,13 +40,13 @@
             "cordova-plugin-device": {},
             "cordova-plugin-browsersync": {},
             "cordova-plugin-x-socialsharing": {},
-            "pasco-cordova-plugin": {},
             "cordova-plugin-file": {},
             "cordova-plugin-media": {
                 "KEEP_AVAUDIOSESSION_ALWAYS_ACTIVE": "YES"
             },
             "cordova-plugin-splashscreen": {},
-            "audscan-cordova-plugin": {}
+            "audscan-cordova-plugin": {},
+            "pasco-cordova-plugin": {}
         },
         "platforms": [
             "ios"
