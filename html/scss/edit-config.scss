@@ -85,7 +85,7 @@ html, body {
       }
       width: auto;
       overflow: hidden;
-      height: 20rem;
+      height: 25rem;
       border: none;
       transition: height 0.5s;
       .list-group-item {
@@ -215,4 +215,58 @@ form[name="quick-setup"] {
 
 .save-section {
   margin-bottom: 20px;
+}
+
+.section-active-menu {
+  display: none;
+}
+@media (max-width: 767px) {
+  .body-navbar-fixed.has-nav-scroll {
+    padding-top: 94px;
+  }
+  html.ios {
+    .section-active-menu {
+      top: 69px;
+    }
+    .body-navbar-fixed.has-nav-scroll {
+      padding-top: 114px;
+    }
+  }
+  .section-active-menu {
+    display: block;
+    position: fixed;
+    left: 0px;
+    right: 0px;
+    top: 49px;
+    min-height: 44px;
+    z-index: 10001;
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #e7e7e7;
+    .menu-items {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      text-align: center;
+      & > li {
+        display: inline-block;
+      }
+      .menu-item {
+        display: inline-block;
+        padding: 10px;
+        text-decoration: none;
+        cursor: pointer;
+        &:after {
+          display: block;
+          content: '';
+          width: 0%;
+          height: 4px;
+          background: #b14400;
+          transition: width 0.3s;
+        }
+        &.active:after {
+          width: 100%;
+        }
+      }
+    }
+  }
 }
