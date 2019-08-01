@@ -1283,6 +1283,10 @@ function update_collapsables() {
 }
 
 function update_collapsable(elm) {
+  if (elm._collapsable_timeout3 != null) {
+    clearTimeout(elm._collapsable_timeout3);
+    elm._collapsable_timeout3 = null;
+  }
   var tmp = elm;
   var set_height_queue = [];
   while(tmp != null && tmp.nodeType == document.ELEMENT_NODE) {
@@ -1293,6 +1297,14 @@ function update_collapsable(elm) {
   }
   for(var i = 0, len = set_height_queue.length; i < len; i++)
     set_height_queue[i]();
+  if (set_height_queue.length > 0) {
+    elm._collapsable_timeout3 = setTimeout(() => {
+      var evt = document.createEvent("CustomEvent")
+      evt.initCustomEvent('x-collapsable-move-end', true, false, null)
+      elm.dispatchEvent(evt);
+      elm._collapsable_timeout3 = null;
+    }, 500);
+  }
 }
 
 function update_collapsable_subrout(elm) {

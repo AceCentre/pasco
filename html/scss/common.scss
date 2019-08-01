@@ -15,12 +15,16 @@ body {
 body.quick-setup {
   padding-top: 30px;
 }
-
+.anchor,
+.scrollnav-anchor {
+  display: block;
+  position: absolute;
+  height: 0px;
+  overflow: hidden;
+}
 .body-navbar-fixed {
   padding-top: 50px;
   .anchor {
-    display: block;
-    position: absolute;
     top: -50px;
   }
 }
