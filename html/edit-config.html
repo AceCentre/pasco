@@ -28,10 +28,11 @@
         </li>
         <li class="head">
           <h1 class="main-head"><i class="far fa-cogs"></i><span x-10n>Settings</span></h1>
-          <h2 href data-name="access" class="page-head"><i class="far fa-universal-access"></i><span x-l10n>Access</span></h2>
-          <h2 href data-name="speech" class="page-head"><i class="far fa-comment"></i><span x-l10n>Speech</span></h2>
-          <h2 href data-name="appearance" class="page-head"><i class="far fa-eye"></i><span x-l10n>Appearance</span></h2>
-          <h2 href data-name="language" class="page-head"><i class="far fa-comment-dots"></i><span x-l10n>Vocabulary</span></h2>
+          <h2 data-name="access" class="page-head"><i class="far fa-universal-access"></i><span x-l10n>Access</span></h2>
+          <h2 data-name="actions" class="page-head"><i class="far fa-keyboard"></i><span x-l10n>Actions</span></h2>
+          <h2 data-name="speech" class="page-head"><i class="far fa-comment"></i><span x-l10n>Speech</span></h2>
+          <h2 data-name="appearance" class="page-head"><i class="far fa-eye"></i><span x-l10n>Appearance</span></h2>
+          <h2 data-name="vocabulary" class="page-head"><i class="far fa-comment-dots"></i><span x-l10n>Vocabulary</span></h2>
         </li>
         <li class="space"></li>
         <li><a class="icon-btn" href="index.html"><span class="far fa-play-circle fa-2x"></span></a></li>
@@ -41,16 +42,17 @@
     <div class="edit-config-container">
       <div class="submenu list-group">
         <a href data-name="access" class="list-group-item"><i class="far fa-universal-access"></i><span x-l10n>Access</span></a>
+        <a href data-name="actions" class="list-group-item"><i class="far fa-keyboard"></i><span x-l10n>Actions</span></a>
         <a href data-name="speech" class="list-group-item"><i class="far fa-comment"></i><span x-l10n>Speech</span></a>
         <a href data-name="appearance" class="list-group-item"><i class="far fa-eye"></i><span x-l10n>Appearance</span></a>
-        <a href data-name="language" class="list-group-item"><i class="far fa-comment-dots"></i><span x-l10n>Vocabulary</span></a>
+        <a href data-name="vocabulary" class="list-group-item"><i class="far fa-comment-dots"></i><span x-l10n>Vocabulary</span></a>
       </div>
       <div class="content">
         <form name="edit-config">
           <div class="page-sect" data-name="access">
             <div class="row">
               <div class="col-sm-6">
-                <h3 x-l10n>On-Screen Navigation</h3>
+                <h3 x-l10n id="access_screen-nav">On-Screen Navigation</h3>
                 <div class="row m-b-10">
                   <div class="col-xs-12">
                     <label class="radio-inline"><input type="radio" name="onscreen_navigation" value="enable"><span x-l10n>Enable</span></label>
@@ -61,10 +63,13 @@
             </div>
             <div class="row">
               <div class="col-xs-12">
-                <h3 x-l10n>Helpers</h3>
+                <h3 x-l10n id="access_helpers">Helpers</h3>
                 <div class="row m-b-10">
                   <div class="col-sm-6">
-                    <label class="m-t-10 m-b-10 checkbox-inline"><input type="checkbox" name="back_at_end"><span x-l10n>Back option for all branches</span></label>
+                    <h4 x-l10n>Back option for all branches</h3>
+                    <label class="radio-inline"><input type="radio" name="helper_back_option" value="start"><span x-l10n>At beginning</span></label>
+                    <label class="radio-inline"><input type="radio" name="helper_back_option" value="end"><span x-l10n>At end</span></label>
+                    <label class="radio-inline"><input type="radio" name="helper_back_option" value=""><span x-l10n>None</span></label>
                   </div>
                   <div class="col-sm-6 hide-for-non-cordova-ios">
                     <button id="ios-open-route-view" type="button" class="btn btn-primary">Open output audio manager</button>
@@ -74,7 +79,7 @@
             </div>
             <div class="row">
               <div class="col-xs-12">
-                <h3 x-l10n>Access Mode</h3>
+                <h3 x-l10n id="access_mode">Access Mode</h3>
                 <div class="row m-b-10">
                   <div class="col-xs-12">
                     <label class="radio-inline"><input type="radio" name="mode" value="auto" data-inp-collapse-toggle="#auto_mode_params"><span x-l10n>1 switch - Auto-Scan</span></label>
@@ -142,25 +147,28 @@
                         </div>
                       </div>
                       <div class="col-sm-3">
-                        <label class="m-t-10 m-b-10 checkbox-inline"><input type="checkbox" name="wheel_y_reverse"><span x-l10n>Reverse Y-Axis Wheel</span></label>
-                      </div>
-                      <div class="col-sm-3">
                         <div class="form-group">
                           <label for="wheel_x_threshold" x-l10n>Wheel X-Axis Threshold</label>
                           <input type="number" id="wheel_x_threshold" name="wheel_x_threshold" class="form-control" value="10" data-validator="number" data-dependent="#wheel_x_threshold_range">
                           <input type="range" id="wheel_x_threshold_range" class="form-control btn-lg" step="1" min="1" max="100" data-default="30" data-dependent="#wheel_x_threshold">
                         </div>
                       </div>
-                      <div class="col-sm-3">
-                        <label class="m-t-10 m-b-10 checkbox-inline"><input type="checkbox" name="wheel_x_reverse"><span x-l10n>Reverse X-Axis Wheel</span></label>
+                      <div class="col-sm-6">
+                        <label class="checkbox-inline"><input type="checkbox" name="wheel_y_reverse"><span x-l10n>Reverse Y-Axis Wheel</span></label>
+                        <label class="checkbox-inline"><input type="checkbox" name="wheel_x_reverse"><span x-l10n>Reverse X-Axis Wheel</span></label>
                       </div>
                     </div>
 
                   </div>
                 </div>
-                <hr class="tinyhr"/>
+              </div>
+            </div>
+          </div>
+          <div class="page-sect" data-name="actions">
+            <div class="row">
+              <div class="col-sm-6">
                 <div>
-                  <h3 x-l10n>Configure Actions</h3>
+                  <h3 x-l10n id="access_actions">Configure Actions</h3>
                   <p x-l10n>Below are possible actions in pasco by clicking on them you can manage switches that triggers them.</p>
                   <div class="row configure-actions-wrp">
                     <div class="col-xs-6 col-sm-6 col-md-3">
@@ -205,12 +213,16 @@
             </div> <!-- /row -->
           </div>
           <div class="page-sect" data-name="speech">
+            <div class="section-active-menu">
+              <ul class="menu-items">
+                <li><a class="menu-item" href="#speech_cue-voice">Cue Voice</a></li>
+                <li><a class="menu-item" href="#speech_main-voice">Main Voice</a></li>
+                <li><a class="menu-item" href="#speech_cue-voice-first">Cue Voice (First)</a></li>
+              </ul>
+            </div>
             <div class="row">
-              <div class="col-xs-12">
-                <h3 x-l10n>Speech</h3>
-              </div>
               <div class="col-sm-6">
-                <h4><span x-l10n>Cue Voice</span> <span id="auditory-cue-playback-wrp" class="voice-playback-wrp"><button type="button" class="btn btn-success play-btn"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="hide btn btn-default stop-btn"><span class="glyphicon glyphicon-stop"></span></button></span></h4>
+                <h3 id="speech_cue-voice"><span x-l10n>Cue Voice</span> <span id="auditory-cue-playback-wrp" class="voice-playback-wrp"><button type="button" class="btn btn-success play-btn"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="hide btn btn-default stop-btn"><span class="glyphicon glyphicon-stop"></span></button></span></h3>
                 <div class="row">
                   <div class="col-sm-6">
                     <div class="form-group">
@@ -253,7 +265,7 @@
                 </div>
               </div>
               <div class="col-sm-6">
-                <h4><span x-l10n>Main Voice</span> <span id="auditory-main-playback-wrp" class="voice-playback-wrp"><button type="button" class="btn btn-success play-btn"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="hide btn btn-default stop-btn"><span class="glyphicon glyphicon-stop"></span></button></span></h4>
+                <h3 id="speech_main-voice"><span x-l10n>Main Voice</span> <span id="auditory-main-playback-wrp" class="voice-playback-wrp"><button type="button" class="btn btn-success play-btn"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="hide btn btn-default stop-btn"><span class="glyphicon glyphicon-stop"></span></button></span></h3>
                 <div class="row">
                   <div class="col-sm-6">
                     <div class="form-group">
@@ -300,7 +312,7 @@
               <div class="col-sm-6">
                 <div class="row m-b-10">
                   <div class="col-sm-9">
-                    <h4><span x-l10n>First Time Run (Cue Voice)</span> <span id="auditory-cue-first-run-playback-wrp" class="voice-playback-wrp"><button type="button" class="btn btn-success play-btn"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="hide btn btn-default stop-btn"><span class="glyphicon glyphicon-stop"></span></button></span></h4>
+                    <h3 id="speech_cue-voice-first"><span x-l10n>First Time Run (Cue Voice)</span> <span id="auditory-cue-first-run-playback-wrp" class="voice-playback-wrp"><button type="button" class="btn btn-success play-btn"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="hide btn btn-default stop-btn"><span class="glyphicon glyphicon-stop"></span></button></span></h3>
                     <p x-l10n>Only for auto-scan access mode</p>
                   </div>
                   <div class="col-sm-3">
@@ -402,7 +414,7 @@
               </div>
             </div>
           </div>
-          <div class="page-sect" data-name="language">
+          <div class="page-sect" data-name="vocabulary">
             <div class="row">
               <div class="col-sm-6">
                 <div class="row">
@@ -458,7 +470,7 @@
           </div>
         </form>
         <form name="edit-tree">
-          <div class="page-sect" data-name="language">
+          <div class="page-sect" data-name="vocabulary">
             <div class="row">
               <div class="col-sm-4 col-md-6">
                 <h3 x-l10n>Edit Tree</h3>

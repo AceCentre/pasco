@@ -117,6 +117,14 @@ function _fix_config(cfg) {
     }
     cfg.keys["66"] = { "func": "tree_go_in", "label": "b" };
   }
+  if (!cfg.helper_back_option) {
+    if (cfg.back_at_end) {
+      cfg.helper_back_option = "end";
+    } else {
+      cfg.helper_back_option = "";
+    }
+  }
+  delete cfg.back_at_end;
 }
 
 function bind_dom_event_handlers () {
@@ -179,7 +187,7 @@ function bind_dom_event_handlers () {
   bind_configure_actions();
 }
 
-function submenu_set_active (name) {
+function submenu_set_active (name, sam_options) {
   var isactive = $('.x-navbar .head .page-head[data-name="'+name+'"]').hasClass('active');
   if (isactive) {
     return;
@@ -222,29 +230,58 @@ function submenu_set_active (name) {
           });
         }
       });
+    })
+    .then(() => {
+      if (NavScroll.navigationWrapper) {
+        NavScroll.unbindObserver(sam_options);
+        NavScroll.navigationWrapper = null;
+      }
+      let $sect_menu = $('.edit-config-container .page-sect.active .section-active-menu');
+      if ($sect_menu.length > 0) {
+        document.body.classList.add('has-nav-scroll');
+        NavScroll.navigationWrapper = $sect_menu[0];
+        NavScroll.initObserver($sect_menu[0], '.menu-item', sam_options)
+      } else {
+        document.body.classList.remove('has-nav-scroll');
+      }
     });
 }
 
 function submenu_init () {
+  let sam_options = {
+    container: 'html',
+    activeClass: 'active',
+    offset: $('html').hasClass('ios') ? 120 : 100,
+    scrollX: false,
+    scrollY: true,
+    stopPropagation: true,
+    anchor: false,
+  }
   $('.edit-config-container .submenu a').on('click', function ($evt) {
     $evt.preventDefault();
     var $this = $(this);
     var name = $this.data('name');
     history.replaceState({}, name, '#!' + name);
-    submenu_set_active(name);
+    submenu_set_active(name, sam_options);
   });
   $('.back-btn').on('click', function ($evt) {
     $evt.preventDefault();
     history.replaceState({}, name, location.pathname);
-    submenu_set_active("");
+    submenu_set_active("", sam_options);
   });
   window.addEventListener('popstate', updatestate);
   setTimeout(updatestate, 1000);
+  // NavScroll listens for scroll event on container element (body), trigger it on body to
+  document.addEventListener('scroll', (evt) => {
+    if (NavScroll.navigationWrapper) {
+      NavScroll.onScroll(evt);
+    }
+  }, false);
   function updatestate () {
     if (location.hash.indexOf("#!") == 0) {
-      submenu_set_active(location.hash.substr(2));
+      submenu_set_active(location.hash.substr(2), sam_options);
     } else {
-      submenu_set_active("");
+      submenu_set_active("", sam_options);
     }
   }
 }

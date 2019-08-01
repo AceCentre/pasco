@@ -110,6 +110,9 @@ function _main_fix_config (cfg) {
     cfg.keys = cfg.switch_keys || cfg.auto_keys || {};
     cfg.keys["66"] = { "func": "tree_go_in", "label": "b" }
   }
+  if (cfg.helper_back_option === undefined && cfg.back_at_end) {
+    cfg.helper_back_option = "end";
+  }
 }
 
 window.addEventListener('unload', function() {
@@ -403,13 +406,13 @@ function _napi_remove_key_command() {
   }
 }
 function _start_prepare() {
-  if(!state.edit_mode && config.back_at_end) {
+  if(!state.edit_mode && config.helper_back_option) {
     var tree = state.positions[0].tree;
     var content_template,
         tmp = document.querySelector('#tree-node-template');
     if(tmp)
       content_template = _.template(tmp.innerHTML);
-    _start_auto_insert_back(tree, content_template);
+    _start_auto_insert_back(tree, content_template, config.helper_back_option);
   }
   return _napi_add_key_command();
 }
@@ -424,7 +427,11 @@ function _stop_prepare() {
 function _start_auto_insert_back(tree, content_template) {
   _.each(tree.nodes, function(anode) {
     if(!anode.is_leaf) {
-      anode._back_node = tree_add_node(anode, null, {
+      let insert_pos = null;
+      if (config.helper_back_option == 'start') {
+        insert_pos = 0;
+      }
+      anode._back_node = tree_add_node(anode, insert_pos, {
         _more_meta: {
           istmp: true
         },
@@ -601,7 +608,6 @@ function _on_xkeycommand(evt) {
 }
 
 function _tree_on_click (evt) {
-  console.log(state.edit_mode, config._keyhit_delegates);
   if (state.edit_mode) {
     return; // skip
   }
