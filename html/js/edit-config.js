@@ -117,6 +117,14 @@ function _fix_config(cfg) {
     }
     cfg.keys["66"] = { "func": "tree_go_in", "label": "b" };
   }
+  if (!cfg.helper_back_option) {
+    if (cfg.back_at_end) {
+      cfg.helper_back_option = "end";
+    } else {
+      cfg.helper_back_option = "";
+    }
+  }
+  delete cfg.back_at_end;
 }
 
 function bind_dom_event_handlers () {

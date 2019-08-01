@@ -66,7 +66,10 @@
                 <h3 x-l10n id="access_helpers">Helpers</h3>
                 <div class="row m-b-10">
                   <div class="col-sm-6">
-                    <label class="m-t-10 m-b-10 checkbox-inline"><input type="checkbox" name="back_at_end"><span x-l10n>Back option for all branches</span></label>
+                    <h4 x-l10n>Back option for all branches</h3>
+                    <label class="radio-inline"><input type="radio" name="helper_back_option" value="start"><span x-l10n>At beginning</span></label>
+                    <label class="radio-inline"><input type="radio" name="helper_back_option" value="end"><span x-l10n>At end</span></label>
+                    <label class="radio-inline"><input type="radio" name="helper_back_option" value=""><span x-l10n>None</span></label>
                   </div>
                   <div class="col-sm-6 hide-for-non-cordova-ios">
                     <button id="ios-open-route-view" type="button" class="btn btn-primary">Open output audio manager</button>
