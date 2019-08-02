@@ -11,6 +11,7 @@
     "dev": "concurrently \"npm run dev-bs\" \"gulp dev\"",
     "dev-bs": "browser-sync start -c bs-config.js",
     "build": "gulp build-dev",
+    "build-prod": "gulp build-prod",
     "cordova-dist": "gulp cordova-dist",
     "watch-cordova-dist": "gulp watch-cordova-dist",
     "docs:dev": "vuepress dev docs",
