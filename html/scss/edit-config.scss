@@ -224,21 +224,21 @@ form[name="quick-setup"] {
 @media (max-width: 767px) {
   .body-navbar-fixed {
     &.has-nav-scroll {
-      padding-top: 94px;
+      padding-top: 94px + $iosoffsettop;
     }
     .page-sect .scrollnav-anchor {
-      top: -109px;
+      top: -109px + $iosoffsettop;
     }
   }
   html.ios {
     .page-sect .scroll-nav {
-      top: 69px;
+      top: 49px + $iosoffsettop;
     }
     .body-navbar-fixed.has-nav-scroll {
-      padding-top: 114px;
+      padding-top: 94px + $iosoffsettop;
     }
     .page-sect .scrollnav-anchor {
-      top: -129px;
+      top: -109px - $iosoffsettop;
     }
   }
   .page-sect .scroll-nav {
