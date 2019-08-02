@@ -99,14 +99,14 @@ gulp.task('build-script-prod', function () {
   return gulp.src('.')
     .pipe(webpackst(Object.assign({}, webpackConfig, {
       output: {
-        filename: '[name].min.js',
+        filename: '[name].js',
       },
       mode: 'production',
       devtool: 'source-map',
       plugins: [
         new webpack.DefinePlugin(wpdefine_options(true)),
         new UglifyJsPlugin({
-          exclude: /min\.js$/,
+          exclude: /(min\.js|nodelib\.js)$/,
           sourceMap: true,
         }),
       ],
