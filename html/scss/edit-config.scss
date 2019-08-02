@@ -217,22 +217,31 @@ form[name="quick-setup"] {
   margin-bottom: 20px;
 }
 
-.section-active-menu {
+
+.page-sect .scroll-nav {
   display: none;
 }
 @media (max-width: 767px) {
-  .body-navbar-fixed.has-nav-scroll {
-    padding-top: 94px;
+  .body-navbar-fixed {
+    &.has-nav-scroll {
+      padding-top: 94px;
+    }
+    .page-sect .scrollnav-anchor {
+      top: -109px;
+    }
   }
   html.ios {
-    .section-active-menu {
+    .page-sect .scroll-nav {
       top: 69px;
     }
     .body-navbar-fixed.has-nav-scroll {
       padding-top: 114px;
     }
+    .page-sect .scrollnav-anchor {
+      top: -129px;
+    }
   }
-  .section-active-menu {
+  .page-sect .scroll-nav {
     display: block;
     position: fixed;
     left: 0px;
@@ -242,7 +251,7 @@ form[name="quick-setup"] {
     z-index: 10001;
     background-color: #f8f8f8;
     border-bottom: 1px solid #e7e7e7;
-    .menu-items {
+    .scroll-nav__list {
       list-style: none;
       padding: 0;
       margin: 0;
@@ -250,7 +259,7 @@ form[name="quick-setup"] {
       & > li {
         display: inline-block;
       }
-      .menu-item {
+      .scroll-nav__link {
         display: inline-block;
         padding: 10px;
         text-decoration: none;
@@ -263,9 +272,9 @@ form[name="quick-setup"] {
           background: #b14400;
           transition: width 0.3s;
         }
-        &.active:after {
-          width: 100%;
-        }
+      }
+      .scroll-nav__item--active .scroll-nav__link:after {
+        width: 100%;
       }
     }
   }
