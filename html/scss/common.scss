@@ -99,6 +99,7 @@ body.quick-setup {
   }
 }
 
+$iosoffsettop: 25px;
 
 /* common */
 .main-top-navbar {
@@ -107,30 +108,29 @@ body.quick-setup {
 }
 html.ios {
   .body-navbar-fixed {
-    padding-top: 70px;
+    padding-top: 50px + $iosoffsettop;
   }
   .main-top-navbar {
-    padding-top: 20px;
-    min-height: 70px;
+    padding-top: $iosoffsettop;
   }
   .modal-dialog {
     margin-top: 30px;
   }
   .body-navbar-fixed .navbar-fixed-top {
-    padding-top: 20px;
+    padding-top: $iosoffsettop;
   }
   @media (min-height: 630px) and (max-width: 400px) {
     body.quick-setup {
-      padding-top: 60px;
+      padding-top: 40px + $iosoffsettop;
     }
     .body-navbar-fixed {
-	    padding-top: 65px;
+	    padding-top: 40px + $iosoffsettop;
       .anchor {
-        top: -85px;
+        top: -65px - $iosoffsettop;
       }
     }
     .main-top-navbar {
-      padding-top: 35px;
+      padding-top: 10px + $iosoffsettop;
     }
     .modal-dialog {
       margin-top: 100px;
