@@ -112,7 +112,24 @@
     "Simple Adult Starter - Chinese Main": "સિમ્પલ એડલ્ટ સ્ટાર્ટર - ચીની મુખ્ય",
     "Welsh": "વેલ્શ",
     "Light-Bold": "પ્રકાશ-બોલ્ડ",
-    "Spell by Word/Letter Prediction": "શબ્દ / પત્ર આગાહી દ્વારા જોડણી કરો"
+    "Spell by Word/Letter Prediction": "શબ્દ / પત્ર આગાહી દ્વારા જોડણી કરો",
+    "Access": "પ્રવેશ",
+    "Vocabulary": "શબ્દભંડોળ",
+    "Tools": "સાધનો",
+    "Edit tree": "વૃક્ષ સંપાદિત કરો",
+    "At beginning": "શરૂઆતમાં",
+    "At end": "અંતે",
+    "None": "કંઈ નહીં",
+    "Minimum Cue Time(ms)": "ન્યૂનતમ ક્યુ સમય (એમએસ)",
+    "Scrollwheel": "સ્ક્રોલવ્હીલ",
+    "1 switch - Auto-Scan": "1 સ્વીચ - સ્વત.-સ્કેન",
+    "2+ Switches": "2+ સ્વીચો",
+    "Only for auto-scan access mode": "ફક્ત સ્વત scan-સ્કેન accessક્સેસ મોડ માટે",
+    "On": "ચાલુ",
+    "Select Item": "આઇટમ પસંદ કરો",
+    "Go Back": "પાછા જાવ",
+    "Move to Next": "આગળ પર ખસેડો",
+    "Move to Previous": "પાછલા પર ખસેડો"
 };
   
 })();

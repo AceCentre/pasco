@@ -112,7 +112,24 @@
     "Simple Adult Starter - Chinese Main": "Simple Adult Starter - Main Chinois",
     "Welsh": "gallois",
     "Light-Bold": "Gras clair",
-    "Spell by Word/Letter Prediction": "Orthographe par mot / lettre"
+    "Spell by Word/Letter Prediction": "Orthographe par mot / lettre",
+    "Access": "Accès",
+    "Vocabulary": "Vocabulaire",
+    "Tools": "Outils",
+    "Edit tree": "Modifier l'arbre",
+    "At beginning": "Au début",
+    "At end": "À la fin",
+    "None": "Aucun",
+    "Minimum Cue Time(ms)": "Temps minimum de repérage (ms)",
+    "Scrollwheel": "Molette",
+    "1 switch - Auto-Scan": "1 commutateur - balayage automatique",
+    "2+ Switches": "2+ commutateurs",
+    "Only for auto-scan access mode": "Uniquement pour le mode d'accès à l'analyse automatique",
+    "On": "Sur",
+    "Select Item": "Sélectionner un article",
+    "Go Back": "Retourner",
+    "Move to Next": "Passer au suivant",
+    "Move to Previous": "Passer au précédent"
 };
 
 })();

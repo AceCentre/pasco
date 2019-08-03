@@ -112,7 +112,24 @@
     "Simple Adult Starter - Chinese Main": "Arrancador Adulto Simple - Chino Principal",
     "Welsh": "galés",
     "Light-Bold": "Light-Bold",
-    "Spell by Word/Letter Prediction": "Hechizo por palabra / letra predicción"
+    "Spell by Word/Letter Prediction": "Hechizo por palabra / letra predicción",
+    "Access": "Acceso",
+    "Vocabulary": "Vocabulario",
+    "Tools": "Herramientas",
+    "Edit tree": "Editar árbol",
+    "At beginning": "Al principio",
+    "At end": "Al final",
+    "None": "Ninguna",
+    "Minimum Cue Time(ms)": "Tiempo mínimo de señal (ms)",
+    "Scrollwheel": "Rueda de desplazamiento",
+    "1 switch - Auto-Scan": "1 interruptor - Escaneo automático",
+    "2+ Switches": "2+ interruptores",
+    "Only for auto-scan access mode": "Solo para el modo de acceso de escaneo automático",
+    "On": "En",
+    "Select Item": "Seleccione un artículo",
+    "Go Back": "Regresa",
+    "Move to Next": "Mover al siguiente",
+    "Move to Previous": "Mover a anterior"
 };
 
 })();

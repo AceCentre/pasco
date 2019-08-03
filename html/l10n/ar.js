@@ -112,7 +112,24 @@
     "Simple Adult Starter - Chinese Main": "بسيطة الكبار كاتب - الصينية الرئيسية",
     "Welsh": "الويلزية",
     "Light-Bold": "ضوء جريئة",
-    "Spell by Word/Letter Prediction": "تهجئة كلمة / خطاب التنبؤ"
+    "Spell by Word/Letter Prediction": "تهجئة كلمة / خطاب التنبؤ",
+    "Access": "التمكن من",
+    "Vocabulary": "مفردات اللغه",
+    "Tools": "أدوات",
+    "Edit tree": "تحرير الشجرة",
+    "At beginning": "في البداية",
+    "At end": "في النهاية",
+    "None": "لا شيء",
+    "Minimum Cue Time(ms)": "الحد الأدنى من الوقت جديلة (مللي ثانية)",
+    "Scrollwheel": "عجلة التمرير",
+    "1 switch - Auto-Scan": "مفتاح واحد - المسح التلقائي",
+    "2+ Switches": "2+ مفاتيح",
+    "Only for auto-scan access mode": "فقط لوضع الوصول المسح التلقائي",
+    "On": "على",
+    "Select Item": "اختر البند",
+    "Go Back": "عد",
+    "Move to Next": "الانتقال إلى التالي",
+    "Move to Previous": "الانتقال إلى السابق"
 };
 
 })();

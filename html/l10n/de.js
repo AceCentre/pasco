@@ -112,7 +112,24 @@
     "Simple Adult Starter - Chinese Main": "Einfacher Erwachsener Starter - Chinese Main",
     "Welsh": "Walisisch",
     "Light-Bold": "Licht-Fett",
-    "Spell by Word/Letter Prediction": "Buchstabiere durch Wort- / Buchstabenvorhersage"
+    "Spell by Word/Letter Prediction": "Buchstabiere durch Wort- / Buchstabenvorhersage",
+    "Access": "Zugriff",
+    "Vocabulary": "Wortschatz",
+    "Tools": "Werkzeuge",
+    "Edit tree": "Baum bearbeiten",
+    "At beginning": "Am Anfang",
+    "At end": "Am Ende",
+    "None": "Keiner",
+    "Minimum Cue Time(ms)": "Minimale Cue-Zeit (ms)",
+    "Scrollwheel": "Scrollrad",
+    "1 switch - Auto-Scan": "1 Schalter - Auto-Scan",
+    "2+ Switches": "2+ Schalter",
+    "Only for auto-scan access mode": "Nur für den Auto-Scan-Zugriffsmodus",
+    "On": "Auf",
+    "Select Item": "Menüpunkt wählen",
+    "Go Back": "Geh zurück",
+    "Move to Next": "Weiter mit Weiter",
+    "Move to Previous": "Zum vorherigen verschieben"
 };
 
 })();

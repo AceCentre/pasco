@@ -112,7 +112,24 @@
     "Simple Adult Starter - Chinese Main": "Dechreuwr Oedolion Syml - Prif Dseiniaidd",
     "Welsh": "Cymraeg",
     "Light-Bold": "Golau-Bold",
-    "Spell by Word/Letter Prediction": "Sillafu yn ôl Word / Letter Prediction"
+    "Spell by Word/Letter Prediction": "Sillafu yn ôl Word / Letter Prediction",
+    "Access": "Mynediad",
+    "Vocabulary": "Geirfa",
+    "Tools": "Offer",
+    "Edit tree": "Golygu coeden",
+    "At beginning": "Ar y dechrau",
+    "At end": "Ar y diwedd",
+    "None": "Dim",
+    "Minimum Cue Time(ms)": "Isafswm Amser Ciw (ms)",
+    "Scrollwheel": "Scrollwheel",
+    "1 switch - Auto-Scan": "1 switsh - Auto-Sgan",
+    "2+ Switches": "2+ Switsys",
+    "Only for auto-scan access mode": "Dim ond ar gyfer modd mynediad auto-sgan",
+    "On": "Ymlaen",
+    "Select Item": "Dewiswch Eitem",
+    "Go Back": "Mynd yn ôl",
+    "Move to Next": "Symud i'r Nesaf",
+    "Move to Previous": "Symud i Blaenorol"
 };
 
 })();
