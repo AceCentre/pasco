@@ -615,21 +615,50 @@ function handle_error_checkpoint() {
 function handle_error_data (err) {
   if(err.withcheckpoint) {
     return {
-      error: [ "checkpoint:", err.checkpoint_stack, err.error ],
-      alert:err.error+''
+      console_error: [ "checkpoint:", err.checkpoint_stack, err.error ],
+      title: err.error.message ? 'Error: ' + err.error.message  : 'Unexpected error',
+      details: error_details(err.error, err.checkpoint_stack)
     };
   } else {
     return {
-      error: [ err ],
-      alert:err
+      console_error: [ err ],
+      title: err.message ? 'Error: ' + err.message  : 'Unexpected error',
+      details: error_details(err)
     };
+  }
+  function error_details (error, checkpoint_stack) {
+    if (typeof error.message != 'string' || typeof error.stack != 'string') {
+      return JSON.stringify(error) +
+        (checkpoint_stack ? "\n\ncheckpoint: " + checkpoint_stack : "");
+    } else {
+      return error.constructor.name  + ": " + error.message + "\n" + error.stack +
+        (checkpoint_stack ? "\n\ncheckpoint: " + checkpoint_stack : "");
+    }
   }
 }
 
 function handle_error (err) {
   var data = handle_error_data(err);
-  console.error.apply(console, data.error);
-  alert(err.alert ? err.alert : err+"");
+  var $modal = $('#error-modal');
+  console.error.apply(console, data.console_error);
+  if ($modal.length > 0) {
+    var details_btn = $modal.find('.copy-details-btn')[0];
+    if (details_btn) {
+      if (details_btn._onclick_handler) {
+        details_btn.removeEventListener('click', details_btn._onclick_handler, false);
+      }
+      details_btn.addEventListener('click', details_btn._onclick_handler = function () {
+        window.copy($modal.find('.error-details').text());
+      }, false);
+    }
+    $modal.find('.modal-title').text(data.title);
+    $modal.find('.error-details').text(data.details);
+    $modal.modal('show');
+    // make sure it is visible despite view is not ready
+    $('body').removeClass('notready');
+  } else {
+    alert(data.title);
+  }
 }
 
 function delete_file(url, options) {
