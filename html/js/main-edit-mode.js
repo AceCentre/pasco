@@ -262,6 +262,9 @@ function _on_edit_save(evt) {
 function _on_edit_cancel(evt) {
   if(evt)
     evt.preventDefault();
+  if(!state._orig_snapshot)
+    return;
+  let tree = state._orig_snapshot.tree;
   editor_helper.on_restore(tree)
     .then(function() {
       // restore will stop => auto toggle off

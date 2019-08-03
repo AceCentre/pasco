@@ -331,7 +331,7 @@ function tree_add_node(parent_node, at, data, content_template) {
     after_node = parent_node.nodes[at];
     static_node_idx = parent_node.static_nodes.indexOf(after_node);
     if (static_node_idx == -1) {
-      throw new Error("tree_add_node at node is not static node");
+      throw new Error("tree_add_node at node that is not static node");
     }
   } else {
     static_node_idx = parent_node.static_nodes.length;
