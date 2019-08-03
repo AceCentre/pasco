@@ -186,7 +186,10 @@
       for(var i = 0, len = tree.nodes.length; i < len; i++)
         promises.push(helper.on_save(tree.nodes[i]));
     }
-    return Promise.all(promises);
+    return Promise.all(promises)
+      .then(() => {
+        tree.static_nodes = [].concat(tree.nodes);
+      });
   }
 
   helper.on_restore = function(tree) {
@@ -209,7 +212,10 @@
       for(var i = 0, len = tree.nodes.length; i < len; i++)
         promises.push(helper.on_restore(tree.nodes[i]));
     }
-    return Promise.all(promises);
+    return Promise.all(promises)
+      .then(() => {
+        tree.static_nodes = [].concat(tree.nodes);
+      });
   }
   
   helper.node_setting_modal_unbind = function() {

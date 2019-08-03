@@ -1115,7 +1115,12 @@ function config_auto_save_init() {
       }
     }, true);
   }
-  function onchange() {
+  function onchange($evt) {
+    if ($evt && $evt.target) {
+      if (!$evt.target.name) {
+        return;
+      }
+    }
     _config_autosave_start_countdown();
   }
 }
