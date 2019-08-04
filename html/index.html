@@ -212,6 +212,21 @@
         </g>
       </svg>
     </div>
+    <div id="error-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="Error dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title"></h4>
+          </div>
+          <div class="modal-body">
+            <button class="btn btn-primary copy-details-btn m-b-10" type="button" x-l10n>Copy</button>
+            <pre><code class="error-details"></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- INJECT SCRIPTS -->
     <!-- MAIN SCRIPTS -->
     <script src="bower_components/underscore/underscore-min.js"></script>
