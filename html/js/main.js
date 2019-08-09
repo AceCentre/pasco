@@ -13,6 +13,12 @@ Promise.all([
   .then(initialize_app)
   .catch(handle_error_checkpoint())
   .then(function() {
+    // ios specific
+    var html = document.querySelector('html');
+    if (html.classList.contains('ios')) {
+      html.classList.add('with-fake-scroll');
+    }
+
     config_fn = default_config;
     napi = new NativeAccessApi();
     speaku = new SpeakUnit(napi);
@@ -36,6 +42,24 @@ Promise.all([
         } else {
           localStorage.clear()
         }
+      }, false);
+    }
+    var el = document.querySelector('#debug-with-fake-scroll-toggle')
+    if(el) {
+      el.addEventListener('click', function() {
+        stop()
+          .then(function () {
+            var html = document.querySelector('html');
+            var active = !html.classList.contains('with-fake-scroll');
+            if (active) {
+              html.classList.add('with-fake-scroll');
+            } else {
+              html.classList.remove('with-fake-scroll');
+            }
+            el.innerHTML = "Wheel With Fake " + (active ? '[ON]' : '[OFF]');
+            state = renew_state(state)
+            start(state);
+          });
       }, false);
     }
   })
@@ -126,7 +150,8 @@ window.addEventListener('unload', function() {
 
 /* ios related */
 document.addEventListener('touchmove', function(evt) {
-  if(document.querySelector('html').classList.contains('ios')) {
+  var html = document.querySelector('html');
+  if(html.classList.contains('ios') && !html.classList.contains('has-fake-scroll')) {
     // prevent scrolling
     evt.preventDefault();
   }
@@ -230,11 +255,22 @@ function start(_state) {
           "RightClick" in config._keyhit_delegates) {
         tree_wrp_element.addEventListener('click', _tree_on_click, false);
       }
+      // add mode as a class to html
       document.addEventListener('x-keycommand', _on_xkeycommand, false);
       window.addEventListener('keydown', _on_keydown, false);
       window.addEventListener('resize', _tree_needs_resize, false);
       if (state.mode == 'wheel') {
-        document.addEventListener('wheel', _on_wheel, false);
+        var html = document.querySelector('html');
+        if (html.classList.contains('with-fake-scroll')) {
+          // ios has fake-scroll adjust scroll state according to that
+          html.classList.add('has-fake-scroll');
+          window.scrollTo(60, 60);
+          window._last_scroll_x = window.scrollX;
+          window._last_scroll_y = window.scrollY;
+          document.addEventListener('scroll', _on_scroll, false);
+        } else {
+          document.addEventListener('wheel', _on_wheel, false);
+        }
       }
       var tmp = document.querySelector('#navbtns')
       if(tmp && config._onscreen_navigation) {
@@ -427,7 +463,7 @@ function _stop_prepare() {
 function _start_auto_insert_back(tree, content_template) {
   _.each(tree.nodes, function(anode) {
     if(!anode.is_leaf) {
-      let insert_pos = null;
+      var insert_pos = null;
       if (config.helper_back_option == 'start') {
         insert_pos = 0;
       }
@@ -483,7 +519,14 @@ function stop() {
           clearTimeout(state._wheel_timeout);
           state._wheel_timeout = null;
         }
-        document.removeEventListener('wheel', _on_wheel, false);
+        var html = document.querySelector('html');
+        if (html.classList.contains('with-fake-scroll')) {
+          html.classList.remove('has-fake-scroll');
+          window.scrollTo(0, 0);
+          document.removeEventListener('scroll', _on_scroll, false);
+        } else {
+          document.removeEventListener('wheel', _on_wheel, false);
+        }
       }
       var tmp = document.querySelector('#navbtns')
       if(tmp && config._onscreen_navigation) {
@@ -678,9 +721,27 @@ function _on_keydown(down_ev) {
   window.addEventListener('keyup', state._next_keyup, false);
 }
 
+function _on_scroll (evt) {
+  if(!state || state._wheel_off)
+    return;
+  var deltaX = evt.pageX - window._last_scroll_x,
+      deltaY = evt.pageY - window._last_scroll_y;
+  _on_wheel_subrout(deltaX, deltaY);
+  // lock-the scroll
+  var scrollX = window.scrollX > 110 || window.scrollX < 10 ? 60 : window.scrollX,
+      scrollY = window.scrollY > 110 || window.scrollY < 10 ? 60 : window.scrollY;
+  window.scrollTo(scrollX, scrollY);
+  window._last_scroll_x = scrollX;
+  window._last_scroll_y = scrollY;
+}
+
 function _on_wheel (evt) {
   if(!state || state._wheel_off)
     return;
+  _on_wheel_subrout(evt.deltaX, evt.deltaY);
+}
+
+function _on_wheel_subrout (deltaX, deltaY) {
   // clear wheel delta after 3s
   if (state._wheel_timeout != null) {
     clearTimeout(state._wheel_timeout);
@@ -689,8 +750,8 @@ function _on_wheel (evt) {
     state._wheel_delta = [ 0, 0 ];
     state._wheel_timeout = null;
   }, 3000);
-  state._wheel_delta = [ state._wheel_delta[0] + evt.deltaX,
-                         state._wheel_delta[1] + evt.deltaY ];
+  state._wheel_delta = [ state._wheel_delta[0] + deltaX,
+                         state._wheel_delta[1] + deltaY ];
   var x_threshold = config.wheel_x_threshold || 30;
   if (Math.abs(state._wheel_delta[0]) > x_threshold) {
     (state._wheel_delta[0] > 0 && !config.wheel_x_reverse ?
@@ -1415,7 +1476,14 @@ function _start_at_next_action(atree) {
     window.removeEventListener('keydown', onkeydown, false);
     document.removeEventListener('x-keycommand', onkeydown, false);
     if (state.mode == 'wheel') {
-      document.removeEventListener('wheel', tmp_onwheel, false);
+      var html = document.querySelector('html');
+      if (html.classList.contains('with-fake-scroll')) {
+        html.classList.remove('has-fake-scroll');
+        window.scrollTo(0, 0);
+        document.removeEventListener('scroll', tmp_onscroll, false);
+      } else {
+        document.removeEventListener('wheel', tmp_onwheel, false);
+      }
     }
   }
   function onscreen_nav_click() {
@@ -1427,10 +1495,25 @@ function _start_at_next_action(atree) {
     clear()
     finish()
   }
-  let wheeldelta = [ 0, 0 ];
+  var wheeldelta = [ 0, 0 ];
   function tmp_onwheel (evt) {
-    wheeldelta = [ wheeldelta[0] + evt.deltaX,
-                   wheeldelta[1] + evt.deltaY ];
+    tmp_onwheel_subrout(evt.deltaX, evt.deltaY)
+  }
+  function tmp_onscroll (evt) {
+    var deltaX = evt.pageX - window._last_scroll_x,
+        deltaY = evt.pageY - window._last_scroll_y;
+    tmp_onwheel_subrout(deltaX, deltaY)
+    // lock-the scroll
+    var scrollX = window.scrollX > 110 || window.scrollX < 10 ? 60 : window.scrollX,
+        scrollY = window.scrollY > 110 || window.scrollY < 10 ? 60 : window.scrollY;
+    window.scrollTo(scrollX, scrollY);
+    window._last_scroll_x = scrollX;
+    window._last_scroll_y = scrollY;
+  }
+tmp_onscroll
+  function tmp_onwheel_subrout (deltaX, deltaY) {
+    wheeldelta = [ wheeldelta[0] + deltaX,
+                   wheeldelta[1] + deltaY ];
     var x_threshold = config.wheel_x_threshold || 30
     var y_threshold = config.wheel_y_threshold || 30
     if (Math.abs(wheeldelta[0]) > x_threshold ||
@@ -1448,7 +1531,17 @@ function _start_at_next_action(atree) {
       window.addEventListener('keydown', onkeydown, false);
       document.addEventListener('x-keycommand', onkeydown, false); 
       if (state.mode == 'wheel') {
-        document.addEventListener('wheel', tmp_onwheel, false);
+        var html = document.querySelector('html');
+        if (html.classList.contains('with-fake-scroll')) {
+          html.classList.add('has-fake-scroll');
+          // ios has fake-scroll adjust scroll state according to that
+          window.scrollTo(60, 60);
+          window._last_scroll_x = window.scrollX;
+          window._last_scroll_y = window.scrollY;
+          document.addEventListener('scroll', tmp_onscroll, false);
+        } else {
+          document.addEventListener('wheel', tmp_onwheel, false);
+        }
       }
     });
 }
