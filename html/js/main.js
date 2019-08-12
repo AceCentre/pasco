@@ -56,7 +56,7 @@ Promise.all([
             } else {
               html.classList.remove('with-fake-scroll');
             }
-            el.innerHTML = "Wheel With Fake " + (active ? '[ON]' : '[OFF]');
+            el.innerHTML = "Wheel With Fake Scroll " + (active ? '[ON]' : '[OFF]');
             state = renew_state(state)
             start(state);
           });
@@ -724,8 +724,8 @@ function _on_keydown(down_ev) {
 function _on_scroll (evt) {
   if(!state || state._wheel_off)
     return;
-  var deltaX = evt.pageX - window._last_scroll_x,
-      deltaY = evt.pageY - window._last_scroll_y;
+  var deltaX = window.scrollX - window._last_scroll_x,
+      deltaY = window.scrollY - window._last_scroll_y;
   _on_wheel_subrout(deltaX, deltaY);
   // lock-the scroll
   var scrollX = window.scrollX > 110 || window.scrollX < 10 ? 60 : window.scrollX,
@@ -1500,8 +1500,8 @@ function _start_at_next_action(atree) {
     tmp_onwheel_subrout(evt.deltaX, evt.deltaY)
   }
   function tmp_onscroll (evt) {
-    var deltaX = evt.pageX - window._last_scroll_x,
-        deltaY = evt.pageY - window._last_scroll_y;
+    var deltaX = window.scrollX - window._last_scroll_x,
+        deltaY = window.scrollY - window._last_scroll_y;
     tmp_onwheel_subrout(deltaX, deltaY)
     // lock-the scroll
     var scrollX = window.scrollX > 110 || window.scrollX < 10 ? 60 : window.scrollX,
