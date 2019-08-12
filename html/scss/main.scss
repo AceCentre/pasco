@@ -283,6 +283,9 @@ body.rtl #tree {
       width: 450px;
     }
   }
+  & > .content { // do not display content at level zero
+    display: none;
+  }
 }
 
 body:not(.debug-mode) .on-debug-mode {
@@ -430,5 +433,26 @@ body.debug-mode .on-debug-mode {
 @media (max-width: 250px) {
   #edit-mode-btn, #edit-mode-save-btn, #edit-mode-cancel-btn {
     display: none;
+  }
+}
+
+
+// fake scrolls
+html.has-fake-scroll {
+  .main-top-navbar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+  }
+  #tree-wrp {
+    position: fixed;
+  }
+  .fake-scroll-elm {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    right: -120px;
+    bottom: -120px;
   }
 }
