@@ -62,6 +62,18 @@ Promise.all([
           });
       }, false);
     }
+
+
+    _.each(document.querySelectorAll('#main-top-navbar,#navbtns-wrp'), function (elm) {
+        function actionEventHandler (event) {
+          event.stopPropagation()
+        }
+        elm.addEventListener('click', actionEventHandler, false)
+        elm.addEventListener('touchstart', actionEventHandler, false)
+        elm.addEventListener('touchend', actionEventHandler, false)
+        elm.addEventListener('mousedown', actionEventHandler, false)
+        elm.addEventListener('mouseup', actionEventHandler, false)
+    })
   })
   .then(function() {
     // ready to start, load config
