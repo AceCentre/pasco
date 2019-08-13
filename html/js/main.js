@@ -74,6 +74,13 @@ Promise.all([
         elm.addEventListener('mousedown', actionEventHandler, false)
         elm.addEventListener('mouseup', actionEventHandler, false)
     })
+
+    if(napi.available) {
+      return Promise.all([
+        napi.add_key_command("p"),
+        napi.add_key_command("."),
+      ])
+    }
   })
   .then(function() {
     // ready to start, load config
