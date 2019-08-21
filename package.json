@@ -29,6 +29,10 @@
   "homepage": "https://github.com/AceCentre/pasco#readme",
   "dependencies": {
     "copy-html-to-clipboard": "^4.0.1",
+    "cordova": "^9.0.0",
+    "cordova-icon": "^1.0.0",
+    "cordova-ios": "^5.0.1",
+    "ios-deploy": "^1.9.4",
     "jquery": "^3.4.1",
     "path-browserify": "^1.0.0",
     "plist": "3.0.1",
