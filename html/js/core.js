@@ -269,6 +269,8 @@ function tree_mk_list_base(tree, el, content_template) {
     tree.txt_dom_element = txtel;
   }
   if(!tree.is_leaf) {
+    let ulwrp = newEl('div')
+    ulwrp.classList.add('children-wrp')
     var nodes = tree.nodes,
         ul = newEl('ul');
     tree.nodes_ul_dom_element = ul;
@@ -279,7 +281,8 @@ function tree_mk_list_base(tree, el, content_template) {
       tree_mk_list_base(node, li, content_template);
       ul.appendChild(li);
     }
-    el.appendChild(ul);
+    ulwrp.appendChild(ul)
+    el.appendChild(ulwrp);
   }
 }
 var _parse_dom_tree_pttrn01 = /^H([0-9])$/,
