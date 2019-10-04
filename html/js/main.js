@@ -265,6 +265,7 @@ function start(_state) {
     _auto_next_rem_loops: config.auto_next_loops || 0,
     _stop_callbacks: [],
     _wheel_delta: [ 0, 0 ],
+    _paused: false,
   };
   if(_modes.indexOf(state.mode) == -1)
     throw new Error("Unknown mode " + state.mode);
@@ -317,7 +318,7 @@ function start(_state) {
       return _before_changeposition()
         .then(function () {
           if(state.positions[state.positions.length - 1].index != -1)
-            _tree_position_update();
+            _scan_move()
           else
             _update_active_positions();
           delete state._start_promise;
@@ -342,7 +343,7 @@ function start(_state) {
         config.auto_next_first_run_delay : null) ||
           config.auto_next_delay || 500);
     function run() {
-      if(_state._stopped)
+      if(_state._stopped || _state._paused)
         return; // stop the loop
       if(_state._running_move != null) {
         _state._running_move.then(auto_next);
@@ -389,6 +390,53 @@ function start(_state) {
       }, delay);
     }
   }
+}
+
+function pause () {
+  if (!state || state._stopped) {
+    throw new Error('state is not initialized!');
+  }
+  state._paused = true;
+  if (state._active_timeout != null) {
+    clearTimeout(state._active_timeout);
+  }
+  return Promise.resolve();
+}
+
+function resume () {
+  if (!state || state._stopped) {
+    throw new Error('state is not initialized!');
+  }
+  state._paused = false;
+  if(state.mode == 'auto' && _state._active_timeout == null) {
+    _state.auto_next_start();
+  }
+  return _before_changeposition()
+    .then(function () {
+      if(state.positions[state.positions.length - 1].index != -1)
+        _scan_move();
+      else
+        _update_active_positions();
+      delete state._start_promise;
+    });
+}
+
+function reset_state () {
+  Object.assign(state, {
+    can_move: true,
+    mode: config.mode || 'auto',
+    positions: [ {
+      tree: tree,
+      index: -1
+    } ],
+    _active_elements: [],
+    _highlighted_elements: [],
+    _auto_next_rem_loops: config.auto_next_loops || 0,
+    _stop_callbacks: [],
+    _wheel_delta: [ 0, 0 ],
+    _paused: false,
+    auto_next_dead: false,
+  })
 }
 
 function _napi_add_key_command() {
@@ -595,6 +643,9 @@ function _clean_state(_state) {
 }
 
 function _on_navbtns_tstart(evt) {
+  if (!state || state._paused) {
+    return
+  }
   var call = null;
   if(evt.touches.length == 1) {
     var elem = evt.touches[0].target;
@@ -628,6 +679,9 @@ function _on_navbtns_tstart(evt) {
 }
 
 function _on_navbtns_click(ev) {
+  if (!state || state._paused) {
+    return
+  }
   var elem = ev.target;
   switch(elem.id) {
   case 'nav-upbtn':
@@ -654,7 +708,7 @@ function _on_navbtns_click(ev) {
 }
 
 function _on_xkeycommand(evt) {
-  if(!state || state._keyhit_off)
+  if(!state || state._keyhit_off || state._paused)
     return;
   var curtime = new Date().getTime()
   if(config.ignore_second_hits_time > 0 && state._last_keydown_time &&
@@ -670,7 +724,7 @@ function _on_xkeycommand(evt) {
 }
 
 function _tree_on_click (evt) {
-  if (state.edit_mode) {
+  if (!state || state.edit_mode || state._paused) {
     return; // skip
   }
   var delegate;
@@ -688,7 +742,7 @@ function _tree_on_click (evt) {
 }
 
 function _on_keydown(down_ev) {
-  if(!state || state._keyhit_off)
+  if(!state || state._keyhit_off || state._paused)
     return;
   var curtime = new Date().getTime()
   if(config.ignore_second_hits_time > 0 && state._last_keydown_time &&
@@ -741,7 +795,7 @@ function _on_keydown(down_ev) {
 }
 
 function _on_scroll (evt) {
-  if(!state || state._wheel_off)
+  if(!state || state._wheel_off || state._paused)
     return;
   var deltaX = window.scrollX - window._last_scroll_x,
       deltaY = window.scrollY - window._last_scroll_y;
@@ -755,7 +809,7 @@ function _on_scroll (evt) {
 }
 
 function _on_wheel (evt) {
-  if(!state || state._wheel_off)
+  if(!state || state._wheel_off || state._paused)
     return;
   _on_wheel_subrout(evt.deltaX, evt.deltaY);
 }
@@ -1284,14 +1338,15 @@ function _in_spell_finish(atree) {
       }, 10);
     }
     delete tmp[1]._concat_letters;
-    return stop()
+    return pause()
       .then(function() {
         if(atree.content_element)
           atree.content_element.classList.add('selected' || config.selected_class);
         // speak it
         return _move_sub_speak2.call(atree, 'main', msg)
           .then(function() {
-            _start_at_next_action(atree)
+            reset_state()
+            _resume_at_next_action(atree)
           });
       });
   } else {
@@ -1464,10 +1519,11 @@ function _in_override_change_tree_subrout (atree, another_tree) {
   }
 }
 
-function _start_at_next_action(atree) {
+function _resume_at_next_action(atree) {
   // start again, on demand
   function finish() {
-    return _napi_remove_key_command()
+    // return 
+    return (state._stopped ? _napi_remove_key_command() : Promise.resolve())
       .then(function() {
         var popup = document.querySelector('#popup-message-wrp'),
             popup_mtext = popup ? popup.querySelector('.main-text') : null;
@@ -1479,10 +1535,9 @@ function _start_at_next_action(atree) {
             popup.classList.add('hide');
           }, 500); // wait for hide transition 
         }
-        _clean_state()
         // update tree dyn, before start again
         _tree_update_subdyn(tree);
-        return start(); // start over
+        return resume(); // start over
       });
   }
   function clear() {
@@ -1529,7 +1584,6 @@ function _start_at_next_action(atree) {
     window._last_scroll_x = scrollX;
     window._last_scroll_y = scrollY;
   }
-tmp_onscroll
   function tmp_onwheel_subrout (deltaX, deltaY) {
     wheeldelta = [ wheeldelta[0] + deltaX,
                    wheeldelta[1] + deltaY ];
@@ -1541,7 +1595,7 @@ tmp_onscroll
       finish()
     }
   }
-  return _napi_add_key_command()
+  return (state._stopped ? _napi_add_key_command() : Promise.resolve())
     .then(function() {
       tmp = document.querySelector('#navbtns')
       if(tmp && config._onscreen_navigation) {
@@ -1665,7 +1719,7 @@ function _tree_go_in() {
     }
     // finish it
     // on auto mode stop iteration and on any key restart
-    return stop()
+    return pause()
       .then(function() {
         if(atree.content_element)
           atree.content_element.classList.add('selected' || config.selected_class);
@@ -1673,7 +1727,8 @@ function _tree_go_in() {
         return (_meta_true_check(atree.meta['no-main'], false) ?
                 Promise.resolve() : _move_sub_speak2.call(atree, 'main'))
           .then(function() {
-            _start_at_next_action(atree)
+            reset_state();
+            _resume_at_next_action(atree);
           });
       });
   } else {
@@ -1714,9 +1769,6 @@ function _tree_move(node) {
       state.positions = positions
       return _scan_move()
     });
-}
-function _tree_position_update() {
-  return _scan_move()
 }
 function _tree_go_previous() {
   if(!state.can_move)

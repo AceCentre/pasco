@@ -223,6 +223,9 @@ function _edit_mode_on_tree_click(evt) {
   }
 }
 function _on_edit_mode(evt) {
+  if (!state || state._paused) {
+    return
+  }
   if(evt)
     evt.preventDefault();
   if(document.querySelector('#edit-mode-btn').classList.contains('disabled')) {
@@ -234,6 +237,9 @@ function _on_edit_mode(evt) {
     });
 }
 function _on_edit_save(evt) {
+  if (!state || state._paused) {
+    return
+  }
   if(evt)
     evt.preventDefault();
   var save_btn = document.querySelector('#edit-mode-save-btn'),
@@ -260,6 +266,9 @@ function _on_edit_save(evt) {
     });
 }
 function _on_edit_cancel(evt) {
+  if (!state || state._paused) {
+    return
+  }
   if(evt)
     evt.preventDefault();
   if(!state._orig_snapshot)
