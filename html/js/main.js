@@ -509,20 +509,32 @@ function _napi_remove_key_command() {
   }
 }
 function _start_prepare() {
-  if(!state.edit_mode && config.helper_back_option) {
-    var tree = state.positions[0].tree;
-    var content_template,
-        tmp = document.querySelector('#tree-node-template');
-    if(tmp)
-      content_template = _.template(tmp.innerHTML);
-    _start_auto_insert_back(tree, content_template, config.helper_back_option);
+  if (!state.edit_mode) {
+    if (config.helper_back_option) {
+      var tree = state.positions[0].tree;
+      var content_template,
+          tmp = document.querySelector('#tree-node-template');
+      if(tmp)
+        content_template = _.template(tmp.innerHTML);
+      _start_auto_insert_back(tree, content_template, config.helper_back_option);
+    }
+    if (config.helper_stay_in_branch_for_all) {
+      var tree = state.positions[0].tree;
+      _helper_add_stay_in_branch_for_all(tree)
+    }
   }
   return _napi_add_key_command();
 }
 function _stop_prepare() {
-  if(!state.edit_mode && config.back_at_end) {
-    var tree = state.positions[0].tree;
-    _stop_auto_remove_back(tree);
+  if (!state.edit_mode) {
+    if (config.back_at_end) {
+      var tree = state.positions[0].tree;
+      _stop_auto_remove_back(tree);
+    }
+    if (config.helper_stay_in_branch_for_all) {
+      var tree = state.positions[0].tree;
+      _helper_remove_stay_in_branch_for_all(tree)
+    }
   }
   return _napi_remove_key_command();
 }
@@ -547,7 +559,6 @@ function _start_auto_insert_back(tree, content_template) {
     }
   });
 }
-
 function _stop_auto_remove_back(tree) {
   _.each(tree.nodes, function(anode) {
     if(anode._back_node) {
@@ -556,6 +567,29 @@ function _stop_auto_remove_back(tree) {
     }
     if(!anode.is_leaf) {
       _stop_auto_remove_back(anode);
+    }
+  });
+}
+
+function _helper_add_stay_in_branch_for_all (tree) {
+  _.each(tree.nodes, function(anode) {
+    if (!anode.is_leaf) {
+      if (!('stay-in-branch' in anode.meta)) {
+        anode._helper_stay_in_branch_added = true;
+        anode.meta['stay-in-branch'] = 'true';
+      }
+      _helper_add_stay_in_branch_for_all(anode);
+    }
+  });
+}
+function _helper_remove_stay_in_branch_for_all (tree) {
+  if (tree._helper_stay_in_branch_added) {
+    delete tree._helper_stay_in_branch_added;
+    delete anode.meta['stay-in-branch']
+  }
+  _.each(tree.nodes, function(anode) {
+    if (!anode.is_leaf) {
+      _helper_add_stay_in_branch_for_all(anode);
     }
   });
 }
@@ -1666,11 +1700,33 @@ function _in_check_stay_in_branch (atree) {
   }
 }
 
+function _leaf_endit (anode) {
+  return pause()
+    .then(function() {
+      if(anode.content_element)
+        anode.content_element.classList.add('selected' || config.selected_class);
+      // speak it
+      return (_meta_true_check(anode.meta['no-main'], false) ?
+              Promise.resolve() : _move_sub_speak2.call(anode, 'main'))
+        .then(function() {
+          reset_state();
+          _resume_at_next_action(anode);
+        });
+    });
+}
+
+function _in_check_endit (anode) {
+  if (_meta_true_check(anode.meta['endit'])) {
+    return _leaf_endit(anode);
+  }
+}
+
 var _tree_select_override_functions = [
   _in_check_back_n_branch,
   _in_check_spell_delchar,
   _in_check_spell_default,
   _in_override_change_tree,
+  _in_check_endit,
   _in_check_stay_in_branch,
 ];
 function _tree_go_in() {
@@ -1719,18 +1775,7 @@ function _tree_go_in() {
     }
     // finish it
     // on auto mode stop iteration and on any key restart
-    return pause()
-      .then(function() {
-        if(atree.content_element)
-          atree.content_element.classList.add('selected' || config.selected_class);
-        // speak it
-        return (_meta_true_check(atree.meta['no-main'], false) ?
-                Promise.resolve() : _move_sub_speak2.call(atree, 'main'))
-          .then(function() {
-            reset_state();
-            _resume_at_next_action(atree);
-          });
-      });
+    return _leaf_endit(atree);
   } else {
     if(atree.nodes.length == 0)
       return Promise.resolve(); // has no leaf, nothing to do
