@@ -546,7 +546,7 @@ function _start_auto_insert_back(tree, content_template) {
       if (config.helper_back_option == 'start') {
         insert_pos = 0;
       }
-      anode._back_node = tree_add_node(anode, insert_pos, {
+      anode._back_node = tree_insert_node(anode, insert_pos, {
         _more_meta: {
           istmp: true
         },
@@ -2042,7 +2042,11 @@ function _word_prediction_dynamic_nodes (anode) {
     throw new Error("No words file given for dyn=\"spell-word-prediction\"");
   }
   var txt = _get_current_spell_txt(),
-      max_nodes = anode.meta['max-nodes'] || 3;
+      max_nodes = anode.meta['max-nodes'] || 3,
+      nchars = parseInt(anode.meta['predict-after-n-chars']);
+  if (!isNaN(nchars) && txt.length < nchars) {
+    return Promise.resolve({ nodes: [] });
+  }
   return _get_prediction_spell_words(words_file, txt)
     .then(function (subwdata) {
       if (!subwdata.words_sorted) {
@@ -2070,13 +2074,17 @@ function _letter_prediction_dynamic_nodes (anode) {
   }
   var alphabet = anode.meta['alphabet'] || config.alphabet ||
                  'abcdefghijklmnopqrstuvwxyz', 
-      txt = _get_current_spell_txt();
+      txt = _get_current_spell_txt(),
+      nchars = parseInt(anode.meta['predict-after-n-chars']);
   if (typeof alphabet == 'string') {
     if (alphabet.indexOf(',') != -1) {
       alphabet = alphabet.split(',');
     } else {
       alphabet.split('');
     }
+  }
+  if (!isNaN(nchars) && txt.length < nchars) {
+    return Promise.resolve({ nodes: [] });
   }
   return _get_prediction_spell_words(words_file, txt)
     .then(function (subwdata) {

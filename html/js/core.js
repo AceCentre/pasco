@@ -305,6 +305,79 @@ function parse_dom_tree_subrout_parse_text(text) {
     _more_meta: _more_meta
   }
 }
+function tree_insert_node (parent_node, beforenode, data, content_template) {
+  // data can contain (_more_meta, meta, text, nodes)
+  var node = {
+    is_leaf: !data.nodes || data.nodes.length == 0,
+    level: parent_node.level + 1,
+    text: data.text,
+    meta: data.meta,
+    _more_meta: data._more_meta,
+    parent: parent_node
+  };
+  if (parent_node.is_leaf) {
+    parent_node.is_leaf = false;
+    parent_node.nodes = [];
+    parent_node.static_nodes = [];
+    let ulwrp = newEl('div');
+    ulwrp.classList.add('children-wrp');
+    var ul = newEl('ul');
+    ul.classList.add('children');
+    ulwrp.appendChild(ul);
+    parent_node.nodes_ul_dom_element = ul;
+    parent_node.dom_element.appendChild(ulwrp);
+  }
+  var beforenode_idx, beforenode_static_idx;
+  if (!isNaN(beforenode)) { // if beforenode is a number
+    if (beforenode >= parent_node.static_nodes.length) {
+      beforenode_static_idx = parent_node.static_nodes.length;
+      beforenode = null
+    } else {
+      if (beforenode < 0) {
+        throw new Error('beforenode should not be less than zero')
+      }
+      beforenode_static_idx = beforenode;
+      beforenode = parent_node.static_nodes[beforenode_static_idx];
+    }
+  } else {
+    if (beforenode == null) {
+      beforenode_static_idx = parent_node.static_nodes.length;
+    } else {
+      beforenode_static_idx = parent_node.static_nodes.indexOf(beforenode);
+      if (beforenode_static_idx == -1) {
+        throw new Error('Could not find beforenode in parent\'s static_nodes');
+      }
+    }
+  }
+  // convert beforenode to non-static
+  if (beforenode == null) {
+    beforenode_idx = parent_node.nodes.length;
+  } else {
+    // step back while no more empty dynnode exists
+    let idx = beforenode_static_idx;
+    do {
+      if (idx <= 0) {
+        beforenode_idx = 0;
+        break;
+      }
+      let anode = parent_node.static_nodes[idx];
+      beforenode_idx = parent_node.nodes.findIndex((a) => a == anode || a._more_meta._dynnode == anode);
+      idx -= 1;
+    } while (beforenode_idx == -1);
+    beforenode = parent_node.nodes[beforenode_idx];
+  }
+  parent_node.nodes.splice(beforenode_idx, 0, node);
+  parent_node.static_nodes.splice(beforenode_static_idx, 0, node);
+  var li = newEl('li');
+  if(beforenode) {
+    parent_node.nodes_ul_dom_element.insertBefore(li, beforenode.dom_element);
+  } else {
+    parent_node.nodes_ul_dom_element.appendChild(li);
+  }
+  tree_mk_list_base(node, li, content_template);
+  return node;
+}
+
 function tree_add_node(parent_node, at, data, content_template) {
   // data can contain (_more_meta, meta, text, nodes)
   var node = {
@@ -324,10 +397,13 @@ function tree_add_node(parent_node, at, data, content_template) {
     parent_node.is_leaf = false;
     parent_node.nodes = [];
     parent_node.static_nodes = [];
+    let ulwrp = newEl('div');
+    ulwrp.classList.add('children-wrp');
     var ul = newEl('ul');
     ul.classList.add('children');
+    ulwrp.appendChild(ul);
     parent_node.nodes_ul_dom_element = ul;
-    parent_node.dom_element.appendChild(ul);
+    parent_node.dom_element.appendChild(ulwrp);
   }
   var after_node, static_node_idx;
   if(at < parent_node.nodes.length) {
@@ -361,10 +437,13 @@ function tree_attach_node (node, parent, at) {
     parent_node.is_leaf = false;
     parent_node.nodes = [];
     parent_node.static_nodes = [];
+    let ulwrp = newEl('div');
+    ulwrp.classList.add('children-wrp');
     var ul = newEl('ul');
     ul.classList.add('children');
+    ulwrp.appendChild(ul);
     parent_node.nodes_ul_dom_element = ul;
-    parent_node.dom_element.appendChild(ul);
+    parent_node.dom_element.appendChild(ulwrp);
   }
   var after_node, static_node_idx;
   if(at < parent_node.nodes.length) {
