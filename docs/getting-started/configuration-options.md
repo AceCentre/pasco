@@ -153,7 +153,9 @@ Here you can export or import your vocabulary file as a zip file - or a OBF file
 
 ### Edit Tree 
 
-Because you can have different "Trees" (Vocabularies) in pasco - you need to choose which tree you are working on, edit the tree - and then Save it when you are ready. If you want to make a new Tree - press new. The video should help 
+Because you can have different "Trees" (Vocabularies) in pasco - you need to choose which tree you are working on, edit the tree - and then Save it when you are ready. If you want to make a new Tree - press new. The video should help
+
+ 
 
 
 

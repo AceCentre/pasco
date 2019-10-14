@@ -17,10 +17,34 @@ The following is an example markdown for a metadata in a node
 
 It's the replacement text for utterance for cue
 
+#### Stay in Branch commands
+
+To stay in a branch simply add this at the top level item:
+
+	<meta data-stay-in-branch>
+
+e.g.
+
+	I would like<meta data-stay-in-branch>
+		Pizza
+		with Cheese
+		with Pepperoni 
+
+To go back one level or several you can use use back-n-branch=N where N = number of branches to step back to. e.g. 
+
+	<meta data-back-n-branch="1" data-back-n-branch-notify>
+
+And lastly, to select an item and then exit use select-utterance
+
+	<meta data-select-utterance>
 
 #### Spell metadata
 
-Spelling function is builtin pasco, here are metadata for installing it
+Spelling is possible. To start it you need a branch that defines a alphabet. So the root node should have `spell-branch`:
+
+	I'll spell it <meta data-spell-branch>
+	
+To spell a letter use `spell-letter` e.g. `<meta data-spell-letter=" ">`
 
 	spell-letter="<A LETTER>"
 
@@ -28,7 +52,7 @@ It's the replacement for the text existed in that node. Instead this value will 
 
 	spell-finish
 
-The option to end the spell round
+The option to delete the last letter selected
 
 	spell-delchar
 
@@ -37,6 +61,15 @@ The option to remove last inserted character in spelling queue
 	spell-branch
 
 Considers all leaf of that branch to be as spell letters, It used for defining where spell function should be used.
+
+#### Spelling with prediction
+
+
+	<meta data-onselect-continue-in-branch data-onselect-continue-concat>
+
+	predict-after-n-chars="number"
+
+
 
 #### Audio metadata
 

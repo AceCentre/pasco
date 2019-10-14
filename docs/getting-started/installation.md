@@ -4,7 +4,7 @@
 
 ## What platforms are supported?
 
-pasco is a web app currently. This is great as we can support a range of platforms and develop ideas relatively quickly. The downside though is that some features that rely on the operating system need to still be developed specifically. So here are the features and quick overview that which features work where:
+pasco is a [web app](http://app.pasco.chat) and [iOS app](https://itunes.apple.com/us/app/pasco/id1317265884?ls=1&mt=8) currently. Here are the features and quick overview that which features work where:
 
 
 | Feature        | iOS           | Web  |
