@@ -64,11 +64,32 @@ Considers all leaf of that branch to be as spell letters, It used for defining w
 
 #### Spelling with prediction
 
+Firstly we need to tell pasco that there will be changes to the layout after each selection:
 
-	<meta data-onselect-continue-in-branch data-onselect-continue-concat>
+	<meta data-spell-branch  data-spell-update-dyn-onchange>
+
+Next we need to define some aspects of prediction. For *Word prediction* we define it with `data-dyn=spell-word-prediction`:
+
+
+	<meta data-dyn="spell-word-prediction" data-words-file="trees/Spell_Prediction/bncfrequency.json" data-max-nodes="3" data-spell-finish data-predict-after-n-chars="3"
+	
+We need to define a corpus to predict from. There are a range of Corpus' already in pasco (see [here](https://github.com/AceCentre/pasco/tree/master/html/trees/Spell_Prediction) for some examples. These are effectively a list of words with their frequency.) 
+
+	data-words-file="trees/Spell_Prediction/bncfrequency.json" 
+
+Next we say the number of predictions that are going to be presented: 
+
+	data-max-nodes="3" 
+
+And lastly, we can define after how many letters are spelt before we get predictions:
 
 	predict-after-n-chars="number"
 
+We can also use *next letter prediction*. This is done with `data-dyn=spell-letter-prediction`:
+
+	<meta data-dyn="spell-letter-prediction" data-words-file="trees/Spell_Prediction/bncfrequency.json">
+
+(A full example can be seen [here](https://raw.githubusercontent.com/AceCentre/pasco/master/html/trees/Spell_Prediction/en-GB-Spell_Prediction.md))
 
 
 #### Audio metadata
