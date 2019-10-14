@@ -1700,7 +1700,7 @@ function _in_check_stay_in_branch (atree) {
   }
 }
 
-function _leaf_endit (anode) {
+function _leaf_select_utterance (anode) {
   return pause()
     .then(function() {
       if(anode.content_element)
@@ -1715,9 +1715,9 @@ function _leaf_endit (anode) {
     });
 }
 
-function _in_check_endit (anode) {
-  if (_meta_true_check(anode.meta['endit'])) {
-    return _leaf_endit(anode);
+function _in_check_select_utterance (anode) {
+  if (_meta_true_check(anode.meta['select-utterance'])) {
+    return _leaf_select_utterance(anode);
   }
 }
 
@@ -1726,7 +1726,7 @@ var _tree_select_override_functions = [
   _in_check_spell_delchar,
   _in_check_spell_default,
   _in_override_change_tree,
-  _in_check_endit,
+  _in_check_select_utterance,
   _in_check_stay_in_branch,
 ];
 function _tree_go_in() {
@@ -1775,7 +1775,7 @@ function _tree_go_in() {
     }
     // finish it
     // on auto mode stop iteration and on any key restart
-    return _leaf_endit(atree);
+    return _leaf_select_utterance(atree);
   } else {
     if(atree.nodes.length == 0)
       return Promise.resolve(); // has no leaf, nothing to do
