@@ -250,6 +250,8 @@ function _on_edit_save(evt) {
   editor_helper.on_save(tree)
     .then(function() {
       var tree_md = tree_to_markdown(tree)
+      // update global variable tree_data
+      tree_data = tree_md
       return set_file_data(tree_fn, tree_md)
     })
     .then(function() {

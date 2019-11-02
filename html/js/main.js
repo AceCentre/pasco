@@ -1,6 +1,6 @@
-var config_fn, tree_fn, config, tree, state = null, tree_element, napi, speaku,
-    config_json, words_cache = {}, tree_contentsize_xstep = 50, locale,
-    tree_wrp_element;
+var config_fn, tree_fn, config, tree, tree_data, state = null, tree_element,
+    napi, speaku, tree_wrp_element,
+    config_json, words_cache = {}, tree_contentsize_xstep = 50, locale;
 Promise.all([
   window.cordova ? NativeAccessApi.onready() : Promise.resolve(),
   new Promise(function(resolve) { // domready
@@ -120,9 +120,9 @@ Promise.all([
         .catch(function(err) {
           console.warn(err);
         }),
-      load_tree(tree_element, tree_fn)
+      get_file_data(tree_fn)
         .catch(handle_error_checkpoint())
-        .then(function(_tree) { tree = _tree; })
+        .then(function(data) { tree_data = data; })
     ]);
   })
   .then(function() {
@@ -132,6 +132,18 @@ Promise.all([
     // set theme class
     if(config.theme)
       document.body.classList.add('theme-' + config.theme);
+    // message bar close handler
+    _.each(document.querySelectorAll('#message-bar-close-btn'), function (btn) {
+      btn.addEventListener('click', function (event) {
+        event.stopPropagation();
+        event.preventDefault();
+        var wrp = document.querySelector('#message-bar-wrp');
+        if (wrp) {
+          wrp.classList.add('hide');
+        }
+      });
+    });
+
   })
   .then(function() {
     // deal with on-screen navigation
@@ -250,15 +262,11 @@ function start(_state) {
   // modes [auto,switch]
   // diff, auto iterates through nodes <-> switch iteration is manual
   // mode controls the work flow, start handles mode
-  if(tree.nodes.length == 0)
-    throw new Error("Tree has zero length");
+  // positions are no longer saved between start/stop
   state = _state = _state || {
     can_move: true,
     mode: config.mode || 'auto',
-    positions: [ {
-      tree: tree,
-      index: -1
-    } ],
+    select_path: [],
     config: config,
     _active_elements: [],
     _highlighted_elements: [],
@@ -271,6 +279,8 @@ function start(_state) {
     throw new Error("Unknown mode " + state.mode);
   return state._start_promise = _start_prepare()
     .then(function() {
+      if(tree.nodes.length == 0)
+        throw new Error("Tree has zero length");
       if ("Click" in config._keyhit_delegates ||
           "RightClick" in config._keyhit_delegates) {
         tree_wrp_element.addEventListener('click', _tree_on_click, false);
@@ -321,6 +331,7 @@ function start(_state) {
             _scan_move()
           else
             _update_active_positions();
+          _on_update_select_path();
           delete state._start_promise;
         });
     });
@@ -417,6 +428,7 @@ function resume () {
         _scan_move();
       else
         _update_active_positions();
+      _on_update_select_path();
       delete state._start_promise;
     });
 }
@@ -429,6 +441,7 @@ function reset_state () {
       tree: tree,
       index: -1
     } ],
+    select_path: [],
     _active_elements: [],
     _highlighted_elements: [],
     _auto_next_rem_loops: config.auto_next_loops || 0,
@@ -509,90 +522,16 @@ function _napi_remove_key_command() {
   }
 }
 function _start_prepare() {
-  if (!state.edit_mode) {
-    if (config.helper_back_option) {
-      var tree = state.positions[0].tree;
-      var content_template,
-          tmp = document.querySelector('#tree-node-template');
-      if(tmp)
-        content_template = _.template(tmp.innerHTML);
-      _start_auto_insert_back(tree, content_template, config.helper_back_option);
-    }
-    if (config.helper_stay_in_branch_for_all) {
-      var tree = state.positions[0].tree;
-      _helper_add_stay_in_branch_for_all(tree)
-    }
-  }
-  return _napi_add_key_command();
+  return install_tree(tree_element, tree_data, config, state)
+    .then(function (_tree) {
+      tree = _tree;
+      return _napi_add_key_command();
+    });
 }
 function _stop_prepare() {
-  if (!state.edit_mode) {
-    if (config.back_at_end) {
-      var tree = state.positions[0].tree;
-      _stop_auto_remove_back(tree);
-    }
-    if (config.helper_stay_in_branch_for_all) {
-      var tree = state.positions[0].tree;
-      _helper_remove_stay_in_branch_for_all(tree)
-    }
-  }
   return _napi_remove_key_command();
 }
 
-function _start_auto_insert_back(tree, content_template) {
-  _.each(tree.nodes, function(anode) {
-    if(!anode.is_leaf) {
-      var insert_pos = null;
-      if (config.helper_back_option == 'start') {
-        insert_pos = 0;
-      }
-      anode._back_node = tree_insert_node(anode, insert_pos, {
-        _more_meta: {
-          istmp: true
-        },
-        meta: {
-          'back-n-branch': '1'
-        },
-        text: _t('Back')
-      }, content_template);
-      _start_auto_insert_back(anode, content_template);
-    }
-  });
-}
-function _stop_auto_remove_back(tree) {
-  _.each(tree.nodes, function(anode) {
-    if(anode._back_node) {
-      tree_remove_node_from_parent(anode._back_node);
-      delete anode._back_node;
-    }
-    if(!anode.is_leaf) {
-      _stop_auto_remove_back(anode);
-    }
-  });
-}
-
-function _helper_add_stay_in_branch_for_all (tree) {
-  _.each(tree.nodes, function(anode) {
-    if (!anode.is_leaf) {
-      if (!('stay-in-branch' in anode.meta)) {
-        anode._helper_stay_in_branch_added = true;
-        anode.meta['stay-in-branch'] = 'true';
-      }
-      _helper_add_stay_in_branch_for_all(anode);
-    }
-  });
-}
-function _helper_remove_stay_in_branch_for_all (tree) {
-  if (tree._helper_stay_in_branch_added) {
-    delete tree._helper_stay_in_branch_added;
-    delete anode.meta['stay-in-branch']
-  }
-  _.each(tree.nodes, function(anode) {
-    if (!anode.is_leaf) {
-      _helper_add_stay_in_branch_for_all(anode);
-    }
-  });
-}
 
 /**
  * Stops the current control-flow if exists, makes it ready for next start
@@ -1061,6 +1000,9 @@ function _tree_set_contentsize(percentage) {
 function _node_cue_text(node) {
   return node.meta['auditory-cue'] || node.text;
 }
+function _node_main_text (node) {
+  return node.meta['auditory-main'] || node.text;
+}
 
 function _move_sub_highlight() {
   var node = this
@@ -1100,7 +1042,7 @@ function _move_sub_speak2(type, override_msg) {
   case 'main':
     opts = config.auditory_main_voice_options;
     audio = this.meta['main-audio'] || this.meta['audio'];
-    text = this.text;
+    text = _node_main_text(this);
     break;
   }
   // check override voiceId
@@ -1320,6 +1262,8 @@ function _do_tree_go_out () {
         // no more way, start at top (reset)
         state.positions[0].index = 0;
       }
+      state.select_path = state.positions.slice(0, state.positions.length-1);
+      _on_update_select_path();
       return _scan_move();
     }); 
 }
@@ -1371,6 +1315,7 @@ function _in_spell_finish(atree) {
         popup.classList.add('visible');
       }, 10);
     }
+    _update_message_bar(msg); // update message bar
     delete tmp[1]._concat_letters;
     return pause()
       .then(function() {
@@ -1379,8 +1324,7 @@ function _in_spell_finish(atree) {
         // speak it
         return _move_sub_speak2.call(atree, 'main', msg)
           .then(function() {
-            reset_state()
-            _resume_at_next_action(atree)
+            _reset_resume_at_next_action(atree)
           });
       });
   } else {
@@ -1438,6 +1382,8 @@ function _in_check_spell_default(atree) {
         } else {
           state.positions[0].index = 0;
         }
+        state.select_path = state.positions.slice(0, state.positions.length-1);
+        _on_update_select_path();
         var msg;
         {
           var idx = concat_letters.lastIndexOf(' ');
@@ -1467,6 +1413,8 @@ function _in_check_back_n_branch(atree) {
       while(i-- > 0) {
         var last_pos = state.positions.pop();
       }
+      state.select_path = state.positions.slice(0, state.positions.length-1);
+      _on_update_select_path();
       if (atree.meta['back-n-branch-notify']) {
         return _do_notify_move(_get_current_node(), atree);
       } else {
@@ -1485,7 +1433,7 @@ function _in_override_change_tree (atree) {
     return get_trees_info(default_trees_info_fn)
       .then(function (trees_info) {
         another_tree_name = another_tree_name.toLowerCase();
-        var tree_info = _.find(trees_info.list, function (a) { return a.name.toLowerCase() == another_tree_name; });
+        var tree_info = _.find(trees_info.list, function (a) { return (a.name+'').toLowerCase() == another_tree_name; });
         if (tree_info) {
           return _in_override_change_tree_subrout(atree, tree_info.tree_fn);
         } else {
@@ -1510,13 +1458,9 @@ function _in_override_change_tree_subrout (atree, another_tree) {
         telm.setAttribute('class', tree_element.getAttribute('class'));
         var current_config_tree = config.tree;
         config.tree = info.tree_fn;
-        return load_tree(telm, info.tree_fn)
-          .catch(function (err) {
-            config.tree = current_config_tree;
-            throw err;
-          })
-          .catch(handle_error_checkpoint())
-          .then(function(_tree) {
+        return get_file_data(info.tree_fn)
+          .then(function (data) {
+            tree_data = data;
             var _config = JSON.parse(config_json);
             _config.tree = info.tree_fn;
             var _config_data = JSON.stringify(_config, null, "  ");
@@ -1529,13 +1473,6 @@ function _in_override_change_tree_subrout (atree, another_tree) {
                   .then(function () {
                     tree_fn = info.tree_fn;
                     editor_helper.audio_save_dir = info.audio_dir;
-                    tree = _tree;
-                    // start again with new tree
-                    tree_element.id = 'old-tree';
-                    telm.id = 'tree';
-                    tree_element.parentNode.insertBefore(telm, tree_element);
-                    tree_element.parentNode.removeChild(tree_element);
-                    tree_element = telm;
                     _clean_state(state);
                     return start();
                   })
@@ -1553,9 +1490,11 @@ function _in_override_change_tree_subrout (atree, another_tree) {
   }
 }
 
-function _resume_at_next_action(atree) {
+function _reset_resume_at_next_action(atree) {
   // start again, on demand
   function finish() {
+    reset_state();
+    _on_update_select_path();
     // return 
     return (state._stopped ? _napi_remove_key_command() : Promise.resolve())
       .then(function() {
@@ -1654,28 +1593,29 @@ function _resume_at_next_action(atree) {
 }
 
 function _before_changeposition () {
-  var subdyn_tree;
-  for (var i = 0, len = state.positions.length; i < len; i++) {
-    var pos = state.positions[i];
-    if (!subdyn_tree && pos._dyndirty) {
-      if(pos.index != -1) {
-        subdyn_tree = pos.tree.nodes[pos.index];
-      } else { // special case, at root
-        subdyn_tree = pos.tree;
+  if (!state.edit_mode) {
+    var subdyn_tree;
+    for (var i = 0, len = state.positions.length; i < len; i++) {
+      var pos = state.positions[i];
+      if (!subdyn_tree && pos._dyndirty) {
+        if(pos.index != -1) {
+          subdyn_tree = pos.tree.nodes[pos.index];
+        } else { // special case, at root
+          subdyn_tree = pos.tree;
+        }
       }
+      delete pos._dyndirty;
     }
-    delete pos._dyndirty;
-  }
-  // check for dyndirty of root
-  if (state._dyndirty) {
-    subdyn_tree = state.positions[0].tree;
-    delete state._dyndirty;
-  }
-  if (subdyn_tree) {
-    return _tree_update_subdyn(subdyn_tree, {
-      changing_position: true,
-      disable_dyn: state.edit_mode
-    });
+    // check for dyndirty of root
+    if (state._dyndirty) {
+      subdyn_tree = state.positions[0].tree;
+      delete state._dyndirty;
+    }
+    if (subdyn_tree) {
+      return _tree_update_subdyn(subdyn_tree, {
+        changing_position: true,
+      });
+    }
   }
   return Promise.resolve();
 }
@@ -1695,6 +1635,8 @@ function _in_check_stay_in_branch (atree) {
         } else {
           state.positions[0].index = 0;
         }
+        state.select_path = state.positions.slice(0, state.positions.length-1);
+        _on_update_select_path();
         return _notify_move(_get_current_node(), atree);
       });
   }
@@ -1703,14 +1645,15 @@ function _in_check_stay_in_branch (atree) {
 function _leaf_select_utterance (anode) {
   return pause()
     .then(function() {
+      state.select_path = state.positions.slice(); // copy
+      _on_update_select_path();
       if(anode.content_element)
         anode.content_element.classList.add('selected' || config.selected_class);
       // speak it
       return (_meta_true_check(anode.meta['no-main'], false) ?
               Promise.resolve() : _move_sub_speak2.call(anode, 'main'))
         .then(function() {
-          reset_state();
-          _resume_at_next_action(anode);
+          _reset_resume_at_next_action(anode);
         });
     });
 }
@@ -1718,6 +1661,62 @@ function _leaf_select_utterance (anode) {
 function _in_check_select_utterance (anode) {
   if (_meta_true_check(anode.meta['select-utterance'])) {
     return _leaf_select_utterance(anode);
+  }
+}
+
+function _on_update_select_path () {
+  // message bar
+  var wrp = document.querySelector('#message-bar-wrp');
+  if (wrp) {
+    // current positions except index of last one
+    var positions = state.positions.slice(0, state.positions.length-1);
+    positions.push({
+      tree: state.positions[state.positions.length-1].tree,
+      index: -1,
+    });
+    var show = !!_get_node_attr_inherits_full(positions, 'spell-branch');
+    if (show && wrp.classList.contains('hide')) {
+      wrp.classList.remove('hide');
+    } else if (!show && !wrp.classList.contains('hide')) {
+      wrp.classList.add('hide');
+    }
+  }
+  _update_message_bar();
+}
+
+function _update_message_bar (txt) {
+  var msgbar = document.querySelector('#message-bar');
+  if (msgbar == null) {
+    return;
+  }
+  msgbar.innerHTML = '';
+  if (txt != null) {
+    var elm = newEl('div');
+    elm.classList.add('text');
+    elm.textContent = txt;
+    msgbar.appendChild(elm);
+    return;
+  }
+  txt = _get_current_spell_txt();
+  if (!!txt) {
+    var words = txt.split(' ');
+    var idx = 0;
+    _.each(words, function (word) {
+      if (idx + 1 == words.length) {
+        _.each(word, function (letter) {
+          var elm = newEl('div');
+          elm.classList.add('text');
+          elm.textContent = letter;
+          msgbar.appendChild(elm);
+        });
+      } else {
+        var elm = newEl('div');
+        elm.classList.add('text');
+        elm.textContent = word;
+        msgbar.appendChild(elm);
+      }
+      idx++;
+    });
   }
 }
 
@@ -1785,6 +1784,8 @@ function _tree_go_in() {
           tree: atree,
           index: 0
         });
+        state.select_path = state.positions.slice(0, state.positions.length-1);
+        _on_update_select_path();
         var delay = state.mode == 'auto' ? config.auto_next_atfirst_delay || 0 : 0;
         return _notify_move(_get_current_node(), atree, { delay: delay });
       });
@@ -1812,6 +1813,8 @@ function _tree_move(node) {
       if(positions.length == 0)
         throw new Error("the node should belong to a tree");
       state.positions = positions
+      state.select_path = state.positions.slice(0, state.positions.length-1);
+      _on_update_select_path();
       return _scan_move()
     });
 }
@@ -1974,7 +1977,6 @@ function get_words (url) {
       throw err;
     });
 }
-
 function _get_current_spell_txt () {
   var txt = '';
   if (state && !state._stopped) {
@@ -1982,11 +1984,14 @@ function _get_current_spell_txt () {
     // has called at the time of updating dyn.
     var tmp = _.filter(state.positions, function (a) { return !!a._concat_letters; });
     if(tmp.length > 0) {
-      tmp = tmp[tmp.length-1]._concat_letters.join('').split(' ');
-      txt = tmp[tmp.length-1];
+      txt = tmp[tmp.length-1]._concat_letters.join('')
     }
   }
   return txt;
+}
+function _get_current_spell_word () {
+  var txt = _get_current_spell_txt().split(' ');
+  return txt[txt.length-1];
 }
 var _prediction_spell_words_max_memory = 20;
 function _get_prediction_spell_words (words_file, txt) {
@@ -2041,7 +2046,7 @@ function _word_prediction_dynamic_nodes (anode) {
   if (!words_file) {
     throw new Error("No words file given for dyn=\"spell-word-prediction\"");
   }
-  var txt = _get_current_spell_txt(),
+  var txt = _get_current_spell_word(),
       max_nodes = anode.meta['max-nodes'] || 3,
       nchars = parseInt(anode.meta['predict-after-n-chars']);
   if (!isNaN(nchars) && txt.length < nchars) {
@@ -2074,7 +2079,7 @@ function _letter_prediction_dynamic_nodes (anode) {
   }
   var alphabet = anode.meta['alphabet'] || config.alphabet ||
                  'abcdefghijklmnopqrstuvwxyz', 
-      txt = _get_current_spell_txt(),
+      txt = _get_current_spell_word(),
       nchars = parseInt(anode.meta['predict-after-n-chars']);
   if (typeof alphabet == 'string') {
     if (alphabet.indexOf(',') != -1) {
@@ -2118,27 +2123,71 @@ function _letter_prediction_dynamic_nodes (anode) {
     });
 }
 
-function load_tree(tree_element, fn) {
-  if(typeof fn != 'string') {
-    tree = fn;
-    tree_element.innerText = "No tree given in config";
-    return Promise.resolve();
+
+function _start_auto_insert_back(tree, content_template) {
+  _.each(tree.nodes, function(anode) {
+    if(!anode.is_leaf) {
+      var insert_pos = null;
+      if (config.helper_back_option == 'start') {
+        insert_pos = 0;
+      }
+      anode._back_node = tree_insert_node(anode, insert_pos, {
+        _more_meta: {
+          istmp: true
+        },
+        meta: {
+          'back-n-branch': '1'
+        },
+        text: _t('Back')
+      }, content_template);
+      _start_auto_insert_back(anode, content_template);
+    }
+  });
+}
+
+function _helper_add_stay_in_branch_for_all (tree) {
+  _.each(tree.nodes, function(anode) {
+    if (!anode.is_leaf) {
+      if (!('stay-in-branch' in anode.meta)) {
+        anode._helper_stay_in_branch_added = true;
+        anode.meta['stay-in-branch'] = 'true';
+      }
+      _helper_add_stay_in_branch_for_all(anode);
+    }
+  });
+}
+
+function install_tree (tree_element, tree_data, config, state) {
+  let tmpelm = newEl('div');
+  var tree = parse_tree(tmpelm, tree_data);
+  // init positions
+  state.positions = [ {
+    tree: tree,
+    index: -1
+  } ];
+  if (!state.edit_mode) {
+    if (config.helper_back_option) {
+      var content_template,
+          tmp = document.querySelector('#tree-node-template');
+      if(tmp)
+        content_template = _.template(tmp.innerHTML);
+      _start_auto_insert_back(tree, content_template, config.helper_back_option);
+    }
+    if (config.helper_stay_in_branch_for_all) {
+      _helper_add_stay_in_branch_for_all(tree);
+    }
   }
-  return get_file_data(fn)
-    .then(function(data) {
-      var tree = _parse_tree_subrout(tree_element, data);
-      return _tree_dynupdate(tree)
-        .then(function () {
-          // rest of parse_tree
-          var content_template,
-              tmp = document.querySelector('#tree-node-template');
-          if(tmp)
-            content_template = _.template(tmp.innerHTML);
-          tree_element.innerHTML = ''; // clear all
-          tree_mk_list_base(tree, tree_element, content_template); // re-create
-          tree_element.tree_height = window.innerHeight;
-          return tree;
-        });
+  return (state.edit_mode ? Promise.resolve() : _tree_dynupdate(tree))
+    .then(function () {
+      // rest of parse_tree
+      var content_template,
+          tmp = document.querySelector('#tree-node-template');
+      if(tmp)
+        content_template = _.template(tmp.innerHTML);
+      tree_element.innerHTML = ''; // clear all
+      tree_mk_list_base(tree, tree_element, content_template); // re-create
+      tree_element.tree_height = window.innerHeight;
+      return tree;
     });
 }
 
