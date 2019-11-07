@@ -377,7 +377,6 @@ function tree_insert_node (parent_node, beforenode, data, content_template) {
   tree_mk_list_base(node, li, content_template);
   return node;
 }
-
 function tree_add_node(parent_node, at, data, content_template) {
   // data can contain (_more_meta, meta, text, nodes)
   var node = {

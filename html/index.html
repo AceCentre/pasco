@@ -22,7 +22,7 @@
     
   </head>
 
-  <body class="non-selectable notready">
+  <body class="notready">
     <nav class="navbar navbar-default main-top-navbar">
       <ul class="x-navbar">
         <li class="head"><h1 href x-l10n>pasco</h1></li>
@@ -41,7 +41,12 @@
     </div>
     <div class="fake-scroll-elm"></div>
     <div id="tree-wrp">
-      <div id="tree" class="resizable-content" oncontextmenu="return false">
+      <div id="tree" class="non-selectable resizable-content" oncontextmenu="return false">
+      </div>
+      <div id="message-bar-wrp" class="hide">
+        <a id="message-bar-close-btn" href><i class="fa fa-times"></i></a>
+        <div id="message-bar" class="resizable-content">
+        </div>
       </div>
     </div>
     <script type="text/x-template" id="tree-node-template">
