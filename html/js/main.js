@@ -1642,7 +1642,7 @@ function _in_check_stay_in_branch (atree) {
   }
 }
 
-function _leaf_select_utterance (anode) {
+function _leaf_select_utterance (anode, override_msg) {
   return pause()
     .then(function() {
       state.select_path = state.positions.slice(); // copy
@@ -1651,7 +1651,7 @@ function _leaf_select_utterance (anode) {
         anode.content_element.classList.add('selected' || config.selected_class);
       // speak it
       return (_meta_true_check(anode.meta['no-main'], false) ?
-              Promise.resolve() : _move_sub_speak2.call(anode, 'main'))
+              Promise.resolve() : _move_sub_speak2.call(anode, 'main', override_msg))
         .then(function() {
           _reset_resume_at_next_action(anode);
         });
@@ -1720,11 +1720,79 @@ function _update_message_bar (txt) {
   }
 }
 
+function _in_override_webhook_action (anode) {
+  if (anode.meta['webhook']) {
+    return new Promise(function (resolve, reject) {
+      var url = anode.meta['webhook'],
+          method = anode.meta['webhook-method'] || 'POST',
+          contenttype = anode.meta['webhook-content-type'] || 'application/json',
+          body = anode.meta['webhook-body'],
+          success_msg = anode.meta['webhook-success-message'],
+          skip_validating_response = _meta_true_check(anode.meta['webhook-skip-validating-response']),
+          modify_headers = _meta_true_check(anode.meta['webhook-modify-headers']);
+      if (contenttype == 'application/json') {
+        try {
+          if (!body) {
+            body = '{}'
+          }
+          // validate json body
+          JSON.parse(body)
+        } catch (err) {
+          err.utter_message = 'Could not parse request body as json';
+          reject(err);
+          return;
+        }
+      }
+      var headers = {};
+      if (['HEAD','GET'].indexOf(method) == -1) {
+        if (modify_headers) {
+          headers['Content-Type'] = contenttype;
+        }
+      } else {
+        contenttype = null;
+      }
+      window.fetch(url, {
+        method: method,
+        headers: headers,
+        body: contenttype ? body : null,
+      })
+        .then(function (resp) {
+          return skip_validating_response ? Promise.resolve() :
+            resp.json()
+            .catch(function (err) {
+              err.utter_message = 'Unexpected response, Expecting json data'
+              throw err;
+            });
+        })
+        .then(function (respdata) {
+          if (!skip_validating_response && (respdata.status+'').toLowerCase() != 'success') {
+            var err = new Error('webhook request was not successful: ' + JSON.stringify(respdata));
+            err.utter_message = _t('Request failed');
+            throw err;
+          }
+          return _leaf_select_utterance(anode, success_msg);
+        })
+        .catch(function (err) {
+          err.utter_message = _t('Request failed');
+          reject(err);
+        });
+    })
+      .catch(function (err) {
+        console.error(err);
+        var errmsg = err.utter_message || 'Unknown error';
+        return _do_notify_move(_get_current_node(), anode, {
+          main_override_msg: errmsg
+        });
+      });
+  }
+}
+
 var _tree_select_override_functions = [
   _in_check_back_n_branch,
+  _in_override_change_tree,
+  _in_override_webhook_action,
   _in_check_spell_delchar,
   _in_check_spell_default,
-  _in_override_change_tree,
   _in_check_select_utterance,
   _in_check_stay_in_branch,
 ];
