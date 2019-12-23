@@ -61,7 +61,7 @@ module.exports = {
         collapsable: true,
         children: [
           ['/advanced/tree-file-details', 'Language/Tree file details'],
-          ['/advanced/meta-data-commands', 'Meta-Data Commands'],
+          ['/advanced/meta-tags', 'Meta tags'],
           ['/advanced/developing', 'Development Guide'],
         ]
       },

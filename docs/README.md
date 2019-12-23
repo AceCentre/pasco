@@ -1,6 +1,7 @@
 ---
 home: true
-heroImage: /icon.png
+heroImage: /icon.jpg
+heroAlt: pasco
 actionText: Get Started →
 actionLink: /getting-started/introduction.html
 footer: MIT Licensed | Copyright © 2019 Ace Centre 

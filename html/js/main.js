@@ -1,6 +1,15 @@
 var config_fn, tree_fn, config, tree, tree_data, state = null, tree_element,
     napi, speaku, tree_wrp_element,
     config_json, words_cache = {}, tree_contentsize_xstep = 50, locale;
+/* Initiation chain
+ * 1. wait for dom and NativeAccessApi
+ * 2. initialize_app (from core.js)
+ * 3. os specific initiation
+ * 4. Instantiate NativeAccessApi and SpeakUnit (from NativeAccessApi.js and core.js)
+ * 5. some code for debugging
+ * 6. load config/tree and other random initiations
+ * 7. start the app
+ */
 Promise.all([
   window.cordova ? NativeAccessApi.onready() : Promise.resolve(),
   new Promise(function(resolve) { // domready
@@ -63,7 +72,7 @@ Promise.all([
       }, false);
     }
 
-
+    // stop touch/mouse event propagation for these elements
     _.each(document.querySelectorAll('#main-top-navbar,#navbtns-wrp'), function (elm) {
         function actionEventHandler (event) {
           event.stopPropagation()
@@ -75,6 +84,7 @@ Promise.all([
         elm.addEventListener('mouseup', actionEventHandler, false)
     })
 
+    // add debug keys in key_command watch
     if(napi.available) {
       return Promise.all([
         napi.add_key_command("p"),
@@ -106,7 +116,7 @@ Promise.all([
       });
   })
   .then(function() {
-    // load tree
+    // parallel init localization & load tree
     tree_element = document.querySelector('#tree')
     tree_wrp_element = document.querySelector('#tree-wrp')
     if(!tree_element || !tree_wrp_element)
@@ -160,6 +170,7 @@ Promise.all([
     handle_error(err);
   });
 
+// required fixes for making old config files compatible
 function _main_fix_config (cfg) {
   if (!cfg.keys) {
     cfg.keys = cfg.switch_keys || cfg.auto_keys || {};
@@ -280,9 +291,9 @@ function start(_state) {
   return state._start_promise = _start_prepare()
     .then(function() {
       if(tree.nodes.length == 0)
-        throw new Error("Tree has zero length");
-      if ("Click" in config._keyhit_delegates ||
-          "RightClick" in config._keyhit_delegates) {
+        throw new Error('Tree has zero length');
+      if ('Click' in config._keyhit_delegates ||
+          'RightClick' in config._keyhit_delegates) {
         tree_wrp_element.addEventListener('click', _tree_on_click, false);
       }
       // add mode as a class to html
@@ -378,7 +389,7 @@ function start(_state) {
     }
     function delayrun(delay) {
       function clearListener() {
-        tree_element.removeEventListener("x-new-move", on_new_move, true);
+        tree_element.removeEventListener('x-new-move', on_new_move, true);
       }
       function on_new_move() {
         clearListener();
@@ -389,7 +400,7 @@ function start(_state) {
           _state._stop_callbacks.splice(idx, 1);
         run();
       }
-      tree_element.addEventListener("x-new-move", on_new_move, true);
+      tree_element.addEventListener('x-new-move', on_new_move, true);
       _state._stop_callbacks.push(clearListener)
       _state._active_timeout = setTimeout(function() {
         clearListener()
@@ -477,7 +488,7 @@ function _napi_add_key_command() {
       if (!input) {
         return next();
       }
-      console.log("add_key_command", input);
+      console.log('add_key_command', input);
       return napi.add_key_command(input)
         .then(next);
     }
@@ -512,7 +523,7 @@ function _napi_remove_key_command() {
       if (!input) {
         return next();
       }
-      console.log("remove_key_command", input);
+      console.log('remove_key_command', input);
       return napi.remove_key_command(input)
         .then(next);
     }
@@ -538,7 +549,7 @@ function _stop_prepare() {
  */
 function stop() {
   if(!state)
-    return Promise.reject(new Error("stop called when, not running!"));
+    return Promise.reject(new Error('stop called when, not running!'));
   if(state._stop_promise)
     return state._stop_promise;
   return state._stop_promise = _stop_prepare()
@@ -836,7 +847,7 @@ function _on_keyhit(ev) {
   }
 }
 
-function _before_new_move() {
+function _before_new_move() { // called before every move
   return speaku.stop_speaking()
     .then(function () {
       var el;
@@ -845,6 +856,7 @@ function _before_new_move() {
     });
 }
 
+// queue and process system for every move
 function _new_move_start(moveobj) {
   return unboundPromise()
     .then(function (defer) {
@@ -958,12 +970,14 @@ function _update_active_positions_tree() {
     widthSum += ul.offsetWidth
   }
   if(window.icu && window.icu.rtl) {
+    tree_element.style.left = 'auto';
     if(widthSum - window.innerWidth > 0) {
       tree_element.style.right = (-widthSum + window.innerWidth) + "px";
     } else {
       tree_element.style.right = 0;
     }
   } else {
+    tree_element.style.right = '';
     if(widthSum - window.innerWidth > 0) {
       tree_element.style.left = (-widthSum + window.innerWidth) + "px";
     } else {
@@ -1013,22 +1027,7 @@ function _move_sub_highlight() {
   _update_active_positions();
 }
 
-function _move_sub_speak(text, voice_options) {
-  if(state.silent_mode) {
-    return Promise.resolve();
-  }
-  if(this.meta['audio']) {
-    return speaku.play_audio(this.meta['audio'], voice_options)
-      .catch(function (err) {
-        console.error(err);
-        return speaku.simple_speak(_t("Could not play the input audio"), voice_options);
-      });
-  } else {
-    return speaku.simple_speak(text, voice_options);
-  }
-}
-
-function _move_sub_speak2(type, override_msg) {
+function _move_sub_speak(type, override_msg) {
   if(state.silent_mode) {
     return Promise.resolve();
   }
@@ -1091,7 +1090,7 @@ function _scan_move(node, opts) {
     })
   }
   moveobj.steps.push(_move_sub_highlight.bind(node))
-  moveobj.steps.push(_move_sub_speak2.bind(node, 'cue', opts.cue_override_msg))
+  moveobj.steps.push(_move_sub_speak.bind(node, 'cue', opts.cue_override_msg))
   moveobj.node.dom_element.dispatchEvent(new CustomEvent("x-new-move", {
     detail: {
       node: node
@@ -1119,7 +1118,7 @@ function _notify_move(node, notifynode, opts) {
 function _do_notify_move(node, notifynode, opts) {
   opts = opts||{};
   var moveobj = _new_move_init(node || notifynode)
-  moveobj.steps.push(_move_sub_speak2.bind(notifynode, 'main', opts.main_override_msg))
+  moveobj.steps.push(_move_sub_speak.bind(notifynode, 'main', opts.main_override_msg))
   if(node) {
     moveobj.steps.push(_before_new_move)
     moveobj.steps.push(function() {
@@ -1138,7 +1137,7 @@ function _do_notify_move(node, notifynode, opts) {
   }
   moveobj.steps.push(un_can_move)
   if(node) {
-    moveobj.steps.push(_move_sub_speak2.bind(node, 'cue', opts.cue_override_msg))
+    moveobj.steps.push(_move_sub_speak.bind(node, 'cue', opts.cue_override_msg))
   }
   speaku.stop_speaking();
   state.can_move = false;
@@ -1322,7 +1321,7 @@ function _in_spell_finish(atree) {
         if(atree.content_element)
           atree.content_element.classList.add('selected' || config.selected_class);
         // speak it
-        return _move_sub_speak2.call(atree, 'main', msg)
+        return _move_sub_speak.call(atree, 'main', msg)
           .then(function() {
             _reset_resume_at_next_action(atree)
           });
@@ -1647,11 +1646,12 @@ function _leaf_select_utterance (anode, override_msg) {
     .then(function() {
       state.select_path = state.positions.slice(); // copy
       _on_update_select_path();
+
       if(anode.content_element)
         anode.content_element.classList.add('selected' || config.selected_class);
       // speak it
       return (_meta_true_check(anode.meta['no-main'], false) ?
-              Promise.resolve() : _move_sub_speak2.call(anode, 'main', override_msg))
+              Promise.resolve() : _move_sub_speak.call(anode, 'main', override_msg))
         .then(function() {
           _reset_resume_at_next_action(anode);
         });
@@ -1813,25 +1813,6 @@ function _tree_go_in() {
     // for edit_mode do nothing
     if(state.edit_mode)
       return Promise.resolve();
-
-    // TODO:: This is an un-used feature, Remove it if there's no need for it in future
-    // dyn-setdirty-relative-onselect requires the tree to update dynnodes
-    // relative within the selected position on next update of position
-    var tmp = _get_node_attr_inherits_full(state.positions, 'dyn-setdirty-onselect');
-    if (tmp && _meta_true_check(tmp[0])) {
-      var idx = state.positions.indexOf(tmp[1]);
-      for (var i = idx; i >= 0; i--) {
-        var pos = state.positions[i];
-        if (i == 0) {
-          state._dyndirty = true;
-        } else {
-          pos._dyndirty = true;
-        }
-        if (!_meta_true_check(pos.tree.meta['dyn-setdirty-onselect'], false)) {
-          break;
-        }
-      }
-    }
     
     // explicit finish check
     // special case
