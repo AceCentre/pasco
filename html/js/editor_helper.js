@@ -99,6 +99,7 @@
     helper._record_inprogress = true;
     helper._record_promise
       .then(function(arg) {
+        helper._record_promise = null;
         if(!arg)
           return;
         var dest = arg[0], audio_meta = arg[1],
@@ -289,6 +290,8 @@
   }
 
   helper.audio_table_init = function(node) {
+    var tbody = document.getElementById('node-audio-tbody');
+    tbody.innerHTML = '';
     for(var i = 0, len = helper.audio_meta_list.length; i < len; ++i) {
       var audio_meta = helper.audio_meta_list[i];
       if(node.meta[audio_meta.target_meta]) {
