@@ -1,5 +1,5 @@
 module.exports = {
-  base: '/pasco/',
+  base: '/docs/',
   title: 'pasco',
   description: 'Communication for Physically and Visually impaired',
   ga: 'UA-24637628-7',
