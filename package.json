@@ -11,11 +11,11 @@
     "dev": "concurrently \"npm run dev-bs\" \"gulp dev\"",
     "dev-bs": "browser-sync start -c bs-config.js",
     "build": "gulp build-dev",
-    "build-prod": "gulp build-prod",
+    "build-prod": "gulp build-prod && npm run docs:build",
     "cordova-dist": "gulp cordova-dist",
     "watch-cordova-dist": "gulp watch-cordova-dist",
     "docs:dev": "vuepress dev docs",
-    "docs:build": "vuepress build docs"
+    "docs:build": "vuepress build --dest ./html/docs docs"
   },
   "repository": {
     "type": "git",
@@ -52,6 +52,7 @@
     "node-sass": "^4.12.0",
     "node-sass-package-importer": "^5.2.0",
     "uglifyjs-webpack-plugin": "^2.0.1",
+    "vuepress": "^1.2.0",
     "webpack": "^4.20.2",
     "webpack-stream": "^5.1.1"
   }
