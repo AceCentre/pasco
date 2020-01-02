@@ -16,7 +16,6 @@
         "cordova": "^8.1.2",
         "cordova-icon": "^1.0.0",
         "cordova-ios": "^5.0.1",
-        "cordova-plugin-browsersync": "^1.1.0",
         "cordova-plugin-device": "^1.1.7",
         "cordova-plugin-file": "^6.0.1",
         "cordova-plugin-media": "git+https://github.com/hosseinamin/cordova-plugin-media.git",
@@ -38,7 +37,6 @@
         "plugins": {
             "cordova-plugin-whitelist": {},
             "cordova-plugin-device": {},
-            "cordova-plugin-browsersync": {},
             "cordova-plugin-x-socialsharing": {
                 "PHOTO_LIBRARY_ADD_USAGE_DESCRIPTION": "This app requires photo library access to function properly.",
                 "PHOTO_LIBRARY_USAGE_DESCRIPTION": "This app requires photo library access to function properly."
