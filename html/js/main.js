@@ -787,9 +787,15 @@ function _on_scroll (evt) {
   // lock-the scroll
   var scrollX = window.scrollX > 110 || window.scrollX < 10 ? 60 : window.scrollX,
       scrollY = window.scrollY > 110 || window.scrollY < 10 ? 60 : window.scrollY;
+  state._wheel_off = true;
   window.scrollTo(scrollX, scrollY);
+  window.scrollX = scrollX;
+  window.scrollY = scrollY;
   window._last_scroll_x = scrollX;
   window._last_scroll_y = scrollY;
+  setTimeout(function () {
+    state._wheel_off = false;
+  }, 10);
 }
 
 function _on_wheel (evt) {
