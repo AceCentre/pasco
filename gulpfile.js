@@ -148,7 +148,7 @@ gulp.task('build-script-dev:watch', function () {
 var cordova_dist_running = false;
 var sh_bin = '/bin/sh';
 gulp.task('cordova-dist', gulp.series('sass-all', 'build-script-dev', (done) => {
-  var chp = spawn(sh_bin, [ __dirname + '/scripts/push-cordova', __dirname + '/cordova/www/' ]);
+  var chp = spawn(sh_bin, [ __dirname + '/scripts/push-cordova' ]);
   chp.on('exit', (code) => {
     if(code == 0) {
       done();
