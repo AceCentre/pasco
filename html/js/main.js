@@ -330,12 +330,6 @@ function start(_state) {
           .addEventListener('click', _on_edit_cancel, false);
       }
       _edit_mode_toggle(!!_state.edit_mode, false)
-      // operation starts
-      if(state.mode == 'auto') {
-        _state.auto_next_start = auto_next
-        _state.auto_next_dead = false
-        auto_next();
-      }
       return _before_changeposition()
         .then(function () {
           if(state.positions[state.positions.length - 1].index != -1)
@@ -343,6 +337,12 @@ function start(_state) {
           else
             _update_active_positions();
           _on_update_select_path();
+          // operation starts
+          if(state.mode == 'auto') {
+            _state.auto_next_start = auto_next
+            _state.auto_next_dead = false
+            auto_next();
+          }
           delete state._start_promise;
         });
     });
@@ -421,6 +421,7 @@ function pause () {
   state._paused = true;
   if (state._active_timeout != null) {
     clearTimeout(state._active_timeout);
+    state._active_timeout = null;
   }
   return Promise.resolve();
 }
@@ -430,9 +431,6 @@ function resume () {
     throw new Error('state is not initialized!');
   }
   state._paused = false;
-  if(state.mode == 'auto' && _state._active_timeout == null) {
-    _state.auto_next_start();
-  }
   return _before_changeposition()
     .then(function () {
       if(state.positions[state.positions.length - 1].index != -1)
@@ -440,7 +438,9 @@ function resume () {
       else
         _update_active_positions();
       _on_update_select_path();
-      delete state._start_promise;
+      if(state.mode == 'auto' && state._active_timeout == null) {
+        state.auto_next_start();
+      }
     });
 }
 
@@ -880,12 +880,14 @@ function _new_move_start(moveobj) {
             // otherwise move has stopped....
           });
       });
+      function onend () {
+        if(running_move == state._running_move) {
+          state._running_move = null;
+        }
+      }
       var prev_running_move = state._running_move
       running_move = state._running_move = promise
-        .then(function() {
-          if(running_move == state._running_move)
-            state._running_move = null;
-        });
+        .then(onend, function (err) { onend(); throw err; });
       if(prev_running_move) {
         prev_running_move.then(resolve, reject)
       } else {
@@ -1156,7 +1158,32 @@ function _do_notify_move(node, notifynode, opts) {
   }
   return (!node ? speaku.stop_speaking(speaku) : Promise.resolve())
     .then(_new_move_start.bind(null, moveobj))
-    .then(un_can_move);
+    .then(un_can_move, function (err) { un_can_move(); throw err; });
+}
+
+function _do_select(node, opts) {
+  opts = opts||{};
+  var moveobj = _new_move_init(node)
+  moveobj.steps.push(function() {
+    if(node.content_element) {
+      node.content_element.classList.add('selected' || config.selected_class);
+    }
+    moveobj.node.dom_element.dispatchEvent(new CustomEvent("x-select", {
+      detail: {
+        node: node
+      }
+    }));
+    return (_meta_true_check(node.meta['no-main'], false) ?
+            Promise.resolve() : _move_sub_speak.call(node, 'main', opts.override_msg))
+  })
+  speaku.stop_speaking();
+  state.can_move = false;
+  function un_can_move() {
+    state.can_move = true;
+  }
+  return _before_new_move()
+    .then(_new_move_start.bind(null, moveobj))
+    .then(un_can_move, function (err) { un_can_move(); throw err; });
 }
 
 function _get_current_position() {
@@ -1328,10 +1355,7 @@ function _in_spell_finish(atree) {
     delete tmp[1]._concat_letters;
     return pause()
       .then(function() {
-        if(atree.content_element)
-          atree.content_element.classList.add('selected' || config.selected_class);
-        // speak it
-        return _move_sub_speak.call(atree, 'main', msg)
+        return _do_select(atree, { override_msg: msg })
           .then(function() {
             _reset_resume_at_next_action(atree)
           });
@@ -1657,11 +1681,7 @@ function _leaf_select_utterance (anode, override_msg) {
       state.select_path = state.positions.slice(); // copy
       _on_update_select_path();
 
-      if(anode.content_element)
-        anode.content_element.classList.add('selected' || config.selected_class);
-      // speak it
-      return (_meta_true_check(anode.meta['no-main'], false) ?
-              Promise.resolve() : _move_sub_speak.call(anode, 'main', override_msg))
+      return _do_select(anode, { override_msg: override_msg })
         .then(function() {
           _reset_resume_at_next_action(anode);
         });
