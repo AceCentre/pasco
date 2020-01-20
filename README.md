@@ -59,10 +59,11 @@ To build the iOS build (Cordova):
 ```
 npm install 
 bower install
+npm run build-prod
 npm run cordova-dist
 cd cordova
 cordova platform add ios
-cordova run
+cordova build
 ```
 
 ### Having problems building?
