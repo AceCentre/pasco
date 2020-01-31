@@ -96,18 +96,16 @@ function _edit_mode_select(node) {
          node.meta['auditory-cue'] ?
          '(' + node.meta['auditory-cue'] + ')' : '');
     inp_txt.value = txt;
-    inp_txt.addEventListener('blur', function(evt) {
-      if(config._theinput_enabled) {
-        keyevents_handle_theinput();
-      }
-    }, false);
-    function onbefore_other_blur() {
-      if(config._theinput_enabled) {
-        keyevents_handle_theinput_off();
-      }
+    function onblur() {
+      main_keyboard_turn_on();
     }
-    inp_txt.addEventListener('touchend', onbefore_other_blur, false);
-    inp_txt.addEventListener('mouseup', onbefore_other_blur, false);
+    function onfocus() {
+      main_keyboard_turn_off();
+    }
+    inp_txt.addEventListener('blur', onblur, false);
+    inp_txt.addEventListener('focus', onfocus, false);
+    inp_txt.addEventListener('touchend', onfocus, false);
+    inp_txt.addEventListener('mouseup', onfocus, false);
     inp_txt.addEventListener('input', function(evt) {
       var data = parse_dom_tree_subrout_parse_text(inp_txt.value);
       node.text = data.text;
