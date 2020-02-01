@@ -463,14 +463,32 @@ function reset_state () {
   })
 }
 
+function main_keyboard_turn_off () {
+  if(config._theinput_enabled) {
+    keyevents_handle_theinput_off();
+  }
+  state._keyhit_off = true;
+  _napi_remove_key_command();
+}
+
+function main_keyboard_turn_on () {
+  if(config._theinput_enabled) {
+    keyevents_handle_theinput();
+  }
+  state._keyhit_off = false;
+  _napi_add_key_command();
+}
+
 function _napi_add_key_command() {
   if(napi.available) {
     var delegates = config._keyhit_delegates;
     var promises = [];
+    napi._added_key_commands = napi._added_key_commands || {};
     for(var key in delegates) {
       if (delegates.hasOwnProperty(key)) {
         var input = NativeAccessApi.keyInputByCode[key];
-        if(input) {
+        if(input && !napi._added_key_commands[input]) {
+          napi._added_key_commands[input] = true;
           promises.push(napi.add_key_command(input))
         }
       }
@@ -502,10 +520,12 @@ function _napi_remove_key_command() {
   if(napi.available) {
     var delegates = config._keyhit_delegates;
     var promises = [];
+    napi._added_key_commands = napi._added_key_commands || {};
     for(var key in delegates) {
       if (delegates.hasOwnProperty(key)) {
         var input = NativeAccessApi.keyInputByCode[key];
-        if(input) {
+        if(input && napi._added_key_commands[input]) {
+          delete napi._added_key_commands[input];
           promises.push(napi.remove_key_command(input));
         }
       }
@@ -982,18 +1002,18 @@ function _update_active_positions_tree() {
     widthSum += ul.offsetWidth
   }
   if(window.icu && window.icu.rtl) {
-    tree_element.style.left = 'auto';
+    tree_element.style.marginLeft = '';
     if(widthSum - window.innerWidth > 0) {
-      tree_element.style.right = (-widthSum + window.innerWidth) + "px";
+      tree_element.style.marginRight = (-widthSum + window.innerWidth) + 'px';
     } else {
-      tree_element.style.right = 0;
+      tree_element.style.marginRight = '0px';
     }
   } else {
-    tree_element.style.right = '';
+    tree_element.style.marginRight = '';
     if(widthSum - window.innerWidth > 0) {
-      tree_element.style.left = (-widthSum + window.innerWidth) + "px";
+      tree_element.style.marginLeft = (-widthSum + window.innerWidth) + 'px';
     } else {
-      tree_element.style.left = 0;
+      tree_element.style.marginLeft = '0px';
     }
   }
 }

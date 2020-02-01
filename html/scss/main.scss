@@ -84,21 +84,33 @@ html.ios {
   flex-direction: column;
 }
 body.rtl #tree {
-  left: initial;
-  right: 0px;
-  transition: right 0.3s;
-  ul.children {
+  & > div.children-wrp {
+    left: initial;
+    right: 0;
+  }
+  .children-wrp {
     left: initial;
     right: 100%;
+  }
+  .content {
+    & > .arrow-wrp {
+      .fa-angle-left {
+        display: inline-block;// only for rtl
+      }
+      .fa-angle-right {
+        display: none;// hide for rtl
+      }
+    }
   }
 }
 #tree {
   position: relative;
-  left: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
   flex-grow: 1;
   z-index: 0;
   overflow: hidden;
-  transition: left 0.3s;
+  transition: margin-left 0.3s, margin-right 0.3s;
   &.no-transition {
     transition: none;
   }
@@ -172,6 +184,9 @@ body.rtl #tree {
     & > .arrow-wrp {
       margin-left: 5px;
       position: relative;
+      .fa-angle-left {
+        display: none;// only for rtl
+      }
       .fa, .far {
         position: relative;
         top: 50%;
