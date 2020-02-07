@@ -37,36 +37,8 @@ Feelings
 	I'm sad
 	I'm Angry
 I will spell it<meta data-spell-branch  data-spell-update-dyn-onchange>
-	<meta data-dyn="spell-word-prediction" data-words-file="trees/Spell_Prediction/bncfrequency.json" data-max-nodes="3" data-spell-finish>
-	a to h
-		a
-		b
-		c
-		d
-		e
-		f
-		g
-		h
-	i to r 
-		i 
-		j
-		k
-		l
-		m
-		n
-		o
-		p
-		q
-		r
-	s to z
-		s
-		t
-		u
-		v
-		w
-		x
-		y
-		z
+	<meta data-dyn="spell-word-prediction" data-words-file="trees/Spell_Prediction/bncfrequency.json" data-max-nodes="3"  data-predict-after-n-chars="3">
+	<meta data-dyn="spell-letter-prediction" data-words-file="trees/Spell_Prediction/bncfrequency.json">
 	Space <meta data-spell-letter=" ">
-	Finish <meta data-spell-finish>
 	Undo <meta data-spell-delchar>
+	Finish <meta data-spell-finish>
