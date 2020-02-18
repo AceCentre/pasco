@@ -27,6 +27,9 @@ To learn more about pasco, [Read pasco documentation](https://app.pasco.chat/doc
 | Adjustable font size and Colour Themes                       | ✅   |  ✅   |
 | Switch Access (1-4)					                       | ✅   |  ✅   |
 | On-Screen navigation tool, Resizable and Draggable           | ✅   |  ✅   |
+| Webhook support (e.g. IFTT, Zapier)                          | ✅   |  ✅   |
+| (Beta) Scroll-wheel navigation mode                          | ✅   |  ✅   |
+| Offline voices                                               | ✅   |  ❎   |
 
 
 ## Developing 
@@ -54,7 +57,7 @@ To test the web build:
 npm run dev
 ```
 
-To build the iOS build (Cordova):
+To build the iOS build - First time:
 
 ```
 npm install 
@@ -65,6 +68,18 @@ cd cordova
 cordova platform add ios
 cordova build
 ```
+
+To build the iOS build - Additional times:
+
+```
+npm install 
+bower install
+npm run build-prod
+npm run cordova-dist
+cd cordova
+cordova build
+```
+
 
 ### Having problems building?
 
