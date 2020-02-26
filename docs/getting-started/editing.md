@@ -74,6 +74,19 @@ For example. This is a standard layout:
 		- What are you doing today?
 ```
 
+and you don't need to use ``-`` dashes if you don't wish e.g.
+
+```markdown
+My phrases
+	Hello
+	Goodbye
+	Thanks
+	No thanks
+	Questions
+		How are you?
+		What are you doing today?
+```
+
 ::: warning
 Be super careful with the use of tabs - and spaces. The lines **have** to have the right spacing to be read by pasco correctly. You can use tabs - or spaces but to make your life easier - try and use the same throughout. Confused? [Read this tip](/tips-n-tricks/editing-with-texteditor.html) on how to do this correctly!
 :::
