@@ -12,13 +12,13 @@
 
 2. Using the navigation menu - navigate to the node you want to edit
 
-So tap down to go down - right - to go into a sub tree element.
+Tap the down arrow to go down, the right arrow to go into a sub tree element for example
 
 3. Edit the text in the node. 
 
-Note that if you put text in brackets after the word  - this will be the cue text. Other text is read out loud as the main text. 
+Note that if you put text in brackets after the word  - this will be the cue text. Other text is read out loud as the main text. For example ``My care (care)`` will have the *cue* of *care* and read outloud *My care*
 
-4. Hit save when done
+4. Hit the Save button (top right) when done.
 
 Here is a quick video demonstrating this:
 
