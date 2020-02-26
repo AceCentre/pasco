@@ -80,6 +80,18 @@ cd cordova
 cordova build
 ```
 
+For the full documentation we use [vuepress](https://vuepress.vuejs.org/guide/getting-started.html). To develop locally:
+
+```
+cd docs
+vuepress dev
+```
+
+To push the final docs 
+
+```
+./docs-deploy.sh
+```
 
 ### Having problems building?
 
@@ -103,6 +115,11 @@ ArrowDown or S -> Next # on switch mode
 ArrowRight or D -> Go into or select
 ArrowLeft or A -> Go out
 ```
+
+## Roadmap
+
+Our next milestone is: https://github.com/AceCentre/pasco/milestone/4
+
 
 ## Built With
 
