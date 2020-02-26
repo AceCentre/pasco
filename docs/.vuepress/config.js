@@ -40,6 +40,7 @@ module.exports = {
           ['/getting-started/introduction', 'Introduction'],
           ['/getting-started/installation', 'Installation'],
           ['/getting-started/configuration-options', 'Configuration Options'],
+          ['/getting-started/editing', 'Editing the tree'],
           ['/getting-started/contributing', 'Contributing'],
           ['/getting-started/supporting-pasco', 'Supporting pasco'],
           ['/getting-started/troubleshooting', 'Troubleshooting'],

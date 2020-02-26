@@ -2,7 +2,7 @@
 
 There are three formats that pasco reads langauge trees in.
 
-1. **Mindnode - Markdown format.** 
+1. **Mindnode - Markdown format. - ATX Style** 
 
 Files look a little like this:
 
