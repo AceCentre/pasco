@@ -99,7 +99,7 @@ body.quick-setup {
   }
 }
 
-$iosoffsettop: 25px;
+$iosoffsettop: 30px;
 
 /* common */
 .main-top-navbar {
@@ -225,7 +225,9 @@ html {
     padding-left: 6px;
     padding-right: 6px;
     display: inline-block;
-    height: 100
+    &:hover {
+      text-decoration: none;
+    }
   }
   .disabled {
     color: #777;
@@ -279,5 +281,15 @@ html {
   flex-direction: row;
   & > * {
     margin-right: 10px;
+  }
+}
+
+.icon-with-text {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  .text {
+    margin-left: 0.3em;
+    font-size: 1.1em;
   }
 }

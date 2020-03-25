@@ -1052,7 +1052,7 @@ function save_quick_setup(evt) {
         });
     })
     .then(function() {
-      window.location = 'index.html'; // goto pasco
+      window.location = 'intro.html'; // open intro page
     })
     .catch(show_error);
   function show_error(err) {
