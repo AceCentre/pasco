@@ -156,11 +156,7 @@ Promise.all([
 
   })
   .then(function() {
-    // deal with on-screen navigation
-    var elem = document.querySelector('#navbtns-wrp');
-    if(elem && config._onscreen_navigation) {
-      elem.classList.add('navbtns-enable');
-    }
+    // init on-screen navigation
     navbtns_init();
     document.body.classList.remove('notready');
   })
@@ -313,13 +309,20 @@ function start(_state) {
           document.addEventListener('wheel', _on_wheel, false);
         }
       }
-      var tmp = document.querySelector('#navbtns')
-      if(tmp && config._onscreen_navigation) {
-        if(window.device && window.device.platform.toLowerCase() == 'ios') {
-          tmp.addEventListener('touchstart', _on_navbtns_tstart, false);
-        } else {
-          tmp.addEventListener('click', _on_navbtns_click, false)
+      var navbtns_wrp = document.querySelector('#navbtns-wrp');
+      var navbtns = document.querySelector('#navbtns')
+      if(navbtns && (config._onscreen_navigation || _state.edit_mode)) {
+        _state._navbtns_enabled = true
+        if(navbtns_wrp) {
+          navbtns_wrp.classList.add('navbtns-enable');
         }
+        if(window.device && window.device.platform.toLowerCase() == 'ios') {
+          navbtns.addEventListener('touchstart', _on_navbtns_tstart, false);
+        } else {
+          navbtns.addEventListener('click', _on_navbtns_click, false)
+        }
+      } else if(navbtns_wrp) {
+        navbtns_wrp.classList.remove('navbtns-enable');
       }
       if(config.can_edit) {
         document.querySelector('#edit-mode-btn')
@@ -599,12 +602,13 @@ function stop() {
           document.removeEventListener('wheel', _on_wheel, false);
         }
       }
-      var tmp = document.querySelector('#navbtns')
-      if(tmp && config._onscreen_navigation) {
+      var navbtns = document.querySelector('#navbtns')
+      if(navbtns && state._navbtns_enabled) {
+        state._navbtns_enabled = false
         if(window.device && window.device.platform.toLowerCase() == 'ios') {
-          tmp.removeEventListener('touchstart', _on_navbtns_tstart, false);
+          navbtns.removeEventListener('touchstart', _on_navbtns_tstart, false);
         } else {
-          tmp.removeEventListener('click', _on_navbtns_click, false);
+          navbtns.removeEventListener('click', _on_navbtns_click, false);
         }
       }
       if(config.can_edit) {
