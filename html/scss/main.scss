@@ -111,6 +111,11 @@ body.rtl #tree {
   z-index: 0;
   overflow: hidden;
   transition: margin-left 0.3s, margin-right 0.3s;
+  @media (max-width: 767px) {
+    ul.children {
+      width: 100vw;
+    }
+  }
   &.no-transition {
     transition: none;
   }

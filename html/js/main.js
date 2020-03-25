@@ -1376,6 +1376,9 @@ function _in_spell_finish(atree) {
     return pause()
       .then(function() {
         return _do_select(atree, { override_msg: msg })
+          .catch(function(err) {
+            console.warn(err)
+          })
           .then(function() {
             _reset_resume_at_next_action(atree)
           });
@@ -1702,6 +1705,9 @@ function _leaf_select_utterance (anode, override_msg) {
       _on_update_select_path();
 
       return _do_select(anode, { override_msg: override_msg })
+        .catch(function(err) {
+          console.warn(err);
+        })
         .then(function() {
           _reset_resume_at_next_action(anode);
         });
