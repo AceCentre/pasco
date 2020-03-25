@@ -247,10 +247,8 @@ function tree_mk_list_base(tree, el, content_template) {
     cel.classList.add('content');
     el.appendChild(cel);
     tree.content_element = cel;
-    var tmp = newEl('div');
-    tmp.textContent = text;
     cel.innerHTML = content_template({
-      text: tmp.innerHTML,
+      text: text,
       tree: tree
     });
     var txtel = cel.querySelector('.text');
