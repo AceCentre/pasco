@@ -2245,9 +2245,10 @@ function _start_auto_insert_back(tree, content_template) {
           istmp: true
         },
         meta: {
-          'back-n-branch': '1'
+          'back-n-branch': '1',
+          'auditory-cue': config.helper_back_option_cue_text || _t('Back'),
         },
-        text: _t('Back')
+        text: config.helper_back_option_main_text || _t('Back'),
       }, content_template);
       _start_auto_insert_back(anode, content_template);
     }

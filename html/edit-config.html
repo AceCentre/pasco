@@ -202,9 +202,26 @@
                 <div class="row m-b-10">
                   <div class="col-sm-6">
                     <h4 x-l10n>Back option for all branches</h4>
-                    <label class="radio-inline"><input type="radio" name="helper_back_option" value="start"><span x-l10n>At beginning</span></label>
-                    <label class="radio-inline"><input type="radio" name="helper_back_option" value="end"><span x-l10n>At end</span></label>
-                    <label class="radio-inline"><input type="radio" name="helper_back_option" value=""><span x-l10n>None</span></label>
+                    <div class="row">
+                      <div class="col-sm-12 m-b-10">
+                        <label class="radio-inline"><input type="radio" name="helper_back_option" value="start"><span x-l10n>At beginning</span></label>
+                        <label class="radio-inline"><input type="radio" name="helper_back_option" value="end"><span x-l10n>At end</span></label>
+                        <label class="radio-inline"><input type="radio" name="helper_back_option" value=""><span x-l10n>None</span></label>
+                      </div>
+                      <div class="col-sm-6">
+                        <div class="form-group">
+                          <label for="helper_back_option_main_text" x-l10n>Main Speech</label>
+                          <input type="text" id="helper_back_option_main_text" name="helper_back_option_main_text" class="form-control" value="" placeholder="Back">
+                        </div>
+                      </div>
+                      <div class="col-sm-6">
+                        <div class="form-group">
+                          <label for="helper_back_option_cue_text" x-l10n>Cue Speech</label>
+                          <input type="text" id="helper_back_option_cue_text" name="helper_back_option_cue_text" class="form-control" value="" placeholder="Back">
+                        </div>
+                      </div>
+                    </div>
+                    <hr>
                   </div>
                   <div class="col-sm-6">
                     <h4 x-l10n>Stay in branch for all nodes</h4>
