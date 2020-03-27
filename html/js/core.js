@@ -13,6 +13,11 @@ document.addEventListener('deviceready', function() {
   if (window.cordova) {
     html.classList.add('cordova');
   }
+  window.open = cordova.InAppBrowser.open;
+  $('body').on('click', 'a[target="_blank"]', (evt) => {
+    evt.preventDefault();
+    window.open($(evt.currentTarget).attr('href'), '_system', '');
+  });
 }, false);
 
 window.newEl = document.createElement.bind(document);
