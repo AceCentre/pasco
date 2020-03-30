@@ -61,27 +61,27 @@ function generate_boards_from_tree (tree, options, export_files, boards, state) 
       if (anode.is_leaf) {
         // check for spelling meta and add to state
         let meta_to_actions = [
-          { boolmeta: 'spell-delchar', action: ":backspace" },
-          { boolmeta: 'spell-finish', action: ":speak",
+          { boolmeta: 'spell-delchar', actions: [":backspace"] },
+          { boolmeta: 'spell-finish', actions: [":speak"],
             actions: [ ":speak", ":clear", ":home" ] },
-          { meta: 'spell-letter', metaeq: ' ', action: ":space" },
+          { meta: 'spell-letter', metaeq: ' ', actions: [":space"] },
         ];
         for (let m2a of meta_to_actions) {
           if ((anode.meta[m2a.meta] &&
                (m2a.metaeq || anode.meta[m2a.meta] == m2a.metaeq)) ||
               (m2a.boolmeta != null &&
                _meta_true_check(anode.meta[m2a.boolmeta], false))) {
-            ret.action = m2a.action;
+            // ret.action = m2a.action;
             if (m2a.actions) {
               ret.actions = m2a.actions;
             }
             break;
           }
         }
-        if (!ret.action && state.inspellbranch) {
-          ret.action = "+" + (anode.meta['spell-word'] || anode.meta['spell-letter'] || anode.text);
+        if (!ret.actions && state.inspellbranch) {
+          ret.actions = [ "+" + (anode.meta['spell-word'] || anode.meta['spell-letter'] || anode.text) ];
           if (anode.meta['spell-word']) {
-            ret.actions = [ ret.action, ":space" ];
+            ret.actions.push(":space");
           }
         }
       } else {
@@ -106,6 +106,19 @@ function generate_boards_from_tree (tree, options, export_files, boards, state) 
   } else if (row_len > 0) {
     col_len = Math.ceil(buttons.length / row_len);
   }
+  let order = [];
+  for (let y = 0; y < row_len; y++) {
+    let order_row = [];
+    for (let x = 0; x < col_len; x++) {
+      if (y * col_len + x < buttons.length) {
+        let button = buttons[y * col_len + x]
+        order_row.push(button.id)
+      } else {
+        order_row.push(null)
+      }
+    }
+    order.push(order_row);
+  }
   let board = {
     "format": "open-board-0.1",
     "id": boardid,
@@ -113,9 +126,11 @@ function generate_boards_from_tree (tree, options, export_files, boards, state) 
     "name": tree.text,
     // "description_html": "",
     "buttons": buttons,
+    "images": [],
     "grid": {
       "rows": row_len,
       "columns": col_len,
+      "order": order,
     },
     "sounds": sounds,
   };
