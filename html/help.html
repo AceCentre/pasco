@@ -54,6 +54,63 @@
 	<h3 class="relative">
 		<a class="anchor" name="settings"></a>Settings 
 	</h3>
+		<ul><li><a href="#">
+			Access 
+		</a><ul><li><a href="#on-screen-navigation">
+			On-Screen Navigation 
+		</a></li><li><a href="#access-mode">
+			Access Mode 
+		</a></li><li><a href="#switch-setup-background">
+			Switch Setup - Background 
+		</a></li><li><a href="#_2-switches-default">
+			2+ Switches (Default) 
+		</a></li><li><a href="#_1-switch-auto-scan">
+			1 switch - Auto-Scan 
+		</a><ul><li><a href="#loops-default-3">
+			Loops (Default: 3) 
+		</a></li><li><a href="#delay-at-first-item-ms-default-1000-ms">
+			Delay at first item (ms) (Default: 1000 ms) 
+		</a></li><li><a href="#auto-scanning-delay-ms-default-3000-ms">
+			 Auto-scanning delay (ms) (Default: 3000 ms) 
+		</a></li></ul></li><li><a href="#configure-actions">
+			Configure Actions
+		</a></li><li><a href="#switch-key-to-select-items">
+			 Switch key to select items 
+		</a></li><li><a href="#minimum-cue-time-ms-default-0-ms">
+			 Minimum Cue Time (ms) (Default: 0 ms) 
+		</a></li><li><a href="#ignore-second-hits-ms-default-100-ms">
+			 Ignore second hits (ms) (Default: 100 ms) 
+		</a></li></ul></li><li><a href="#helpers">
+			 Helpers 
+		</a><ul><li><a href="#back-option-for-all-branches">
+			 Back option for all branches 
+		</a></li></ul></li><li><a href="#speech">
+			 Speech 
+		</a><ul><li><a href="#cue-voice">
+			 Cue Voice 
+		</a></li><li><a href="#main-voice">
+			 Main Voice 
+		</a></li><li><a href="#first-time-run-cue-voice">
+			 First time run (Cue Voice) 
+		</a></li></ul></li><li><a href="#appearance">
+			 Appearance 
+		</a><ul><li><a href="#font-size">
+			 Font size 
+		</a></li><li><a href="#theme">
+			 Theme 
+		</a></li><li><a href="#locale">
+			 Locale 
+		</a></li></ul></li><li><a href="#vocabulary">
+			 Vocabulary 
+		</a><ul><li><a href="#active-tree">
+			 Active Tree 
+		</a></li><li><a href="#tools">
+			 Tools 
+		</a></li><li><a href="#load-an-example-tree">
+			 Load an example tree 
+		</a></li><li><a href="#export-import">
+			 Export / Import 
+		</a></li></ul></li></ul>
 	<h4>
 		Access 
 	</h4>
@@ -141,23 +198,15 @@
 	<p>
 		By turning this on it stops the user selecting a large number of items in the tree before hearing the cue. You can change the default time here. 
 	</p>
-	<div class="custom-block tip">
-		<p class="custom-block-title">
-			TIP 
-		</p>
-		<p>
-			You probably want to keep it under 500ms other wise it can feel laggy 
-		</p>
-	</div>
 	<h5 id="ignore-second-hits-ms-default-100-ms">
 		<a href="ignore-second-hits-ms-default-100-ms" class="header-anchor"></a> Ignore second hits (ms) (Default: 100 ms) 
 	</h5>
 	<p>
 		This feature stops the switches being responded to if they are hit within this timeframe. So for example, if a user presses a switch and hits immediately afterwards - pasco will ignore this second press if it is within the timeframe. Some 
 	</p>
-	<h5 id="helpers">
+	<h4 id="helpers">
 		<a href="helpers" class="header-anchor"></a> Helpers 
-	</h5>
+	</h4>
 	<p>
 		We will add additional <strong>'helpers'</strong> (actions that alter the tree) here - but for now we only have one helper: 
 	</p>
@@ -167,9 +216,9 @@
 	<p>
 		It's really useful for single switch scanners to get back a branch if they need to. This adds the option of 'Back' to the end of each Branch, at the beginning of each branch or not at all. 
 	</p>
-	<h5 id="speech">
+	<h4 id="speech">
 		<a href="speech" class="header-anchor"></a> Speech 
-	</h5>
+	</h4>
 	<h5 id="cue-voice">
 		<a href="cue-voice" class="header-anchor"></a> Cue Voice 
 	</h5>
@@ -201,17 +250,10 @@
 	<p>
 		For many people who are visually impaired its useful to 'hear' the items at each selected branch. This is like someone who is using their eyes to visually scan the interface. It give the user a fast way of scanning the items. If you turn this on we recommend making as fast as you can before the voice becomes hard to understand. 
 	</p>
-	<div class="custom-block tip">
-		<p class="custom-block-title">
-			TIP 
-		</p>
-		<p>
-			This won't increase the speed of any recorded messages. <strong>Note:</strong> This option is only available for automatic scanning. 
-		</p>
-	</div>
-	<h5 id="appearance">
+
+	<h4 id="appearance">
 		<a href="appearance" class="header-anchor"></a> Appearance 
-	</h5>
+	</h4>
 	<p>
 		This area defines how the application looks and feels. 
 	</p>
@@ -241,9 +283,9 @@
 			This doesn't automatically change the language of the trees/vocabulary. For that you will have to use something like google translate. 
 		</p>
 	</div>
-	<h5 id="vocabulary">
+	<h4 id="vocabulary">
 		<a href="vocabulary" class="header-anchor"></a> Vocabulary 
-	</h5>
+	</h4>
 	<h5 id="active-tree">
 		<a href="active-tree" class="header-anchor"></a> Active Tree 
 	</h5>
