@@ -64,7 +64,6 @@
         <splash height="800" src="res/screens/wp8/SplashScreenImage.screen-WVGA.jpg" width="480" />
         <splash height="1280" src="res/screens/wp8/SplashScreenImage.screen-WXGA.jpg" width="768" />
     </platform>
-    <plugin name="audscan-cordova-plugin" spec="git+https://github.com/hosseinamin/pasco-cordova-plugin.git" />
     <plugin name="cordova-plugin-device" spec="^1.1.7" />
     <plugin name="cordova-plugin-file" spec="^6.0.1" />
     <plugin name="cordova-plugin-media" spec="git+https://github.com/hosseinamin/cordova-plugin-media.git">
