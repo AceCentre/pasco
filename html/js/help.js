@@ -2,6 +2,7 @@ window.help_files = {
   'en': 'help.html',
   'es-ES': 'help/es-ES.html'
 };
+document.addEventListener('scroll', _onscroll);
 var config;
 Promise.all([
   window.cordova ? NativeAccessApi.onready() : Promise.resolve(),
@@ -54,6 +55,21 @@ Promise.all([
     document.body.style.display = '';
   });
 
+
+function _onscroll () {
+  var movetoplink = document.querySelector('#move-top-link');
+  if (movetoplink) {
+    if (window.scrollY > 500) {
+      if (movetoplink.classList.contains('hidden')) {
+        movetoplink.classList.remove('hidden');
+      }
+    } else {
+      if (!movetoplink.classList.contains('hidden')) {
+        movetoplink.classList.add('hidden');
+      }
+    }
+  }
+}
 
 function generate_toc (element, options) {
   options = options || {};
