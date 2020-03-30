@@ -446,6 +446,21 @@
                   <div class="col-sm-12">
                     <h4 x-l10n>Display message bar when spelling</h4>
                     <label class="checkbox-inline"><input type="checkbox" name="display_message_bar_at_spell_branch"><span x-l10n>On</span></label>
+
+                    <div class="row m-t-10">
+                      <div class="col-sm-4">
+                        <h5 x-l10n>Custom height for message bar</h5>
+                        <label class="checkbox-inline"><input type="checkbox" name="message_bar_have_custom_height"><span x-l10n>On</span></label>
+                      </div>
+                      <div class="col-sm-4">
+                        <div class="form-group">
+                          <label for="message_bar_height" x-l10n>Message bar height (%)</label>
+                          <input type="number" id="message_bar_height" name="message_bar_height" class="form-control" step="1" value="40" min="10" max="300" data-validator="number" data-dependent="#message_bar_height_range">
+                          <input type="range" id="message_bar_height_range" class="form-control btn-lg" step="1" min="10" max="90" data-default="40" data-dependent="#message_bar_height">
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
               </div>
