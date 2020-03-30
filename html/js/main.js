@@ -492,7 +492,9 @@ function _napi_add_key_command() {
         var input = NativeAccessApi.keyInputByCode[key];
         if(input && !napi._added_key_commands[input]) {
           napi._added_key_commands[input] = true;
-          promises.push(napi.add_key_command(input))
+          promises.push(napi.add_key_command(input, '', {
+            repeatable: !!config.ios_keycommand_repeatable,
+          }))
         }
       }
     }
