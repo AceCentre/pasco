@@ -1515,7 +1515,6 @@ function parse_tree(tree_element, data) {
     content_template = _.template(tmp.innerHTML);
   tree_element.innerHTML = ''; // clear all
   tree_mk_list_base(tree, tree_element, content_template); // re-create
-  tree_element.tree_height = window.innerHeight;
   return tree;
 }
 

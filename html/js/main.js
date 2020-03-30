@@ -153,7 +153,16 @@ Promise.all([
         }
       });
     });
-
+    // set message bar custom height
+    if (config.message_bar_have_custom_height &&
+        config.message_bar_height > 0 && config.message_bar_height <= 100) {
+      var html = document.querySelector('html')
+      var topbar_offset = 50 + (html.classList.contains('ios') ? 30 : 0)
+      var msgbar_wrp = document.querySelector('#message-bar-wrp')
+      if (msgbar_wrp) {
+        msgbar_wrp.style.height = 'calc(' + config.message_bar_height + 'vh - ' + topbar_offset + 'px)';
+      }
+    }
   })
   .then(function() {
     // init on-screen navigation
@@ -1000,7 +1009,7 @@ function _update_active_positions_tree() {
         el = node ? node.dom_element : null,
         height = el ? el.offsetHeight : 0,
         offY = el ? el.offsetTop : 0,
-        pheight = tree_element.tree_height;
+        pheight = tree_element.offsetHeight;
     var top = ((pheight / 2.0 - height / 2.0) - offY - topSum);
     if(ul)
       ul.style.top = top + 'px';
@@ -1025,7 +1034,6 @@ function _update_active_positions_tree() {
 }
 
 function _tree_needs_resize() {
-  tree_element.tree_height = window.innerHeight;
   _update_active_positions_tree();
 }
 
@@ -1744,6 +1752,7 @@ function _on_update_select_path () {
     }
   }
   _update_message_bar();
+  _tree_needs_resize();
 }
 
 function _update_message_bar (txt) {
@@ -2298,7 +2307,6 @@ function install_tree (tree_element, tree_data, config, state) {
         content_template = _.template(tmp.innerHTML);
       tree_element.innerHTML = ''; // clear all
       tree_mk_list_base(tree, tree_element, content_template); // re-create
-      tree_element.tree_height = window.innerHeight;
       return tree;
     });
 }
@@ -2344,7 +2352,6 @@ function _tree_update_subdyn (atree, options) {
       if (tree_element == atree.dom_element) {
         tree_element.innerHTML = ''; // clear all
         tree_mk_list_base(atree, tree_element, content_template); // re-create
-        tree_element.tree_height = window.innerHeight;
         finish();
         return;
       }
