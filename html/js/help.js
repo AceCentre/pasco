@@ -40,6 +40,7 @@ Promise.all([
     if (tocwrp) {
       var root_list = generate_toc(document.body, {
         start_level: 2,
+        end_level: 3,
         list_type_map: { 2: 'ol' },
       });
       if(root_list) {
