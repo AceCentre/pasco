@@ -75,8 +75,13 @@
 
     <!-- INJECT SCRIPTS -->
     <!-- MAIN SCRIPTS -->
-    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/underscore/underscore-min.js"></script>
+    <script src="bower_components/showdown/dist/showdown.min.js"></script>
+    <script src="js/lib/translate.js"></script>
+    <script src="js/lib/sanitize-html.js"></script>
+    <script src="js/nodelib.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="js/core.js"></script>
     <script>
       document.querySelector('#intro-video').addEventListener('ended', function () {
         document.querySelector('#skip-btn').classList.add('hidden')
