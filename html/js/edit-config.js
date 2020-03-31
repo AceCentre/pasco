@@ -1052,7 +1052,7 @@ function save_quick_setup(evt) {
         });
     })
     .then(function() {
-      window.location = 'intro.html'; // open intro page
+      window.location = 'index.html'; // open index page
     })
     .catch(show_error);
   function show_error(err) {

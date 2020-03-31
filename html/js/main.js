@@ -105,7 +105,7 @@ Promise.all([
   })
   .then(function() {
     if(!config.__did_quick_setup) {
-      window.location = 'quick-setup.html'; // goto quick-setup.html page
+      window.location = 'intro.html'; // goto quick-setup.html page
       return new Promise(function(){ }); // hang
     }
     return prepare_tree(config.tree || window.default_tree)
