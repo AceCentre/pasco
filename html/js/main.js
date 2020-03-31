@@ -1365,6 +1365,8 @@ function _in_check_spell_delchar(atree) {
       } else {
         msg = concat_letters.join(' ');
       }
+      _update_message_bar();
+      _tree_needs_resize();
       return _do_notify_move(_get_current_node(), atree, {
         main_override_msg: msg
       });
@@ -1420,10 +1422,11 @@ function _in_check_spell_default(atree) {
       var last_word_idx = concat_letters.lastIndexOf(' ');
       if (last_word_idx == -1) {
         concat_letters.splice(0, concat_letters.length); // empty the list
-      } else {
+      } else if (last_word_idx + 1 != concat_letters.length) {
         concat_letters.splice(last_word_idx, concat_letters.length - last_word_idx, ' ');
       }
-      concat_letters.push(atree.meta['spell-word']);
+      concat_letters.push(atree.meta['spell-word'])
+      concat_letters.push(' ');
     } else {
       var letter = atree.meta['spell-letter'] || atree.text;
       concat_letters.push(letter)
@@ -1453,7 +1456,6 @@ function _in_check_spell_default(atree) {
           state.positions[0].index = 0;
         }
         state.select_path = state.positions.slice(0, state.positions.length-1);
-        _on_update_select_path();
         var msg;
         {
           var idx = concat_letters.lastIndexOf(' ');
@@ -1464,6 +1466,7 @@ function _in_check_spell_default(atree) {
             msg = concat_letters.join(' ');
           }
         }
+        _on_update_select_path();
         return _do_notify_move(_get_current_node(), atree, {
           main_override_msg: msg
         });
@@ -1736,23 +1739,25 @@ function _in_check_select_utterance (anode) {
 
 function _on_update_select_path () {
   // message bar
-  var wrp = document.querySelector('#message-bar-wrp');
-  if (wrp) {
-    // current positions except index of last one
-    var positions = state.positions.slice(0, state.positions.length-1);
-    positions.push({
-      tree: state.positions[state.positions.length-1].tree,
-      index: -1,
-    });
-    var show = !!_get_node_attr_inherits_full(positions, 'spell-branch');
-    if (show && wrp.classList.contains('hide')) {
-      wrp.classList.remove('hide');
-    } else if (!show && !wrp.classList.contains('hide')) {
-      wrp.classList.add('hide');
+  if (config.display_message_bar_at_spell_branch) {
+    var wrp = document.querySelector('#message-bar-wrp');
+    if (wrp) {
+      // current positions except index of last one
+      var positions = state.positions.slice(0, state.positions.length-1);
+      positions.push({
+        tree: state.positions[state.positions.length-1].tree,
+        index: -1,
+      });
+      var show = !!_get_node_attr_inherits_full(positions, 'spell-branch');
+      if (show && wrp.classList.contains('hide')) {
+        wrp.classList.remove('hide');
+      } else if (!show && !wrp.classList.contains('hide')) {
+        wrp.classList.add('hide');
+      }
+      _update_message_bar();
+      _tree_needs_resize();
     }
   }
-  _update_message_bar();
-  _tree_needs_resize();
 }
 
 function _update_message_bar (txt) {
