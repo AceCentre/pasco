@@ -52,6 +52,10 @@
         </edit-config>
         <splash src="res/screens/ios/Default@2x~universal~anyany.png" />
         <splash src="res/screens/ios/Default@2x~universal~anycom.png" />
+        <feature name="CDVWKWebViewEngine">
+          <param name="ios-package" value="CDVWKWebViewEngine" />
+        </feature>
+        <preference name="CordovaWebViewEngine" value="CDVWKWebViewEngine" />
     </platform>
     <platform name="windows">
         <splash height="300" src="res/screens/windows/SplashScreen.scale-100.png" width="620" />
