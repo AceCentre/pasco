@@ -124,7 +124,8 @@ body.rtl #tree {
     opacity: 0;
   }
   &.current .content,
-  .current .content {
+  .current .content,
+  .active > .content {
     & > .arrow-wrp {
       opacity: 1;
     }

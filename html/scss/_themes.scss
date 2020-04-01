@@ -7,7 +7,7 @@ $theme-light-secondary: #D6602B;
 $theme-light-hint: #F0C000;
 $theme-light-secondary-bg: #FFF;
 $theme-light-parent-arrow: red;
-$theme-light-child-arrow: blue;
+$theme-light-child-arrow: #af473d;
 
 $theme-lightbold-bg: #C8F2FD;
 $theme-lightbold-primary: #001401;
@@ -15,7 +15,7 @@ $theme-lightbold-secondary: #D6602B;
 $theme-lightbold-hint: #F0C000;
 $theme-lightbold-secondary-bg: #FFF;
 $theme-lightbold-parent-arrow: red;
-$theme-lightbold-child-arrow: blue;
+$theme-lightbold-child-arrow: #C8F2FD;
 
 $theme-greyred-bg: #F4F4F4;
 $theme-greyred-primary: #FF4136;
@@ -23,7 +23,7 @@ $theme-greyred-secondary: #000000;
 $theme-greyred-hint: #AAAAAA;
 $theme-greyred-secondary-bg: #FFF;
 $theme-greyred-parent-arrow: red;
-$theme-greyred-child-arrow: blue;
+$theme-greyred-child-arrow: #F4F4F4;
 
 
 $theme-yb-bg: #FFFF00;
@@ -32,7 +32,7 @@ $theme-yb-secondary: #000000;
 $theme-yb-hint: #AAAAAA;
 $theme-yb-secondary-bg: #FFF;
 $theme-yb-parent-arrow: red;
-$theme-yb-child-arrow: blue;
+$theme-yb-child-arrow:  #999999;
 
 
 $theme-by-bg: #000000;
@@ -41,7 +41,7 @@ $theme-by-secondary: #FFFF00;
 $theme-by-hint: #FBF1A9;
 $theme-by-secondary-bg: #FFF;
 $theme-by-parent-arrow: red;
-$theme-by-child-arrow: blue;
+$theme-by-child-arrow: #FBF1A9;
 
 $theme-mint-bg: #9EEBCF;
 $theme-mint-primary: #999999;
@@ -49,7 +49,7 @@ $theme-mint-secondary: #000000;
 $theme-mint-hint: #AAAAAA;
 $theme-mint-secondary-bg: #FFF;
 $theme-mint-parent-arrow: red;
-$theme-mint-child-arrow: blue;
+$theme-mint-child-arrow: #999999;
 
 $theme-dark-bg: #12003D;
 $theme-dark-primary: #FFE400;
@@ -57,7 +57,7 @@ $theme-dark-secondary: #D6602B;
 $theme-dark-hint: #EEE;
 $theme-dark-secondary-bg: #FFF;
 $theme-dark-parent-arrow: red;
-$theme-dark-child-arrow: orange;
+$theme-dark-child-arrow: #FFE400;
 
 #tree {
   .content {
@@ -68,6 +68,26 @@ $theme-dark-child-arrow: orange;
   .content.selected,
   .content.highlight {
     opacity: 1;
+  }
+}
+
+@mixin tree_arrow_theme_tmpl01 ($current-color, $active-color) {
+  #tree {
+    // arrow of all options in the current branch
+    &.current .content,
+    .current .content {
+      > .arrow-wrp {
+        color: $current-color;
+        transform: none;
+        font-size: 120%;
+      }
+    }
+    // arrow of parents of current position
+    .active > .content > .arrow-wrp {
+      color: $active-color;
+      transform: rotate(-180deg);
+      font-size: 100%;
+    }
   }
 }
 
@@ -92,8 +112,7 @@ body.theme-light {
   #message-bar {
     color: $theme-light-secondary;
   }
-  #tree .current > .content > .arrow-wrp { color: $theme-light-parent-arrow;}
-  #tree .current .content > .arrow-wrp { color: $theme-light-child-arrow; font-size: 120%;}
+  @include tree_arrow_theme_tmpl01($theme-light-child-arrow, $theme-light-parent-arrow);
 }
 
 body.theme-lightbold {
@@ -118,8 +137,7 @@ body.theme-lightbold {
   #message-bar {
     color: $theme-lightbold-secondary;
   }
-  #tree .current > .content > .arrow-wrp { color: $theme-lightbold-parent-arrow; }
-  #tree .current .content > .arrow-wrp { color: $theme-lightbold-child-arrow; font-size: 120%;}
+  @include tree_arrow_theme_tmpl01($theme-lightbold-child-arrow, $theme-lightbold-parent-arrow);
 }
 
 body.theme-greyred {
@@ -143,8 +161,7 @@ body.theme-greyred {
   #message-bar {
     color: $theme-greyred-secondary;
   }
-  #tree .current > .content > .arrow-wrp { color: $theme-greyred-parent-arrow; }
-  #tree .current .content > .arrow-wrp { color: $theme-greyred-child-arrow; font-size: 120%;}
+  @include tree_arrow_theme_tmpl01($theme-greyred-child-arrow, $theme-greyred-parent-arrow);
 }
 
 body.theme-yb {
@@ -169,9 +186,7 @@ body.theme-yb {
   #message-bar {
     color: $theme-yb-secondary;
   }
-  #tree .current > .content > .arrow-wrp { color: $theme-yb-parent-arrow; }
-  #tree .current .content > .arrow-wrp { color: $theme-yb-child-arrow; font-size: 120%;}
-
+  @include tree_arrow_theme_tmpl01($theme-yb-child-arrow, $theme-yb-parent-arrow);
 }
 
 body.theme-by {
@@ -196,9 +211,7 @@ body.theme-by {
   #message-bar {
     color: $theme-by-secondary;
   }
-  #tree .current > .content > .arrow-wrp { color: $theme-by-parent-arrow; }
-  #tree .current .content > .arrow-wrp { color: $theme-by-child-arrow; font-size: 120%;}
-
+  @include tree_arrow_theme_tmpl01($theme-by-child-arrow, $theme-by-parent-arrow);
 }
 
 body.theme-mint {
@@ -222,9 +235,7 @@ body.theme-mint {
   #message-bar {
     color: $theme-mint-secondary;
   }
-  #tree .current > .content > .arrow-wrp { color: $theme-mint-parent-arrow; }
-  #tree .current .content > .arrow-wrp { color: $theme-mint-child-arrow; font-size: 120%;}
-
+  @include tree_arrow_theme_tmpl01($theme-mint-child-arrow, $theme-mint-parent-arrow);
 }
 
 body.theme-dark {
@@ -255,7 +266,5 @@ body.theme-dark {
   #message-bar {
     color: $theme-dark-secondary;
   }
-  #tree .current > .content > .arrow-wrp { color: $theme-dark-parent-arrow; }
-  #tree .current .content > .arrow-wrp { color: $theme-dark-child-arrow; font-size: 120%;}
-  
+  @include tree_arrow_theme_tmpl01($theme-dark-child-arrow, $theme-dark-parent-arrow);
 }
