@@ -92,8 +92,8 @@ body.theme-light {
   #message-bar {
     color: $theme-light-secondary;
   }
-  #tree .current > .content > .arrow-wrp { color: $theme-light-parent-arrow;transform: none;}
   #tree .current .content > .arrow-wrp { color: $theme-light-child-arrow; font-size: 120%;   transform: rotate(-180deg);}
+  #tree .current > .content > .arrow-wrp { color: $theme-light-parent-arrow;transform: none;}
 }
 
 body.theme-lightbold {
@@ -118,8 +118,8 @@ body.theme-lightbold {
   #message-bar {
     color: $theme-lightbold-secondary;
   }
-  #tree .current > .content > .arrow-wrp { color: $theme-lightbold-parent-arrow; }
   #tree .current .content > .arrow-wrp { color: $theme-lightbold-child-arrow; font-size: 120%;transform: rotate(-180deg);}
+  #tree .current > .content > .arrow-wrp { color: $theme-lightbold-parent-arrow;transform: none; }
 }
 
 body.theme-greyred {
@@ -143,8 +143,8 @@ body.theme-greyred {
   #message-bar {
     color: $theme-greyred-secondary;
   }
-  #tree .current > .content > .arrow-wrp { color: $theme-greyred-parent-arrow; transform: none;}
   #tree .current .content > .arrow-wrp { color: $theme-greyred-child-arrow; font-size: 120%;transform: rotate(-180deg);}
+  #tree .current > .content > .arrow-wrp { color: $theme-greyred-parent-arrow; transform: none;}
 }
 
 body.theme-yb {
@@ -169,8 +169,8 @@ body.theme-yb {
   #message-bar {
     color: $theme-yb-secondary;
   }
-  #tree .current > .content > .arrow-wrp { color: $theme-yb-parent-arrow; transform: none;}
   #tree .current .content > .arrow-wrp { color: $theme-yb-child-arrow; font-size: 120%;transform: rotate(-180deg);}
+  #tree .current > .content > .arrow-wrp { color: $theme-yb-parent-arrow; transform: none;}
 
 }
 
@@ -196,8 +196,8 @@ body.theme-by {
   #message-bar {
     color: $theme-by-secondary;
   }
-  #tree .current > .content > .arrow-wrp { color: $theme-by-parent-arrow; transform: none; }
   #tree .current .content > .arrow-wrp { color: $theme-by-child-arrow; font-size: 120%;transform: rotate(-180deg);}
+  #tree .current > .content > .arrow-wrp { color: $theme-by-parent-arrow; transform: none; }
 
 }
 
@@ -222,8 +222,8 @@ body.theme-mint {
   #message-bar {
     color: $theme-mint-secondary;
   }
-  #tree .current > .content > .arrow-wrp { color: $theme-mint-parent-arrow;transform: none; }
   #tree .current .content > .arrow-wrp { color: $theme-mint-child-arrow; font-size: 120%;transform: rotate(-180deg);}
+  #tree .current > .content > .arrow-wrp { color: $theme-mint-parent-arrow;transform: none; }
 
 }
 
@@ -255,7 +255,7 @@ body.theme-dark {
   #message-bar {
     color: $theme-dark-secondary;
   }
-  #tree .current > .content > .arrow-wrp { color: $theme-dark-parent-arrow; transform: none;}
   #tree .current .content > .arrow-wrp { color: $theme-dark-child-arrow; font-size: 120%;transform: rotate(-180deg);}
+  #tree .current > .content > .arrow-wrp { color: $theme-dark-parent-arrow; transform: none;}
   
 }
