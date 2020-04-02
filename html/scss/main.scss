@@ -113,7 +113,7 @@ body.rtl #tree {
   transition: margin-left 0.3s, margin-right 0.3s;
   @media (max-width: 767px) {
     ul.children {
-      width: 100vw;
+      width: calc(100vw - 48px);
     }
   }
   &.no-transition {
