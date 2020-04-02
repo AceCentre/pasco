@@ -16,7 +16,8 @@
     "cordova-build": "gulp build-prod",
     "watch-cordova-dist": "gulp watch-cordova-dist",
     "docs:dev": "vuepress dev docs",
-    "docs:build": "vuepress build docs"
+    "docs:build": "vuepress build docs",
+    "build-ios": "npm run build-prod  && npm run cordova-dist  && cd cordova/ && cordova build"
   },
   "repository": {
     "type": "git",
