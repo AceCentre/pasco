@@ -12,8 +12,9 @@ html.ios,
 html.ios body {
   padding: 0;
   margin: 0;
-  height: 100%;
+  height: 100vh;
   overflow: hidden;
+  position: relative;
 }
 html.ios {
   #navbtns-wrp {
