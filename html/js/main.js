@@ -163,6 +163,13 @@ Promise.all([
         msgbar_wrp.style.height = 'calc(' + config.message_bar_height + 'vh - ' + topbar_offset + 'px)';
       }
     }
+    // set message bar font size
+    if (config.message_bar_font_size_percentage > 0) {
+      var msgbar_wrp = document.querySelector('#message-bar-wrp')
+      if (msgbar_wrp) {
+        msgbar_wrp.style.fontSize = config.message_bar_font_size_percentage + '%';
+      }
+    }
   })
   .then(function() {
     // init on-screen navigation
@@ -893,12 +900,7 @@ function _on_keyhit(ev) {
 }
 
 function _before_new_move() { // called before every move
-  return speaku.stop_speaking()
-    .then(function () {
-      var el;
-      while((el = state._highlighted_elements.pop()))
-        el.classList.remove('highlight' || config.highlight_class);
-    });
+  return speaku.stop_speaking();
 }
 
 // queue and process system for every move
@@ -946,33 +948,31 @@ function _add_on_next_update_active_positions (_state, callable) {
   list.push(callable);
 }
 
-function _update_active_positions(_state, positions) {
-  _state = _state || state
-  positions = positions || _state.positions
-  if (_state.on_next_update_active_positions) {
-    _.each(_state.on_next_update_active_positions, function (f) { f(); });
-    delete _state.on_next_update_active_positions;
+function _update_active_positions (avoidloop) {
+  if (state.on_next_update_active_positions) {
+    _.each(state.on_next_update_active_positions, function (f) { f(); });
+    delete state.on_next_update_active_positions;
   }
-  var dom_elements = _.map(positions, function(pos) { return pos.tree.dom_element; });
-  for(var i = 0; i < _state._active_elements.length; ) {
-    var ael = _state._active_elements[i];
+  var dom_elements = _.map(state.positions, function(pos) { return pos.tree.dom_element; });
+  for (var i = 0; i < state._active_elements.length; ) {
+    var ael = state._active_elements[i];
     ael.classList.remove('current');
-    if(dom_elements.indexOf(ael) == -1) {
+    if (dom_elements.indexOf(ael) == -1) {
       ael.classList.remove('active');
-      _state._active_elements.splice(i, 1);
+      state._active_elements.splice(i, 1);
       if(ael.classList.contains('no-transition'))
         ael.classList.remove('no-transition');
     } else {
       i++;
     }
   }
-  for(var i = 0, len = dom_elements.length; i < len; ++i) {
+  for (var i = 0, len = dom_elements.length; i < len; ++i) {
     var ael = dom_elements[i];
-    if(!ael.classList.contains('active')) {
+    if (!ael.classList.contains('active')) {
       // new element
       ael.classList.add('no-transition');
       ael.classList.add('active');
-      _state._active_elements.push(ael);
+      state._active_elements.push(ael);
     } else {
       if(ael.classList.contains('no-transition'))
          ael.classList.remove('no-transition');
@@ -981,19 +981,35 @@ function _update_active_positions(_state, positions) {
       ael.classList.add('current');
     }
   }
+  // update highlight postition
+  var el;
+  while ((el = state._highlighted_elements.pop()))
+    el.classList.remove('highlight' || config.highlight_class);
+  if (state.positions.length > 0) {
+    var curpos = state.positions[state.positions.length - 1]
+    if (curpos.tree.nodes[curpos.index]) {
+      var node = curpos.tree.nodes[curpos.index]
+      if (node && node.content_element) {
+        node.content_element.classList.add('highlight' || config.highlight_class);
+        state._highlighted_elements.push(node.content_element);
+      }
+    }
+  }
   _update_active_positions_tree();
-  if(_state._update_active_position_tree_timeout != null)
-    clearTimeout(_state._update_active_position_tree_timeout);
-  _state._update_active_position_tree_timeout = setTimeout(function() {
-    _update_active_positions_tree();
-    _state._update_active_position_tree_timeout = setTimeout(function() {
-      _update_active_positions_tree();
-      _state._update_active_position_tree_timeout = setTimeout(function() {
-        delete _state._update_active_position_tree_timeout;
-        _update_active_positions_tree();
-      }, 200);
+  if (!avoidloop) {
+    if(state._update_active_position_tree_timeout != null)
+      clearTimeout(state._update_active_position_tree_timeout);
+    state._update_active_position_tree_timeout = setTimeout(function() {
+      _update_active_positions(true);
+      state._update_active_position_tree_timeout = setTimeout(function() {
+        _update_active_positions(true);
+        state._update_active_position_tree_timeout = setTimeout(function() {
+          delete state._update_active_position_tree_timeout;
+          _update_active_positions(true);
+        }, 200);
+      }, 150);
     }, 150);
-  }, 150);
+  }
 }
 
 function _update_active_positions_tree() {
@@ -1033,8 +1049,16 @@ function _update_active_positions_tree() {
   }
 }
 
+var _needs_resize_timeout = null;
+var _needs_resize_delay = 500;
 function _tree_needs_resize() {
-  _update_active_positions_tree();
+  if (_needs_resize_timeout != null) {
+    clearTimeout(_needs_resize_timeout);
+  }
+  _needs_resize_timeout = setTimeout(function () {
+    _needs_resize_timeout = null;
+    _update_active_positions();
+  }, _needs_resize_delay);
 }
 
 function _tree_set_contentsize(percentage) {
@@ -1062,15 +1086,6 @@ function _node_cue_text(node) {
 }
 function _node_main_text (node) {
   return node.meta['auditory-main'] || node.text;
-}
-
-function _move_sub_highlight() {
-  var node = this
-  if(node.content_element) {
-    node.content_element.classList.add('highlight' || config.highlight_class);
-    state._highlighted_elements.push(node.content_element);
-  }
-  _update_active_positions();
 }
 
 function _move_sub_speak(type, override_msg) {
@@ -1135,7 +1150,7 @@ function _scan_move(node, opts) {
       return new Promise(function(resolve) { setTimeout(resolve, opts.delay) })
     })
   }
-  moveobj.steps.push(_move_sub_highlight.bind(node))
+  moveobj.steps.push(function () { _update_active_positions(); })
   moveobj.steps.push(_move_sub_speak.bind(node, 'cue', opts.cue_override_msg))
   moveobj.node.dom_element.dispatchEvent(new CustomEvent("x-new-move", {
     detail: {
@@ -1174,7 +1189,7 @@ function _do_notify_move(node, notifynode, opts) {
         }
       }));
     });
-    moveobj.steps.push(_move_sub_highlight.bind(node))
+  moveobj.steps.push(function () { _update_active_positions(); })
   }
   if(opts.delay > 0) {
     moveobj.steps.push(function() {
@@ -1366,7 +1381,6 @@ function _in_check_spell_delchar(atree) {
         msg = concat_letters.join(' ');
       }
       _update_message_bar();
-      _tree_needs_resize();
       return _do_notify_move(_get_current_node(), atree, {
         main_override_msg: msg
       });
@@ -1582,8 +1596,8 @@ function _reset_resume_at_next_action(atree) {
           }, 500); // wait for hide transition 
         }
         // update tree dyn, before start again
-        _tree_update_subdyn(tree);
-        return resume(); // start over
+        return _tree_update_subdyn(tree)
+          .then(resume); // start over
       });
   }
   function clear() {
@@ -1755,7 +1769,6 @@ function _on_update_select_path () {
         wrp.classList.add('hide');
       }
       _update_message_bar();
-      _tree_needs_resize();
     }
   }
 }
@@ -1794,6 +1807,7 @@ function _update_message_bar (txt) {
       idx++;
     });
   }
+  _tree_needs_resize();
 }
 
 function _in_override_webhook_action (anode) {
@@ -2284,7 +2298,7 @@ function _helper_add_stay_in_branch_for_all (tree) {
 }
 
 function install_tree (tree_element, tree_data, config, state) {
-  let tmpelm = newEl('div');
+  var tmpelm = newEl('div');
   var tree = parse_tree(tmpelm, tree_data);
   // init positions
   state.positions = [ {
