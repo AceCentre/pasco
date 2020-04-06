@@ -12,8 +12,9 @@ html.ios,
 html.ios body {
   padding: 0;
   margin: 0;
-  height: 100%;
+  height: 100vh;
   overflow: hidden;
+  position: relative;
 }
 html.ios {
   #navbtns-wrp {
@@ -111,6 +112,11 @@ body.rtl #tree {
   z-index: 0;
   overflow: hidden;
   transition: margin-left 0.3s, margin-right 0.3s;
+  @media (max-width: 767px) {
+    ul.children {
+      width: calc(100vw - 48px);
+    }
+  }
   &.no-transition {
     transition: none;
   }
@@ -119,7 +125,8 @@ body.rtl #tree {
     opacity: 0;
   }
   &.current .content,
-  .current .content {
+  .current .content,
+  .active > .content {
     & > .arrow-wrp {
       opacity: 1;
     }

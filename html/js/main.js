@@ -105,7 +105,7 @@ Promise.all([
   })
   .then(function() {
     if(!config.__did_quick_setup) {
-      window.location = 'quick-setup.html'; // goto quick-setup.html page
+      window.location = 'intro.html'; // goto quick-setup.html page
       return new Promise(function(){ }); // hang
     }
     return prepare_tree(config.tree || window.default_tree)
@@ -153,14 +153,26 @@ Promise.all([
         }
       });
     });
-
+    // set message bar custom height
+    if (config.message_bar_have_custom_height &&
+        config.message_bar_height > 0 && config.message_bar_height <= 100) {
+      var html = document.querySelector('html')
+      var topbar_offset = 50 + (html.classList.contains('ios') ? 30 : 0)
+      var msgbar_wrp = document.querySelector('#message-bar-wrp')
+      if (msgbar_wrp) {
+        msgbar_wrp.style.height = 'calc(' + config.message_bar_height + 'vh - ' + topbar_offset + 'px)';
+      }
+    }
+    // set message bar font size
+    if (config.message_bar_font_size_percentage > 0) {
+      var msgbar_wrp = document.querySelector('#message-bar-wrp')
+      if (msgbar_wrp) {
+        msgbar_wrp.style.fontSize = config.message_bar_font_size_percentage + '%';
+      }
+    }
   })
   .then(function() {
-    // deal with on-screen navigation
-    var elem = document.querySelector('#navbtns-wrp');
-    if(elem && config._onscreen_navigation) {
-      elem.classList.add('navbtns-enable');
-    }
+    // init on-screen navigation
     navbtns_init();
     document.body.classList.remove('notready');
   })
@@ -313,13 +325,20 @@ function start(_state) {
           document.addEventListener('wheel', _on_wheel, false);
         }
       }
-      var tmp = document.querySelector('#navbtns')
-      if(tmp && config._onscreen_navigation) {
-        if(window.device && window.device.platform.toLowerCase() == 'ios') {
-          tmp.addEventListener('touchstart', _on_navbtns_tstart, false);
-        } else {
-          tmp.addEventListener('click', _on_navbtns_click, false)
+      var navbtns_wrp = document.querySelector('#navbtns-wrp');
+      var navbtns = document.querySelector('#navbtns')
+      if(navbtns && (config._onscreen_navigation || _state.edit_mode)) {
+        _state._navbtns_enabled = true
+        if(navbtns_wrp) {
+          navbtns_wrp.classList.add('navbtns-enable');
         }
+        if(window.device && window.device.platform.toLowerCase() == 'ios') {
+          navbtns.addEventListener('touchstart', _on_navbtns_tstart, false);
+        } else {
+          navbtns.addEventListener('click', _on_navbtns_click, false)
+        }
+      } else if(navbtns_wrp) {
+        navbtns_wrp.classList.remove('navbtns-enable');
       }
       if(config.can_edit) {
         document.querySelector('#edit-mode-btn')
@@ -489,7 +508,9 @@ function _napi_add_key_command() {
         var input = NativeAccessApi.keyInputByCode[key];
         if(input && !napi._added_key_commands[input]) {
           napi._added_key_commands[input] = true;
-          promises.push(napi.add_key_command(input))
+          promises.push(napi.add_key_command(input, '', {
+            repeatable: !!config.ios_keycommand_repeatable,
+          }))
         }
       }
     }
@@ -599,12 +620,13 @@ function stop() {
           document.removeEventListener('wheel', _on_wheel, false);
         }
       }
-      var tmp = document.querySelector('#navbtns')
-      if(tmp && config._onscreen_navigation) {
+      var navbtns = document.querySelector('#navbtns')
+      if(navbtns && state._navbtns_enabled) {
+        state._navbtns_enabled = false
         if(window.device && window.device.platform.toLowerCase() == 'ios') {
-          tmp.removeEventListener('touchstart', _on_navbtns_tstart, false);
+          navbtns.removeEventListener('touchstart', _on_navbtns_tstart, false);
         } else {
-          tmp.removeEventListener('click', _on_navbtns_click, false);
+          navbtns.removeEventListener('click', _on_navbtns_click, false);
         }
       }
       if(config.can_edit) {
@@ -878,12 +900,7 @@ function _on_keyhit(ev) {
 }
 
 function _before_new_move() { // called before every move
-  return speaku.stop_speaking()
-    .then(function () {
-      var el;
-      while((el = state._highlighted_elements.pop()))
-        el.classList.remove('highlight' || config.highlight_class);
-    });
+  return speaku.stop_speaking();
 }
 
 // queue and process system for every move
@@ -931,33 +948,31 @@ function _add_on_next_update_active_positions (_state, callable) {
   list.push(callable);
 }
 
-function _update_active_positions(_state, positions) {
-  _state = _state || state
-  positions = positions || _state.positions
-  if (_state.on_next_update_active_positions) {
-    _.each(_state.on_next_update_active_positions, function (f) { f(); });
-    delete _state.on_next_update_active_positions;
+function _update_active_positions (avoidloop) {
+  if (state.on_next_update_active_positions) {
+    _.each(state.on_next_update_active_positions, function (f) { f(); });
+    delete state.on_next_update_active_positions;
   }
-  var dom_elements = _.map(positions, function(pos) { return pos.tree.dom_element; });
-  for(var i = 0; i < _state._active_elements.length; ) {
-    var ael = _state._active_elements[i];
+  var dom_elements = _.map(state.positions, function(pos) { return pos.tree.dom_element; });
+  for (var i = 0; i < state._active_elements.length; ) {
+    var ael = state._active_elements[i];
     ael.classList.remove('current');
-    if(dom_elements.indexOf(ael) == -1) {
+    if (dom_elements.indexOf(ael) == -1) {
       ael.classList.remove('active');
-      _state._active_elements.splice(i, 1);
+      state._active_elements.splice(i, 1);
       if(ael.classList.contains('no-transition'))
         ael.classList.remove('no-transition');
     } else {
       i++;
     }
   }
-  for(var i = 0, len = dom_elements.length; i < len; ++i) {
+  for (var i = 0, len = dom_elements.length; i < len; ++i) {
     var ael = dom_elements[i];
-    if(!ael.classList.contains('active')) {
+    if (!ael.classList.contains('active')) {
       // new element
       ael.classList.add('no-transition');
       ael.classList.add('active');
-      _state._active_elements.push(ael);
+      state._active_elements.push(ael);
     } else {
       if(ael.classList.contains('no-transition'))
          ael.classList.remove('no-transition');
@@ -966,19 +981,35 @@ function _update_active_positions(_state, positions) {
       ael.classList.add('current');
     }
   }
+  // update highlight postition
+  var el;
+  while ((el = state._highlighted_elements.pop()))
+    el.classList.remove('highlight' || config.highlight_class);
+  if (state.positions.length > 0) {
+    var curpos = state.positions[state.positions.length - 1]
+    if (curpos.tree.nodes[curpos.index]) {
+      var node = curpos.tree.nodes[curpos.index]
+      if (node && node.content_element) {
+        node.content_element.classList.add('highlight' || config.highlight_class);
+        state._highlighted_elements.push(node.content_element);
+      }
+    }
+  }
   _update_active_positions_tree();
-  if(_state._update_active_position_tree_timeout != null)
-    clearTimeout(_state._update_active_position_tree_timeout);
-  _state._update_active_position_tree_timeout = setTimeout(function() {
-    _update_active_positions_tree();
-    _state._update_active_position_tree_timeout = setTimeout(function() {
-      _update_active_positions_tree();
-      _state._update_active_position_tree_timeout = setTimeout(function() {
-        delete _state._update_active_position_tree_timeout;
-        _update_active_positions_tree();
-      }, 200);
+  if (!avoidloop) {
+    if(state._update_active_position_tree_timeout != null)
+      clearTimeout(state._update_active_position_tree_timeout);
+    state._update_active_position_tree_timeout = setTimeout(function() {
+      _update_active_positions(true);
+      state._update_active_position_tree_timeout = setTimeout(function() {
+        _update_active_positions(true);
+        state._update_active_position_tree_timeout = setTimeout(function() {
+          delete state._update_active_position_tree_timeout;
+          _update_active_positions(true);
+        }, 200);
+      }, 150);
     }, 150);
-  }, 150);
+  }
 }
 
 function _update_active_positions_tree() {
@@ -994,7 +1025,7 @@ function _update_active_positions_tree() {
         el = node ? node.dom_element : null,
         height = el ? el.offsetHeight : 0,
         offY = el ? el.offsetTop : 0,
-        pheight = tree_element.tree_height;
+        pheight = tree_element.offsetHeight;
     var top = ((pheight / 2.0 - height / 2.0) - offY - topSum);
     if(ul)
       ul.style.top = top + 'px';
@@ -1018,9 +1049,16 @@ function _update_active_positions_tree() {
   }
 }
 
+var _needs_resize_timeout = null;
+var _needs_resize_delay = 500;
 function _tree_needs_resize() {
-  tree_element.tree_height = window.innerHeight;
-  _update_active_positions_tree();
+  if (_needs_resize_timeout != null) {
+    clearTimeout(_needs_resize_timeout);
+  }
+  _needs_resize_timeout = setTimeout(function () {
+    _needs_resize_timeout = null;
+    _update_active_positions();
+  }, _needs_resize_delay);
 }
 
 function _tree_set_contentsize(percentage) {
@@ -1048,15 +1086,6 @@ function _node_cue_text(node) {
 }
 function _node_main_text (node) {
   return node.meta['auditory-main'] || node.text;
-}
-
-function _move_sub_highlight() {
-  var node = this
-  if(node.content_element) {
-    node.content_element.classList.add('highlight' || config.highlight_class);
-    state._highlighted_elements.push(node.content_element);
-  }
-  _update_active_positions();
 }
 
 function _move_sub_speak(type, override_msg) {
@@ -1121,7 +1150,7 @@ function _scan_move(node, opts) {
       return new Promise(function(resolve) { setTimeout(resolve, opts.delay) })
     })
   }
-  moveobj.steps.push(_move_sub_highlight.bind(node))
+  moveobj.steps.push(function () { _update_active_positions(); })
   moveobj.steps.push(_move_sub_speak.bind(node, 'cue', opts.cue_override_msg))
   moveobj.node.dom_element.dispatchEvent(new CustomEvent("x-new-move", {
     detail: {
@@ -1160,7 +1189,7 @@ function _do_notify_move(node, notifynode, opts) {
         }
       }));
     });
-    moveobj.steps.push(_move_sub_highlight.bind(node))
+  moveobj.steps.push(function () { _update_active_positions(); })
   }
   if(opts.delay > 0) {
     moveobj.steps.push(function() {
@@ -1351,6 +1380,7 @@ function _in_check_spell_delchar(atree) {
       } else {
         msg = concat_letters.join(' ');
       }
+      _update_message_bar();
       return _do_notify_move(_get_current_node(), atree, {
         main_override_msg: msg
       });
@@ -1376,6 +1406,9 @@ function _in_spell_finish(atree) {
     return pause()
       .then(function() {
         return _do_select(atree, { override_msg: msg })
+          .catch(function(err) {
+            console.warn(err)
+          })
           .then(function() {
             _reset_resume_at_next_action(atree)
           });
@@ -1403,10 +1436,11 @@ function _in_check_spell_default(atree) {
       var last_word_idx = concat_letters.lastIndexOf(' ');
       if (last_word_idx == -1) {
         concat_letters.splice(0, concat_letters.length); // empty the list
-      } else {
+      } else if (last_word_idx + 1 != concat_letters.length) {
         concat_letters.splice(last_word_idx, concat_letters.length - last_word_idx, ' ');
       }
-      concat_letters.push(atree.meta['spell-word']);
+      concat_letters.push(atree.meta['spell-word'])
+      concat_letters.push(' ');
     } else {
       var letter = atree.meta['spell-letter'] || atree.text;
       concat_letters.push(letter)
@@ -1436,7 +1470,6 @@ function _in_check_spell_default(atree) {
           state.positions[0].index = 0;
         }
         state.select_path = state.positions.slice(0, state.positions.length-1);
-        _on_update_select_path();
         var msg;
         {
           var idx = concat_letters.lastIndexOf(' ');
@@ -1447,6 +1480,7 @@ function _in_check_spell_default(atree) {
             msg = concat_letters.join(' ');
           }
         }
+        _on_update_select_path();
         return _do_notify_move(_get_current_node(), atree, {
           main_override_msg: msg
         });
@@ -1562,8 +1596,8 @@ function _reset_resume_at_next_action(atree) {
           }, 500); // wait for hide transition 
         }
         // update tree dyn, before start again
-        _tree_update_subdyn(tree);
-        return resume(); // start over
+        return _tree_update_subdyn(tree)
+          .then(resume); // start over
       });
   }
   function clear() {
@@ -1702,6 +1736,9 @@ function _leaf_select_utterance (anode, override_msg) {
       _on_update_select_path();
 
       return _do_select(anode, { override_msg: override_msg })
+        .catch(function(err) {
+          console.warn(err);
+        })
         .then(function() {
           _reset_resume_at_next_action(anode);
         });
@@ -1716,22 +1753,24 @@ function _in_check_select_utterance (anode) {
 
 function _on_update_select_path () {
   // message bar
-  var wrp = document.querySelector('#message-bar-wrp');
-  if (wrp) {
-    // current positions except index of last one
-    var positions = state.positions.slice(0, state.positions.length-1);
-    positions.push({
-      tree: state.positions[state.positions.length-1].tree,
-      index: -1,
-    });
-    var show = !!_get_node_attr_inherits_full(positions, 'spell-branch');
-    if (show && wrp.classList.contains('hide')) {
-      wrp.classList.remove('hide');
-    } else if (!show && !wrp.classList.contains('hide')) {
-      wrp.classList.add('hide');
+  if (config.display_message_bar_at_spell_branch) {
+    var wrp = document.querySelector('#message-bar-wrp');
+    if (wrp) {
+      // current positions except index of last one
+      var positions = state.positions.slice(0, state.positions.length-1);
+      positions.push({
+        tree: state.positions[state.positions.length-1].tree,
+        index: -1,
+      });
+      var show = !!_get_node_attr_inherits_full(positions, 'spell-branch');
+      if (show && wrp.classList.contains('hide')) {
+        wrp.classList.remove('hide');
+      } else if (!show && !wrp.classList.contains('hide')) {
+        wrp.classList.add('hide');
+      }
+      _update_message_bar();
     }
   }
-  _update_message_bar();
 }
 
 function _update_message_bar (txt) {
@@ -1768,6 +1807,7 @@ function _update_message_bar (txt) {
       idx++;
     });
   }
+  _tree_needs_resize();
 }
 
 function _in_override_webhook_action (anode) {
@@ -2235,9 +2275,10 @@ function _start_auto_insert_back(tree, content_template) {
           istmp: true
         },
         meta: {
-          'back-n-branch': '1'
+          'back-n-branch': '1',
+          'auditory-cue': config.helper_back_option_cue_text || _t('Back'),
         },
-        text: _t('Back')
+        text: config.helper_back_option_main_text || _t('Back'),
       }, content_template);
       _start_auto_insert_back(anode, content_template);
     }
@@ -2257,7 +2298,7 @@ function _helper_add_stay_in_branch_for_all (tree) {
 }
 
 function install_tree (tree_element, tree_data, config, state) {
-  let tmpelm = newEl('div');
+  var tmpelm = newEl('div');
   var tree = parse_tree(tmpelm, tree_data);
   // init positions
   state.positions = [ {
@@ -2285,7 +2326,6 @@ function install_tree (tree_element, tree_data, config, state) {
         content_template = _.template(tmp.innerHTML);
       tree_element.innerHTML = ''; // clear all
       tree_mk_list_base(tree, tree_element, content_template); // re-create
-      tree_element.tree_height = window.innerHeight;
       return tree;
     });
 }
@@ -2331,7 +2371,6 @@ function _tree_update_subdyn (atree, options) {
       if (tree_element == atree.dom_element) {
         tree_element.innerHTML = ''; // clear all
         tree_mk_list_base(atree, tree_element, content_template); // re-create
-        tree_element.tree_height = window.innerHeight;
         finish();
         return;
       }

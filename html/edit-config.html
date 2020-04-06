@@ -167,6 +167,14 @@
                       <button type="button" class="btn btn-primary" data-action="tree_go_previous"><i class="far fa-arrow-up"></i><span x-l10n>Move to Previous</span></button>
                     </div>
                   </div>
+                 <div class="row">
+                  <div class="col-sm-6 hide-for-non-cordova-ios">
+                    <h4 x-l10n>Allow hold down of switches</h4>
+                    <p x-l10n>By pressing down on a switch it will repeat the action. <b>Warning: Do not use when single switch scanning activated</b>.</p>
+                    <label class="checkbox-inline"><input type="checkbox" name="ios_keycommand_repeatable"><span x-l10n>On</span></label>
+                  </div>
+                </div>
+
                 </div>
                 <hr class="tinyhr"/>
               </div>
@@ -202,19 +210,30 @@
                 <div class="row m-b-10">
                   <div class="col-sm-6">
                     <h4 x-l10n>Back option for all branches</h4>
-                    <label class="radio-inline"><input type="radio" name="helper_back_option" value="start"><span x-l10n>At beginning</span></label>
-                    <label class="radio-inline"><input type="radio" name="helper_back_option" value="end"><span x-l10n>At end</span></label>
-                    <label class="radio-inline"><input type="radio" name="helper_back_option" value=""><span x-l10n>None</span></label>
+                    <div class="row">
+                      <div class="col-sm-12 m-b-10">
+                        <label class="radio-inline"><input type="radio" name="helper_back_option" value="start"><span x-l10n>At beginning</span></label>
+                        <label class="radio-inline"><input type="radio" name="helper_back_option" value="end"><span x-l10n>At end</span></label>
+                        <label class="radio-inline"><input type="radio" name="helper_back_option" value=""><span x-l10n>None</span></label>
+                      </div>
+                      <div class="col-sm-6">
+                        <div class="form-group">
+                          <label for="helper_back_option_main_text" x-l10n>Main Speech</label>
+                          <input type="text" id="helper_back_option_main_text" name="helper_back_option_main_text" class="form-control" value="" placeholder="Back">
+                        </div>
+                      </div>
+                      <div class="col-sm-6">
+                        <div class="form-group">
+                          <label for="helper_back_option_cue_text" x-l10n>Cue Speech</label>
+                          <input type="text" id="helper_back_option_cue_text" name="helper_back_option_cue_text" class="form-control" value="" placeholder="Back">
+                        </div>
+                      </div>
+                    </div>
+                    <hr>
                   </div>
                   <div class="col-sm-6">
                     <h4 x-l10n>Stay in branch for all nodes</h4>
                     <label class="checkbox-inline"><input type="checkbox" name="helper_stay_in_branch_for_all"><span x-l10n>On</span></label>
-                  </div>
-                </div>
-                <div class="row m-b-10">
-                  <div class="col-sm-12">
-                    <h4 x-l10n>Display message bar when spelling</h4>
-                    <label class="checkbox-inline"><input type="checkbox" name="display_message_bar_at_spell_branch" data-inp-collapse-toggle="#message_bar_section"><span x-l10n>On</span></label>
                   </div>
                 </div>
               </div>
@@ -425,6 +444,32 @@
                         <option value="cy" x-l10n>Welsh</option>
                       </select>
                     </div>
+                  </div>
+                  <div class="col-sm-12">
+                    <h4 x-l10n>Display message bar when spelling</h4>
+                    <label class="checkbox-inline"><input type="checkbox" name="display_message_bar_at_spell_branch"><span x-l10n>On</span></label>
+
+                    <div class="row m-t-10">
+                      <div class="col-sm-4">
+                        <h5 x-l10n>Custom height for message bar</h5>
+                        <label class="checkbox-inline m-b-10"><input type="checkbox" name="message_bar_have_custom_height"><span x-l10n>On</span></label>
+                      </div>
+                      <div class="col-sm-4">
+                        <div class="form-group">
+                          <label for="message_bar_height" x-l10n>Message bar height (%)</label>
+                          <input type="number" id="message_bar_height" name="message_bar_height" class="form-control" step="1" value="40" min="10" max="90" data-validator="number" data-dependent="#message_bar_height_range">
+                          <input type="range" id="message_bar_height_range" class="form-control btn-lg" step="1" min="10" max="90" data-default="40" data-dependent="#message_bar_height">
+                        </div>
+                      </div>
+                      <div class="col-sm-4">
+                        <div class="form-group">
+                          <label for="message_bar_font_size_percentage" x-l10n>Message bar font size (%)</label>
+                          <input type="number" id="message_bar_font_size_percentage" name="message_bar_font_size_percentage" class="form-control" step="1" value="100" min="10" max="300" data-validator="number" data-dependent="#message_bar_font_size_percentage_range">
+                          <input type="range" id="message_bar_font_size_percentage_range" class="form-control btn-lg" step="1" min="10" max="300" data-default="100" data-dependent="#message_bar_font_size_percentage">
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
               </div>

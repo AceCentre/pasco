@@ -13,6 +13,11 @@ document.addEventListener('deviceready', function() {
   if (window.cordova) {
     html.classList.add('cordova');
   }
+  window.open = cordova.InAppBrowser.open;
+  $('body').on('click', 'a[target="_blank"]', (evt) => {
+    evt.preventDefault();
+    window.open($(evt.currentTarget).attr('href'), '_system', '');
+  });
 }, false);
 
 window.newEl = document.createElement.bind(document);
@@ -247,10 +252,8 @@ function tree_mk_list_base(tree, el, content_template) {
     cel.classList.add('content');
     el.appendChild(cel);
     tree.content_element = cel;
-    var tmp = newEl('div');
-    tmp.textContent = text;
     cel.innerHTML = content_template({
-      text: tmp.innerHTML,
+      text: text,
       tree: tree
     });
     var txtel = cel.querySelector('.text');
@@ -269,7 +272,7 @@ function tree_mk_list_base(tree, el, content_template) {
     tree.txt_dom_element = txtel;
   }
   if(!tree.is_leaf) {
-    let ulwrp = newEl('div')
+    var ulwrp = newEl('div')
     ulwrp.classList.add('children-wrp')
     var nodes = tree.nodes,
         ul = newEl('ul');
@@ -319,7 +322,7 @@ function tree_insert_node (parent_node, beforenode, data, content_template) {
     parent_node.is_leaf = false;
     parent_node.nodes = [];
     parent_node.static_nodes = [];
-    let ulwrp = newEl('div');
+    var ulwrp = newEl('div');
     ulwrp.classList.add('children-wrp');
     var ul = newEl('ul');
     ul.classList.add('children');
@@ -354,13 +357,13 @@ function tree_insert_node (parent_node, beforenode, data, content_template) {
     beforenode_idx = parent_node.nodes.length;
   } else {
     // step back while no more empty dynnode exists
-    let idx = beforenode_static_idx;
+    var idx = beforenode_static_idx;
     do {
       if (idx <= 0) {
         beforenode_idx = 0;
         break;
       }
-      let anode = parent_node.static_nodes[idx];
+      var anode = parent_node.static_nodes[idx];
       beforenode_idx = parent_node.nodes.findIndex((a) => a == anode || a._more_meta._dynnode == anode);
       idx -= 1;
     } while (beforenode_idx == -1);
@@ -396,7 +399,7 @@ function tree_add_node(parent_node, at, data, content_template) {
     parent_node.is_leaf = false;
     parent_node.nodes = [];
     parent_node.static_nodes = [];
-    let ulwrp = newEl('div');
+    var ulwrp = newEl('div');
     ulwrp.classList.add('children-wrp');
     var ul = newEl('ul');
     ul.classList.add('children');
@@ -436,7 +439,7 @@ function tree_attach_node (node, parent, at) {
     parent_node.is_leaf = false;
     parent_node.nodes = [];
     parent_node.static_nodes = [];
-    let ulwrp = newEl('div');
+    var ulwrp = newEl('div');
     ulwrp.classList.add('children-wrp');
     var ul = newEl('ul');
     ul.classList.add('children');
@@ -1028,44 +1031,14 @@ proto.init = function() {
             return self;
           })
       } else { // alternative approach
-        return new Promise(function(resolve, reject) {
-          var script = document.createElement('script');
-          script.type = 'text/javascript';
-          script.async = true;
-          script.onload = function() {
-            try {
-              self.is_native = false
-              self.responsiveVoice = responsiveVoice
-              responsiveVoiceFix(responsiveVoice);
-              // voiceSupport check removed, it is not the indicator for responsiveVoice compatibility
-              resolve(self);
-            } catch(err) {
-              reject(err);
-            }
-          };
-          script.onerror = function() {
-            reject("Could not load responsivevoice code");
-          };
-          script.src = "https://code.responsivevoice.org/responsivevoice.js";
-          document.body.appendChild(script);
-        });
-        function responsiveVoiceFix (rv) {
-          var orgiFallback_audioPool_getAudio = rv.fallback_audioPool_getAudio;
-          rv.fallback_audioPool_getAudio = function () {
-            if (rv.fallback_audiopool_index >= rv.fallback_audiopool.length) {
-              rv.fallback_audiopool = [];
-            }
-            return orgiFallback_audioPool_getAudio.apply(this, arguments);
-          }
-          var origClearFallbackPool = rv.clearFallbackPool;
-          rv.clearFallbackPool = function () {
-            _.each(rv.fallback_audiopool, function (audio) {
-              audio.pause();
-            });
-            rv.fallback_audiopool = [];
-            return origClearFallbackPool.apply(this, arguments);
-          }
+        if (!window.speechSynthesis) {
+          return Promise.reject(new Error('SpeechSynthesis is not support'));
         }
+        self._voices_by_uri = {};
+        _.each(speechSynthesis.getVoices(), function (voice) {
+          self._voices_by_uri[voice.voiceURI] = voice;
+        });
+        return Promise.resolve();
       }
     });
 }
@@ -1128,20 +1101,15 @@ proto.start_speaking = function(speech, opts) {
     var voiceId = opts.voiceId;
     delete opts.voiceId;
     delete opts.audio_behavior;
-    // TODO:: control audio playback,
-    // delay can be implemented if access to audio playback is at this level
-    var retobj = {};
-    function onend() {
-      if(retobj.onend)
-        retobj.onend.apply(this, arguments)
-      retobj.didend = true;
+    var utterance = new SpeechSynthesisUtterance(speech);
+    if (voiceId in self._voices_by_uri) {
+      utterance.voice = self._voices_by_uri[voiceId];
     }
-    opts.onend = onend
-    // bugfix for responsiveVoice not calling onend
-    // when cancel called before speak
-    self.responsiveVoice.cancelled = false;
-    self.responsiveVoice.speak(speech, voiceId, opts);
-    return Promise.resolve(retobj);
+    utterance.pitch = opts.pitch;
+    utterance.rate = opts.rate;
+    utterance.volume = opts.volume;
+    speechSynthesis.speak(utterance);
+    return Promise.resolve(utterance);
   }
 }
 
@@ -1160,30 +1128,17 @@ proto.speak_finish = function(utterance_hdl) {
   } else {
     var self = this;
     return new Promise(function(resolve, reject) {
-      if(utterance_hdl.didend)
-        return resolve();
-      self._alt_finish_queue.push(resolve)
-      utterance_hdl.onend = function() {
-        var idx = self._alt_finish_queue.indexOf(resolve);
-        if(idx != -1)
-          self._alt_finish_queue.splice(idx, 1);
+      if (!speechSynthesis.speaking) {
         resolve();
+      } else {
+        function finish_handler () {
+          utterance_hdl.removeEventListener('end', finish_handler);
+          utterance_hdl.removeEventListener('error', finish_handler);
+          resolve()
+        }
+        utterance_hdl.addEventListener('end', finish_handler);
+        utterance_hdl.addEventListener('error', finish_handler);
       }
-      /*
-      function check() {
-        ref[0] = setTimeout(function() {
-          if(self.responsiveVoice.isPlaying())
-            check();
-          else {
-            var idx = self._alt_finish_queue.indexOf(ref);
-            if(idx != -1)
-              self._alt_finish_queue.splice(idx, 1);
-            resolve();
-          }
-        }, 50); // check resolution
-      }
-      check();
-      */
     });
   }
 }
@@ -1196,9 +1151,9 @@ proto.stop_speaking = function() {
     if(this.is_native) {
       return this.api.stop_speaking(this.synthesizer);
     } else {
-      this.responsiveVoice.cancel();
-      while((resolve = this._alt_finish_queue.shift()))
-        resolve();
+      if (speechSynthesis.speaking) {
+        speechSynthesis.cancel();
+      }
       return Promise.resolve();
     }
   }
@@ -1209,9 +1164,9 @@ proto.get_voices = function() {
     return this.api.get_voices();
   } else {
     // this.responsiveVoice.getVoices()
-    return Promise.resolve(_.map(this.responsiveVoice.responsivevoices,function(v) {
+    return Promise.resolve(_.map(speechSynthesis.getVoices(), function(v) {
       return {
-        id: v.name,
+        id: v.voiceURI,
         label: v.name,
         locale: v.lang||''
       };
@@ -1560,7 +1515,6 @@ function parse_tree(tree_element, data) {
     content_template = _.template(tmp.innerHTML);
   tree_element.innerHTML = ''; // clear all
   tree_mk_list_base(tree, tree_element, content_template); // re-create
-  tree_element.tree_height = window.innerHeight;
   return tree;
 }
 

@@ -292,8 +292,6 @@ function _take_snapshot() {
       new_tree = _clone_tree(tree),
       new_tree_elm = tree_element.cloneNode()
   tree_mk_list_base(new_tree, new_tree_elm); // re-create
-  if(tree.dom_element)
-    new_tree_elm.tree_height = tree.dom_element.tree_height;
   return {
     tree: new_tree,
     positions: _state_redefine_positions(state.positions, new_tree)
