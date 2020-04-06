@@ -336,16 +336,55 @@ function start() {
       speaku.stop_speaking();
     });
     /* voice list */
-    var $inp = $form.find('[name='+alink[1]+']');
-    var opt = newEl('option')
-    opt.value = ''
-    opt.textContent = 'Default'
-    $inp.append(opt)
+    var voices_by_locale = _.object(_.map(_.pairs(window.locales_info||{}), function (a) { return [ a[0], Object.assign({ opts: [] }, a[1]) ] }));
+    var unlabled_voices = [ { label: 'Default', id: '' } ];
     _.each(all_voices, function(voice) {
-      var opt = newEl('option')
-      opt.value = voice.id
-      opt.textContent = voice.label
-      $inp.append(opt)
+      var locale = voice.locale.toLowerCase();
+      var vbl = null;
+      if (locale in voices_by_locale) {
+        vbl = voices_by_locale[locale];
+      } else if (locale.split('-')[0] in voices_by_locale) {
+        vbl = voices_by_locale[locale.split('-')[0]];
+      } else if (!!locale) {
+        vbl = voices_by_locale[locale] =
+            (voices_by_locale[locale] ?
+             voices_by_locale[locale] : { opts: [], mr: locale, Marathi: locale });
+      }
+      if (vbl) {
+        vbl.opts.push(voice);
+      } else {
+        unlabled_voices.push(voice);
+      }
+    });
+    var optgroups = _.filter(_.values(voices_by_locale), function (a) { return a.opts.length > 0 })
+        .sort(function (a, b) {
+          if (a.Marathi < b.Marathi) {
+            return -1;
+          }
+          if (a.Marathi > b.Marathi) {
+            return 1;
+          }
+          return 0;
+        });
+    var grp = newEl('optgroup');
+    grp.setAttribute('label', '');
+    _.each(unlabled_voices, function (voice) {
+      var opt = newEl('option');
+      opt.value = voice.id;
+      opt.textContent = voice.label;
+      grp.appendChild(opt);
+    });
+    $inp.append(grp);
+    _.each(optgroups, function (optgroup) {
+      var grp = newEl('optgroup');
+      grp.setAttribute('label', optgroup.Marathi);
+      _.each(optgroup.opts, function (voice) {
+        var opt = newEl('option');
+        opt.value = voice.id;
+        opt.textContent = voice.label;
+        grp.appendChild(opt);
+      });
+      $inp.append(grp);
     });
   });
   $('#locale-select').on('change', function() {
