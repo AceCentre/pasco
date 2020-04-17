@@ -156,6 +156,8 @@ function initialize_app() {
       options = options || {};
       var result = localStorage.getItem('file_'+key);
       if(result == null) {
+        return read_file(key, options);
+      } else {
         var type = localStorage.getItem('filetype_'+key);
         if (type == "blob") {
           result = atob(result);
@@ -164,20 +166,20 @@ function initialize_app() {
           var contenttype = localStorage.getItem("filecontenttype_"+key);
           result = new Blob([result], { type: contenttype || 'application/octet-stream' });
         }
-        return read_file(key, options);
-      } else {
         return Promise.resolve(result);
       }
     }
     function new_write(key, data, options) {
       options = options || {};
-      var data_type;
       return new Promise(function (resolve, reject) {
         if (data instanceof Blob) {
           var reader = new FileReader();
           reader.onload = function(e) {
-            data = btoa(reader.result);
-            data_type = "blob";
+            if (options._datatype == 'blob') {
+              data = btoa(reader.result);
+            } else {
+              data = reader.result;
+            }
             resolve();
           }
           reader.readAsBinaryString(data)
@@ -187,9 +189,12 @@ function initialize_app() {
       })
         .then(function () {
           localStorage.setItem('file_'+key, data);
-          if (data_type) {
-            localStorage.setItem('filetype_'+key, data_type);
+          if (options._datatype) {
+            localStorage.setItem('filetype_'+key, options._datatype);
             localStorage.setItem('filecontenttype_'+key, options.contentType || 'application/octet-stream');
+          } else {
+            localStorage.removeItem('filetype_'+key);
+            localStorage.removeItem('filecontenttype_'+key);
           }
           return Promise.resolve();
         });
@@ -200,11 +205,11 @@ function initialize_app() {
     }
     window.get_file_json = function(key) {
       return new_read(key) 
-        .then(function(data) {
-          var config = JSON.parse(data);
-          if(!config)
+        .then(function(json) {
+          var data = JSON.parse(json);
+          if(!data)
             throw new Error("No input json!, " + key);
-          return config;
+          return data;
         });
     }
     function _base64ToByteArray(base64) {
