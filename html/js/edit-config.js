@@ -623,6 +623,8 @@ function start() {
             if (!err.__msg || err.__iserror) {
               var data = handle_error_data(err);
               console.error.apply(console, data.console_error);
+            } else {
+              console.warn('import error', err)
             }
             update_alert(false, err.__msg || "Could not parse tree");
             didfinish();
