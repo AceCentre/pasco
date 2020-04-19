@@ -24,6 +24,37 @@ Promise.all([
         return speaku.get_voices().then(function(v) { all_voices = v })
       });
   })
+  // prepare zip
+  .then(function() {
+    if (window.cordova) {
+      zip.workerScriptsPath = null;
+      return Promise.all(_.map([ 'z-worker.js', 'deflate.js', 'inflate.js' ], function (fn) {
+        return new Promise(function(resolve, reject) {
+          var fndir = 'cdvfile://localhost/bundle/www/js/lib/zipjs/';
+          window.resolveLocalFileSystemURL(fndir + fn, function (entry) {
+            entry.file(function (file) {
+              var reader = new FileReader();
+              reader.onloadend = function() {
+                var blob = new Blob([this.result], { type: 'application/javascript' });
+                resolve(URL.createObjectURL(blob));
+              };
+              reader.readAsText(file);
+            }, reject);
+          }, reject);
+        });
+      }));
+    } else {
+      return null;
+    }
+  })
+  .then(function(zipBlobs) {
+    if (zipBlobs) {
+      zip.workerScripts = {
+        deflater: [ zipBlobs[0], zipBlobs[1] ],
+        inflater: [ zipBlobs[0], zipBlobs[2] ],
+      };
+    }
+  })
   // load
   .then(function() {
     return get_file_json(config_fn)
