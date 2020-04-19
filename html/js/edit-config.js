@@ -24,6 +24,37 @@ Promise.all([
         return speaku.get_voices().then(function(v) { all_voices = v })
       });
   })
+  // prepare zip
+  .then(function() {
+    if (window.cordova) {
+      zip.workerScriptsPath = null;
+      return Promise.all(_.map([ 'z-worker.js', 'deflate.js', 'inflate.js' ], function (fn) {
+        return new Promise(function(resolve, reject) {
+          var fndir = 'cdvfile://localhost/bundle/www/js/lib/zipjs/';
+          window.resolveLocalFileSystemURL(fndir + fn, function (entry) {
+            entry.file(function (file) {
+              var reader = new FileReader();
+              reader.onloadend = function() {
+                var blob = new Blob([this.result], { type: 'application/javascript' });
+                resolve(URL.createObjectURL(blob));
+              };
+              reader.readAsText(file);
+            }, reject);
+          }, reject);
+        });
+      }));
+    } else {
+      return null;
+    }
+  })
+  .then(function(zipBlobs) {
+    if (zipBlobs) {
+      zip.workerScripts = {
+        deflater: [ zipBlobs[0], zipBlobs[1] ],
+        inflater: [ zipBlobs[0], zipBlobs[2] ],
+      };
+    }
+  })
   // load
   .then(function() {
     return get_file_json(config_fn)
@@ -576,7 +607,7 @@ function start() {
                                 if (idx != -1) {
                                   onrootreject.splice(idx, 1);
                                 }
-                                set_file_data(item.newval, blob)
+                                set_file_data(item.newval, blob, { _datatype: item.datatype })
                                   .catch(handle_error_checkpoint())
                                   .then(resolve, reject);
 			                        });
@@ -622,7 +653,9 @@ function start() {
           .catch(function(err) {
             if (!err.__msg || err.__iserror) {
               var data = handle_error_data(err);
-              console.error.apply(console, data.error);
+              console.error.apply(console, data.console_error);
+            } else {
+              console.warn('import error', err)
             }
             update_alert(false, err.__msg || "Could not parse tree");
             didfinish();
@@ -883,54 +916,66 @@ var audio_meta_list = [ 'audio', 'cue-audio', 'main-audio' ];
 function tree_import_prepare(ptree_info, tree, import_list) {
   if(tree.meta) {
     _.each(audio_meta_list, function(audio_meta) {
-      var val = tree.meta[audio_meta];
-      if (val && val.indexOf("://") == -1 &&
-          val.indexOf("..") == -1 &&
-          _.find(import_list, function (a) { return a.val == val; }) == null) {
-        tree.meta[audio_meta] = ptree_info.dirpath + '/' + val;
-        import_list.push({
-          tree: tree,
-          meta_name: audio_meta,
-          val: val,
-          newval: tree.meta[audio_meta]
-        });
-      }
+      prepare_attr_file_for_import(audio_meta, 'blob');
     });
+    prepare_attr_file_for_import('words-file', null);
   }
   if(tree.static_nodes || tree.nodes)
     _.each(tree.static_nodes || tree.nodes, function(a) { tree_import_prepare(ptree_info, a, import_list); });
+
+  function prepare_attr_file_for_import (name, datatype) {
+    var val = tree.meta[name];
+    if (val && val.indexOf("://") == -1 && val.indexOf("../") == -1) {
+      var iobj = _.find(import_list, function (a) { return a.val == val; });
+      if (iobj != null) {
+        tree.meta[name] = iobj.newval;
+      } else {
+        tree.meta[name] = ptree_info.dirpath + '/' + val;
+        import_list.push({
+          tree: tree,
+          meta_name: name,
+          val: val,
+          newval: tree.meta[name],
+          datatype: datatype,
+        });
+      }
+    }
+  }
 }
 function tree_export_prepare(ptree_info, tree, export_files) {
   if(tree.meta) {
     _.each(audio_meta_list, function(audio_meta) {
-      var val = tree.meta[audio_meta];
-      if(val &&
-         _.find(export_files, function (a) { return a.val ==val; }) == null) {
+      prepare_attr_file_for_export(audio_meta, 'audio');
+    });
+    prepare_attr_file_for_export('words-file', '');
+  }
+  if(tree.static_nodes || tree.nodes)
+    _.each(tree.static_nodes || tree.nodes, function(a) { tree_export_prepare(ptree_info, a, export_files); });
+
+  function prepare_attr_file_for_export (name, optional_prefix) {
+    var val = tree.meta[name];
+    if(val) {
+      var eobj = _.find(export_files, function (a) { return a.val ==val; });
+      if (eobj != null) {
+        tree.meta[name] = eobj.newval;
+      } else {
         if(val.indexOf(ptree_info.dirpath) == 0) {
           var newval = val.substr(ptree_info.dirpath.length);
           if (newval[0] == '/')
             newval = newval.substr(1);
-          tree.meta[audio_meta] = newval;
-          export_files.push({
-            tree: tree,
-            meta_name: audio_meta,
-            val: val,
-            newval: tree.meta[audio_meta]
-          });
+          tree.meta[name] = newval;
         } else {
-          tree.meta[audio_meta] = 'audio/' + fs_friendly_name(val);
-          export_files.push({
-            tree: tree,
-            meta_name: audio_meta,
-            val: val,
-            newval: tree.meta[audio_meta]
-          });
+          tree.meta[name] = (optional_prefix ? optional_prefix + '/' : '') + fs_friendly_name(val);
         }
+        export_files.push({
+          tree: tree,
+          meta_name: name,
+          val: val,
+          newval: tree.meta[name]
+        });
       }
-    });
+    }
   }
-  if(tree.static_nodes || tree.nodes)
-    _.each(tree.static_nodes || tree.nodes, function(a) { tree_export_prepare(ptree_info, a, export_files); });
 }
 
 function validate_number(v, name) {
