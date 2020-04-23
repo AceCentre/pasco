@@ -1169,13 +1169,19 @@ proto.get_voices = function() {
     return this.api.get_voices();
   } else {
     // this.responsiveVoice.getVoices()
-    return Promise.resolve(_.map(speechSynthesis.getVoices(), function(v) {
-      return {
-        id: v.voiceURI,
-        label: v.name,
-        locale: v.lang||''
-      };
-    }));
+    return new Promise(function(res) {
+      setTimeout(function() {
+        res(
+          _.map(speechSynthesis.getVoices(), function(v) {
+            return {
+              id: v.voiceURI,
+              label: v.name,
+              locale: v.lang || '',
+            };
+          })
+        );
+      }, 0);
+    });
   }
 }
 
