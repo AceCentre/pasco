@@ -17,7 +17,9 @@
     "watch-cordova-dist": "gulp watch-cordova-dist",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
-    "build-ios": "npm run build-prod  && npm run cordova-dist  && cd cordova/ && cordova build"
+    "build-ios": "npm run build-prod  && npm run cordova-dist  && cd cordova/ && cordova build",
+    "webpack:start": "webpack-dev-server --config webpack/webpack.dev.js",
+    "webpack:build": "webpack --config webpack/webpack.prod.js"
   },
   "repository": {
     "type": "git",
@@ -55,7 +57,8 @@
     "node-sass-package-importer": "^5.2.0",
     "uglifyjs-webpack-plugin": "^2.0.1",
     "vuepress": "^1.2.0",
-    "webpack": "^4.20.2",
+    "webpack": "^4.43.0",
+    "webpack-dev-server": "^3.10.3",
     "webpack-stream": "^5.1.1"
   }
 }
