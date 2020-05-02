@@ -39,6 +39,7 @@ module.exports = {
         ],
       },
       {
+        // TODO Would be good if this loader could do some kind of compression
         test: /\.(mp4|png|vtt)(\?v=\d+\.\d+\.\d+)?$/,
         use: [
           {
