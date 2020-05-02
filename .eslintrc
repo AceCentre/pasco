@@ -1,0 +1,24 @@
+{
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  "ignorePatterns": ["webpack/"],
+  "extends": "eslint:recommended",
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly",
+    "cordova": "readonly",
+    "Media": "readonly"
+  },
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "rules": {
+    "indent": ["error", 2],
+    "linebreak-style": ["error", "unix"],
+    "quotes": ["error", "double", "avoid-escape"],
+    "semi": ["error", "always"]
+  }
+}
