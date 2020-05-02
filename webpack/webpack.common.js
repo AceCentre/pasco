@@ -7,6 +7,7 @@ const relativeToRoot = (pathName) => path.resolve(__dirname, "../", pathName);
 module.exports = {
   entry: {
     intro: relativeToRoot("src/pages/intro/index.js"),
+    help: relativeToRoot("src/pages/help/index.js"),
   },
   output: {
     path: relativeToRoot("html"),
@@ -17,6 +18,12 @@ module.exports = {
       filename: "intro/index.html",
       template: relativeToRoot("src/pages/intro/index.html"),
       chunks: ["intro"],
+      favicon: relativeToRoot("src/favicon.ico"),
+    }),
+    new HtmlWebpackPlugin({
+      filename: "help/index.html",
+      template: relativeToRoot("src/pages/help/index.html"),
+      chunks: ["help"],
       favicon: relativeToRoot("src/favicon.ico"),
     }),
   ],
