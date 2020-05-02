@@ -9,7 +9,7 @@ module.exports = {
     intro: relativeToRoot("src/pages/intro/index.js"),
   },
   output: {
-    path: relativeToRoot("dist"),
+    path: relativeToRoot("html"),
     filename: "[name]/bundle.js",
   },
   plugins: [

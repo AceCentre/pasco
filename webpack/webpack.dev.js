@@ -5,7 +5,7 @@ const config = {
   ...commonConfig,
   mode: "development",
   devServer: {
-    contentBase: path.join(__dirname, "../dist"),
+    contentBase: path.join(__dirname, "../html"),
     port: 9000,
     open: true,
   },
