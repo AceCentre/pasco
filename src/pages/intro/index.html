@@ -16,17 +16,6 @@
     />
 
     <title x-l10n="main_title">pasco</title>
-
-    <!-- bootstrap includes -->
-    <!-- <link
-      rel="stylesheet"
-      href="bower_components/bootstrap/dist/css/bootstrap.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="fonts/fontawesome/css/fontawesome-all.min.css"
-    />
-    <link rel="stylesheet" href="css/main.css" /> -->
   </head>
 
   <body>
@@ -57,19 +46,13 @@
         </ul>
       </nav>
       <div class="intro-video-container">
-        <video
-          id="intro-video"
-          controls
-          autoplay="autoplay"
-          preload="none"
-          poster="intro-data/intro.png"
-        >
-          <source src="intro-data/intro.mp4" type="video/mp4" />
+        <video id="intro-video" controls autoplay="autoplay" preload="none">
+          <source id="intro-video-source" type="video/mp4" />
           <track
             label="English"
             kind="subtitles"
+            id="intro-video-track"
             srclang="en"
-            src="intro-data/intro.vtt"
             default
           />
         </video>
