@@ -32,6 +32,7 @@
   },
   "homepage": "https://github.com/AceCentre/pasco#readme",
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.13.0",
     "bootstrap": "^3.3.7",
     "copy-html-to-clipboard": "^4.0.1",
     "eslint": "^6.8.0",
