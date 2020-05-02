@@ -17,7 +17,7 @@ module.exports = {
       filename: "intro/index.html",
       template: relativeToRoot("src/pages/intro/index.html"),
       chunks: ["intro"],
-      favicon: relativeToRoot("src/images/favicon.ico"),
+      favicon: relativeToRoot("src/favicon.ico"),
     }),
   ],
   module: {
