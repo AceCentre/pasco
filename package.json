@@ -32,6 +32,7 @@
   },
   "homepage": "https://github.com/AceCentre/pasco#readme",
   "dependencies": {
+    "bootstrap": "^3.3.7",
     "copy-html-to-clipboard": "^4.0.1",
     "eslint": "^6.8.0",
     "html-webpack-plugin": "^4.3.0",
@@ -50,6 +51,7 @@
     "babel-loader": "^8.0.0-beta.4",
     "browser-sync": "^2.26.7",
     "concurrently": "^3.4.0",
+    "css-loader": "^3.5.3",
     "gulp": "^4.0.0",
     "gulp-rename": "^1.4.0",
     "gulp-sass": "^4.0.2",
@@ -57,6 +59,7 @@
     "natives": "^1.1.5",
     "node-sass": "^4.12.0",
     "node-sass-package-importer": "^5.2.0",
+    "style-loader": "^1.2.1",
     "uglifyjs-webpack-plugin": "^2.0.1",
     "vuepress": "^1.2.0",
     "webpack": "^4.43.0",
