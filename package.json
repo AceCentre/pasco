@@ -7,7 +7,8 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "dev": "concurrently \"npm run dev-bs\" \"gulp dev\"",
     "dev-bs": "browser-sync start -c bs-config.js",
     "build": "gulp build-dev",
@@ -35,8 +36,8 @@
     "@fortawesome/fontawesome-free": "^5.13.0",
     "bootstrap": "^3.3.7",
     "copy-html-to-clipboard": "^4.0.1",
-    "eslint": "^6.8.0",
     "html-webpack-plugin": "^4.3.0",
+    "jest": "^25.5.4",
     "jquery": "^3.4.1",
     "path-browserify": "^1.0.0",
     "plist": "3.0.1",
@@ -53,6 +54,8 @@
     "browser-sync": "^2.26.7",
     "concurrently": "^3.4.0",
     "css-loader": "^3.5.3",
+    "eslint": "^6.8.0",
+    "eslint-plugin-jest": "^23.8.2",
     "gulp": "^4.0.0",
     "gulp-rename": "^1.4.0",
     "gulp-sass": "^4.0.2",
