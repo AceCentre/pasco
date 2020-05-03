@@ -11,5 +11,3 @@ import showOrHideGoTopLink from "./show-or-hide-go-top-link";
 // };
 
 document.addEventListener("scroll", showOrHideGoTopLink);
-
-console.log("Entry point for help page");

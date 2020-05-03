@@ -1,10 +1,8 @@
 const GO_TO_TOP_ID = "move-top-link";
 
 function showOrHideGoTopLink() {
-  console.log("showOrHideGoTopLink");
-
   const goToTopButton = document.querySelector(`#${GO_TO_TOP_ID}`);
-  const scrollYPosition = window.scrollY || 0;
+  const scrollYPosition = window.scrollY || 501;
 
   if (goToTopButton == undefined) {
     throw new Error(`Couldnt find "#${GO_TO_TOP_ID}"`);

@@ -9,7 +9,8 @@
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly",
     "cordova": "readonly",
-    "Media": "readonly"
+    "Media": "readonly",
+    "window": "writable"
   },
   "parserOptions": {
     "ecmaVersion": 2018,
@@ -20,6 +21,7 @@
     "linebreak-style": ["error", "unix"],
     "quotes": ["error", "double", "avoid-escape"],
     "semi": ["error", "always"],
-    "no-var": "error"
+    "no-var": "error",
+    "no-console": "error"
   }
 }
