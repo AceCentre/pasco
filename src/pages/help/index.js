@@ -4,10 +4,20 @@ import "@fortawesome/fontawesome-free/css/all.css";
 import "../../common.css";
 
 import showOrHideGoTopLink from "./show-or-hide-go-top-link";
+import NativeAccessApi from "../../NativeAccessApi";
+import { waitForEvent } from "../../utils";
 
 // const HELP_FILES = {
 //   en: "help.html",
 //   "es-ES": "help/es-ES.html",
 // };
 
-document.addEventListener("scroll", showOrHideGoTopLink);
+(async () => {
+  document.addEventListener("scroll", showOrHideGoTopLink);
+
+  if (NativeAccessApi.available) {
+    await NativeAccessApi.onready();
+  }
+
+  await waitForEvent("DOMContentLoaded");
+})();
