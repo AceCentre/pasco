@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "jest",
-    "test:watch": "jest --watch",
+    "test:watch": "npm run test -- --watch",
     "dev": "concurrently \"npm run dev-bs\" \"gulp dev\"",
     "dev-bs": "browser-sync start -c bs-config.js",
     "build": "gulp build-dev",
@@ -51,6 +51,7 @@
     "@babel/preset-env": "^7.0.0-beta.51",
     "@babel/runtime": "^7.0.0-beta.51",
     "babel-loader": "^8.0.0-beta.4",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "browser-sync": "^2.26.7",
     "concurrently": "^3.4.0",
     "css-loader": "^3.5.3",
