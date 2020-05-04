@@ -6,6 +6,7 @@ import "../../common.css";
 import showOrHideGoTopLink from "./show-or-hide-go-top-link";
 import NativeAccessApi from "../../NativeAccessApi";
 import { waitForEvent } from "../../utils";
+import initializeCordova from "../../initializeCordova";
 
 // const HELP_FILES = {
 //   en: "help.html",
@@ -20,4 +21,8 @@ import { waitForEvent } from "../../utils";
   }
 
   await waitForEvent("DOMContentLoaded");
+
+  if (window && window.cordova) {
+    await initializeCordova();
+  }
 })();
