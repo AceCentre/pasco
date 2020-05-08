@@ -45,6 +45,7 @@
     "rangeslider-js": "^3.2.1",
     "scrollnav": "git+https://github.com/hosseinamin/scrollnav.git",
     "sorted-array-functions": "^1.2.0",
+    "underscore": "^1.10.2",
     "xhr-mock": "^2.5.1"
   },
   "devDependencies": {
