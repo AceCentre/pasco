@@ -4,6 +4,14 @@ const CopyPlugin = require("copy-webpack-plugin");
 
 const relativeToRoot = (pathName) => path.resolve(__dirname, "../", pathName);
 
+const commonHtmlConfig = {
+  favicon: relativeToRoot("src/favicon.ico"),
+  minify: {
+    // TODO Ideally we should be removing comments but we still use them to inject cordova scripts
+    removeComments: false,
+  },
+};
+
 module.exports = {
   entry: {
     intro: relativeToRoot("src/pages/intro/index.js"),
@@ -18,13 +26,13 @@ module.exports = {
       filename: "intro/index.html",
       template: relativeToRoot("src/pages/intro/index.html"),
       chunks: ["intro"],
-      favicon: relativeToRoot("src/favicon.ico"),
+      ...commonHtmlConfig,
     }),
     new HtmlWebpackPlugin({
       filename: "help/index.html",
       template: relativeToRoot("src/pages/help/index.html"),
       chunks: ["help"],
-      favicon: relativeToRoot("src/favicon.ico"),
+      ...commonHtmlConfig,
     }),
   ],
   module: {
