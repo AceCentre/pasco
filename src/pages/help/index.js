@@ -9,7 +9,7 @@ import { waitForEvent } from "../../utils";
 import initializeCordova from "../../initializeCordova";
 
 // const HELP_FILES = {
-//   en: "help.html",
+//   en: "/help",
 //   "es-ES": "help/es-ES.html",
 // };
 
