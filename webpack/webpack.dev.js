@@ -6,12 +6,16 @@ const relativeToRoot = (pathName) => path.resolve(__dirname, "../", pathName);
 
 const config = {
   ...commonConfig,
+  entry: {
+    ...commonConfig.entry,
+    "landing-page": relativeToRoot("src/pages/landing-page/index.js"),
+  },
   plugins: [
     ...commonConfig.plugins,
     new HtmlWebpackPlugin({
       filename: "index.html",
       template: relativeToRoot("src/pages/landing-page/index.html"),
-      chunks: [],
+      chunks: ["landing-page"],
     }),
   ],
   output: {
