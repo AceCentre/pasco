@@ -1,0 +1,8 @@
+.video-link {
+  display: block;
+  text-align: center;
+}
+
+.video-link > video {
+  max-width: 90%;
+}
