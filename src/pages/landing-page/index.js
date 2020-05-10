@@ -1,10 +1,19 @@
 import { fixUrlForCordova } from "../../fs";
+import { waitForEvent } from "../../utils";
 
-if (window.cordova) {
-  const helpPage = fixUrlForCordova("/help");
-  const introPage = fixUrlForCordova("/intro");
+const isCordova = () =>
+  document.URL.indexOf("http://") === -1 &&
+  document.URL.indexOf("https://") === -1;
 
-  console.log({ helpPage, introPage });
-} else {
-  console.log("no cordova ");
-}
+(async () => {
+  console.log(document.URL);
+  if (isCordova()) {
+    await waitForEvent("deviceready");
+    const helpPage = fixUrlForCordova("/help");
+    const introPage = fixUrlForCordova("/intro");
+
+    console.log({ helpPage, introPage });
+  } else {
+    console.log("no cordova ");
+  }
+})();

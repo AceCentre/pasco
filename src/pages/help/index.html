@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+	<% if(isCordova) { %>
+		<script src="cordova.js"></script>
+	<% } %>
 	<meta charset="utf-8">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.youtube.com/ ws://localhost:3000; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:; font-src 'self' data: ;">

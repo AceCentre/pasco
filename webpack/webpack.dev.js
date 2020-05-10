@@ -1,8 +1,14 @@
 const commonConfig = require("./webpack.common");
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const isCordova = require("./is-cordova")();
 
 const relativeToRoot = (pathName) => path.resolve(__dirname, "../", pathName);
+
+const output = {
+  ...commonConfig.output,
+  path: relativeToRoot(isCordova ? "cordova/www" : "dist"),
+};
 
 const config = {
   ...commonConfig,
@@ -16,18 +22,19 @@ const config = {
       filename: "index.html",
       template: relativeToRoot("src/pages/landing-page/index.html"),
       chunks: ["landing-page"],
+      templateParameters: {
+        isCordova,
+      },
     }),
   ],
-  output: {
-    ...commonConfig.output,
-    path: relativeToRoot("dist"),
-  },
+  output,
   mode: "development",
   devServer: {
-    contentBase: relativeToRoot("dist"),
+    contentBase: relativeToRoot(isCordova ? "cordova/www" : "dist"),
     port: 9000,
-    open: true,
+    open: !isCordova,
   },
+  devtool: "inline-source-map",
 };
 
 module.exports = config;

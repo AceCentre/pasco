@@ -1,6 +1,7 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
+const isCordova = require("./is-cordova")();
 
 const relativeToRoot = (pathName) => path.resolve(__dirname, "../", pathName);
 
@@ -9,6 +10,9 @@ const commonHtmlConfig = {
   minify: {
     // TODO Ideally we should be removing comments but we still use them to inject cordova scripts
     removeComments: false,
+  },
+  templateParameters: {
+    isCordova,
   },
 };
 

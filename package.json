@@ -20,8 +20,9 @@
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
     "build-ios": "npm run build-prod  && npm run cordova-dist  && cd cordova/ && cordova build",
-    "webpack:start": "webpack-dev-server --config webpack/webpack.dev.js",
-    "webpack:build": "webpack --config webpack/webpack.prod.js"
+    "webpack:dev": "webpack-dev-server --config webpack/webpack.dev.js",
+    "webpack:build": "webpack --config webpack/webpack.prod.js",
+    "webpack:cordova-dev": "npm run --prefix=cordova webpack:dev"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.13.0",
     "bootstrap": "^3.3.7",
+    "clean-webpack-plugin": "^3.0.0",
     "copy-html-to-clipboard": "^4.0.1",
     "html-webpack-plugin": "^4.3.0",
     "jest": "^25.5.4",
