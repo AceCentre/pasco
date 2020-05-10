@@ -22,7 +22,8 @@
     "build-ios": "npm run build-prod  && npm run cordova-dist  && cd cordova/ && cordova build",
     "webpack:dev": "webpack-dev-server --config webpack/webpack.dev.js",
     "webpack:build": "webpack --config webpack/webpack.prod.js",
-    "webpack:cordova-dev": "npm run --prefix=cordova webpack:dev"
+    "webpack:cordova-dev": "npm run --prefix=cordova webpack:dev",
+    "webpack:cordova-build": "npm run --prefix=cordova webpack:build"
   },
   "repository": {
     "type": "git",

@@ -1,7 +1,7 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const CopyPlugin = require("copy-webpack-plugin");
 const isCordova = require("./is-cordova")();
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 const relativeToRoot = (pathName) => path.resolve(__dirname, "../", pathName);
 
@@ -22,10 +22,12 @@ module.exports = {
     help: relativeToRoot("src/pages/help/index.js"),
   },
   output: {
-    path: relativeToRoot("html"),
+    path: relativeToRoot(isCordova ? "cordova/www" : "html"),
+    publicPath: "/",
     filename: "[name]/bundle.js",
   },
   plugins: [
+    new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       filename: "intro/index.html",
       template: relativeToRoot("src/pages/intro/index.html"),
@@ -52,7 +54,7 @@ module.exports = {
             loader: "file-loader",
             options: {
               name: "[name].[ext]",
-              outputPath: "webpacked-fonts/",
+              outputPath: "webpacked-fonts",
             },
           },
         ],
@@ -65,7 +67,7 @@ module.exports = {
             loader: "file-loader",
             options: {
               name: "[name].[ext]",
-              outputPath: "assets/",
+              outputPath: "assets",
             },
           },
         ],

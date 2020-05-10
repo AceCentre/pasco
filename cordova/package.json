@@ -6,6 +6,7 @@
   "main": "index.js",
   "scripts": {
     "webpack:dev": "cordova prepare && cordova run -- --livereload --webpack.config ../webpack/webpack.dev.js --cordova",
+    "webpack:build": "cordova prepare && cordova build -- --webpack.config ../webpack/webpack.prod.js --cordova",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Apache Cordova Team",

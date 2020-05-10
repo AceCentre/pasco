@@ -9,6 +9,8 @@ import introVideo from "./assets/intro.mp4";
 import introScreenshot from "./assets/intro.png";
 import introTrack from "./assets/intro.vtt";
 
+console.log(introVideo);
+
 /* Load video assets */
 const videoEl = document.getElementById("intro-video");
 const trackEl = document.getElementById("intro-video-track");
