@@ -27,9 +27,9 @@ configsAuditoryCuesImg.src = configsAuditoryCuesGif;
 recordingAudioImg.src = recodingAudioGif;
 advancedEditingImg.src = advancedEditingGif;
 
-// import NativeAccessApi from "../../NativeAccessApi";
-// import { waitForEvent } from "../../utils";
-// import initializeCordova from "../../initializeCordova";
+import NativeAccessApi from "../../NativeAccessApi";
+import { waitForEvent } from "../../utils";
+import initializeCordova from "../../initializeCordova";
 
 // const HELP_FILES = {
 //   en: "/help",
@@ -39,13 +39,13 @@ advancedEditingImg.src = advancedEditingGif;
 (async () => {
   document.addEventListener("scroll", showOrHideGoTopLink);
 
-  // if (NativeAccessApi.available) {
-  //   await NativeAccessApi.onready();
-  // }
+  if (NativeAccessApi.available) {
+    await NativeAccessApi.onready();
+  }
 
-  // await waitForEvent("DOMContentLoaded");
+  await waitForEvent("DOMContentLoaded");
 
-  // if (window && window.cordova) {
-  //   await initializeCordova();
-  // }
+  if (window && window.cordova) {
+    await initializeCordova();
+  }
 })();
