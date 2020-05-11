@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<% if(isCordova) { %>
+		<script src="cordova.js"></script>
+	<% } %>
+	<meta charset="utf-8">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.youtube.com/ ws://localhost:3000; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:; font-src 'self' data: ;">
+	<meta name="format-detection" content="telephone=no">
+	<meta name="msapplication-tap-highlight" content="no">
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, viewport-fit=cover">
+	<title x-l10n="help_title">pasco - Help</title>
+</head>
+<!-- TODO put notready class back on body-->
+<body class="body-navbar-fixed">
+<nav class="navbar navbar-default navbar-fixed-top">
+	<ul class="x-navbar">
+		<li class="head"> 
+		<h1 x-l10n>
+			Help 
+		</h1>
+		</li>
+		<li class="space"></li>
+		<li><a class="icon-btn" href="index.html"><span class="far fa-play-circle fa-2x"></span></a></li>
+		<li><a class="icon-btn" href="edit-config.html" id="edit-config-btn"><span class="far fa-cog fa-2x"></span></a></li>
+	</ul>
+</nav>
+<div class="container">
+  <a class="anchor" name="top"></a>
+	<p class="m-t-15">
+		<b>pasco</b> is not designed to meet all and every communication aid users needs. Its fundamentally designed to suit early switch scanning users who also need <b>auditory cues</b>. Despite this it can be used in a range of ways. Find the relevant section below for some help and some common tips. This is a short help file - for a longer more detailed range of support look at <a target="_blank" href="https://acecentre.github.io/pasco/">https://acecentre.github.io/pasco/</a>. 
+	</p>
+	<div id="tocwrp">
+	</div>
+	<hr />
+	<h2 class="relative">
+		<a class="anchor" name="getting-started-video"></a>Getting Started with pasco 
+	</h2>
+	<div class="video-iframe-wrp">
+		<iframe class="video-iframe" src="https://www.youtube.com/embed/0BW-iez_IuQ" width="420" height="315" allowfullscreen frameborder="0"></iframe> 
+	</div>
+	<h2 class="relative">
+		<a class="anchor" name="quick-reference"></a>Quick Reference 
+	</h2>
+	<p>
+	</p>
+	<h3 class="relative">
+		<a class="anchor" name="settings"></a>Settings 
+	</h3>
+	<p>
+		There are a range of settings for pasco. Each setting and a description of what they mean can be found below 
+		<ul>
+			<li><a href="#"> Access </a> 
+			<ul>
+				<li><a href="#on-screen-navigation"> On-Screen Navigation </a></li>
+				<li><a href="#access-mode"> Access Mode </a></li>
+				<li><a href="#switch-setup-background"> Switch Setup - Background </a></li>
+				<li><a href="#_2-switches-default"> 2+ Switches (Default) </a></li>
+				<li><a href="#_1-switch-auto-scan"> 1 switch - Auto-Scan </a> 
+				<ul>
+					<li><a href="#loops-default-3"> Loops (Default: 3) </a></li>
+					<li><a href="#delay-at-first-item-ms-default-1000-ms"> Delay at first item (ms) (Default: 1000 ms) </a></li>
+					<li><a href="#auto-scanning-delay-ms-default-3000-ms"> Auto-scanning delay (ms) (Default: 3000 ms) </a></li>
+				</ul>
+				</li>
+				<li><a href="#configure-actions"> Configure Actions </a></li>
+				<li><a href="#switch-key-to-select-items"> Switch key to select items </a></li>
+				<li><a href="#minimum-cue-time-ms-default-0-ms"> Minimum Cue Time (ms) (Default: 0 ms) </a></li>
+				<li><a href="#ignore-second-hits-ms-default-100-ms"> Ignore second hits (ms) (Default: 100 ms) </a></li>
+			</ul>
+			</li>
+			<li><a href="#helpers"> Helpers </a> 
+			<ul>
+				<li><a href="#back-option-for-all-branches"> Back option for all branches </a></li>
+			</ul>
+			</li>
+			<li><a href="#speech"> Speech </a> 
+			<ul>
+				<li><a href="#cue-voice"> Cue Voice </a></li>
+				<li><a href="#main-voice"> Main Voice </a></li>
+				<li><a href="#first-time-run-cue-voice"> First time run (Cue Voice) </a></li>
+			</ul>
+			</li>
+			<li><a href="#appearance"> Appearance </a> 
+			<ul>
+				<li><a href="#font-size"> Font size </a></li>
+				<li><a href="#theme"> Theme </a></li>
+				<li><a href="#locale"> Locale </a></li>
+			</ul>
+			</li>
+			<li><a href="#vocabulary"> Vocabulary </a> 
+			<ul>
+				<li><a href="#active-tree"> Active Tree </a></li>
+				<li><a href="#tools"> Tools </a></li>
+				<li><a href="#load-an-example-tree"> Load an example tree </a></li>
+				<li><a href="#export-import"> Export / Import </a></li>
+			</ul>
+			</li>
+		</ul>
+	</p>
+	<h4>
+		Access 
+	</h4>
+	<h5 id="on-screen-navigation">
+		On-Screen Navigation 
+	</h5>
+	<p>
+		Enable or disable the 4-way navigation tool. Remember - you can reposition this just by dragging it - and resize it by pressing and holding on the tool - then dragging one of the corners. Have a watch of <a target="_blank" href="https://youtu.be/0BW-iez_IuQ?t=38" target="_blank" rel="noopener noreferrer">this video<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewbox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h58v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a> to see how it works. 
+	</p>
+	<h5 id="access-mode">
+		Access Mode 
+	</h5>
+	<p>
+		There are currently three options; 
+	</p>
+	<ol>
+		<li>1 switch - Auto-Scan</li>
+		<li>2+ switches</li>
+		<li>Wheel (NB: Experimental!)</li>
+	</ol>
+	<h5 id="switch-setup-background">
+		Switch Setup - Background 
+	</h5>
+	<p>
+		Switch access works by mapping keyboard keys to different actions. A box which allows one or several switches to be plugged in and then connect to the device is then needed. Be aware that for pasco we are looking at switch boxes that support keyboard presses without any additional software. Some (such as the JoyCable and the Crick USB switch box) emulate a joystick button which won't work. Also switch boxes such as the Hook+ won't work either <a href="/pasco/tips-n-tricks/ios-switch-scanning.html" class="">unless you follow our guide on how to use iOS switch scanning with pasco</a>. The following currently work with pasco on iOS: 
+	</p>
+	<ul>
+		<li><a target="_blank" href="https://www.pretorianuk.com/assistive-technology-for-ipad" target="_blank" rel="noopener noreferrer">Pretorian Applicator and iSwitch<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewbox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h58v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li>
+		<li><a target="_blank" href="http://www.orin.com/access/tapio/" target="_blank" rel="noopener noreferrer">Origin Instruments Tapio<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewbox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h58v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li>
+		<li><a target="_blank" href="https://www.ablenetinc.com/technology/computer-tablet-access/blue2-bluetooth-switch" target="_blank" rel="noopener noreferrer">Ablenet's Blue2 switch<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewbox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h58v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li>
+		<li><a target="_blank" href="https://gettecla.com" target="_blank" rel="noopener noreferrer">Tecla<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewbox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h58v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a>.</li>
+	</ul>
+	<h5 id="_2-switches-default">
+		2+ Switches (Default) 
+	</h5>
+	<p>
+		By default switch access is set to <strong>Manual</strong> - which would allow someone to use the on-screen navigation tool - or use 4 switches to navigate the currently active language tree. For example the <strong>arrow keys</strong> - up, down, left &amp; right - would allow someone to access the tree. Equally, the keys <strong>a</strong> (left), <strong>s</strong> (down), <strong>d</strong> (right), <strong>w</strong> (up) can be used. Lastly the keys <strong>1</strong> and <strong>2</strong> would allow a user to go <strong>left</strong> and <strong>right</strong> in the tree. 
+	</p>
+	<h5 id="_1-switch-auto-scan">
+		1 switch - Auto-Scan 
+	</h5>
+	<p>
+		Automatic scanning, often called <strong>"1 switch scanning"</strong> allows a user with one switch to navigate pasco. The computer moves through each item so the user doesn't have to - and only selects the one they want when ready. 
+	</p>
+	<p>
+		Be aware - you need to select which switch key selects (moves forward) - which you can do in the option "Switch key to select items". There are then some options you can configure: 
+	</p>
+	<h6 id="loops-default-3">
+		Loops (Default: 3) 
+	</h6>
+	<p>
+		The number of times the automatic scan runs through each level of the tree before stopping. 
+	</p>
+	<h6 id="delay-at-first-item-ms-default-1000-ms">
+		Delay at first item (ms) (Default: 1000 ms) 
+	</h6>
+	<p>
+		It is sometimes useful to have a delay at the first item in each level of the branch to help someone to time their switch press. 
+	</p>
+	<h6 id="auto-scanning-delay-ms-default-3000-ms">
+		<a href="auto-scanning-delay-ms-default-3000-ms" class="header-anchor"></a> Auto-scanning delay (ms) (Default: 3000 ms) 
+	</h6>
+	<p>
+		The time the scanner moves from one item to a next automatically. Want it to scan quicker/faster? Move it down. Want it to scan slower? Move it up. 
+	</p>
+	<h5 id="configure-actions">
+		Configure Actions 
+	</h5>
+	<h5 id="switch-key-to-select-items">
+		<a href="switch-key-to-select-items" class="header-anchor"></a> Switch key to select items 
+	</h5>
+	<p>
+		Here you can choose your switches (keys) and what should do what action. Select the action (e.g. in Automatic/1-switch scanning you will need to just select the "Select item" action). Then add your key. Remove any keypresses that you don't want to be used by pressing the red cross. 
+	</p>
+	<p>
+		<a class="video-link" target="_blank" href="https://gyazo.com/2cc1a4aae37bf1b146c51d9fc932fcce"> 
+		<video alt="Video from Gyazo" width="872" autoplay="autoplay" muted="muted" loop="loop" playsinline="" controls="controls">
+			<source src="https://i.gyazo.com/2cc1a4aae37bf1b146c51d9fc932fcce.mp4" type="video/mp4"> 
+		</video>
+		</a> 
+	</p>
+	<h5 id="minimum-cue-time-ms-default-0-ms">
+		<a href="minimum-cue-time-ms-default-0-ms" class="header-anchor"></a> Minimum Cue Time (ms) (Default: 0 ms) 
+	</h5>
+	<p>
+		By turning this on it stops the user selecting a large number of items in the tree before hearing the cue. You can change the default time here. 
+	</p>
+	<h5 id="ignore-second-hits-ms-default-100-ms">
+		<a href="ignore-second-hits-ms-default-100-ms" class="header-anchor"></a> Ignore second hits (ms) (Default: 100 ms) 
+	</h5>
+	<p>
+		This feature stops the switches being responded to if they are hit within this timeframe. So for example, if a user presses a switch and hits immediately afterwards - pasco will ignore this second press if it is within the timeframe. Some 
+	</p>
+	<h4 id="helpers">
+		<a href="helpers" class="header-anchor"></a> Helpers 
+	</h4>
+	<p>
+		We will add additional <strong>'helpers'</strong> (actions that alter the tree) here - but for now we only have one helper: 
+	</p>
+	<h5 id="back-option-for-all-branches">
+		<a href="back-option-for-all-branches" class="header-anchor"></a> Back option for all branches 
+	</h5>
+	<p>
+		It's really useful for single switch scanners to get back a branch if they need to. This adds the option of 'Back' to the end of each Branch, at the beginning of each branch or not at all. 
+	</p>
+	<h4 id="speech">
+		<a href="speech" class="header-anchor"></a> Speech 
+	</h4>
+	<h5 id="cue-voice">
+		<a href="cue-voice" class="header-anchor"></a> Cue Voice 
+	</h5>
+	<p>
+		The cue voice - often called the <em>private</em> voice is the synthesised voice that is designed for the communication user to hear. Ideally this would be to a headphone or quiet speaker that only the communication aid user can hear. 
+	</p>
+	<p>
+		Choose your voice and the related volume, pitch and rate (speed) of the voice as you wish. Note there is a plus symbol - this allows people who are using more than one language to add a different synthesised voice for that language. Note there is a line on each slider. This defines the <em>default</em> position so you can reset it if you ever slide this by accident. 
+	</p>
+	<h5 id="main-voice">
+		<a href="main-voice" class="header-anchor"></a> Main Voice 
+	</h5>
+	<p>
+		The main voice - often called the <em>public</em> voice is the synthesised voice that is designed for the communication partner(s) to hear. This is often an amplified speaker. 
+	</p>
+	<p>
+		Choose your voice and the related volume, pitch and rate (speed) of the voice as you wish. Note there is a plus symbol - this allows people who are using more than one language to add a different synthesised voice for that language. 
+	</p>
+	<p>
+		<a class="video-link" target="_blank" href="https://gyazo.com/d5913dfe43a536c8f343fb63da9b0eab"> 
+		<video alt="Video from Gyazo" width="1000" autoplay="autoplay" muted="muted" loop="loop" playsinline="" controls="controls">
+			<source src="https://i.gyazo.com/d5913dfe43a536c8f343fb63da9b0eab.mp4" type="video/mp4"> 
+		</video>
+		</a> 
+	</p>
+	<h5 id="first-time-run-cue-voice">
+		<a href="first-time-run-cue-voice" class="header-anchor"></a> First time run (Cue Voice) 
+	</h5>
+	<p>
+		For many people who are visually impaired its useful to 'hear' the items at each selected branch. This is like someone who is using their eyes to visually scan the interface. It give the user a fast way of scanning the items. If you turn this on we recommend making as fast as you can before the voice becomes hard to understand. 
+	</p>
+	<h4 id="appearance">
+		<a href="appearance" class="header-anchor"></a> Appearance 
+	</h4>
+	<p>
+		This area defines how the application looks and feels. 
+	</p>
+	<h5 id="font-size">
+		<a href="font-size" class="header-anchor"></a> Font size 
+	</h5>
+	<p>
+		Adjust the font size of the text shown in pasco 
+	</p>
+	<h5 id="theme">
+		<a href="theme" class="header-anchor"></a> Theme 
+	</h5>
+	<p>
+		There are a number of themes - some designed for people with a visual impairment - to aid easier reading of the text 
+	</p>
+	<h5 id="locale">
+		<a href="locale" class="header-anchor"></a> Locale 
+	</h5>
+	<p>
+		To change the language of the app (the menus and the configuration text) you can change it here. 
+	</p>
+	<div class="custom-block tip">
+		<p class="custom-block-title">
+			TIP 
+		</p>
+		<p>
+			This doesn't automatically change the language of the trees/vocabulary. For that you will have to use something like google translate. 
+		</p>
+	</div>
+	<h4 id="vocabulary">
+		<a href="vocabulary" class="header-anchor"></a> Vocabulary 
+	</h4>
+	<h5 id="active-tree">
+		<a href="active-tree" class="header-anchor"></a> Active Tree 
+	</h5>
+	<p>
+		Allows a user to switch the current active Tree. This means you could have one tree for social chat, another with spelling and another for a particular school or workplace. But more importantly it allows you to switch between a English only tree and a foreign language tree. More information, including how a user can switch without going into the configuration screen can be read <a href="/pasco/advanced/tree-file-details.html" class="">here</a>. 
+	</p>
+	<h5 id="tools">
+		<a href="tools" class="header-anchor"></a> Tools 
+	</h5>
+	<h5 id="load-an-example-tree">
+		<a href="load-an-example-tree" class="header-anchor"></a> Load an example tree 
+	</h5>
+	<p>
+		Pasco has some example vocabularies installed which you can load up. Select the tree, Press "load selected"", then "Save Tree". 
+	</p>
+	<p>
+		<a class="video-link" target="_blank" href="https://gyazo.com/507a3a9d2611bf98842a09dfd44376b3"> 
+		<video alt="Video from Gyazo" width="662" autoplay="autoplay" muted="muted" loop="loop" playsinline="" controls="controls">
+			<source src="https://i.gyazo.com/507a3a9d2611bf98842a09dfd44376b3.mp4" type="video/mp4"> 
+		</video>
+		</a> 
+	</p>
+	<div class="clearfix">
+	</div>
+	<h5 id="export-import">
+		<a href="export-import" class="header-anchor"></a> Export / Import 
+	</h5>
+	<p>
+		Here you can export or import your vocabulary file as a zip file - or a OBF file - to be used in different AAC programmes. 
+	</p>
+	<div class="clearfix">
+	</div>
+	<h3 class="relative">
+		<a class="anchor" name="common-configurations"></a>Common Configurations 
+	</h3>
+	<h4 class="relative">
+		<a class="anchor" name="config-single-switch"></a>A Single Switch user 
+	</h4>
+	<img id="configs-single-switch" class="pull-left padded-box" style="padding-right:5px;" alt="Short video clip showing how to change settings for a single switch user" width="248" height="476" align="left" style="float: left; margin: 0 20px 20px 0;" /> 
+	<p style="text-align: justify; display: block;">
+		If someone is operating a single button and has learnt the basics of simple automatic scanning then they can use pasco to make their needs known. A video explaining scanning can be found <a target="_blank" href="https://www.youtube.com/watch?v=g4CwiMHuTjo">here</a>. To configure pasco for this within the <b>Config</b> Screen change it to <b>"Automatic-Scanning"</b> Under <b>"Switch Access"</b>. There are some options available when you do this. 
+		<ul>
+			<li><b>Loops.</b> This is how many times the scan will go through each level of the tree if no item is selected. It can be useful if the indvidual wants to listen first and then select. However if you are using it for this try and look at the <b>"First time run"</b> Option</li>
+			<li><b>Delay at first item.</b> Sometimes its difficult for people who use auto-scanning to select start the scan AND select the first item. This delay time adds an extra delay to the very first item at each level of the vocabulary</li>
+			<li><b>Auto-scanning delay.</b> This is the time it takes to move from one item to the next. Some people call this the "Scan Time".</li>
+		</ul>
+		There are some other settings too which are not specific to single switch scanning: 
+		<ul>
+			<li><b>Switch key to select items</b> Many switch boxes (the piece of equipment that connects your switch to the computer) use space or enter as the emulated key press. Which emulated key press are you using? This will be the key that selects items</li>
+			<li><b>First Time Run (Cue Voice)</b> It can be useful to have a cue for the first time the scan goes through each level of your vocabulary. This may go a lot faster than the regular scan rate. This is called the <b>First time Run</b>. By turning this on you can change the rate and a different voice if required</li>
+			<li><b>Ignore second hits(ms)</b> If the user has difficulty pressing the switch once - or for example tremors on a switch - increasing this time can help. It ignores second hits of the switch if they are within the time period selected</li>
+			<li><b>Ignore key presses under n ms</b> This setting tells the app to ignore short switch presses. You can alter this time as you need to.</li>
+		</ul>
+		One last configuration that is very helpful for automatic scanning is the <b>"Back option for all branches"</b> Under <b>Helpers</b>. This puts a <b>"Back"</b> action at the bottom of each level of the vocabulary allowing someone with one switch to go back a branch if they make a mistake. 
+	</p>
+	<div class="clearfix">
+	</div>
+	<h4 class="relative">
+		<a class="anchor" name="config-twoswitch"></a>A Two-Switch user 
+	</h4>
+	<img id="configs-two-switch" class="pull-left padded-box" style="padding-right:5px;" align="left" style="float: left; margin: 0 20px 20px 0;"  alt="Short video clip showing how to alter settings for a two switch user" width="244" height="469" /> 
+	<p style="text-align: justify; display: block;">
+		Some people may use two switches. One switch will move through the items - with a second switch selecting them. This is called <b>Two-switch</b> or <b>Manual</b> scanning. To configure pasco for this within the <b>Config</b> Screen change it to <b>"Manual"</b> Under <b>"Switch Access"</b>. There are some options available when you do this. 
+		<ul>
+			<li><b>Switch key to select items</b> Many switch boxes (the piece of equipment that connects your switch to the computer) use space or enter as the emulated key press. Which emulated key press are you using? This will be the key that selects items.</li>
+			<li><b>Move with the other switch (Step scanning)</b>You will need to select this if you are using two switch scanning. What does this button do? Lets imagine you select "Space" as your selection key. Checking this box will make "Enter" your move key. Equally if you have "Enter" as your selection key it makes "Space" the move key.</li>
+			<li><b>First Time Run (Cue Voice)</b> It can be useful to have a cue for the first time the scan goes through each level of your vocabulary. This may go a lot faster than the regular scan rate. This is called the <b>First time Run</b>. By turning this on you can change the rate and a different voice if required</li>
+			<li><b>Ignore second hits(ms)</b> If the user has difficulty pressing the switch once - or for example tremors on a switch - increasing this time can help. It ignores second hits of the switch if they are within the time period selected</li>
+			<li><b>Ignore key presses under n ms</b> This setting tells the app to ignore short switch presses. You can alter this time as you need to.</li>
+		</ul>
+		One last configuration that is very helpful for manual scanning is the <b>"Back option for all branches"</b> Under <b>Helpers</b>. This puts a <b>"Back"</b> action at the bottom of each level of the vocabulary allowing someone with one switch to go back a branch if they make a mistake. NB: If someone can access a third switch you can set this switch to <b>"A"</b> or <b>"Back arrow"</b>. 
+	</p>
+	<div class="clearfix">
+	</div>
+	<h4 class="relative">
+		<a class="anchor" name="config-nav"></a>Someone who controls the up/down keys on a remote control 
+	</h4>
+	<img id="configs-arrow-keys" class="pull-left padded-box" style="padding-right:5px;" alt="How to configure to use with arrow keys video" width="162" height="279" /> 
+	<p>
+		Some individuals can operate one finger or thumb with some dexterity once positioned in the correct place so that they, for example, can control the navigation arrows of a remote control. Pasco has a built in navigation aid that, although designed for a communication partner to use can be useful for the individual. To turn this on Select the <b>"On"</b> option of the <b>"On-screen navigation"</b>. 
+	</p>
+	<p>
+		The navigation arrow allows you to go up,down, left and right through the language of your vocabulary 
+	</p>
+	<p>
+		Once on you can press and hold on the 4 way arrow to move the navigation tool around the screen to where you need it - and resize it. To resize it press and hold on the middle of the arrow then grab the edge of the dotted line surrounding it to resize the tool. 
+	</p>
+	<div class="clearfix">
+	</div>
+	<h4 class="relative">
+		<a class="anchor" name="config-numspeech"></a>Someone who can control the arrow keys of a external (Bluetooth or wired) keyboard 
+	</h4>
+	<p>
+		Some individuals can operate an external number pad (like <a target="_blank" href="https://www.amazon.co.uk/Satechi%C2%AE-Bluetooth-Wireless-Notebook-Compatible/dp/B011AO91GI/ref=sr_1_46?ie=UTF8&amp;qid=1525248689&amp;sr=8-46&amp;keywords=bluetooth+pad">this</a>) - where one or more fingers can operate the arrow keys. This can be placed in the correct place - and mounted if required. To use this, pair with your device (iPhone, iPad or other device using pasco). Make sure your numlock setting is on so you can use the arrow keys. The arrows allows you to go up,down, left and right through the language of your vocabulary 
+	</p>
+	<div class="clearfix">
+	</div>
+	<h4 class="relative">
+		<a class="anchor" name="config-non-native"></a>Dual-language requirement 
+	</h4>
+	<p>
+		Some people may understand one language but need to communicate to others in a different language. Pasco allows you to do this by changing the voice of the cue (the voice that the pasco user would hear) - and the main voice (the voice that others would hear). There are two ways you can achieve this with pasco 
+		<ol>
+			<li>Using the in-built Text to speech engine - and changing the language</li>
+			<li>Recording your own cue/main voice audio recordings</li>
+		</ol>
+	</p>
+	<div class="clearfix">
+	</div>
+	<h4 class="relative">
+		<a class="anchor" name="config-auditorycue"></a>How to setup for auditory cues 
+	</h4>
+	<img id="configs-auditory-cues" class="pull-left padded-box" style="padding-right:5px;" alt="Short video to show where to fnd auditory cues" width="204" height="305" /> 
+	<p>
+		pasco is designed to work well with an external headphone or speaker so the person communicating can only hear the cue rather than others in their environment hearing the cue constantly. <b>Please note. This feature is only available on iOS at present</b>. To do this plug in a wired headphone or speaker to the device (<b>it does not work on bluetooth speakers yet!</b>). When you do this all sound, by default, will now be directed to your headphones. To redirect the Main voice to the speaker of the iPhone/iPad you need to check the box to <b>redirect the output</b> in the <b>Config</b>-&gt;<b>Speech</b>. 
+	</p>
+	<div class="clearfix">
+	</div>
+	<h3 class="relative">
+		<a class="anchor" name="editing-quick-mode"></a>Editing - Quick Mode 
+	</h3>
+	<img id="recording-audio" class="pull-left padded-box" style="padding-right:5px;" alt="How to press and hold the record button to record audio" width="251" height="453" /> 
+	<p>
+		pasco has some simple and advanced editing available. We will first look at the simple - within app way of editing. To Edit within the app navigate to the tree or part of the tree you want to access (hint: enabling the navigation tool helps this) and then hit the <b>Top right Edit icon (looks a little like a pencil and pad)</b>. Once in this mode tap on the item you want to edit. A white box will appear with small markers. If you want to edit the text (the label) - just tap in the white area and with the on-screen keyboard edit the text as you wish. If you want to add a new item above or below this item - simply hit the plus symbol either above or below the item If you want to change the recorded cue or main recording - you can do this by tapping on the spanner symbol next to the item you want to change. Then in the next window select which the recording is for (Main, Cue or Both) and press and hold the red "Record" button. <b>Release</b> the button when you are finished recording. 
+	</p>
+	<div class="clearfix">
+	</div>
+	<h3 class="relative">
+		<a class="anchor" name="editing-advanced-mode"></a>Editing - Advanced Mode 
+	</h3>
+	<img id="advanced-editing" class="pull-left padded-box" style="padding-right:5px;"  alt="Advanced editing Video" width="246" height="461" /> 
+	<p>
+		In the config it's possible to import and export your own language tree. This is simply a text file. There are two ways you can make this: 
+		<ol>
+			<li>Within <a target="_blank" href="https://mindnode.com/">MindNode</a>. A mindmap editor. Create your list then export to Markdown and import this file</li>
+			<li>Within a plain text editor (e.g. Notepad). Simply indent lines using the tab key under each heading. You can look at an example <a target="_blank" href="https://gist.githubusercontent.com/willwade/c4b96b99c1788b168f4b244f99f82baf/raw/0943dbaad21c4d72ba40ed4f8aeeaee7967bfb75/PlainTextTreeExample.txt">here</a></li>
+		</ol>
+		Copy and paste the file (either the markdown file - or the indented text file) into the <b>Tree</b> in the Config. 
+	</p>
+	<div class="clearfix">
+	</div>
+	<h3 class="relative">
+		<a class="anchor" name="importing-exporting"></a>Importing and Exporting Vocabulary 
+	</h3>
+	<p>
+		Backing up and importing is easy. If you have no recordings in your language file you can simply select all of the text in the <b>Config</b>-&gt;<b>Tree</b> Section and paste it somewhere safe. Equally copy and paste a file you have been working on to that field - and then save your changes. You can also import a text file if you are on a PC. If you do have recordings make use of the <b>Export</b> and <b>Import</b> Tool. It creates a zip file containing your audio recordings as well as the edited vocabulary file. 
+	</p>
+	<h2 class="relative">
+		<a class="anchor" name="credits"></a>Credits
+	</h2>
+	<ul>
+		<li>Inspiration and reason: Clients of the <a target="_blank" href="https://acecentre.org.uk/">Ace Centre</a></li>
+		<li>Fundraising: Paul Pickford</li>
+		<li>Project management, Design and planning: <a target="_blank" href="https://acecentre.org.uk/">Will Wade</a></li>
+		<li>Coding: <a target="_blank" href="https://aminbros.com/">Hossein Amin</a></li>
+	</ul>
+	This software makes use of the following technologies: 
+	<ul>
+		<li>Responsive Voice for Text to Speech (Web), <a target="_blank" href="https://responsivevoice.org/">https://responsivevoice.org/</a> used under the Non-Commercial License</li>
+		<li>Fontawesome, <a target="_blank" href="http://fontawesome.com/">http://fontawesome.com</a></li>
+	</ul>
+</div>
+<a href="#top" id="move-top-link" class="hidden btn btn-info"><i class="far fa-arrow-alt-circle-up"></i> Go Top</a>
+<!-- INJECT SCRIPTS -->
+
+</script> 
+</body>
+</html>

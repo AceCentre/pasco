@@ -7,17 +7,23 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --config jest.config.js",
+    "test:watch": "npm run test -- --watch",
+    "test:coverage": "npm run test -- --coverage=true",
     "dev": "concurrently \"npm run dev-bs\" \"gulp dev\"",
     "dev-bs": "browser-sync start -c bs-config.js",
     "build": "gulp build-dev",
-    "build-prod": "gulp build-prod",
+    "build-prod": "gulp build-prod && npm run webpack:build",
     "cordova-dist": "gulp cordova-dist",
     "cordova-build": "gulp build-prod",
     "watch-cordova-dist": "gulp watch-cordova-dist",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
-    "build-ios": "npm run build-prod  && npm run cordova-dist  && cd cordova/ && cordova build"
+    "build-ios": "npm run build-prod  && npm run cordova-dist  && cd cordova/ && cordova build",
+    "webpack:dev": "webpack-dev-server --config webpack/webpack.dev.js",
+    "webpack:build": "webpack --config webpack/webpack.prod.js",
+    "webpack:cordova-dev": "npm run --prefix=cordova webpack:dev",
+    "webpack:cordova-build": "npm run --prefix=cordova webpack:build"
   },
   "repository": {
     "type": "git",
@@ -30,22 +36,33 @@
   },
   "homepage": "https://github.com/AceCentre/pasco#readme",
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.13.0",
+    "bootstrap": "^3.3.7",
+    "clean-webpack-plugin": "^3.0.0",
     "copy-html-to-clipboard": "^4.0.1",
+    "html-webpack-plugin": "^4.3.0",
+    "jest": "^25.5.4",
     "jquery": "^3.4.1",
     "path-browserify": "^1.0.0",
     "plist": "3.0.1",
     "rangeslider-js": "^3.2.1",
     "scrollnav": "git+https://github.com/hosseinamin/scrollnav.git",
-    "sorted-array-functions": "^1.2.0"
+    "sorted-array-functions": "^1.2.0",
+    "underscore": "^1.10.2",
+    "xhr-mock": "^2.5.1"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-beta.51",
-    "@babel/plugin-transform-runtime": "^7.0.0-beta.51",
+    "@babel/plugin-transform-runtime": "^7.9.6",
     "@babel/preset-env": "^7.0.0-beta.51",
     "@babel/runtime": "^7.0.0-beta.51",
     "babel-loader": "^8.0.0-beta.4",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "browser-sync": "^2.26.7",
     "concurrently": "^3.4.0",
+    "css-loader": "^3.5.3",
+    "eslint": "^6.8.0",
+    "eslint-plugin-jest": "^23.8.2",
     "gulp": "^4.0.0",
     "gulp-rename": "^1.4.0",
     "gulp-sass": "^4.0.2",
@@ -53,9 +70,12 @@
     "natives": "^1.1.5",
     "node-sass": "^4.12.0",
     "node-sass-package-importer": "^5.2.0",
+    "style-loader": "^1.2.1",
     "uglifyjs-webpack-plugin": "^2.0.1",
     "vuepress": "^1.2.0",
-    "webpack": "^4.20.2",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3",
     "webpack-stream": "^5.1.1"
   }
 }

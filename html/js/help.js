@@ -1,5 +1,5 @@
 window.help_files = {
-  'en': 'help.html',
+  'en': '/help',
   'es-ES': 'help/es-ES.html'
 };
 document.addEventListener('scroll', _onscroll);
