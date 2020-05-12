@@ -1,0 +1,61 @@
+{
+  "theme": "light",
+  "mode": "switch",
+  "wheel_y_reverse": false,
+  "wheel_x_reverse": false,
+  "wheel_y_threshold": 30,
+  "wheel_x_threshold": 30,
+  "can_edit": true,
+  "onscreen_navigation": "enable",
+  "ignore_second_hits_time": 100,
+  "ignore_key_release_time": 50,
+  "helper_back_option": "end",
+  "auto_next_delay": 200,
+  "auto_next_first_run_delay": 0,
+  "auto_next_recycle_delay": 0,
+  "auto_next_loops": 3,
+  "auto_next_atfirst_delay": 1000,
+  "minimum_cue_time": 0,
+  "auditory_main_voice_options": {
+    "volume": 1.0,
+    "rate": "default",
+    "rateMul": 1.0,
+    "alt_voiceId": "UK English Male",
+    "pitch": 1.0,
+    "delay": 0.2
+  },
+  "auditory_cue_voice_options": {
+    "volume": 0.5,
+    "rate": "default",
+    "rateMul": 1.0,
+    "alt_voiceId": "UK English Female",
+    "pitch": 1.0
+  },
+  "_auditory_cue_first_run_voice_options": {
+    "volume": 1.0,
+    "rate": "default",
+    "rateMul": 1.5,
+    "alt_voiceId": "UK English Female",
+    "pitch": 1.0
+  },
+  "keys": {
+    "13": { "func": "tree_go_in", "label": "enter" },
+    "32": { "func": "tree_go_out", "label": "space" },
+    "39": { "func": "tree_go_in", "label": "ArrowRight" },
+    "37": { "func": "tree_go_out", "label": "ArrowLeft" },
+    "38": { "func": "tree_go_previous", "label": "ArrowUp" },
+    "40": { "func": "tree_go_next", "label": "ArrowDown" },
+    "87": { "func": "tree_go_previous", "label": "W" },
+    "68": { "func": "tree_go_in", "label": "D" },
+    "83": { "func": "tree_go_next", "label": "S" },
+    "65": { "func": "tree_go_out", "label": "A" },
+    "66": { "func": "tree_go_in", "label": "B" },
+    "49": { "func": "tree_go_previous", "label": "num 1" },
+    "50": { "func": "tree_go_next", "label": "num 2" },
+    "51": { "func": "tree_go_out", "label": "num 3" },
+    "52": { "func": "tree_go_in", "label": "num 4" }
+  },
+  "style": [],
+  "highlight_behavior": "center",
+  "tree_content_size_percentage": 100
+}
