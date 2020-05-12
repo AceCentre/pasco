@@ -43,9 +43,8 @@ import initializeCordova from "../../initializeCordova";
     await NativeAccessApi.onready();
   }
 
-  await waitForEvent("DOMContentLoaded");
-
-  if (window && window.cordova) {
+  if (window.runningWithCordova) {
+    await waitForEvent("deviceready");
     await initializeCordova();
   }
 })();
