@@ -57,6 +57,8 @@
     "@babel/plugin-transform-runtime": "^7.9.6",
     "@babel/preset-env": "^7.0.0-beta.51",
     "@babel/runtime": "^7.0.0-beta.51",
+    "@testing-library/dom": "^7.5.2",
+    "@testing-library/jest-dom": "^5.7.0",
     "babel-loader": "^8.0.0-beta.4",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "browser-sync": "^2.26.7",
