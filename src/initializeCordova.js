@@ -1,19 +1,26 @@
-import _ from "underscore";
-import { resolveLocalFileSystemUrl, readFile } from "./fs";
+import { resolveLocalFileSystemUrl, readFile, writeFile } from "./fs";
+import { waitForEvent } from "./utils";
 
-const REPLACE_FILE_KEYS = ["default_config", "default_trees_info_fn"];
+const REPLACE_FILE = [
+  { fileKey: "default_config", location: "config.json" },
+  { fileKey: "default_trees_info_fn", location: "trees-info.json" },
+];
 
 const intializeCordova = async () => {
-  const promises = REPLACE_FILE_KEYS.map(async (currentKey) => {
-    const path = window[currentKey];
-    const newPath = window.cordova_user_dir_prefix + window[currentKey];
+  const promises = REPLACE_FILE.map(async (currentFile) => {
+    const path = currentFile.location;
+    const newPath = `cdvfile://localhost/persistent/${path}`;
 
+    console.log("about to try");
     try {
+      console.log("Yo");
       await resolveLocalFileSystemUrl(newPath);
-      window[currentKey] = newPath;
+      window[currentFile.fileKey] = newPath;
     } catch (err) {
+      console.log("Err", err);
+
       const file = readFile(path);
-      write_file(newPath, file);
+      writeFile(newPath, file);
     }
   });
 
