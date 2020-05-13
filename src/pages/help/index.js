@@ -7,6 +7,7 @@ import "./index.css";
 import showOrHideGoTopLink from "./show-or-hide-go-top-link";
 import tableOfContentsData from "./table-of-contents-data";
 import generateTableOfContetsElement from "./table-of-contents";
+import localize from "../../localization";
 
 /* Import image assets */
 import configsSingleSwitchGif from "./assets/configs-single-switch.gif";
@@ -41,4 +42,6 @@ advancedEditingImg.src = advancedEditingGif;
   );
   const tableOfContentsContainer = document.getElementById("table-of-contents");
   tableOfContentsContainer.append(tableOfContentsElement);
+
+  await localize();
 })();
