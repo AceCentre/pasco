@@ -1,5 +1,5 @@
 import showOrHideGoToTopLink from "./show-or-hide-go-top-link";
-import { getByText } from "@testing-library/dom";
+import { screen } from "@testing-library/dom";
 import "@testing-library/jest-dom/extend-expect";
 
 describe("showOrHideGoToTopLink", () => {
@@ -16,7 +16,7 @@ describe("showOrHideGoToTopLink", () => {
     showOrHideGoToTopLink();
 
     // Assert
-    const link = getByText(document, "Go to top link");
+    const link = screen.getByText("Go to top link");
     expect(link).toHaveClass("hidden");
   });
 
@@ -30,7 +30,7 @@ describe("showOrHideGoToTopLink", () => {
     showOrHideGoToTopLink();
 
     // Assert
-    const link = getByText(document, "Go to top link");
+    const link = screen.getByText("Go to top link");
     expect(link).not.toHaveClass("hidden");
   });
 
@@ -43,7 +43,7 @@ describe("showOrHideGoToTopLink", () => {
     showOrHideGoToTopLink();
 
     // Assert
-    const link = getByText(document, "Go to top link");
+    const link = screen.getByText("Go to top link");
     expect(link).toHaveClass("hidden");
   });
 });

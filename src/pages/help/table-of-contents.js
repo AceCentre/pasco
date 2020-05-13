@@ -1,5 +1,5 @@
 // TODO This could be clever and recursive
-const generateTableOfContents = (headings) => {
+const generateTableOfContents = (headings = []) => {
   const topLevelList = document.createElement("ol");
 
   /* Loop over heading items */
