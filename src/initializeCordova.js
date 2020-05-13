@@ -11,14 +11,9 @@ const intializeCordova = async () => {
     const path = currentFile.location;
     const newPath = `cdvfile://localhost/persistent/${path}`;
 
-    console.log("about to try");
     try {
-      console.log("Yo");
       await resolveLocalFileSystemUrl(newPath);
-      window[currentFile.fileKey] = newPath;
     } catch (err) {
-      console.log("Err", err);
-
       const file = readFile(path);
       writeFile(newPath, file);
     }
