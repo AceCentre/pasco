@@ -20,6 +20,7 @@ module.exports = {
   entry: {
     intro: relativeToRoot("src/pages/intro/index.js"),
     help: relativeToRoot("src/pages/help/index.js"),
+    "edit-config": relativeToRoot("src/pages/edit-config/index.js"),
   },
   output: {
     path: relativeToRoot(isCordova ? "cordova/www" : "html"),
@@ -38,6 +39,12 @@ module.exports = {
       filename: "help/index.html",
       template: relativeToRoot("src/pages/help/index.html"),
       chunks: ["help"],
+      ...commonHtmlConfig,
+    }),
+    new HtmlWebpackPlugin({
+      filename: "edit-config/index.html",
+      template: relativeToRoot("src/pages/edit-config/index.html"),
+      chunks: ["edit-config"],
       ...commonHtmlConfig,
     }),
   ],
