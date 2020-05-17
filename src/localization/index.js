@@ -1,3 +1,5 @@
+// TODO we do have translation files so it would be good to integrate with them and not rely on a third party translation tool
+
 import translate from "translate";
 
 const YANADEX_API_KEY =
