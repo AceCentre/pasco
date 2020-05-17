@@ -2,6 +2,7 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const isCordova = require("./is-cordova")();
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const { IgnorePlugin } = require("webpack");
 
 const relativeToRoot = (pathName) => path.resolve(__dirname, "../", pathName);
 
@@ -28,6 +29,7 @@ module.exports = {
     filename: "[name]/bundle.js",
   },
   plugins: [
+    new IgnorePlugin(/\/iconv-loader$/),
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       filename: "intro/index.html",
