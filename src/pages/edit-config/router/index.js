@@ -1,20 +1,38 @@
-import { defaultRoute } from "./routes";
+import routes, { defaultRoute } from "./routes";
 
-const getCurrentRoute = () => {};
+const HASH_BANG = "#!";
 
-const setCurrentRoute = () => {
-  // Validate it is given a real route
+const getCurrentRoute = (currentLocation) => {
+  if (!currentLocation.hash.includes(HASH_BANG)) {
+    console.warn("You're not on a valid route");
+    return;
+  }
+
+  const currentPath = currentLocation.hash.split(HASH_BANG)[1];
+  const currentRoute = routes.find((current) => () => {
+    return current.path.toLowerCase() === currentPath.toLowerCase();
+  });
+
+  return currentRoute;
+};
+
+const setCurrentRoute = (route, currentHistory) => {
+  currentHistory.pushState(
+    { currentRoute: route },
+    route.title,
+    `${HASH_BANG}${route.path}`
+  );
 };
 
 const routerListener = () => {
   // Call set current route
+  const currentRoute = getCurrentRoute(location) || defaultRoute;
+  setCurrentRoute(currentRoute, history);
 };
 
 const setupRouter = () => {
-  const currentRoute = getCurrentRoute();
-  if (!currentRoute) setCurrentRoute(defaultRoute);
-
-  document.addEventListener("historychange", routerListener);
+  routerListener();
+  window.addEventListener("hashchange", routerListener);
 };
 
 export default setupRouter;
