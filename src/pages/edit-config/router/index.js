@@ -4,7 +4,6 @@ const HASH_BANG = "#!";
 
 const getCurrentRoute = (currentLocation) => {
   if (!currentLocation.hash.includes(HASH_BANG)) {
-    console.warn("You're not on a valid route");
     return;
   }
 
@@ -18,10 +17,16 @@ const getCurrentRoute = (currentLocation) => {
 
 const setCurrentRoute = (route, currentHistory) => {
   currentHistory.pushState(
-    { currentRoute: route },
+    { currentRoute: { ...route, setRoute: undefined, unsetRoute: undefined } },
     route.title,
     `${HASH_BANG}${route.path}`
   );
+
+  // Unset all routes
+  routes.forEach((currentRoute) => currentRoute.unsetRoute());
+
+  // Set new route
+  route.setRoute();
 };
 
 const routerListener = () => {
