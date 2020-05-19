@@ -407,6 +407,14 @@ html .hide-for-cordova {
   }
 }
 
+.main-head.has-active {
+  display: none;
+}
+
+.back-btn.has-active {
+  display: block;
+}
+
 @media (min-width: 768px) {
   .x-navbar .back-btn {
     display: none !important;
