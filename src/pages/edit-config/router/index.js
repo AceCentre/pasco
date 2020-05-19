@@ -8,7 +8,7 @@ const getCurrentRoute = (currentLocation) => {
   }
 
   const currentPath = currentLocation.hash.split(HASH_BANG)[1];
-  const currentRoute = routes.find((current) => () => {
+  const currentRoute = routes.find((current) => {
     return current.path.toLowerCase() === currentPath.toLowerCase();
   });
 
@@ -32,12 +32,13 @@ const setCurrentRoute = (route, currentHistory) => {
 const routerListener = () => {
   // Call set current route
   const currentRoute = getCurrentRoute(location) || defaultRoute;
+
   setCurrentRoute(currentRoute, history);
 };
 
 const setupRouter = () => {
   routerListener();
-  window.addEventListener("hashchange", routerListener);
+  window.addEventListener("popstate", routerListener);
 };
 
 export default setupRouter;

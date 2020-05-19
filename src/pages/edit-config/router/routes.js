@@ -1,41 +1,43 @@
-const setRouteHandler = () => () => {
-  // console.log("yo");
+const setRouteHandler = (route) => () => {
+  const ListItem = document.querySelector(`a[data-name='${route}']`);
+  ListItem.classList.add("active");
 };
 
-const unsetRouteHandler = () => () => {
-  // console.log("yo");
+const unsetRouteHandler = (route) => () => {
+  const ListItem = document.querySelector(`a[data-name='${route}']`);
+  ListItem.classList.remove("active");
 };
 
 const routes = [
   {
     path: "access",
     title: "pasco - Config | Access",
-    setRoute: setRouteHandler(),
-    unsetRoute: unsetRouteHandler(),
+    setRoute: setRouteHandler("access"),
+    unsetRoute: unsetRouteHandler("access"),
   },
   {
     path: "helpers",
     title: "pasco - Config | Helpers",
-    setRoute: setRouteHandler(),
-    unsetRoute: unsetRouteHandler(),
+    setRoute: setRouteHandler("helpers"),
+    unsetRoute: unsetRouteHandler("helpers"),
   },
   {
     path: "speech",
     title: "pasco - Config | Speech",
-    setRoute: setRouteHandler(),
-    unsetRoute: unsetRouteHandler(),
+    setRoute: setRouteHandler("speech"),
+    unsetRoute: unsetRouteHandler("speech"),
   },
   {
     path: "appearance",
     title: "pasco - Config | Appearance",
-    setRoute: setRouteHandler(),
-    unsetRoute: unsetRouteHandler(),
+    setRoute: setRouteHandler("appearance"),
+    unsetRoute: unsetRouteHandler("appearance"),
   },
   {
     path: "vocabulary",
     title: "pasco - Config | Vocabulary",
-    setRoute: setRouteHandler(),
-    unsetRoute: unsetRouteHandler(),
+    setRoute: setRouteHandler("vocabulary"),
+    unsetRoute: unsetRouteHandler("vocabulary"),
   },
 ];
 
