@@ -35,5 +35,12 @@ initSlider(
   (value) => setConfig({ ignore_second_hits_time: value })
 );
 
+initSlider(
+  "ignore_key_release_time",
+  initialConfig.ignore_key_release_time,
+  { step: 100, min: 0, max: 2000 },
+  (value) => setConfig({ ignore_key_release_time: value })
+);
+
 setupRouter();
 localize();
