@@ -82,8 +82,6 @@ const routes = [
   },
 ];
 
-export const defaultRoute = {
-  path: "",
-};
+export const defaultRoute = routes[0];
 
 export default routes;
