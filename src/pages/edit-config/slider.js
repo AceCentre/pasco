@@ -5,7 +5,7 @@ export const initSlider = (elementName, initialValue, opts, callback) => {
     `input[data-dependent="#${elementName}"]`
   );
 
-  const numberInput = document.getElementById("minimum_cue_time");
+  const numberInput = document.getElementById(elementName);
   numberInput.setAttribute("value", initialValue);
 
   const onSlide = (value) => {

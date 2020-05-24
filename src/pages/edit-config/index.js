@@ -28,5 +28,12 @@ initSlider(
   (value) => setConfig({ minimum_cue_time: value })
 );
 
+initSlider(
+  "ignore_second_hits_time",
+  initialConfig.ignore_second_hits_time,
+  { step: 100, min: 0, max: 2000 },
+  (value) => setConfig({ ignore_second_hits_time: value })
+);
+
 setupRouter();
 localize();
