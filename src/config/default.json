@@ -16,6 +16,7 @@
   "auto_next_loops": 3,
   "auto_next_atfirst_delay": 1000,
   "minimum_cue_time": 0,
+  "helper_stay_in_branch_for_all": false,
   "auditory_main_voice_options": {
     "volume": 1.0,
     "rate": "default",

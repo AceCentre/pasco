@@ -7,8 +7,15 @@ import setupRouter from "./router";
 import { getConfig, setConfig } from "../../config";
 import { initRadioButtons } from "./radio-button";
 import { initSlider } from "./slider";
+import { initCheckbox } from "./checkbox";
 
 const initialConfig = getConfig();
+
+initCheckbox(
+  "helper_stay_in_branch_for_all",
+  initialConfig.helper_stay_in_branch_for_all,
+  (val) => setConfig({ helper_stay_in_branch_for_all: val })
+);
 
 initRadioButtons(
   "onscreen_navigation",
