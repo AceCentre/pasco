@@ -17,6 +17,12 @@ initRadioButtons(
     setConfig({ onscreen_navigation: newOnScreenNavigation })
 );
 
+initRadioButtons(
+  "helper_back_option",
+  initialConfig.helper_back_option,
+  (helper_back_option) => setConfig({ helper_back_option: helper_back_option })
+);
+
 initRadioButtons("mode", initialConfig.mode, (newMode) =>
   setConfig({ mode: newMode })
 );
