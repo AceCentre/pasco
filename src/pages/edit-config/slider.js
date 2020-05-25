@@ -1,5 +1,6 @@
 import rangesliderJs from "rangeslider-js";
 
+// TODO Make this code less ugly
 export const initSlider = (
   elementId,
   initValue,
