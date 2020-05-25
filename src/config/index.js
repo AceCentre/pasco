@@ -26,7 +26,7 @@ export const setConfig = (newConfig) => {
   }
 
   const existingConfig = getConfig();
-  const combinedConfig = { ...defaultConfig, existingConfig, ...newConfig };
+  const combinedConfig = { ...defaultConfig, ...existingConfig, ...newConfig };
 
   window.localStorage.setItem(
     CONFIG_STORAGE_KEY,
