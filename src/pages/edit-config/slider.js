@@ -1,29 +1,39 @@
 import rangesliderJs from "rangeslider-js";
 
-export const initSlider = (elementName, initialValue, opts, callback) => {
-  const rangeEl = document.querySelector(
-    `input[data-dependent="#${elementName}"]`
-  );
+export const initSlider = (
+  elementId,
+  initValue,
+  { textDisplayId, numberInputId, ...opts },
+  cb
+) => {
+  const sliderInputEl = document.getElementById(elementId);
 
-  const numberInput = document.getElementById(elementName);
-  numberInput.setAttribute("value", initialValue);
+  const textDisplayElement = document.getElementById(textDisplayId);
+  if (textDisplayElement) textDisplayElement.textContent = `[${initValue}]`;
+
+  const numberInput = document.getElementById(numberInputId);
+  if (numberInput) {
+    numberInput.setAttribute("value", initValue);
+    numberInput.onchange = (event) => {
+      const { target } = event;
+      sliderInputEl["rangeslider-js"].update({ value: target.value });
+      cb(Number(target.value));
+    };
+  }
+
+  const onSlideEnd = (value) => {
+    cb(value);
+  };
 
   const onSlide = (value) => {
-    numberInput.value = value;
+    if (textDisplayElement) textDisplayElement.textContent = `[${value}]`;
+    if (numberInput) numberInput.value = value;
   };
 
-  const onSlideEnd = (value) => callback(value);
-
-  numberInput.onchange = (event) => {
-    const { target } = event;
-    rangeEl["rangeslider-js"].update({ value: target.value });
-    callback(Number(target.value));
-  };
-
-  rangesliderJs.create(rangeEl, {
+  rangesliderJs.create(sliderInputEl, {
     ...opts,
-    value: initialValue,
-    onSlide,
+    value: initValue,
     onSlideEnd,
+    onSlide,
   });
 };
