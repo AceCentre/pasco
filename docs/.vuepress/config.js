@@ -13,9 +13,9 @@ module.exports = {
     ['link', { rel: "apple-touch-icon", type: "image/x-icon", sizes: "180x180", href: "/apple-touch-icon.png" }],
     ['link', { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png" }],
     ['link', { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16x16.png" }],
-    ['meta', { name: "application-name", content: "RelayKeys Docs" }],
+    ['meta', { name: "application-name", content: "pasco Docs" }],
     ['meta', { name: "theme-color", content: "#263238" }],
-    ['meta', { name: "apple-mobile-web-app-title", content: "Directus Docs" }],
+    ['meta', { name: "apple-mobile-web-app-title", content: "pasco Docs" }],
     ['meta', { name: "msapplication-TileColor", content: "#263238" }],
     ['meta', { name: "msapplication-config", content: "/browserconfig.xml" }]
   ],
