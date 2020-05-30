@@ -6,8 +6,8 @@ import setupRouter from "./router";
 
 import { getConfig, setConfig } from "../../config";
 import { initRadioButtons } from "./radio-button";
-import { initSlider } from "./slider";
 import { initCheckbox } from "./checkbox";
+import { initSlider } from "./slider";
 
 const initialConfig = getConfig();
 
@@ -35,23 +35,99 @@ initRadioButtons("mode", initialConfig.mode, (newMode) =>
 );
 
 initSlider(
-  "minimum_cue_time",
+  "auditory_cue_voice_options.pitch",
+  initialConfig.auditory_cue_voice_options.pitch,
+  {
+    step: 0.01,
+    min: 0.01,
+    max: 2,
+    textDisplayId: "disp-auditory_cue_voice_options__pitch",
+  },
+  (newPitch) => setConfig({ auditory_cue_voice_options: { pitch: newPitch } })
+);
+
+initSlider(
+  "auditory_cue_voice_options.volume",
+  initialConfig.auditory_cue_voice_options.volume,
+  {
+    step: 0.01,
+    min: 0,
+    max: 1,
+    textDisplayId: "disp-auditory_cue_voice_options__volume",
+  },
+  (newVolume) =>
+    setConfig({ auditory_cue_voice_options: { volume: newVolume } })
+);
+
+initSlider(
+  "auditory_cue_voice_options.rateMul",
+  initialConfig.auditory_cue_voice_options.rateMul,
+  {
+    step: 0.01,
+    min: 0.01,
+    max: 4,
+    textDisplayId: "disp-auditory_cue_voice_options__rateMul",
+  },
+  (newRateMul) =>
+    setConfig({ auditory_cue_voice_options: { rateMul: newRateMul } })
+);
+
+initSlider(
+  "auditory_main_voice_options.pitch",
+  initialConfig.auditory_main_voice_options.pitch,
+  {
+    step: 0.01,
+    min: 0.01,
+    max: 2,
+    textDisplayId: "disp-auditory_main_voice_options__pitch",
+  },
+  (newPitch) => setConfig({ auditory_main_voice_options: { pitch: newPitch } })
+);
+
+initSlider(
+  "auditory_main_voice_options.volume",
+  initialConfig.auditory_main_voice_options.volume,
+  {
+    step: 0.01,
+    min: 0,
+    max: 1,
+    textDisplayId: "disp-auditory_main_voice_options__volume",
+  },
+  (newVolume) =>
+    setConfig({ auditory_main_voice_options: { volume: newVolume } })
+);
+
+initSlider(
+  "auditory_main_voice_options.rateMul",
+  initialConfig.auditory_main_voice_options.rateMul,
+  {
+    step: 0.01,
+    min: 0.01,
+    max: 4,
+    textDisplayId: "disp-auditory_main_voice_options__rateMul",
+  },
+  (newRateMul) =>
+    setConfig({ auditory_main_voice_options: { rateMul: newRateMul } })
+);
+
+initSlider(
+  "minimum_cue_time_range",
   initialConfig.minimum_cue_time,
-  { step: 100, min: 0, max: 3000 },
+  { step: 100, min: 0, max: 3000, numberInputId: "minimum_cue_time" },
   (value) => setConfig({ minimum_cue_time: value })
 );
 
 initSlider(
-  "ignore_second_hits_time",
+  "ignore_second_hits_time_range",
   initialConfig.ignore_second_hits_time,
-  { step: 100, min: 0, max: 2000 },
+  { step: 100, min: 0, max: 2000, numberInputId: "ignore_second_hits_time" },
   (value) => setConfig({ ignore_second_hits_time: value })
 );
 
 initSlider(
-  "ignore_key_release_time",
+  "ignore_key_release_time_range",
   initialConfig.ignore_key_release_time,
-  { step: 100, min: 0, max: 2000 },
+  { step: 100, min: 0, max: 2000, numberInputId: "ignore_key_release_time" },
   (value) => setConfig({ ignore_key_release_time: value })
 );
 
