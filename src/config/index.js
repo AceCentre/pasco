@@ -1,4 +1,5 @@
 import defaultConfig from "./default.json";
+import { merge } from "lodash";
 
 const CONFIG_STORAGE_KEY = "config_storage";
 
@@ -26,7 +27,7 @@ export const setConfig = (newConfig) => {
   }
 
   const existingConfig = getConfig();
-  const combinedConfig = { ...defaultConfig, ...existingConfig, ...newConfig };
+  const combinedConfig = merge({}, defaultConfig, existingConfig, newConfig);
 
   window.localStorage.setItem(
     CONFIG_STORAGE_KEY,
