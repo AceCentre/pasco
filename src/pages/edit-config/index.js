@@ -35,6 +35,43 @@ initRadioButtons("mode", initialConfig.mode, (newMode) =>
 );
 
 initSlider(
+  "tree_content_size_percentage_range",
+  initialConfig.tree_content_size_percentage,
+  {
+    step: 1,
+    min: 10,
+    max: 300,
+    numberInputId: "tree_content_size_percentage",
+  },
+  (newPercentage) => setConfig({ tree_content_size_percentage: newPercentage })
+);
+
+initSlider(
+  "message_bar_height_range",
+  initialConfig.message_bar_height,
+  {
+    step: 1,
+    min: 10,
+    max: 90,
+    numberInputId: "message_bar_height",
+  },
+  (newPercentage) => setConfig({ message_bar_height: newPercentage })
+);
+
+initSlider(
+  "message_bar_font_size_percentage_range",
+  initialConfig.message_bar_font_size_percentage,
+  {
+    step: 1,
+    min: 10,
+    max: 300,
+    numberInputId: "message_bar_font_size_percentage",
+  },
+  (newPercentage) =>
+    setConfig({ message_bar_font_size_percentage: newPercentage })
+);
+
+initSlider(
   "auditory_cue_voice_options.pitch",
   initialConfig.auditory_cue_voice_options.pitch,
   {

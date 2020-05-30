@@ -58,5 +58,7 @@
   },
   "style": [],
   "highlight_behavior": "center",
-  "tree_content_size_percentage": 100
+  "tree_content_size_percentage": 100,
+  "message_bar_height": 40,
+  "message_bar_font_size_percentage": 100
 }
