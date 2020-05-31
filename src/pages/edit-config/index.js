@@ -9,6 +9,9 @@ import { initRadioButtons } from "./radio-button";
 import { initCheckbox } from "./checkbox";
 import { initSlider } from "./slider";
 
+// TODO this should be somewhere more generic
+const MODES = ["switch", "wheel", "auto"];
+
 const initialConfig = getConfig();
 
 initCheckbox(
@@ -30,9 +33,21 @@ initRadioButtons(
   (helper_back_option) => setConfig({ helper_back_option: helper_back_option })
 );
 
-initRadioButtons("mode", initialConfig.mode, (newMode) =>
-  setConfig({ mode: newMode })
-);
+initRadioButtons("mode", initialConfig.mode, (newMode) => {
+  // TODO right now this makes everything unactive then sets active. Ideally it would be able to make
+  // only the previously active inactive. Also this could should not be in this file
+  const AllExtraOptions = MODES.map((mode) =>
+    document.getElementById(`${mode}_mode_params`)
+  );
+  AllExtraOptions.forEach((ExtraOption) =>
+    ExtraOption.classList.remove("mode-active")
+  );
+
+  const ExtraOptionsElement = document.getElementById(`${newMode}_mode_params`);
+  ExtraOptionsElement.classList.add("mode-active");
+
+  setConfig({ mode: newMode });
+});
 
 initSlider(
   "tree_content_size_percentage_range",

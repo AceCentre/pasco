@@ -1,4 +1,6 @@
 export const initRadioButtons = (radioButtonName, initialValue, callback) => {
+  callback(initialValue); // TODO This is pretty lazy
+
   const initiallySellected = document.querySelector(
     `input[name="${radioButtonName}"][value="${initialValue}"]`
   );

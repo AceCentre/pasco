@@ -3,6 +3,11 @@
   left: 0px;
 }
 
+/* TODO get rid of this hack */
+.mode-active.mode-active.mode-active {
+  height: auto !important;
+}
+
 .rangeslider {
   position: relative;
   display: block;
