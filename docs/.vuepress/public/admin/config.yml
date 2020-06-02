@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: acecentre/pasco/
+  repo: acecentre/pasco
   branch: master # Branch to update (optional; defaults to master)
   
 media_folder: "docs/.vuepress/public/img"
