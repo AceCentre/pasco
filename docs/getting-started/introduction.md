@@ -1,4 +1,4 @@
-# 🗣 ️Welcome to the pasco
+# 🗣 ️Welcome to pasco
  
 > These Docs will help get you up-and-running quickly, guide you through advanced features, and explain the concepts that make pasco so unique.
 
