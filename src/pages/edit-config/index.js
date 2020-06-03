@@ -20,6 +20,14 @@ initCheckbox(
   (val) => setConfig({ helper_stay_in_branch_for_all: val })
 );
 
+initCheckbox("wheel_y_reverse", initialConfig.wheel_y_reverse, (val) =>
+  setConfig({ wheel_y_reverse: val })
+);
+
+initCheckbox("wheel_x_reverse", initialConfig.wheel_x_reverse, (val) =>
+  setConfig({ wheel_x_reverse: val })
+);
+
 initRadioButtons(
   "onscreen_navigation",
   initialConfig.onscreen_navigation,
@@ -59,6 +67,51 @@ initSlider(
     numberInputId: "tree_content_size_percentage",
   },
   (newPercentage) => setConfig({ tree_content_size_percentage: newPercentage })
+);
+
+initSlider(
+  "wheel_y_threshold_range",
+  initialConfig.wheel_y_threshold,
+  { min: 1, step: 1, max: 100, numberInputId: "wheel_y_threshold" },
+  (newVal) => setConfig({ wheel_y_threshold: newVal })
+);
+
+initSlider(
+  "wheel_x_threshold_range",
+  initialConfig.wheel_x_threshold,
+  { min: 1, step: 1, max: 100, numberInputId: "wheel_x_threshold" },
+  (newVal) => setConfig({ wheel_x_threshold: newVal })
+);
+
+initSlider(
+  "auto_next_loops_range",
+  initialConfig.auto_next_loops,
+  { step: 1, min: 0, max: 4, numberInputId: "auto_next_loops" },
+  (newVal) => setConfig({ auto_next_loops: newVal })
+);
+
+initSlider(
+  "auto_next_atfirst_delay_range",
+  initialConfig.auto_next_atfirst_delay,
+  {
+    step: 100,
+    min: 0,
+    max: 2000,
+    numberInputId: "auto_next_atfirst_delay",
+  },
+  (newVal) => setConfig({ auto_next_atfirst_delay: newVal })
+);
+
+initSlider(
+  "auto_next_delay_range",
+  initialConfig.auto_next_atfirst_delay,
+  {
+    step: 100,
+    min: 0,
+    max: 5000,
+    numberInputId: "auto_next_delay",
+  },
+  (newVal) => setConfig({ auto_next_delay: newVal })
 );
 
 initSlider(
