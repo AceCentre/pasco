@@ -10,12 +10,12 @@ const initKeySelection = (action, modalId) => {
     );
 
   Button.onclick = () => {
-    const Modal = $("#" + modalId);
-    console.log(Modal);
-    Modal.show();
-  };
+    const modal = $("#" + modalId);
+    modal.show();
 
-  // console.log(HotModuleReplacementPlugin);
+    const modalElement = modal[0];
+    modalElement.classList.add("in");
+  };
 };
 
 export default initKeySelection;
