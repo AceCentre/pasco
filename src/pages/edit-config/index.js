@@ -1,4 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap";
 import "@fortawesome/fontawesome-free/css/all.css";
 import "./index.css";
 import localize from "../../localization";
@@ -8,11 +9,15 @@ import { getConfig, setConfig } from "../../config";
 import { initRadioButtons } from "./radio-button";
 import { initCheckbox } from "./checkbox";
 import { initSlider } from "./slider";
+import initKeySelection from "./key-selection";
 
 // TODO this should be somewhere more generic
 const MODES = ["switch", "wheel", "auto"];
 
 const initialConfig = getConfig();
+console.log(initialConfig);
+
+initKeySelection("tree_go_in", "configure-action-modal");
 
 initCheckbox(
   "helper_stay_in_branch_for_all",
