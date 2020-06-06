@@ -18,6 +18,9 @@ const initialConfig = getConfig();
 console.log(initialConfig);
 
 initKeySelection("tree_go_in", "configure-action-modal");
+initKeySelection("tree_go_out", "configure-action-modal");
+initKeySelection("tree_go_next", "configure-action-modal");
+initKeySelection("tree_go_previous", "configure-action-modal");
 
 initCheckbox(
   "helper_stay_in_branch_for_all",

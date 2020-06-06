@@ -15,6 +15,10 @@ const initKeySelection = (action, modalId) => {
 
     const modalElement = modal[0];
     modalElement.classList.add("in");
+
+    const backDropElement = document.createElement("div");
+    backDropElement.classList.add("modal-backdrop", "fade", "in");
+    document.body.appendChild(backDropElement);
   };
 };
 
