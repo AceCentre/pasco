@@ -2072,16 +2072,6 @@ var _tree_dynamic_nodes_module_map = {
   },
 };
 
-function words_cmp (a, b) {
-  if(a.v < b.v) {
-    return -1
-  }
-  if(a.v > b.v) {
-    return 1
-  }
-  return 0
-}
-
 function mk_words_weight_cmp (asc) {
   var mul = asc ? 1 : -1;
   return function (a, b) {
@@ -2089,27 +2079,32 @@ function mk_words_weight_cmp (asc) {
   }
 }
 
-function get_words (url) {
+/**
+ * A single word.
+ * @typedef {Object} Word
+ * @property {string} v - The word.
+ * @property {number} w - The word's weight.
+ */
+
+/**
+ * A list of words.
+ * @typedef {Object} WordList
+ * @property {Array<Word>} words - The words.
+ */
+
+/**
+ * Load the words in a file.
+ * @param {string} url - The location of the file.
+ * @returns {Promise<WordList>}
+ */
+function get_words(url) {
   if (words_cache[url]) {
     return words_cache[url];
   }
   return words_cache[url] = get_file_json(url)
-    .then(function (data) {
-      var words = data.words;
-      // verify words is sorted
-      var notsorted = false;
-      for (var i = 0; i + 1 < words.length; i++) {
-        var w0 = words[i].v, w1 = words[i+1].v;
-        if (words_cmp(w0, w1) > 0) {
-          notsorted = true;
-          break;
-        }
-      }
-      // if not, sort it
-      if (!notsorted) {
-        words.sort(words_cmp);
-      }
-      return data;
+    .then(function(data) {
+      // Make sure that the words are sorted.
+      return _.defaults({ words: _.sortBy(data.words, w => w.v) }, data);
     })
     .catch(function (err) {
       delete words_cache[url];
