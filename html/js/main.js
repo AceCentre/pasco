@@ -2083,6 +2083,7 @@ function mk_words_weight_cmp (asc) {
  * A single word.
  * @typedef {Object} Word
  * @property {string} v - The word.
+ * @property {string} lower - The lowercased word.
  * @property {number} w - The word's weight.
  */
 
@@ -2090,6 +2091,8 @@ function mk_words_weight_cmp (asc) {
  * A list of words.
  * @typedef {Object} WordList
  * @property {Array<Word>} words - The words.
+ * @property {Map<string,WordList>} [_cache] - A cache that maps
+ *   a prefix to a sequence of matching words.
  */
 
 /**
@@ -2103,8 +2106,14 @@ function get_words(url) {
   }
   return words_cache[url] = get_file_json(url)
     .then(function(data) {
-      // Make sure that the words are sorted.
-      return _.defaults({ words: _.sortBy(data.words, w => w.v) }, data);
+      const words = _.chain(data.words)
+        // Store the lowercased word.
+        .map(w => _.defaults({ lower: w.v.toLowerCase() }, w))
+        // Make sure that the words are sorted.
+        .sortBy(w => w.lower)
+        .value();
+
+      return _.defaults({ words }, data);
     })
     .catch(function (err) {
       delete words_cache[url];
@@ -2127,52 +2136,73 @@ function _get_current_spell_word () {
   var txt = _get_current_spell_txt().split(' ');
   return txt[txt.length-1];
 }
-var _prediction_spell_words_max_memory = 20;
-function _get_prediction_spell_words (words_file, txt) {
-  return get_words(words_file)
-    .then(function (wdata) {
-      wdata._cache = wdata._cache || {};
-      wdata._memory_stack = wdata._memory_stack || [];
-      if (wdata._cache[txt]) {
-        return wdata._cache[txt];
-      }
-      if (!txt) { // empty, simple solution would empty output
-        return { words: [] };
-      }
-      while (wdata._memory_stack.length >= _prediction_spell_words_max_memory) {
-        var tmp = wdata._memory_stack.shift();
-        delete wdata._cache[tmp];
-      }
-      var txtlen = txt.length;
-      function _cmp (a) {
-        var tmp = a.v.substr(0, txtlen)
-        if(tmp < txt) {
-          return -1;
-        }
-        if(tmp > txt) {
-          return 1;
-        }
-        return 0;
-      }
-      wdata._memory_stack.push(txt);
-      // for SortedArrayFuncs lt/gt target is known to _cmp, thus null given as target
-      var words = wdata.words,
-          oneidx = SortedArrayFuncs.eq(words, null, _cmp);
-      if (oneidx == -1) {
-        return wdata._cache[txt] = { words: [] }; // no result
-      }
-      var sidx = oneidx, eidx = oneidx;
-      // expand to edges
-      while (sidx > 0 && _cmp(words[sidx-1]) == 0) {
-        sidx--;
-      }
-      while (eidx > 0 && _cmp(words[eidx+1]) == 0) {
-        eidx++;
-      }
-      var subwords = words.slice(sidx, eidx + 1),
-          subwdata = { words: subwords };
-      return wdata._cache[txt] = subwdata;
-    });
+
+const _MAX_PREDICTION_CACHE_ENTRIES = 4;
+
+/**
+ * Get all the words with a given input text as a prefix. This
+ * search is case-insensitive.
+ *
+ * @param {string} wordsFile - The location of the words file.
+ * @param {string} casedPrefix - The input text.
+ *
+ * @returns {Promise<WordList>} The matching words.
+ * @private
+ */
+function _get_prediction_spell_words(wordsFile, casedPrefix) {
+  return get_words(wordsFile).then(function(wdata) {
+    wdata._cache = wdata._cache || new Map();
+
+    const prefix = casedPrefix.toLowerCase();
+
+    // No prediction if the input text is empty.
+    if (!prefix) {
+      return { words: [] };
+    }
+
+    if (wdata._cache.has(prefix)) {
+      return wdata._cache.get(prefix);
+    }
+
+    // If necessary, remove the oldest entries in the cache. Maps
+    // are ordered in JavaScript, so we can simply delete the first
+    // keys first.
+    _.take(
+      [...wdata._cache.keys()],
+      // The number of entries that exceed the limit. Technically
+      // this should always be 1 at most.
+      wdata._cache.size - _MAX_PREDICTION_CACHE_ENTRIES
+    ).forEach(k => wdata._cache.delete(k));
+
+    const words = wdata.words;
+
+    /**
+     * Truncate the word to the same length as the prefix.
+     * @param {Word} w - The word.
+     * @returns {string} - The substring.
+     */
+    const sub = w => w.lower.substr(0, prefix.length);
+
+    /**
+     * Get the position of the first match, or -1.
+     * @returns {number} The index.
+     */
+    function getStartIndex() {
+      const i = _.sortedIndex(words, { lower: prefix }, sub);
+      return sub(words[i]) === prefix ? i : -1;
+    }
+
+    const startIndex = getStartIndex();
+    // TODO: We could use _.takeWhile if we ever replace Underscore
+    //   with Lodash.
+    let stopIndex = startIndex;
+    while (words[stopIndex] && sub(words[stopIndex]) === prefix) {
+      stopIndex++;
+    }
+    const matches = { words: words.slice(startIndex, stopIndex) };
+    wdata._cache.set(prefix, matches);
+    return matches;
+  });
 }
 
 function _word_prediction_dynamic_nodes (anode) {
