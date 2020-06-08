@@ -16,14 +16,35 @@ import { initConfigureActionModal } from "./configure-action-modal";
 const MODES = ["switch", "wheel", "auto"];
 
 const initialConfig = getConfig();
-console.log(initialConfig);
 
 const configureActionModal = initConfigureActionModal("configure-action-modal");
 
-initKeySelection("tree_go_in", configureActionModal);
-initKeySelection("tree_go_out", configureActionModal);
-initKeySelection("tree_go_next", configureActionModal);
-initKeySelection("tree_go_previous", configureActionModal);
+// TODO this should probably be in a key helper
+const { keys } = initialConfig;
+const keysAsArray = Object.entries(keys).map(([key, value]) => ({
+  keyCode: key,
+  ...value,
+}));
+
+const initialGoInKeys = keysAsArray.filter((key) => key.func === "tree_go_in");
+const initialGoOutKeys = keysAsArray.filter(
+  (key) => key.func === "tree_go_out"
+);
+const initialGoNextKeys = keysAsArray.filter(
+  (key) => key.func === "tree_go_next"
+);
+const initialGoPreviousKeys = keysAsArray.filter(
+  (key) => key.func === "tree_go_previous"
+);
+
+initKeySelection("tree_go_in", configureActionModal, initialGoInKeys);
+initKeySelection("tree_go_out", configureActionModal, initialGoOutKeys);
+initKeySelection("tree_go_next", configureActionModal, initialGoNextKeys);
+initKeySelection(
+  "tree_go_previous",
+  configureActionModal,
+  initialGoPreviousKeys
+);
 
 initCheckbox(
   "helper_stay_in_branch_for_all",
