@@ -11,6 +11,7 @@ import { initCheckbox } from "./checkbox";
 import { initSlider } from "./slider";
 import initKeySelection from "./key-selection";
 import { initConfigureActionModal } from "./configure-action-modal";
+import { parseKeys } from "./parse-keys";
 
 // TODO this should be somewhere more generic
 const MODES = ["switch", "wheel", "auto"];
@@ -19,32 +20,14 @@ const initialConfig = getConfig();
 
 const configureActionModal = initConfigureActionModal("configure-action-modal");
 
-// TODO this should probably be in a key helper
-const { keys } = initialConfig;
-const keysAsArray = Object.entries(keys).map(([key, value]) => ({
-  keyCode: key,
-  ...value,
-}));
-
-const initialGoInKeys = keysAsArray.filter((key) => key.func === "tree_go_in");
-const initialGoOutKeys = keysAsArray.filter(
-  (key) => key.func === "tree_go_out"
-);
-const initialGoNextKeys = keysAsArray.filter(
-  (key) => key.func === "tree_go_next"
-);
-const initialGoPreviousKeys = keysAsArray.filter(
-  (key) => key.func === "tree_go_previous"
+const { goInKeys, goOutKeys, goNextKeys, goPreviousKeys } = parseKeys(
+  initialConfig.keys
 );
 
-initKeySelection("tree_go_in", configureActionModal, initialGoInKeys);
-initKeySelection("tree_go_out", configureActionModal, initialGoOutKeys);
-initKeySelection("tree_go_next", configureActionModal, initialGoNextKeys);
-initKeySelection(
-  "tree_go_previous",
-  configureActionModal,
-  initialGoPreviousKeys
-);
+initKeySelection("tree_go_in", configureActionModal, goInKeys);
+initKeySelection("tree_go_out", configureActionModal, goOutKeys);
+initKeySelection("tree_go_next", configureActionModal, goNextKeys);
+initKeySelection("tree_go_previous", configureActionModal, goPreviousKeys);
 
 initCheckbox(
   "helper_stay_in_branch_for_all",
