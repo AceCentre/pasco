@@ -11,6 +11,15 @@ class Modal {
     }
 
     this.modalElement = this.modal[0];
+
+    const closeButtons = this.modalElement.querySelectorAll(
+      'button[data-dismiss="modal"]'
+    );
+
+    closeButtons.forEach((closeButton) => {
+      // TODO doing a bind is pretty annoying
+      closeButton.onclick = this.close.bind(this);
+    });
   }
 
   open() {
