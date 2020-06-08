@@ -5,7 +5,7 @@ import "./index.css";
 import localize from "../../localization";
 import setupRouter from "./router";
 
-import { getConfig, setConfig } from "../../config";
+import { getConfig, setConfig, setConfigNoMerge } from "../../config";
 import { initRadioButtons } from "./radio-button";
 import { initCheckbox } from "./checkbox";
 import { initSlider } from "./slider";
@@ -26,9 +26,9 @@ const { goInKeys, goOutKeys, goNextKeys, goPreviousKeys } = parseKeys(
 
 const deleteKeyCallback = (deletedKey) => {
   const currentConfig = getConfig();
-  const newKeys = removeKey(currentConfig.keys, deletedKey);
+  currentConfig.keys = removeKey(currentConfig.keys, deletedKey);
 
-  setConfig({ keys: newKeys });
+  setConfigNoMerge(currentConfig);
 };
 
 initKeySelection(

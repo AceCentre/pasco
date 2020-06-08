@@ -22,22 +22,18 @@ export const getConfig = () => {
 };
 
 export const setConfig = (newConfig) => {
+  const existingConfig = getConfig();
+  const combinedConfig = merge({}, defaultConfig, existingConfig, newConfig);
+
+  return setConfigNoMerge(combinedConfig);
+};
+
+export const setConfigNoMerge = (config) => {
   if (!window || !window.localStorage) {
     throw new Error("setConfig: No access to local storage API");
   }
 
-  const existingConfig = getConfig();
-  const combinedConfig = merge({}, defaultConfig, existingConfig, newConfig);
+  window.localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(config));
 
-  // Dont merge the keys
-  if (newConfig.keys) {
-    combinedConfig.keys = newConfig.keys;
-  }
-
-  window.localStorage.setItem(
-    CONFIG_STORAGE_KEY,
-    JSON.stringify(combinedConfig)
-  );
-
-  return combinedConfig;
+  return config;
 };
