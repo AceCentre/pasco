@@ -1,5 +1,5 @@
 // prettier-ignore
-const KEY_TEMPLATE = ({ keyCode='', keyIndex='', keyLabel='', isWaiting = false }) => `
+const KEY_TEMPLATE = ({ keyCode = "", keyIndex = "", keyLabel = "", isWaiting = false }) => `
   <div class="key-wrp" data-key="${keyCode}" data-id="${keyIndex}">
     <div class="key-btn-wrp">
         <button type="button" class="key-btn btn btn-default ${isWaiting ? "is-waiting" : ""}" oncontextmenu="return false">
@@ -7,7 +7,7 @@ const KEY_TEMPLATE = ({ keyCode='', keyIndex='', keyLabel='', isWaiting = false 
         </button>
       </div>
     <div>
-      <button type="button" class="remove-btn btn btn-danger">
+      <button id="delete-key-button" data-key="${keyCode}" type="button" class="remove-btn btn btn-danger">
         <span class="glyphicon glyphicon-remove">
         </span>
       </button>
@@ -20,7 +20,7 @@ const stringToDomNode = (htmlString) => {
   return div.firstChild;
 };
 
-const initKeySelection = (action, modal, initialKeys = []) => {
+const initKeySelection = (action, modal, initialKeys = [], deleteCallback) => {
   const Button = document.querySelector(`button[data-action="${action}"]`);
   const KeyListContainer = document.getElementById("configure-action-key-list");
   const AddKeyButton = document.getElementById("configure-action-key-add-btn");
@@ -41,12 +41,23 @@ const initKeySelection = (action, modal, initialKeys = []) => {
     KeyListContainer.innerHTML = "";
 
     initialKeys.forEach((key, keyIndex) => {
-      const KeyItem = KEY_TEMPLATE({
-        keyCode: key.keyCode,
-        keyIndex,
-        keyLabel: key.label,
-      });
-      KeyListContainer.innerHTML += KeyItem;
+      const KeyItem = stringToDomNode(
+        KEY_TEMPLATE({
+          keyCode: key.keyCode,
+          keyIndex,
+          keyLabel: key.label,
+        })
+      );
+
+      const DeleteButton = KeyItem.querySelector("#delete-key-button");
+
+      DeleteButton.onclick = () => {
+        deleteCallback(key);
+
+        KeyItem.remove();
+      };
+
+      KeyListContainer.append(KeyItem);
     });
   };
 };

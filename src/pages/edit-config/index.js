@@ -11,7 +11,7 @@ import { initCheckbox } from "./checkbox";
 import { initSlider } from "./slider";
 import initKeySelection from "./key-selection";
 import { initConfigureActionModal } from "./configure-action-modal";
-import { parseKeys } from "./parse-keys";
+import { parseKeys, removeKey } from "./parse-keys";
 
 // TODO this should be somewhere more generic
 const MODES = ["switch", "wheel", "auto"];
@@ -24,10 +24,37 @@ const { goInKeys, goOutKeys, goNextKeys, goPreviousKeys } = parseKeys(
   initialConfig.keys
 );
 
-initKeySelection("tree_go_in", configureActionModal, goInKeys);
-initKeySelection("tree_go_out", configureActionModal, goOutKeys);
-initKeySelection("tree_go_next", configureActionModal, goNextKeys);
-initKeySelection("tree_go_previous", configureActionModal, goPreviousKeys);
+const deleteKeyCallback = (deletedKey) => {
+  const currentConfig = getConfig();
+  const newKeys = removeKey(currentConfig.keys, deletedKey);
+
+  setConfig({ keys: newKeys });
+};
+
+initKeySelection(
+  "tree_go_in",
+  configureActionModal,
+  goInKeys,
+  deleteKeyCallback
+);
+initKeySelection(
+  "tree_go_out",
+  configureActionModal,
+  goOutKeys,
+  deleteKeyCallback
+);
+initKeySelection(
+  "tree_go_next",
+  configureActionModal,
+  goNextKeys,
+  deleteKeyCallback
+);
+initKeySelection(
+  "tree_go_previous",
+  configureActionModal,
+  goPreviousKeys,
+  deleteKeyCallback
+);
 
 initCheckbox(
   "helper_stay_in_branch_for_all",

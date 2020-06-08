@@ -29,6 +29,11 @@ export const setConfig = (newConfig) => {
   const existingConfig = getConfig();
   const combinedConfig = merge({}, defaultConfig, existingConfig, newConfig);
 
+  // Dont merge the keys
+  if (newConfig.keys) {
+    combinedConfig.keys = newConfig.keys;
+  }
+
   window.localStorage.setItem(
     CONFIG_STORAGE_KEY,
     JSON.stringify(combinedConfig)
