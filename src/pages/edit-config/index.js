@@ -10,6 +10,7 @@ import { initRadioButtons } from "./radio-button";
 import { initCheckbox } from "./checkbox";
 import { initSlider } from "./slider";
 import initKeySelection from "./key-selection";
+import { initConfigureActionModal } from "./configure-action-modal";
 
 // TODO this should be somewhere more generic
 const MODES = ["switch", "wheel", "auto"];
@@ -17,10 +18,12 @@ const MODES = ["switch", "wheel", "auto"];
 const initialConfig = getConfig();
 console.log(initialConfig);
 
-initKeySelection("tree_go_in", "configure-action-modal");
-initKeySelection("tree_go_out", "configure-action-modal");
-initKeySelection("tree_go_next", "configure-action-modal");
-initKeySelection("tree_go_previous", "configure-action-modal");
+const configureActionModal = initConfigureActionModal("configure-action-modal");
+
+initKeySelection("tree_go_in", configureActionModal);
+initKeySelection("tree_go_out", configureActionModal);
+initKeySelection("tree_go_next", configureActionModal);
+initKeySelection("tree_go_previous", configureActionModal);
 
 initCheckbox(
   "helper_stay_in_branch_for_all",
