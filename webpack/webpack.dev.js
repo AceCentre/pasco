@@ -2,6 +2,7 @@ const commonConfig = require("./webpack.common");
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const isCordova = require("./is-cordova")();
+const { DefinePlugin } = require("webpack");
 
 const relativeToRoot = (pathName) => path.resolve(__dirname, "../", pathName);
 
@@ -25,6 +26,9 @@ const config = {
       templateParameters: {
         isCordova,
       },
+    }),
+    new DefinePlugin({
+      "process.env.WEBPACK_ENV": JSON.stringify("development"),
     }),
   ],
   output,

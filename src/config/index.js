@@ -1,5 +1,6 @@
 import defaultConfig from "./default.json";
 import { merge } from "lodash";
+import logger from "../logger";
 
 const CONFIG_STORAGE_KEY = "config_storage";
 
@@ -14,16 +15,29 @@ export const getConfig = () => {
       CONFIG_STORAGE_KEY,
       JSON.stringify(defaultConfig)
     );
+
+    logger.info("No existing config, default config:: ", defaultConfig);
+
     return defaultConfig;
   } else {
     const configFromStorage = JSON.parse(rawConfig);
-    return { ...defaultConfig, ...configFromStorage };
+    const mergedConfig = { ...defaultConfig, ...configFromStorage };
+
+    logger.info("getConfig:", mergedConfig);
+
+    return mergedConfig;
   }
 };
 
 export const setConfig = (newConfig) => {
   const existingConfig = getConfig();
   const combinedConfig = merge({}, defaultConfig, existingConfig, newConfig);
+
+  if (newConfig.keys) {
+    combinedConfig.keys = newConfig.keys;
+  } else {
+    combinedConfig.keys = existingConfig.keys;
+  }
 
   return setConfigNoMerge(combinedConfig);
 };
@@ -34,6 +48,8 @@ export const setConfigNoMerge = (config) => {
   }
 
   window.localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(config));
+
+  logger.info("setConfigNoMerge => config: ", config);
 
   return config;
 };

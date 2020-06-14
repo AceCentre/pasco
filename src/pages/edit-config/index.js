@@ -26,9 +26,10 @@ const { goInKeys, goOutKeys, goNextKeys, goPreviousKeys } = parseKeys(
 
 const deleteKeyCallback = (deletedKey) => {
   const currentConfig = getConfig();
+
   currentConfig.keys = removeKey(currentConfig.keys, deletedKey);
 
-  setConfigNoMerge(currentConfig);
+  setConfig(currentConfig);
 };
 
 initKeySelection(
