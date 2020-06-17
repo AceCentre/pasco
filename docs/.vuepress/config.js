@@ -47,6 +47,13 @@ module.exports = {
         ]
       },
       {
+        title: '🙋 Support ',
+        collapsable: true,
+        children: [
+          ['/support/introduction', 'How to get help and support']
+        ]
+      },
+      {
         title: '✨ Tips & Tricks ',
         collapsable: true,
         children: [
