@@ -4,7 +4,7 @@
 
 ## Email 
 
-Drop us an email at [enquiries@acecentre.org.uk] and we will try and help you!
+Drop us an email at <enquiries@acecentre.org.uk> and we will try and help you!
 
 ## Slack
 
