@@ -19,4 +19,5 @@ collections:
     fields: # The fields for each document, usually in front matter
       - {label: "Title", name: "title", widget: "string"}
       - {label: "Body", name: "body", widget: "markdown"}
+    meta: { path: { widget: string, label: 'Path', index_file: 'introduction' } }
       
