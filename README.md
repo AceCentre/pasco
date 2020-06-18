@@ -7,6 +7,9 @@
 
 pasco is a development project by the [Ace Centre](https://acecentre.org.uk) to create a AAC app to support people who require auditory scanning only. This may be with one or several Text to Speech (TTS) languages or recorded speech. The app supports auditory cues in a headphone and main speech out of the main speaker of a device. Currently only these features are supported in iOS - other platforms are due to be supported in the future. 
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/0ec6c305-cd06-4c45-9ab3-4dfdc9e0d884/deploy-status)](https://app.netlify.com/sites/pasco-app/deploys)
+
+
 ## Getting Started
 
 You can try out a limited version of pasco on the web at [app.pasco.chat](https://app.pasco.chat). Alternatively download the iOS app [here](https://itunes.apple.com/us/app/pasco/id1317265884?ls=1&mt=8).
