@@ -29,7 +29,7 @@
         "es6-promise-plugin": "4.2.2",
         "glob": "^5.0.15",
         "ios-deploy": "^1.10.0",
-        "npm": "^2.15.12",
+        "npm": "^6.14.6",
         "pasco-cordova-plugin": "git+https://github.com/hosseinamin/pasco-cordova-plugin.git",
         "plist": "^1.2.0",
         "q": "^1.5.1",
