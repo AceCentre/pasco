@@ -51,7 +51,7 @@
     "gulp-sass": "^4.0.2",
     "gulp-sourcemaps": "^2.6.0",
     "natives": "^1.1.5",
-    "node-sass": "^4.12.0",
+    "node-sass": "^4.13.1",
     "node-sass-package-importer": "^5.2.0",
     "uglifyjs-webpack-plugin": "^2.0.1",
     "vuepress": "^1.2.0",
