@@ -267,8 +267,9 @@ html {
   display: flex;
   flex-direction: row;
   .form-control {
-    width: auto;
-    flex-grow: 1;
+    flex: 0px 1 1;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
   .btn {
     margin-left: 5px;

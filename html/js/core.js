@@ -27,24 +27,13 @@ window.default_trees_info_fn = 'trees-info.json';
 window.host_tree_dir_prefix = 'trees/';
 window.default_tree = window.host_tree_dir_prefix + 'default/default.md';
 window.cordova_user_dir_prefix = 'cdvfile://localhost/persistent/';
+window.pasco_data_state = null
+
 
 function fs_friendly_name (s) {
   return s.replace(/^[a-z]{1,10}\:\/\//i,"").replace(/\?.*$/,"")
     .replace(/[ \(\)\[\]\*\#\@\!\$\%\^\&\+\=\/\\:]/g, '_')
     .replace(/[\r\n\t]/g, '');
-}
-
-function get_trees_info (trees_info_fn) {
-  return get_file_json(trees_info_fn)
-    .catch(function (error) {
-      console.warn("Could not load trees_info file, " + trees_info_fn, error);
-      return { list: [
-        {
-          name: info.dirname,
-          tree_fn: info.tree_fn,
-        }
-      ] };
-    })
 }
 
 /**
@@ -53,198 +42,312 @@ function get_trees_info (trees_info_fn) {
 function prepare_tree(tree_fn) {
   if(!tree_fn)
     throw new Error("Invalid argument");
-  if (window.cordova && tree_fn.indexOf(window.cordova_user_dir_prefix) == 0) {
-    tree_fn = tree_fn.substr(window.cordova_user_dir_prefix.length);
-  }
-  var parts = tree_fn.split('/'),
-      basename = parts[parts.length - 1],
-      dirname = parts.slice(0, parts.length - 1).join("/");
-  // remove host dir prefix
-  if(dirname.indexOf(window.host_tree_dir_prefix) == 0) {
-    dirname = dirname.substr(window.host_tree_dir_prefix.length);
-  }
-  // should have a dirname
-  if(!dirname) {
-    tree_fn = 'default/' + tree_fn;
-    dirname = 'default';
-  }
-  // make dirname fs friendly
-  var dirpath = dirname = fs_friendly_name(dirname);
-  // for cordova
-  if(window.cordova) {
-    var path = tree_fn;
-    dirpath = window.cordova_user_dir_prefix + dirname;
-    var newpath = dirpath + '/' + basename,
-        audio_dir = dirpath + '/audio';
-    return new Promise(function(resolve, reject) {
-      window.resolveLocalFileSystemURL(newpath, resolve, continue_proc);
-      function continue_proc(err) {
-        // if not found
-        cordova_mkdir(dirpath)
-          .then(function() {
-            return read_file(path)
+  if (tree_fn.indexOf('https://') != -1 ||
+      tree_fn.indexOf('http://') != -1 ||
+      tree_fn.indexOf('://') == -1) {
+    let promise = Promise.resolve(tree_fn)
+    if ((tree_fn.indexOf('://') == -1)) {
+      if (!window.pasco_data_state) {
+        promise = file_exists('file:///' + tree_fn)
+          .then(function (exists) {
+            return exists ? 'file:///' + tree_fn : tree_fn;
           })
-          .catch(function(err) {
-            if (err.caused_by && err.caused_by.code == 1) { // not found
-              return ""; // write empty file
-            } else {
-              throw err;
-            }
-          })
-          .then(function(data) {
-            return write_file(newpath, data)
-          })
-          .then(resolve, reject);
+      } else {
+        promise = Promise.resolve(new URL(tree_fn, location+'').href)
       }
-    })
-      .then(function() {
-        return cordova_mkdir(audio_dir);
-      })
-      .then(function() {
-        return {
-          tree_fn: newpath,
-          dirpath: dirpath,
-          audio_dir: audio_dir
-        };
-      });
-  } else {
-    return Promise.resolve({
-      tree_fn: tree_fn,
-      dirpath: dirpath,
-      audio_dir: null // Not implemented
+    }
+    return promise.then(function (tree_url) {
+      return {
+        tree_fn: tree_url,
+        dirpath: new URL('.', tree_url).href,
+        audio_dirname: null,
+      }
     });
   }
+  let audio_dirname = window.cordova ? 'audio' : null
+  let promise = Promise.resolve()
+  let tree_dir = new URL('.', tree_fn).href
+  if (audio_dirname) {
+    promise = promise
+      .then(function () {
+        return mkdir_rec(new URL(audio_dirname, tree_dir).href);
+      })
+  }
+  return promise.then(function () {
+    return {
+      tree_fn: tree_fn,
+      dirpath: tree_dir,
+      audio_dirname: audio_dirname,
+    }
+  })
+}
+
+function overwrite_file_funcs_with_local_storage () {
+  function new_read(url, options) {
+    let key = url
+    let withfileproto = key.startsWith('file:///')
+    if (withfileproto) {
+      key = key.substring('file:///'.length).replace(/^\/+/, '')
+    }
+    options = options || {};
+    var result = localStorage.getItem('file_'+key);
+    if(result == null) {
+      if (withfileproto) {
+        return Promise.reject(new NodeLib.common.NotFoundError('File not found: ' + url))
+      } else {
+        return read_file(key, options);
+      }
+    } else {
+      var type = localStorage.getItem('filetype_'+key);
+      if (type == "blob") {
+        var contenttype = localStorage.getItem("filecontenttype_"+key);
+        result = blobFromBase64(result, { type: contenttype || 'application/octet-stream' })
+      }
+      if (options.responseType == "blob") {
+        if (!(result instanceof Blob || result instanceof File)) {
+          result = new Blob([result], { type: 'text/plain;charset=UTF-8' })
+        }
+        return Promise.resolve(result)
+      } else {
+        if (result instanceof Blob || result instanceof File) {
+          return new Promise(function (resolve) {
+            var reader = new FileReader();
+            reader.onloadend = function(e) {
+              resolve(this.result)
+            }
+            reader.readAsText(result);
+          })
+        } else {
+          return Promise.resolve(result)
+        }
+      }
+    }
+  }
+  function new_write(key, data, options) {
+    if (key.startsWith('file:///')) {
+      key = key.substring('file:///'.length).replace(/^\/+/, '')
+    }
+    options = options || {};
+    let internal_type = null
+    return new Promise(function (resolve, reject) {
+      if (data instanceof Blob || data instanceof File) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          internal_type = 'blob'
+          let match = reader.result.match(/^data:[^\/]+\/[^;]+;base64,/)
+          if (!match) {
+            reject(new Error('Could not convert blob to base64'))
+          } else {
+            data = reader.result.substring(match[0].length)
+            resolve()
+          }
+        }
+        reader.readAsDataURL(data)
+      } else {
+        resolve();
+      }
+    })
+      .then(function () {
+        localStorage.setItem('file_'+key, data);
+        if (internal_type) {
+          localStorage.setItem('filetype_'+key, internal_type);
+          localStorage.setItem('filecontenttype_'+key, options.contentType || 'application/octet-stream');
+        } else {
+          localStorage.removeItem('filetype_'+key);
+          localStorage.removeItem('filecontenttype_'+key);
+        }
+        return Promise.resolve();
+      });
+  }
+  function delete_entry(key) {
+    if (key.startsWith('file:///')) {
+      key = key.substring('file:///'.length).replace(/^\/+/, '')
+    }
+    localStorage.removeItem('file_'+key);
+    return Promise.resolve();
+  }
+  window.get_file_json = function(key) {
+    return new_read(key) 
+      .then(function(json) {
+        var data = JSON.parse(json);
+        if(!data)
+          throw new Error("No input json!, " + key);
+        return data;
+      });
+  }
+  function blobFromBase64 (base64, options) {
+    var binary_string = window.atob(base64);
+    var len = binary_string.length;
+    var bytes = new Uint8Array( len );
+    for (var i = 0; i < len; i++)        {
+      bytes[i] = binary_string.charCodeAt(i);
+    }
+    return new Blob([bytes], options);
+  }
+  window.release_file_url = function (url) {
+    if (url.indexOf("blob:") == 0) {
+      URL.revokeObjectURL(url);
+    }
+  }
+  window.acquire_file_url = function (key) {
+    if (key.startsWith('file:///')) {
+      key = key.substring('file:///'.length).replace(/^\/+/, '')
+    }
+    var result = localStorage.getItem('file_'+key);
+    if(result != null) {
+      var type = localStorage.getItem('filetype_'+key);
+      let blob
+      if (type == "blob") {
+        var contenttype = localStorage.getItem("filecontenttype_"+key);
+        blob = blobFromBase64(result, { type: contenttype || 'application/octet-stream' })
+      } else {
+        blob = new Blob([result], { type: 'text/plain;charset=UTF-8' })
+      }
+		  return Promise.resolve(URL.createObjectURL(blob));
+    } else {
+      return Promise.resolve(key);
+    }
+  }
+  window.get_file_data = new_read
+  window.set_file_data = new_write
+  window.unset_file = delete_entry
+  window.file_exists = function (key) {
+    let withfileproto = key.startsWith('file:///')
+    if (withfileproto) {
+      key = key.substring('file:///'.length).replace(/^\/+/, '')
+    }
+    var result = localStorage.getItem('file_'+key);
+    if(result == null) {
+      if (withfileproto) {
+        return Promise.resolve(false)
+      } else {
+        return read_file(key)
+          .then(function () {
+            return true
+          })
+          .catch(function (err) {
+            if (err.xhr && err.xhr.status == 404) {
+              return false
+            } else {
+              throw err
+            }
+          })
+      }
+    } else {
+      return Promise.resolve(true)
+    }
+  }
+  window.mkdir = function () { return Promise.resolve() }
+  window.mkdir_rec = function () { return Promise.resolve() }
 }
 
 function initialize_app() {
-  var replaceFileKeys = ['default_config','default_trees_info_fn'];
-  // for cordova
-  if(window.cordova) {
-    var promises = [];
-    _.each(replaceFileKeys, function(key) {
-      var path = window[key],
-          newpath = window.cordova_user_dir_prefix + window[key];
-      promises.push(
-        new Promise(function(resolve, reject) {
-          window.resolveLocalFileSystemURL(newpath, resolve, continue_proc);
-          function continue_proc(err) {
-            // if not found, write it, if it exists
-            read_file(path)
-              .catch(function (err) {
-                if (err.caused_by && err.caused_by.code == 1) { // not found
-                  return {__notfound:true};
-                } else {
-                  throw err;
-                }
+  // open url handler, pasco://
+  NativeAccessApi.addOpenURLHandler(function (url) {
+    var files = ['index.html','edit-config.html']
+    for (var i = 0; i < files.length; i++) {
+      let file = files[i]
+      let prefix = 'pasco:///' + file
+      if (url.indexOf(prefix) == 0 && (url.length == prefix.length || url[prefix.length] == '?')) {
+        let newloc = file + url.substring(prefix.length)
+        if (window.location+'' != newloc) {
+          window.location = newloc
+        }
+      }
+    }
+  })
+  // overwrite file functions
+  if (!window.cordova) {
+    overwrite_file_funcs_with_local_storage()
+  }
+  // load pasco-state.json, v1
+  let state_dir_url = (window.cordova ? window.cordova_user_dir_prefix : 'file:///') + 'v1/'
+  var state_url = state_dir_url + 'pasco-state.json'
+  return NodeLib.PascoDataState.loadFromFile(state_url)
+    .then(function (datastate) {
+      window.pasco_data_state = datastate
+    })
+    .catch(function (err) {
+      if (!is_not_found_error(err)) {
+        throw err
+      }
+    })
+    .then(function () {
+      // modify config and trees_info if needed
+      if (pasco_data_state) {
+        var data = pasco_data_state.getData()
+        default_config = pasco_data_state.get_file_url(data.config)
+        default_trees_info_fn = pasco_data_state.get_file_url(data.trees_info)
+        return // Already integrated to v1
+      }
+      let legacy_dir_url = (window.cordova ? window.cordova_user_dir_prefix : 'file:///')
+      var config_url = legacy_dir_url + default_config
+      return file_exists(config_url)
+        .then(function (config_exists) {
+          if (!config_exists) {
+            // It is the first run, setup pasco-state.json
+            var datastate = new NodeLib.PascoDataState(state_url)
+            window.pasco_data_state = datastate
+            let trees_info = { list: [ ] }
+            let config_src = 'config.json'
+            let trees_info_src = 'trees-info.json'
+            return mkdir_rec(datastate.getStateDirUrl())
+              .then(function () {
+                return read_file(default_config)
               })
-              .then(function (data) {
-                if (!data.__notfound) {
-                  return write_file(newpath, data)
-                }
+              .then(function (config_data) {
+                let config = JSON.parse(config_data)
+                return Promise.all([
+                  set_file_data(datastate.get_file_url(config_src), config_data),
+                  set_file_data(datastate.get_file_url(trees_info_src), JSON.stringify(trees_info, null, '  ')),
+                ])
               })
-              .then(resolve, reject);
+              .then(function () {
+                return datastate.init(config_src, trees_info_src)
+              })
+              .then(function () {
+                window.default_config = datastate.get_file_url(config_src)
+                window.default_trees_info_fn = datastate.get_file_url(trees_info_src)
+                return datastate.save()
+              })
+            /*
+            var datastate = new NodeLib.PascoDataState(state_url)
+            window.pasco_data_state = datastate
+            let trees_info = { list: [
+              {
+                name: 'default',
+                tree_fn: 'default/default.md',
+              }
+            ] }
+            let config_src = 'config.json'
+            let trees_info_src = 'trees-info.json'
+            return datastate.storeTree(trees_info.list[0].tree_fn, new URL(window.default_tree, location+'').href, new URL(window.host_tree_dir_prefix, location+'').href)
+              .then(function () {
+                return read_file(default_config)
+              })
+              .then(function (config_data) {
+                let config = JSON.parse(config_data)
+                config.tree = trees_info.list[0].tree_fn
+                return Promise.all([
+                  set_file_data(datastate.get_file_url(config_src), config_data),
+                  set_file_data(datastate.get_file_url(trees_info_src), JSON.stringify(trees_info, null, '  ')),
+                ])
+              })
+              .then(function () {
+                return datastate.init(config_src, trees_info_src)
+              })
+              .then(function () {
+                window.default_config = datastate.get_file_url(config_src)
+                window.default_trees_info_fn = datastate.get_file_url(trees_info_src)
+                return datastate.save()
+              })
+            */
+          } else {
+            window.default_config = config_url
+            window.default_trees_info_fn = legacy_dir_url + default_trees_info_fn
           }
         })
-          .then(function() {
-            window[key] = newpath;
-          })
-      );
-    });
-    return Promise.all(promises);
-  } else {
-    function new_read(key, options) {
-      options = options || {};
-      var result = localStorage.getItem('file_'+key);
-      if(result == null) {
-        return read_file(key, options);
-      } else {
-        var type = localStorage.getItem('filetype_'+key);
-        if (type == "blob") {
-          result = atob(result);
-        }
-        if (options.responseType == "blob") {
-          var contenttype = localStorage.getItem("filecontenttype_"+key);
-          result = new Blob([result], { type: contenttype || 'application/octet-stream' });
-        }
-        return Promise.resolve(result);
-      }
-    }
-    function new_write(key, data, options) {
-      options = options || {};
-      return new Promise(function (resolve, reject) {
-        if (data instanceof Blob) {
-          var reader = new FileReader();
-          reader.onload = function(e) {
-            if (options._datatype == 'blob') {
-              data = btoa(reader.result);
-            } else {
-              data = reader.result;
-            }
-            resolve();
-          }
-          reader.readAsBinaryString(data)
-        } else {
-          resolve();
-        }
-      })
-        .then(function () {
-          localStorage.setItem('file_'+key, data);
-          if (options._datatype) {
-            localStorage.setItem('filetype_'+key, options._datatype);
-            localStorage.setItem('filecontenttype_'+key, options.contentType || 'application/octet-stream');
-          } else {
-            localStorage.removeItem('filetype_'+key);
-            localStorage.removeItem('filecontenttype_'+key);
-          }
-          return Promise.resolve();
-        });
-    }
-    function delete_entry(key) {
-      localStorage.removeItem('file_'+key);
-      return Promise.resolve();
-    }
-    window.get_file_json = function(key) {
-      return new_read(key) 
-        .then(function(json) {
-          var data = JSON.parse(json);
-          if(!data)
-            throw new Error("No input json!, " + key);
-          return data;
-        });
-    }
-    function _base64ToByteArray(base64) {
-      var binary_string =  window.atob(base64);
-      var len = binary_string.length;
-      var bytes = new Uint8Array( len );
-      for (var i = 0; i < len; i++)        {
-        bytes[i] = binary_string.charCodeAt(i);
-      }
-      return bytes;
-    }
-    window.release_file_url = function (url) {
-      if (url.indexOf("blob:") == 0) {
-        URL.revokeObjectURL(url);
-      }
-    }
-    window.acquire_file_url = function (key) {
-      var result = localStorage.getItem('file_'+key);
-      if(result != null) {
-        var type = localStorage.getItem('filetype_'+key);
-        if (type == "blob") {
-          result = _base64ToByteArray(result).buffer;
-        }
-        var contenttype = localStorage.getItem("filecontenttype_"+key);
-        var blob = new Blob([result], { type: contenttype || 'application/octet-stream' });
-		    return Promise.resolve(URL.createObjectURL(blob));
-      } else {
-        return Promise.resolve(key);
-      }
-    }
-    window.get_file_data = new_read
-    window.set_file_data = new_write
-    window.unset_file = delete_entry
-    return Promise.resolve();
-  }
+    })
 }
 function tree_mk_list_base(tree, el, content_template) {
   el.target_node = tree
@@ -726,8 +829,46 @@ function handle_error_data (err) {
   }
 }
 
+function show_message (data) {
+  return show_error({ title: data.title, message: data.message })
+}
+
+function show_error (data) {
+  var $modal = $('#error-modal');
+  if (data.console_error) {
+    console.error.apply(console, data.console_error);
+  }
+  if ($modal.length > 0) {
+    $modal.find('.modal-title').text(data.title);
+    $modal.find('.error-details-wrp').toggleClass('hidden', !data.details)
+    if (data.details) {
+      var details_btn = $modal.find('.copy-details-btn')[0];
+      if (details_btn) {
+        if (details_btn._onclick_handler) {
+          details_btn.removeEventListener('click', details_btn._onclick_handler, false);
+        }
+        details_btn.addEventListener('click', details_btn._onclick_handler = function () {
+          window.copy($modal.find('.error-details').text());
+        }, false);
+      }
+      $modal.find('.error-details').text(data.details);
+    }
+    $modal.find('.error-message').toggleClass('hidden', !data.message)
+    if (data.message) {
+      $modal.find('.error-message').text(data.message);
+    }
+    $modal.modal('show');
+    // make sure it is visible despite view is not ready
+    $('body').removeClass('notready');
+    return $modal
+  } else {
+    alert(data.message || data.title);
+  }
+}
+
 function handle_error (err) {
   var data = handle_error_data(err);
+  show_error(data)
   var $modal = $('#error-modal');
   console.error.apply(console, data.console_error);
   if ($modal.length > 0) {
@@ -753,8 +894,10 @@ function handle_error (err) {
 function delete_file(url, options) {
   options = options || { method: 'DELETE' }
   // cordova specific
-  if(!/^(https?):\/\//.test(url) && window.cordova &&
-     window.resolveLocalFileSystemURL) {
+  if (is_local_cordova_file(url)) {
+    if (!window.cordova || !window.resolveLocalFileSystemURL){
+      return Promise.reject(new Error('Cordova is not defined!'))
+    }
     url = _cordova_fix_url(url)
     return new Promise(function(resolve, reject) {
       function onEntry(entry) {
@@ -774,6 +917,19 @@ function delete_file(url, options) {
   }  
 }
 
+function is_not_found_error (err) {
+  if (err instanceof NodeLib.common.NotFoundError) {
+    return true
+  }
+  if (typeof FileError != 'undefined') {
+    let ferr = err.caused_by instanceof FileError ? err.caused_by : err
+    if (ferr instanceof FileError && ferr.code == 1) {
+      return true
+    }
+  }
+  return false
+}
+
 function cordova_rmdir_rec(path) {
   return new Promise(function (resolve, reject) {
     function onEntry(entry) {
@@ -788,9 +944,55 @@ function cordova_rmdir_rec(path) {
   });
 }
 
-function cordova_mkdir(path) {
+function cordova_mkdir_rec (dir_url) {
+  let protocol_idx = dir_url.indexOf('://')
+  if (protocol_idx == -1) {
+    return cordova_mkdir(dir_url)
+  }
+  let first_slash_idx = dir_url.indexOf('/', protocol_idx + 3)
+  if (first_slash_idx == -1 || first_slash_idx >= dir_url.length) {
+    return cordova_mkdir(dir_url)
+  }
+  let prefix = dir_url.substring(0, first_slash_idx)
+  let dirpath = dir_url.substring(first_slash_idx)
+  let mkdir_queue = []
+  return step0(dirpath)
+    .then(function () {
+      return step1()
+    })
+  function step0 (dirpath) {
+    if (dirpath == '/') {
+      return Promise.resolve()
+    }
+    return cordova_mkdir(prefix + dirpath)
+      .catch(function (err) {
+        if (is_not_found_error(err)) {
+          mkdir_queue.unshift(dirpath)
+          return step0(path.dirname(dirpath)) // loop
+        } else {
+          throw err
+        }
+      })
+  }
+  function step1 () {
+    let dirpath = mkdir_queue.shift()
+    if (dirpath == null) {
+      return Promise.resolve()
+    } else {
+      return cordova_mkdir(prefix + dirpath)
+        .then(function () {
+          return step1() // loop
+        })
+    }
+  }
+}
+
+function cordova_mkdir(url) {
   return new Promise(function(resolve, reject) {
-    var parts = path.split('/'),
+    while (url.length > 0 && url[url.length - 1] == '/') {
+      url = url.substring(0, url.length - 1)
+    }
+    var parts = url.split('/'),
         basename = parts[parts.length - 1],
         dirname = parts.slice(0, parts.length - 1).join("/");
     function onEntry(dirEntry) {
@@ -799,8 +1001,9 @@ function cordova_mkdir(path) {
       }, onFail);
     }
     function onFail(err) {
-      console.error(err);
-      reject("Fail to mkdir `" + url + "` -- " + err.code + ", " + err.message)
+      let err2 = new Error("Failed to mkdir `" + url + "` -- " + err.code + ", " + err.message)
+      err2.caused_by = err
+      reject(err2)
     }
     window.resolveLocalFileSystemURL(dirname, onEntry, onFail);
   });
@@ -809,8 +1012,10 @@ function cordova_mkdir(path) {
 function write_file(url, data, options) {
   options = options || { method: 'POST' }
   // cordova specific
-  if(!/^(https?):\/\//.test(url) && window.cordova &&
-     window.resolveLocalFileSystemURL) {
+  if (is_local_cordova_file(url)) {
+    if (!window.cordova || !window.resolveLocalFileSystemURL){
+      return Promise.reject(new Error('Cordova is not defined!'))
+    }
     return new Promise(function(resolve, reject) {
       url = _cordova_fix_url(url);
       var parts = url.split('/'),
@@ -831,9 +1036,11 @@ function write_file(url, data, options) {
               reject(newerr)
             };
 
-            if(!(data instanceof Blob)) {
-              if(typeof data != 'string')
-                throw new Error("Unexpected input data, string or Blob accepted");
+            if(!(data instanceof Blob || data instanceof File)) {
+              if(typeof data != 'string') {
+                reject(new Error("Unexpected input data, string or Blob/File accepted, type: " + typeof(data)));
+                return
+              }
               data = new Blob([data], { type: options.contentType || 'application/octet-stream' });
             }
 
@@ -851,14 +1058,19 @@ function write_file(url, data, options) {
     // post otherwise
     if(!options.method)
       options.method = 'POST'
-    if (data instanceof Blob) {
+    if (data instanceof Blob || data instanceof File) {
       return new Promise(function (resolve, reject) {
         var reader = new FileReader();
         reader.onload = function(e) {
-          options.data = btoa(reader.result);
-          resolve();
+          let match = reader.result.match(/^data:[^\/]+\/[^;]+;base64,/)
+          if (!match) {
+            reject(new Error('Could not convert blob to base64'))
+          } else {
+            options.data = reader.result.substring(match[0].length)
+            resolve()
+          }
         }
-        reader.readAsBinaryString(data)
+        reader.readAsDataURL(data)
       })
         .then(function () {
           return read_file(url, options);
@@ -876,28 +1088,35 @@ function _cordova_fix_url(url) {
 }
 
 function file_exists(url, options) {
-  if(!/^(https?):\/\//.test(url) && window.cordova &&
-     window.resolveLocalFileSystemURL) {
-    return new Promise(function(resolve, reject) {
-      url = _cordova_fix_url(url)
-      function onSuccess(fileEntry) {
-        resolve(true);
-      }
-      function onFail(err) {
-        if(err.code == 1) { // not found
-          resolve(false);
-        } else {
-          console.error(err);
-          reject("Fail to access `" + url + "` -- " + err.code)
-        }
-      }
-      window.resolveLocalFileSystemURL(url, onSuccess, onFail);
-    });
+  if (is_local_cordova_file(url)) {
+    return cordova_file_exists(url)
   } else {
     return read_file(url, options)
-      .then(function() { return true; });
+      .then(function() { return true; })
+      .catch(function(err) {
+        if (err instanceof NodeLib.common.NotFoundError) {
+          return false
+        } else {
+          throw err
+        }
+      })
   }
 }
+
+function cordova_file_exists (url) {
+  return new Promise(function (resolve, reject) {
+    window.resolveLocalFileSystemURL(url, function () { resolve(true) }, continue_proc)
+    function continue_proc(err) {
+      if (is_not_found_error(err)) {
+        resolve(false)
+      } else {
+        err.message = 'Could not resolve file: ' + url
+        reject(err)
+      }
+    }
+  })
+}
+
 /**
  * options
  *   - responseType [blob]
@@ -905,8 +1124,10 @@ function file_exists(url, options) {
 function read_file(url, options) {
   return new Promise(function(resolve, reject) {
     options = options || {};
-    if(!/^(https?):\/\//.test(url) && window.cordova &&
-       window.resolveLocalFileSystemURL) {
+    if (is_local_cordova_file(url)) {
+      if (!window.cordova || !window.resolveLocalFileSystemURL){
+        return Promise.reject(new Error('Cordova is not defined!'))
+      }
       url = _cordova_fix_url(url)
       function onSuccess(fileEntry) {
         fileEntry.file(function(file) {
@@ -938,7 +1159,7 @@ function read_file(url, options) {
       }
       xhr.open(options.method || 'GET', url);
       xhr.onreadystatechange = function() {
-        if(xhr.readyState === XMLHttpRequest.DONE) {
+        if(xhr.readyState === 4) {
           if(xhr.status >= 200 && xhr.status < 300) {
             if(!!options.responseType) {
               if (options.responseType == 'blob' && typeof xhr.response == 'string') {
@@ -949,6 +1170,12 @@ function read_file(url, options) {
             } else {
               resolve(xhr.responseText)
             }
+          } else if (xhr.status == 404) {
+            let err = new NodeLib.common.NotFoundError('File not found: ' + url)
+            err.options = options;
+            err.url = url;
+            err.xhr = xhr;
+            reject(err)
           } else {
             var err = new Error(xhr.statusText || 'unknown status ' + xhr.status + ' for `' + url + '`');
             err.options = options;
@@ -960,7 +1187,17 @@ function read_file(url, options) {
       }
       xhr.send(options.data || null);
     }
-  });
+  })
+    .catch(function (err) {
+      if (is_not_found_error(err) &&
+          !(err instanceof NodeLib.common.NotFoundError)) {
+        let err2 = new NodeLib.common.NotFoundError('File not found: ' + url)
+        err2.originalError = err
+        throw err2
+      } else {
+        throw err
+      }
+    })
 }
 
 function _theinput_refocus() {
@@ -1311,14 +1548,36 @@ function read_json(url, options) {
     });
 }
 
+function is_local_cordova_file (url) {
+  return url.indexOf('cdvfile://') == 0 || url.indexOf('file:///') == 0 
+}
+
+// global functions for file manipulation 
 window.acquire_file_url = function (a) { return Promise.resolve(a); }
 window.release_file_url = function () { };
 window.get_file_json = read_json
 window.get_file_data = read_file
 window.set_file_data = write_file
 window.unset_file = delete_file
+window.file_exists = cordova_file_exists
+window.mkdir_rec = cordova_mkdir_rec
+window.mkdir = cordova_mkdir
 
+window.get_file_url = function (link, base) {
+  if (window.pasco_data_state) {
+    return window.pasco_data_state.get_file_url(link, base)
+  } else {
+    return link // legacy relative links are determined by browser
+  }
+}
 
+window.update_pasco_data_state = function () {
+  if (!pasco_data_state) {
+    return Promise.resolve() // skip
+  }
+  return pasco_data_state.reinit()
+    .then(function () { return pasco_data_state.save() })
+}
 
 document.addEventListener('click', function(evt) {
   var elm = evt.target;

@@ -65,7 +65,7 @@ Promise.all([
       });
   })
   .then(function() {
-    return prepare_tree(config.tree || window.default_tree)
+    return prepare_tree(config.tree ? get_file_url(config.tree, config_fn) : window.default_tree)
         .catch(handle_error_checkpoint())
         .then(function(info) {
           ptree_info = info;
@@ -75,10 +75,13 @@ Promise.all([
               console.warn("Could not load trees_info file, " + trees_info_fn, error);
               trees_info = { list: [
                 {
-                  name: info.dirname,
+                  name: 'default',
                   tree_fn: info.tree_fn,
                 }
               ] };
+              // save it 
+              return _save_trees_info(trees_info)
+                .then(function () { return update_pasco_data_state() })
             });
         });
   })
@@ -92,9 +95,15 @@ Promise.all([
         .catch(function(err) {
           console.warn(err);
         }),
-      get_file_data(ptree_info.tree_fn)
-        .catch(handle_error_checkpoint())
+      get_file_data(get_file_url(ptree_info.tree_fn, trees_info_fn))
         .then(function(_data) { tree_data = _data; })
+        .catch(function(err) {          
+          if (!(err.caused_by && err.caused_by.code == 1 ||
+                err instanceof NodeLib.common.NotFoundError)) { // is not (not found)
+            throw err;
+          }
+          tree_data = '';
+        })
     ]);
   })
   .then(function() {
@@ -429,8 +438,30 @@ function start() {
         console.warn(err);
       });
   });
-  
+
+  let dpsync_wrp = document.querySelector('#dropbox-sync-wrp')
+  if (dpsync_wrp) { // init DropboxSyncConfigUI
+    let tokenstorage = new NodeLib.common.LocalStorageTokens()
+    let tokenhandler = new NodeLib.common.TokenHandler(tokenstorage, 'dropbox')
+    let dpsync = new NodeLib.DropboxSync(tokenhandler)
+    let dpsync_ui = new NodeLib.DropboxSyncConfigUI(dpsync, dpsync_wrp)
+    dpsync_ui.setState({ 
+      pasco_data_state: window.pasco_data_state,
+      config_fn: config_fn,
+      trees_info_fn: trees_info_fn,
+    })
+    dpsync_ui.init()
+  }
+
   insert_config()
+
+  $('input[type="range"]').each(function () {
+    NodeLib.uicommon.init_range_slider(this);
+  });
+
+  update_tree_default_select();
+  $('#tree-default-select').on('change', update_tree_default_select);
+
   if(!is_quick_setup) {
     set_tree_data(tree_data);
 
@@ -444,9 +475,6 @@ function start() {
   } else {
     $form.on('submit', save_quick_setup)
   }
-  
-  update_tree_default_select();
-  $('#tree-default-select').on('change', update_tree_default_select);
 
   $('#tree-export-btn').on('click', function($evt) {
     $evt.preventDefault();
@@ -467,7 +495,7 @@ function start() {
           tree_export_prepare(ptree_info, tree, export_list)
           _.each(export_list, function(item) {
             actions.push(function() {
-              return get_file_data(item.val, { responseType: 'blob' })
+              return get_file_data(get_file_url(item.val, ptree_info.tree_fn), { responseType: 'blob' })
                 .then(function(blob) {
                   return new Promise(function(resolve, reject) {
                     zipWriter.add(item.newval, new zip.BlobReader(blob), resolve);
@@ -607,7 +635,8 @@ function start() {
                                 if (idx != -1) {
                                   onrootreject.splice(idx, 1);
                                 }
-                                set_file_data(item.newval, blob, { _datatype: item.datatype })
+                                // options = { _datatype: item.datatype } # Obsolete
+                                set_file_data(get_file_url(item.newval, ptree_info.tree_fn), blob)
                                   .catch(handle_error_checkpoint())
                                   .then(resolve, reject);
 			                        });
@@ -685,17 +714,50 @@ function start() {
   }
   $('#tree-default-select-load-btn').on('click', function() {
     var locale = config.locale || default_locale;
-    var name = $('#tree-default-select').val();
-    if(!name) {
-      alert("Nothing selected!");
+    var default_name = $('#tree-default-select').val();
+    if (window.pasco_data_state) {
+      bootbox.prompt(_t("Please write a name for the new tree"), function (name) {
+        if (!name) {
+          update_alert(false, _t("Empty name is not allowed"));
+        } else {
+          let tree_info
+          get_default_tree_url(default_name, locale)
+            .then(function (file_url) {
+              var tmp = fs_friendly_name(name);
+              var tree_fn = tmp + '/' + tmp + '.md'
+              let name2 = name
+              let tree_fn2 = name + '/' + name + '.md'
+              let exists = !!trees_info.list.find((a) => a.name == name2 || a.tree_fn == tree_fn2)
+              for (let i = 0; i < 1000; i++) {
+                if (!exists) {
+                  break
+                }
+                name2 = name + '_' + (i + 1)
+                tree_fn2 = name + '_' + (i + 1) + '/' + name + '.md'
+                exists = !!trees_info.list.find((a) => a.name == name2 || a.tree_fn == tree_fn2)
+              }
+              tree_info = { name: name2, tree_fn: tree_fn2 }
+              return window.pasco_data_state.storeTree(tree_info.tree_fn, file_url, new URL(window.host_tree_dir_prefix, location+'').href)
+            })
+            .then(function () {
+              trees_info.list.push(tree_info)
+              return set_file_data(pasco_data_state.get_file_url(trees_info_fn), JSON.stringify(trees_info, null, '  '))
+            })
+            .then(function () { return update_pasco_data_state() })
+            .then(function () {
+              return change_tree(get_file_url(tree_info.tree_fn, trees_info_fn))
+            })
+            .then(function () {
+              update_tree_name_selection_update();
+              update_alert(true);
+            })
+            .catch(handle_error);
+        }
+      });
     } else {
-      get_default_tree(name, locale)
-        .then(change_tree)
+      get_default_tree(default_name, locale)
+        .then(set_tree_data)
         .catch(handle_error);
-    }
-    function change_tree(data) {
-      tree_data = data
-      $('form[name=edit-tree] [name=tree-input]').val(tree_data)
     }
   });
 }
@@ -705,6 +767,7 @@ function showsavemodal(name, blob) {
   if($modal.length == 0)
     return; // should never happen
   if(window.cordova) {
+    // There might be a better place to store the file for sharing, TODO:: fix it
     var filepath = window.cordova_user_dir_prefix + name;
     write_file(filepath, blob)
       .then(function() {
@@ -747,10 +810,11 @@ function _start_subrout_tree_selection () {
         $form = $('form[name=edit-tree]').first(),
         $tree_input = $form.find('[name=tree-input]');
     $tree_input.prop('disabled', true);
-    prepare_tree(new_tree_fn)
+    prepare_tree(get_file_url(new_tree_fn, trees_info_fn))
       .catch(handle_error_checkpoint())
       .then(function(info) {
         ptree_info = info;
+        update_tree_name_selection_update();
         return get_file_data(info.tree_fn)
           .catch(handle_error_checkpoint())
       })
@@ -768,14 +832,16 @@ function _start_subrout_tree_selection () {
         $('#tree-delete-btn').prop('disabled', true);
         $('#tree-name-input').prop('disabled', true);
         var tmp = fs_friendly_name(name);
-        prepare_tree(tmp + '/' + tmp + '.md')
+        var tree_fn = tmp + '/' + tmp + '.md'
+        prepare_tree(get_file_url(tree_fn, trees_info_fn))
           .catch(handle_error_checkpoint())
           .then(function (info) {
             var trees_info_orig = JSON.stringify(trees_info);
-            trees_info.list.push({ name: name, tree_fn: info.tree_fn });
+            trees_info.list.push({ name: name, tree_fn });
             return set_file_data(info.tree_fn, "")
               .then(function () {
                 return _save_trees_info(trees_info)
+                  .then(function () { return update_pasco_data_state() })
                   .catch(function (err) {
                     trees_info = JSON.parse(trees_info_orig);
                     throw err;
@@ -804,20 +870,18 @@ function _start_subrout_tree_selection () {
     } else {
       bootbox.confirm(_t("Are you sure you want to delete this item?"), function(confirmed) {
         if (confirmed) {
-          var ptree_info_idx = _.findIndex(trees_info.list, function(a) { return a.tree_fn == ptree_info.tree_fn; });
+          let tree_fn = $('#tree-name-input').val()
+          var ptree_info_idx = _.findIndex(trees_info.list, function(a) { return a.tree_fn == tree_fn; });
           if (ptree_info_idx == -1) {
             update_alert(false, _t("Could not delete, tree info not found!"))
           } else {
             $('#tree-delete-btn').prop('disabled', true);
             $('#tree-name-input').prop('disabled', true);
             var tinfo = trees_info.list[ptree_info_idx];
-            var promise;
-            if (window.cordova) {
-              promise = cordova_rmdir_rec(ptree_info.dirpath);
-            } else {
-              promise = unset_file(tinfo.tree_fn);
-            }
-            promise
+            // TODO:: also remove local dependencies of the tree
+            (window.pasco_data_state ? 
+             pasco_data_state.deleteTree(get_file_url(tinfo.tree_fn, trees_info_fn)) :
+             unset_file(tinfo.tree_fn))
               .then(function () {
                 var trees_info_orig = JSON.stringify(trees_info);
                 trees_info.list.splice(ptree_info_idx, 1);
@@ -825,24 +889,25 @@ function _start_subrout_tree_selection () {
                     trees_info.list[ptree_info_idx] :
                     trees_info.list[trees_info.list.length - 1];
                 return _save_trees_info(trees_info)
+                  .then(function () {
+                    if (config.tree == tree_fn) {
+                      var _config = JSON.parse(config_data);
+                      _config.tree = '';
+                      var $form = $('form[name=edit-config]').first();
+                      return do_save_config($form, _config, false);
+                    }
+                  })
+                  .then(function () { return update_pasco_data_state() })
                   .catch(function (err) {
                     trees_info = JSON.parse(trees_info_orig);
                     throw err;
                   })
                   .then(function () {
-                    return change_tree(nexttinfo.tree_fn)
+                    return change_tree(get_file_url(nexttinfo.tree_fn, trees_info_fn))
                       .catch(function (err) {
                         console.error("Could not load tree (after delete), " + nexttinfo.tree_fn);
                         return change_tree(window.default_tree);
                       });
-                  })
-                  .then(function () {
-                    if (tinfo.tree_fn == config.tree) {
-                      config.tree = ptree_info.tree_fn;
-                      var $form = $('form[name=edit-config]').first();
-                      $form.find('[name=tree]').val(config.tree);
-                      return do_save_config($form, null, false);
-                    }
                   });
               })
               .then(function () {
@@ -873,7 +938,8 @@ function update_tree_name_selection_update () {
           .text(item.name)
           .appendTo($sel);
       if ($sel[0].id == 'tree-name-input') {
-        $opt.attr('selected', item.tree_fn == ptree_info.tree_fn ? "" : undefined);
+        let tree_fn_url = get_file_url(item.tree_fn, trees_info_fn)
+        $opt.attr('selected', tree_fn_url == ptree_info.tree_fn ? "" : undefined);
       } else {
         $opt.attr('selected', item.tree_fn == config_tree ? "" : undefined);
       }
@@ -881,6 +947,24 @@ function update_tree_name_selection_update () {
   });
 }
 
+function get_default_tree_url (name, locale) {
+  let file_url = 'trees/' + name + '/' + locale + '-' + name + '.md'
+  return get_file_data(file_url)
+    .catch(function(err) {
+      if(default_locale == locale)
+        throw err;
+      file_url = 'trees/' + name + '/' + default_locale + '-' + name + '.md'
+      return get_file_data(file_url)
+        .catch(function() {
+          file_url = 'trees/' + name + '/' + name + '.md'
+          return get_file_data(file_url)
+            .catch(function() { throw err; });
+        });
+    })
+    .then(function () {
+      return new URL(file_url, location+'').href;
+    });
+}
 
 function get_default_tree(name, locale) {
   return get_file_data('trees/' + name + '/' + locale + '-' + name + '.md')
@@ -1032,6 +1116,7 @@ function change_tree (tree_fn) {
         .then(function(_data) {
           ptree_info = info;
           tree_data = _data;
+          update_tree_name_selection_update();
           return set_tree_data(tree_data);
         });
     });
@@ -1101,6 +1186,7 @@ function do_save_config($form, _config, hdlerr) {
   // console.log(_config)
   var _config_data = JSON.stringify(_config, null, "  ");
   return set_file_data(config_fn, _config_data)
+    .then(function () { return update_pasco_data_state() })
     .then(function() {
       config_data = _config_data
       config = _config
@@ -1126,15 +1212,38 @@ function save_quick_setup(evt) {
   }
   var _config = JSON.parse(config_data);
   _config.__did_quick_setup = true;
-  return do_save_config($form, _config, false)
-    .then(function() {
-      var locale = config.locale;
-      var name = $('#tree-default-select').val();
-      return get_default_tree(name, locale)
-        .then(function(data) {
-          return set_file_data(ptree_info.tree_fn, data);
-        });
+  var locale = config.locale || default_locale;
+  var name = $('#tree-default-select').val();
+  return get_default_tree_url(name, locale)
+    .then(function(default_tree_url) {
+      // use pasco_data_state.storeTree if pasco_data_state is available
+      if (window.pasco_data_state) {
+        // write default_tree
+        let write_trees_info = false
+        let default_tree_info = trees_info.list.find((a) => a.name == 'default')
+        if (!default_tree_info) {
+          write_trees_info = true
+          trees_info.list.push({
+            name: 'default',
+            tree_fn: 'default/default.md',
+          })
+        }
+        return (write_trees_info ?
+                set_file_data(pasco_data_state.get_file_url(trees_info_fn), JSON.stringify(trees_info, null, '  ')) : Promise.resolve())
+          .then(function () {
+            let default_tree_info = trees_info.list.find((a) => a.name == 'default')
+            _config.tree = default_tree_info.tree_fn
+            return window.pasco_data_state.storeTree(default_tree_info.tree_fn, default_tree_url, new URL(window.host_tree_dir_prefix, location+'').href)
+          })
+      } else {
+        _config.tree = ptree_info.tree_fn
+        return set_file_data(ptree_info.tree_fn, data);
+      }
     })
+    .then(function () {
+      return do_save_config($form, _config, false)
+    })
+    .then(function () { return update_pasco_data_state() })
     .then(function() {
       window.location = 'index.html'; // open index page
     })
@@ -1217,7 +1326,6 @@ function _config_autosave_start_countdown() {
   }, 500);
 }
 
-
 function save_tree(evt) {
   if(evt)
     evt.preventDefault();
@@ -1227,6 +1335,7 @@ function save_tree(evt) {
   // then save
   $form.find('.save-section .alert').html('').toggleClass('alert-hidden', true)
   return set_file_data(ptree_info.tree_fn, tree_data)
+    .then(function () { return update_pasco_data_state() })
     .then(function() {
       update_alert(true);
     })
@@ -1323,11 +1432,6 @@ function _input_set_from_config(element, value) {
       element.dispatchEvent(new CustomEvent("input"));
     } else {
       $(element).trigger('input');
-    }
-  }
-  if(['range'].indexOf(element.type) != -1) {
-    if (element['rangeslider-js']) {
-      element['rangeslider-js'].update({ value: element.value });
     }
   }
 }

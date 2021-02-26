@@ -1,4 +1,6 @@
 @import "common";
+@import "./dropbox-sync";
+
 /* edit config specific */
 .x-navbar {
   .back-btn {
@@ -85,7 +87,7 @@ html, body {
       }
       width: auto;
       overflow: hidden;
-      height: 25rem;
+      height: 30rem;
       border: none;
       transition: height 0.5s;
       .list-group-item {

@@ -412,8 +412,9 @@ export async function pasco_import_obz (obzblob, treefn) {
   let promises = _.map(import_list, async function (item) {
     var entry = filesmap[item.val];
     if(entry) {
-      await zipentry_save_file(entry, item.newval);
-      saved_list.push(item.newval);
+      let entry_url = get_file_url(item.newval, treefn)
+      await zipentry_save_file(entry, entry_url);
+      saved_list.push(entry_url);
     }
   });
   try {

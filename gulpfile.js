@@ -2,7 +2,6 @@
 const gulp = require('gulp');
 const webpack = require('webpack');
 const webpackst = require('webpack-stream');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 // const eslint = require('gulp-eslint');
 const sourcemaps = require('gulp-sourcemaps');
 const rename = require('gulp-rename');
@@ -21,7 +20,8 @@ if (!('NO_NODELIB' in process.env))
 function wpdefine_options(is_production) {
   return {
     'process.env.IS_PRODUCTION': JSON.stringify(is_production),
-    'process.env.HOST_URL': JSON.stringify(process.env.HOST_URL||"")
+    'process.env.PASCO_BACKEND_URL': JSON.stringify(process.env.PASCO_BACKEND_URL || 'https://backend.pasco.chat'),
+    'process.env.DROPBOX_APP_KEY': JSON.stringify(process.env.DROPBOX_APP_KEY || ''),
   };
 }
 
@@ -31,6 +31,9 @@ let webpackConfig = {
   resolve: {
     modules: [ 'node_modules' ],
     alias: {
+    },
+    fallback: {
+      'path': require.resolve('path-browserify')
     },
   },
   module: {
@@ -105,10 +108,6 @@ gulp.task('build-script-prod', function () {
       devtool: 'source-map',
       plugins: [
         new webpack.DefinePlugin(wpdefine_options(true)),
-        new UglifyJsPlugin({
-          exclude: /(min\.js|nodelib\.js)$/,
-          sourceMap: true,
-        }),
       ],
     }), webpack))
     .pipe(gulp.dest('html/js/'));

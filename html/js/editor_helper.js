@@ -11,11 +11,12 @@
     if(try_len == 0)
       return Promise.reject("Could not find new filename!");
     extra = extra || '';
-    var path = dir + '/' + basename + extra + ext;
+    let filename = basename + extra + ext
+    var path = dir + '/' + filename;
     return file_exists(path)
       .then(function(exists) {
         if(!exists)
-          return path;
+          return filename;
         return find_unique_filename(dir, basename, ext, '_'+mkrand(5), try_len-1);
       });
   }
@@ -27,21 +28,27 @@
         audio_meta = audio_meta_by_name(audio_name);
     if(!audio_name || helper._record_promise || helper._record_inprogress)
       return;
-    if(!helper.audio_save_dir) {
+    if(!helper.audio_save_dirname || !helper.tree_url) {
       alert("Could not save, save directory not found!");
       return;
     }
+    let audio_dir_url = get_file_url(helper.audio_save_dirname, helper.tree_url)
+    if (!audio_dir_url.endsWith('/')) {
+      audio_dir_url += '/'
+    }
     helper._record_promise =
-      find_unique_filename(helper.audio_save_dir, filename_friendly(node.text + '_' + audio_name), '.wav')
-      .then(function(dest) {
+      find_unique_filename(audio_dir_url, filename_friendly(node.text + '_' + audio_name), '.wav')
+      .then(function(filename) {
         if(!helper._record_promise) // (ref removed) no longer needed
           return;
+        let dest_url = audio_dir_url + '/' + filename
+        let new_audio_src = helper.audio_save_dirname + '/' + filename
         helper._record_start_time = new Date().getTime();
-        return helper.audio_record(dest)
+        return helper.audio_record(dest_url)
           .then(function(b) {
             if(!b)
               return false;
-            return [ dest, audio_meta ];
+            return [ dest_url, audio_meta, new_audio_src ];
           });
       })
       .catch(function(err) {
@@ -102,8 +109,8 @@
         helper._record_promise = null;
         if(!arg)
           return;
-        var dest = arg[0], audio_meta = arg[1],
-            prev_src = node.meta[audio_meta.target_meta],
+        var audio_meta = arg[1], new_audio_src = arg[2],
+            prev_src = node.meta[audio_meta.target_meta] ? get_file_url(node.meta[audio_meta.target_meta], helper.tree_url) : null,
             reverts = node._more_meta.audio_reverts =
               node._more_meta.audio_reverts || {},
             has_revert = !!reverts[audio_meta.target_meta];
@@ -114,7 +121,7 @@
            .catch(function(){console.warn("Could not delete " + prev_src);}) :
          Promise.resolve())
           .then(function() {
-            node.meta[audio_meta.target_meta] = dest;
+            node.meta[audio_meta.target_meta] = new_audio_src;
             helper.audio_row_add(audio_meta);
           });
       })
@@ -165,7 +172,8 @@
   
   var helper = {};
 
-  helper.audio_save_dir = null;
+  helper.audio_save_dirname = null;
+  helper.tree_url = null;
 
   helper.on_save = function(tree) {
     var promises = [];
@@ -174,7 +182,7 @@
     if(audio_reverts) {
       for(var name in audio_reverts) {
         if(audio_reverts[name] !== true) { // true is for first record
-          var fn = audio_reverts[name];
+          var fn = get_file_url(audio_reverts[name], helper.tree_url);
           if(fn.indexOf(window.cordova_user_dir_prefix) == 0) {
             promises.push(delete_file(fn));
           }
@@ -200,7 +208,7 @@
     if(audio_reverts) {
       for(var name in audio_reverts) {
         if(tree.meta[name])
-          promises.push(delete_file(tree.meta[name]));
+          promises.push(delete_file(get_file_url(tree.meta[name], helper.tree_url)));
         if(audio_reverts[name] !== true) // true is for first record
           tree.meta[name] = audio_reverts[name];
         else
@@ -319,7 +327,7 @@
     if(!has_revert && src)
       reverts[audio_meta.target_meta] = src;
     return (src && has_revert ?
-       delete_file(src)
+       delete_file(get_file_url(src, helper.tree_url))
          .catch(function(){console.warn("Could not delete " + prev_src);}) :
        Promise.resolve())
         .then(function() {
@@ -457,10 +465,10 @@
       .then(function(speaku) {
         return self._audio_stop(speaku)
            .then(function() {
-            toggle_audio_btn(audio_name, true);
-            self._playing_audio_name = audio_name;
-            return speaku.play_audio(src);
-          });
+             toggle_audio_btn(audio_name, true);
+             self._playing_audio_name = audio_name;
+             return speaku.play_audio(get_file_url(src, helper.tree_url));
+           });
       })
       .catch(function(err) {
         console.error(err);

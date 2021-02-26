@@ -1,5 +1,21 @@
 (function(){
   var slice = [].slice;
+
+  // declare global function for capturing
+  var handleOpenURLCallListeners = []
+  var lastHandleOpenURLValue = null
+  window.handleOpenURL = function (url) {
+    lastHandleOpenURLValue = url
+    _.each(handleOpenURLCallListeners, function (listener) {
+      try {
+        listener(url)
+      } catch (err) {
+        console.error(err)
+      }
+    })
+    console.log("received url: " + url);
+  }
+
   
   /**
    *  Currently connection is based on cordova
@@ -53,6 +69,17 @@
         resolve();
       }, true);
     });
+  }
+  NativeAccessApi.addOpenURLHandler = function (handler) {
+    if (typeof handler != 'function') {
+      throw new Error('handler should be a function')
+    }
+    handleOpenURLCallListeners.push(handler)
+    if (lastHandleOpenURLValue != null) {
+      setTimeout(function () {
+        handler(lastHandleOpenURLValue)
+      }, 0)
+    }
   }
 
   NativeAccessApi.keyInputByCode = {

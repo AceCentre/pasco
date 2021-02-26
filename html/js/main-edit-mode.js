@@ -252,6 +252,7 @@ function _on_edit_save(evt) {
       tree_data = tree_md
       return set_file_data(tree_fn, tree_md)
     })
+    .then(function () { return update_pasco_data_state() })
     .then(function() {
       // did save
       save_btn.disabled = false;

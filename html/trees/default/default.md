@@ -469,4 +469,3 @@
 
 ### dark
 
-# Audio from horse/cat <meta data-audio="test-assets/horse.mp3" data-cue-audio="test-assets/horse.mp3" data-main-audio="test-assets/cat.mp3">
