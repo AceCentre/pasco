@@ -2345,8 +2345,8 @@ function _start_auto_insert_back(tree, content_template) {
           'back-n-branch': '1',
           'auditory-cue': config.helper_back_option_cue_text || _t('Back'),
           'back-n-branch-notify': config.helper_back_option_notify ? 'true' : 'false',
-          'main-audio': config.helper_back_option_main_audio || null,
-          'cue-audio': config.helper_back_option_cue_audio || null,
+          'main-audio': config.helper_back_option_main_audio ? get_file_url(config.helper_back_option_main_audio, config_fn) : null,
+          'cue-audio': config.helper_back_option_cue_audio ? get_file_url(config.helper_back_option_cue_audio, config_fn) : null,
         },
         text: config.helper_back_option_main_text || _t('Back'),
       }, content_template);
