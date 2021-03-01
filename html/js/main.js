@@ -1412,7 +1412,7 @@ function _in_spell_finish(atree) {
             console.warn(err)
           })
           .then(function() {
-            _reset_resume_at_next_action(atree)
+            _did_select_prepare_for_resume(atree)
           });
       });
   } else {
@@ -1504,7 +1504,7 @@ function _in_check_back_n_branch(atree) {
       }
       state.select_path = state.positions.slice(0, state.positions.length-1);
       _on_update_select_path();
-      if (atree.meta['back-n-branch-notify']) {
+      if (_meta_true_check(atree.meta['back-n-branch-notify'], false)) {
         return _do_notify_move(_get_current_node(), atree);
       } else {
         return _scan_move();
@@ -1578,6 +1578,35 @@ function _in_override_change_tree_subrout (atree, another_tree) {
         });
       });
   }
+}
+
+function _did_select_prepare_for_resume (atree) {
+  if(state.mode == 'auto' && config.auto_scan) {
+    return _reset_and_resume(atree)
+  } else {
+    return _reset_resume_at_next_action(atree)
+  }
+}
+
+function _reset_and_resume (atree) {
+  return Promise.resolve()
+    .then(function () {
+      reset_state();
+      _on_update_select_path();
+      var popup = document.querySelector('#popup-message-wrp'),
+          popup_mtext = popup ? popup.querySelector('.main-text') : null;
+      if(popup && popup.classList.contains('visible')) {
+        popup.classList.remove('visible');
+        setTimeout(function() {
+          if(popup_mtext)
+            popup_mtext.textContent = "";
+          popup.classList.add('hide');
+        }, 500); // wait for hide transition 
+      }
+      // update tree dyn, before start again
+      return _tree_update_subdyn(tree)
+        .then(resume); // start over
+    });
 }
 
 function _reset_resume_at_next_action(atree) {
@@ -1743,7 +1772,7 @@ function _leaf_select_utterance (anode, override_msg) {
           console.warn(err);
         })
         .then(function() {
-          _reset_resume_at_next_action(anode);
+          _did_select_prepare_for_resume(anode);
         });
     });
 }
@@ -2315,6 +2344,9 @@ function _start_auto_insert_back(tree, content_template) {
         meta: {
           'back-n-branch': '1',
           'auditory-cue': config.helper_back_option_cue_text || _t('Back'),
+          'back-n-branch-notify': config.helper_back_option_notify ? 'true' : 'false',
+          'main-audio': config.helper_back_option_main_audio || null,
+          'cue-audio': config.helper_back_option_cue_audio || null,
         },
         text: config.helper_back_option_main_text || _t('Back'),
       }, content_template);

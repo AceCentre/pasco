@@ -97,6 +97,11 @@
                       <input type="range" id="auto_next_delay_range" class="form-control btn-lg" step="100" min="0" max="5000" data-dependent="#auto_next_delay">
                     </div>
                   </div>
+                  <div class="col-sm-4">
+                    <h4 x-l10n>Auto start</h4>
+                    <label class="checkbox-inline"><input type="checkbox" name="auto_scan"><span x-l10n>On</span></label><br>
+                    <small>It will automatically start scanning after an item has been selected.</small>
+                  </div>
                 </div>
                 <div class="row x-collapsable x-collapse" id="switch_mode_params">
                   <div class="col-sm-12">
@@ -218,18 +223,40 @@
                         <label class="radio-inline"><input type="radio" name="helper_back_option" value="end"><span x-l10n>At end</span></label>
                         <label class="radio-inline"><input type="radio" name="helper_back_option" value=""><span x-l10n>None</span></label>
                       </div>
-                      <div class="col-sm-6">
+                      <div id="helper_back_option_main" class="col-sm-6">
                         <div class="form-group">
                           <label for="helper_back_option_main_text" x-l10n>Main Speech</label>
                           <input type="text" id="helper_back_option_main_text" name="helper_back_option_main_text" class="form-control" value="" placeholder="Back">
+                          <div id="helper_back_option_main_record" class="record-audio-section hide-for-non-cordova-ios">
+                            <input type="hidden" name="helper_back_option_main_audio" value="">
+                            <div class="node-record-btn-wrap">
+                              <button class="record-btn btn btn-danger" type="button" x-l10n>Record</button>
+                              <span class="record-amp-circle"></span>
+                            </div>
+                            <button type="button" class="delete-btn btn btn-default" title="Delete audio"><i class="far fa-times"></i></button>
+                          </div>
                         </div>
                       </div>
-                      <div class="col-sm-6">
+                      <div id="helper_back_option_cue" class="col-sm-6">
                         <div class="form-group">
                           <label for="helper_back_option_cue_text" x-l10n>Cue Speech</label>
                           <input type="text" id="helper_back_option_cue_text" name="helper_back_option_cue_text" class="form-control" value="" placeholder="Back">
+                          <div id="helper_back_option_cue_record" class="record-audio-section hide-for-non-cordova-ios">
+                            <input type="hidden" name="helper_back_option_cue_audio" value="">
+                            <div class="node-record-btn-wrap">
+                              <button class="record-btn btn btn-danger" type="button" x-l10n>Record</button>
+                              <span class="record-amp-circle"></span>
+                            </div>
+                            <button type="button" class="delete-btn btn btn-default" title="Delete audio"><i class="far fa-times"></i></button>
+                          </div>
                         </div>
                       </div>
+
+                      <div class="col-sm-6">
+                        <h4 x-l10n>Notify back on select</h4>
+                        <label class="checkbox-inline"><input type="checkbox" name="helper_back_option_notify"><span x-l10n>On</span></label>
+                      </div>
+
                     </div>
                     <hr>
                   </div>

@@ -462,6 +462,36 @@ function start() {
   update_tree_default_select();
   $('#tree-default-select').on('change', update_tree_default_select);
 
+  // helper_back_option
+  _.each([
+    {
+      text_inp: '#helper_back_option_main_text',
+      record_section: '#helper_back_option_main_record',
+      audio_dest: 'back-main.wav',
+    },
+    {
+      text_inp: '#helper_back_option_cue_text',
+      record_section: '#helper_back_option_cue_record',
+      audio_dest: 'back-cue.wav',
+    },
+  ], function (info) {
+    var record_section = document.querySelector(info.record_section)
+    if (!record_section) {
+      return
+    }
+    if (!window.pasco_data_state) {
+      // record_section is not supported in the legacy version
+      record_section.classList.add('hidden')
+      return
+    }
+    _init_custom_node({
+      text_inp: document.querySelector(info.text_inp),
+      record_section: record_section,
+      audio_dest: info.audio_dest,
+      audio_dest_url: get_file_url(info.audio_dest, config_fn),
+    })
+  })
+
   if(!is_quick_setup) {
     set_tree_data(tree_data);
 
@@ -1787,4 +1817,145 @@ function napi_remove_key_command() {
   } else {
     return Promise.resolve();
   }
+}
+
+function _init_custom_node (info) {
+  var text_inp = info.text_inp,
+      record_section = info.record_section,
+      audio_inp = record_section.querySelector('input'),
+      delete_audio_btn = record_section.querySelector('.delete-btn'),
+      record_btn_wrap = record_section.querySelector('.node-record-btn-wrap'),
+      record_btn = record_section.querySelector('.record-btn'),
+      audio_dest = info.audio_dest,
+      audio_dest_url = info.audio_dest_url;
+  update_elements_class()
+  record_btn.addEventListener('mousedown', record_btn_on_hold, false)
+  record_btn.addEventListener('touchstart', record_btn_on_hold, false)
+  delete_audio_btn.addEventListener('click', function () {
+    if (audio_inp.value) {
+      unset_file(audio_dest_url)
+        .catch(function (err) {
+          console.warn(err)
+        })
+    }
+    change_audio_inp('')
+  }, false)
+  var recording_promise = null
+  function record_btn_on_hold () {
+    if (recording_promise) {
+      return
+    }
+    recording_promise = _record_audio(audio_dest_url, record_btn_wrap)
+
+    recording_promise
+      .then(function (success) {
+        if (success) {
+          change_audio_inp(audio_dest)
+        }
+      })
+      .catch(handle_error)
+      .then(function () {
+        recording_promise = null
+      })
+
+    document.addEventListener('mouseup', record_btn_on_release, false)
+    document.addEventListener('touchend', record_btn_on_release, false)
+  }
+  function change_audio_inp (value) {
+    audio_inp.value = value
+    $(audio_inp).trigger('input')
+    update_elements_class()
+  }
+  function record_btn_on_release () {
+    if (recording_promise) {
+      recording_promise.stopRecording()
+    }
+    document.removeEventListener('mouseup', record_btn_on_release, false)
+    document.removeEventListener('touchend', record_btn_on_release, false)
+  }
+  function update_elements_class () {
+    var has_audio = !!audio_inp.value ? true : false
+    if (text_inp) {
+      text_inp.classList[has_audio ? 'add' : 'remove']('hidden')
+    }
+    delete_audio_btn.classList[!has_audio ? 'add' : 'remove']('hidden')
+  }
+}
+
+function _record_audio (dest, record_btn_wrap) {
+  var stopped = false
+  var media = null
+  var promise = SpeakUnit.getInstance()
+    .then(function(speaku) {
+      return speaku.api.request_audio_record_permission();
+    })
+    .then(function(granted) {
+      if(!granted) {
+        throw new Error("Permission not granted");
+      }
+      return write_file(dest, "");
+    })
+    .then(function() {
+      if(stopped) {
+        return false;
+      }
+      return new Promise(function(resolve, reject) {
+        if(stopped) {
+          return resolve(false);
+        }
+        var amp_circle = record_btn_wrap.querySelector('.record-amp-circle'),
+            circle_max_radius = 120;
+        function set_circle_radius(radius) {
+          if(amp_circle) {
+            amp_circle.style.width = (radius * 2) + 'px';
+            amp_circle.style.height = (radius * 2) + 'px';
+            amp_circle.style.borderRadius = radius + 'px';
+          }
+        }
+        set_circle_radius(0);
+        record_btn_wrap.classList.add('recording');
+        // Audio player
+        //
+        media = new Media(
+          dest,
+          // success callback
+          function() {
+            record_btn_wrap.classList.remove('recording')
+            clearInterval(mediaTimer);
+            resolve(true);
+          },
+          // error callback
+          function(err) {
+            record_btn_wrap.classList.remove('recording')
+            clearInterval(mediaTimer);
+            reject(err);
+          }
+        );
+        var mediaTimer = setInterval(function () {
+          // get media amplitude
+          media.getCurrentAmplitude(
+            // success callback
+            function (amp) {
+              set_circle_radius(amp * circle_max_radius);
+            },
+            // error callback
+            function (e) {
+              console.log("Error getting amp", e);
+              clearInterval(mediaTimer);
+            }
+          );
+        }, 100);
+
+        // Record audio
+        media.startRecord();
+      });
+    });
+  promise.stopRecording = function () {
+    stopped = true;
+    if(media) {
+      media.stopRecord();
+      media.release();
+    }
+  }
+  return promise
 }

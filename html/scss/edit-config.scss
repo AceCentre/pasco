@@ -1,5 +1,6 @@
-@import "common";
+@import "./common";
 @import "./dropbox-sync";
+@import "./editor";
 
 /* edit config specific */
 .x-navbar {
@@ -280,4 +281,9 @@ form[name="quick-setup"] {
       }
     }
   }
+}
+
+
+.record-audio-section {
+  margin-bottom: 15px;
 }

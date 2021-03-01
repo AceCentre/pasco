@@ -10,6 +10,7 @@
   "ignore_second_hits_time": 100,
   "ignore_key_release_time": 50,
   "helper_back_option": "end",
+  "auto_scan": false,
   "auto_next_delay": 200,
   "auto_next_first_run_delay": 0,
   "auto_next_recycle_delay": 0,

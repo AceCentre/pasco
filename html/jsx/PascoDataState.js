@@ -6,6 +6,7 @@ import { getRuntimeEnv, arrayBufferFromFile, sha256Digest,
          arrayBufferToHex, NotFoundError } from './common'
 import { v4 as uuidv4 } from 'uuid'
 
+let CONFIG_DEPENDENCY_PARAMS = [ 'helper_back_option_main_audio', 'helper_back_option_cue_audio' ]
 export default class PascoDataState {
   constructor (state_src_url) {
     this._version = '1.0'
@@ -233,14 +234,30 @@ export default class PascoDataState {
     }
   }
   async includeFromConfig (config, config_src) {
+    let configdir = path.dirname(config_src)
     if (config.tree && this._data.tree_list.indexOf(config.tree) == -1) {
-      let configdir = path.dirname(config_src)
       let tree_src = this.resolve_internal_path(config.tree, configdir)
       try {
         await this._addTreeFromSource(tree_src, this.get_file_url(tree_src))
       } catch (err) {
         if (!(err instanceof NotFoundError)) {
           throw err
+        } else {
+          console.warn(err)
+        }
+      }
+    }
+    for (let name of CONFIG_DEPENDENCY_PARAMS) {
+      if (!!config[name] && typeof config[name] == 'string') {
+        let file = { src: this.resolve_internal_path(config[name], configdir) }
+        try {
+          await this._addFileFromSource(file, this.get_file_url(file.src))
+        } catch (err) {
+          if (!(err instanceof NotFoundError)) {
+            throw err
+          } else {
+            console.warn(err)
+          }
         }
       }
     }
@@ -282,7 +299,7 @@ export default class PascoDataState {
         } else {
           console.warn(err)
         }
-      } 
+      }
     }
     let node_append_files = async (node) => {
       // dyn=spell-word-prediction
