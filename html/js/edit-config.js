@@ -785,9 +785,10 @@ function start() {
         }
       });
     } else {
-      get_default_tree(default_name, locale)
-        .then(set_tree_data)
-        .catch(handle_error);
+      if (!confirm('Cannot load default trees in the legacy version, Would you like to update to v1?')) {
+        return
+      }
+      upgrade_to_pasco_data_state()
     }
   });
 }
@@ -1958,4 +1959,23 @@ function _record_audio (dest, record_btn_wrap) {
     }
   }
   return promise
+}
+
+function upgrade_to_pasco_data_state () {
+  waitingDialog.show()
+  let state_dir_url = (window.cordova ? window.cordova_user_dir_prefix : 'file:///') + 'v1/'
+  PascoDataState.rebuildStateFromLegacy(this._state_config_fn, this._state_trees_info_fn, state_dir_url)
+    .then(function (datastate) {
+      let $message_modal = show_message({ title: _t('Update was successful'), message: '' })
+      $message_modal.on('hide.bs.modal', function () {
+        location.reload()
+      })
+    })
+    .catch(function (err) {
+      console.error(err)
+      show_error({ title: _t('Failed to save to dropbox'), message: err.message || 'Unknown error' })
+    })
+    .then(function () {
+      waitingDialog.hide()
+    })
 }

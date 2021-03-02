@@ -32,9 +32,15 @@ export default class PascoDataState {
     if (!this._state_src_url) {
       throw new Error('state_src_url has not defined')
     }
-    return new URL(src, base || this._state_src_url).href
+    return this.constructor.get_file_url(src, base || this._state_src_url)
   }
   resolve_internal_path (src, basedir) {
+    return this.constructor.resolve_internal_path(src, basedir)
+  }
+  static get_file_url (src, base) {
+    return new URL(src, base).href
+  }
+  static resolve_internal_path (src, basedir) {
     src = src.replace(/[:;]/g, '')
     basedir = typeof basedir == 'string' ? basedir.replace(/[:;]/g, '') : basedir
     basedir = typeof basedir == 'string' && path.isAbsolute(basedir) ? basedir.replace(/^[\/\\]+/, '') : basedir
@@ -72,12 +78,15 @@ export default class PascoDataState {
     if (!this._state_dir_url) {
       throw new Error('state_dir_url has not defined')
     }
+    return this.constructor.storeTree(src, src_url, src_url_base, this._state_dir_url)
+  }
+  static async storeTree (src, src_url, src_url_base, target_dir_url) {
     if (!src_url_base) {
       src_url_base = new URL('.', src_url).href
     }
     let rewrite_list = []
     let rewrite_tree = await this.makeTreeRewriteForImport(src, src_url, src_url_base, rewrite_list)
-    await this._performRewrite(rewrite_list, this._state_dir_url)
+    await this.performRewrite(rewrite_list, target_dir_url)
   }
   async deleteTree (src_url) {
     let processTree = (tree) => {
@@ -131,7 +140,7 @@ export default class PascoDataState {
       }
     }
   }
-  async makeTreeRewriteForImport (src, src_url, src_url_base, rewrite_list, is_legacy) {
+  static async makeTreeRewriteForImport (src, src_url, src_url_base, rewrite_list, is_legacy) {
     let translateTree = (tree, tree_src) => {
       let tree_src_dir = path.dirname(src)
       let tree_src_dir_url = new URL('.', src_url).href
@@ -190,7 +199,7 @@ export default class PascoDataState {
     let new_tree_data = tree_to_markdown(tree)
     rewrite_list.push({ src, src_url, data: new_tree_data })
   }
-  async _performRewrite (rewrite_list, target_dir_url) {
+  static async performRewrite (rewrite_list, target_dir_url) {
     if (!target_dir_url.endsWith('/')) {
       target_dir_url = target_dir_url + '/'
     }
@@ -451,7 +460,7 @@ export default class PascoDataState {
         return null
       }
       let src = datastate.resolve_internal_path(src_url.substring(base_url_dir.length))
-      await datastate.makeTreeRewriteForImport(src, src_url, base_url_dir, rewrite_list, true)
+      await PascoDataState.makeTreeRewriteForImport(src, src_url, base_url_dir, rewrite_list, true)
       return src
     }
     let state_src = 'pasco-state.json'
@@ -474,7 +483,7 @@ export default class PascoDataState {
         treeinf.tree_fn = new_src
       }
     }
-    await datastate._performRewrite(rewrite_list, target_dir_url)
+    await PascoDataState.performRewrite(rewrite_list, target_dir_url)
     let target_config_fn = 'config.json'
     let target_trees_info_fn = 'trees-info.json'
     let new_config_data = JSON.stringify(config, null, '  ')

@@ -1370,7 +1370,7 @@ proto.speak_finish = function(utterance_hdl) {
   } else {
     var self = this;
     return new Promise(function(resolve, reject) {
-      if (!speechSynthesis.speaking) {
+      if (!speechSynthesis.speaking && !speechSynthesis.pending) {
         resolve();
       } else {
         function finish_handler () {

@@ -256,6 +256,9 @@ export default class DropboxSyncConfigUI {
         if (!this._state_config_fn || !this._state_trees_info_fn) {
           throw new Error('state config or trees_info is not defined!')
         }
+        if (!confirm('Cannot save to dropbox in the legacy version, Would you like to update to v1?')) {
+          return
+        }
         let state_dir_url = (window.cordova ? window.cordova_user_dir_prefix : 'file:///') + 'v1/'
         datastate = await PascoDataState.rebuildStateFromLegacy(this._state_config_fn, this._state_trees_info_fn, state_dir_url)
         should_restart = true

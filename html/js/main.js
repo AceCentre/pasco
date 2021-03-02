@@ -1122,7 +1122,7 @@ function _move_sub_speak(type, override_msg) {
     audio = null;
   }
   if(audio) {
-    return  speaku.play_audio(get_file_url(audio, tree_fn), opts)
+    return speaku.play_audio(get_file_url(audio, tree_fn), opts)
       .catch(function (err) {
         console.error(err);
         return speaku.simple_speak(_t("Could not play the input audio"), opts);
