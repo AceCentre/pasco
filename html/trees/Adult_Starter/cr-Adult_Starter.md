@@ -37,8 +37,8 @@ osjećaji
 	tužan sam
 	Ja sam ljuta
 Ja ću to napisati<meta data-spell-branch  data-spell-update-dyn-onchange>
-	<meta data-dyn="spell-word-prediction" data-words-file="trees/Spell_Prediction/cr.json" data-max-nodes="3"  data-predict-after-n-chars="3">
-	<meta data-dyn="spell-letter-prediction" data-words-file="trees/Spell_Prediction/cr.json" data-alphabet="a,b,c,č,ć,d,dž	đ,e,f,g,h,i,j,k,l,lj,m,n,nj,o,p,r,s,š,t,u,v,z,ž">
+	<meta data-dyn="spell-word-prediction" data-words-file="../Spell_Prediction/cr.json" data-max-nodes="3"  data-predict-after-n-chars="3">
+	<meta data-dyn="spell-letter-prediction" data-words-file="../Spell_Prediction/cr.json" data-alphabet="a,b,c,č,ć,d,dž	đ,e,f,g,h,i,j,k,l,lj,m,n,nj,o,p,r,s,š,t,u,v,z,ž">
 	Space <meta data-spell-letter=" ">
 	Undo <meta data-spell-delchar>
 	Finish <meta data-spell-finish>

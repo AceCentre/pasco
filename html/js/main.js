@@ -1,6 +1,7 @@
 var config_fn, tree_fn, config, tree, tree_data, state = null, tree_element,
     napi, speaku, tree_wrp_element,
     config_json, words_cache = {}, tree_contentsize_xstep = 50, locale;
+
 /* Initiation chain
  * 1. wait for dom and NativeAccessApi
  * 2. initialize_app (from core.js)
@@ -108,11 +109,12 @@ Promise.all([
       window.location = 'intro.html'; // goto quick-setup.html page
       return new Promise(function(){ }); // hang
     }
-    return prepare_tree(config.tree || window.default_tree)
+    tree_fn = config.tree ? get_file_url(config.tree, config_fn) : window.default_tree
+    return prepare_tree(tree_fn)
       .catch(handle_error_checkpoint())
       .then(function(info) {
-        tree_fn = info.tree_fn;
-        editor_helper.audio_save_dir = info.audio_dir;
+        editor_helper.tree_url = tree_fn;
+        editor_helper.audio_save_dirname = info.audio_dirname;
       });
   })
   .then(function() {
@@ -1120,7 +1122,7 @@ function _move_sub_speak(type, override_msg) {
     audio = null;
   }
   if(audio) {
-    return  speaku.play_audio(audio, opts)
+    return speaku.play_audio(get_file_url(audio, tree_fn), opts)
       .catch(function (err) {
         console.error(err);
         return speaku.simple_speak(_t("Could not play the input audio"), opts);
@@ -1410,7 +1412,7 @@ function _in_spell_finish(atree) {
             console.warn(err)
           })
           .then(function() {
-            _reset_resume_at_next_action(atree)
+            _did_select_prepare_for_resume(atree)
           });
       });
   } else {
@@ -1502,7 +1504,7 @@ function _in_check_back_n_branch(atree) {
       }
       state.select_path = state.positions.slice(0, state.positions.length-1);
       _on_update_select_path();
-      if (atree.meta['back-n-branch-notify']) {
+      if (_meta_true_check(atree.meta['back-n-branch-notify'], false)) {
         return _do_notify_move(_get_current_node(), atree);
       } else {
         return _scan_move();
@@ -1513,16 +1515,16 @@ function _in_check_back_n_branch(atree) {
 function _in_override_change_tree (atree) {
   var another_tree = atree.meta['change-tree'];
   if (another_tree) {
-    return _in_override_change_tree_subrout(atree, another_tree);
+    return _in_override_change_tree_subrout(atree, get_file_url(another_tree, tree_fn));
   }
   var another_tree_name = atree.meta['change-tree-by-name'];
   if (another_tree_name) {
-    return get_trees_info(default_trees_info_fn)
+  return get_file_json(default_trees_info_fn)
       .then(function (trees_info) {
         another_tree_name = another_tree_name.toLowerCase();
         var tree_info = _.find(trees_info.list, function (a) { return (a.name+'').toLowerCase() == another_tree_name; });
         if (tree_info) {
-          return _in_override_change_tree_subrout(atree, tree_info.tree_fn);
+          return _in_override_change_tree_subrout(atree, get_file_url(tree_info.tree_fn, default_trees_info_fn));
         } else {
           return _do_notify_move(_get_current_node(), atree, {
             main_override_msg: _t("Could not find tree with this name")
@@ -1533,7 +1535,7 @@ function _in_override_change_tree (atree) {
 }
 
 function _in_override_change_tree_subrout (atree, another_tree) {
-  var current_tree = config.tree || window.default_tree;
+  var current_tree = tree_fn;
   if (another_tree === current_tree) {
     return _do_notify_move(_get_current_node(), atree, {
       main_override_msg: _t("This tree is already running")
@@ -1544,8 +1546,8 @@ function _in_override_change_tree_subrout (atree, another_tree) {
         var telm = newEl('div');
         telm.setAttribute('class', tree_element.getAttribute('class'));
         var current_config_tree = config.tree;
-        config.tree = info.tree_fn;
-        return get_file_data(info.tree_fn)
+        config.tree = another_tree;
+        return get_file_data(another_tree)
           .then(function (data) {
             tree_data = data;
             var _config = JSON.parse(config_json);
@@ -1559,7 +1561,8 @@ function _in_override_change_tree_subrout (atree, another_tree) {
                 stop()
                   .then(function () {
                     tree_fn = info.tree_fn;
-                    editor_helper.audio_save_dir = info.audio_dir;
+                    editor_helper.tree_url = tree_fn;
+                    editor_helper.audio_save_dirname = info.audio_dirname;
                     _clean_state(state);
                     return start();
                   })
@@ -1575,6 +1578,35 @@ function _in_override_change_tree_subrout (atree, another_tree) {
         });
       });
   }
+}
+
+function _did_select_prepare_for_resume (atree) {
+  if(state.mode == 'auto' && config.auto_scan) {
+    return _reset_and_resume(atree)
+  } else {
+    return _reset_resume_at_next_action(atree)
+  }
+}
+
+function _reset_and_resume (atree) {
+  return Promise.resolve()
+    .then(function () {
+      reset_state();
+      _on_update_select_path();
+      var popup = document.querySelector('#popup-message-wrp'),
+          popup_mtext = popup ? popup.querySelector('.main-text') : null;
+      if(popup && popup.classList.contains('visible')) {
+        popup.classList.remove('visible');
+        setTimeout(function() {
+          if(popup_mtext)
+            popup_mtext.textContent = "";
+          popup.classList.add('hide');
+        }, 500); // wait for hide transition 
+      }
+      // update tree dyn, before start again
+      return _tree_update_subdyn(tree)
+        .then(resume); // start over
+    });
 }
 
 function _reset_resume_at_next_action(atree) {
@@ -1740,7 +1772,7 @@ function _leaf_select_utterance (anode, override_msg) {
           console.warn(err);
         })
         .then(function() {
-          _reset_resume_at_next_action(anode);
+          _did_select_prepare_for_resume(anode);
         });
     });
 }
@@ -2206,7 +2238,12 @@ function _get_prediction_spell_words(wordsFile, casedPrefix) {
 }
 
 function _word_prediction_dynamic_nodes (anode) {
-  var words_file = anode.meta['words-file'] || config.words_file;
+  var words_file
+  if (anode.meta['words-file']) {
+    words_file = get_file_url(anode.meta['words-file'], tree_fn)
+  } else if (config.words_file) {
+    words_file = get_file_url(config.words_file, config_fn)
+  }
   if (!words_file) {
     throw new Error("No words file given for dyn=\"spell-word-prediction\"");
   }
@@ -2237,7 +2274,12 @@ function _word_prediction_dynamic_nodes (anode) {
 }
 
 function _letter_prediction_dynamic_nodes (anode) {
-  var words_file = anode.meta['words-file'] || config.words_file;
+  var words_file
+  if (anode.meta['words-file']) {
+    words_file = get_file_url(anode.meta['words-file'], tree_fn)
+  } else if (config.words_file) {
+    words_file = get_file_url(config.words_file, config_fn)
+  }
   if (!words_file) {
     throw new Error("No words file given for dyn=\"spell-word-prediction\"");
   }
@@ -2302,6 +2344,9 @@ function _start_auto_insert_back(tree, content_template) {
         meta: {
           'back-n-branch': '1',
           'auditory-cue': config.helper_back_option_cue_text || _t('Back'),
+          'back-n-branch-notify': config.helper_back_option_notify ? 'true' : 'false',
+          'main-audio': config.helper_back_option_main_audio ? get_file_url(config.helper_back_option_main_audio, config_fn) : null,
+          'cue-audio': config.helper_back_option_cue_audio ? get_file_url(config.helper_back_option_cue_audio, config_fn) : null,
         },
         text: config.helper_back_option_main_text || _t('Back'),
       }, content_template);
@@ -2467,7 +2512,7 @@ function xscale_from_percentage_floor(percentage, step, decres) {
 
 function _trees_switcher_dynamic_nodes(anode) {
   var current_tree = config.tree || window.default_tree;
-  return get_trees_info(default_trees_info_fn)
+  return get_file_json(default_trees_info_fn)
     .then(function (trees_info) {
       return {
         nodes: _.filter(

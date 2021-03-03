@@ -33,16 +33,7 @@ module.exports = {
   "port": 3000,
   "middleware": false,
   "serveStatic": [],
-  "ghostMode": {
-    "clicks": true,
-    "scroll": true,
-    "location": true,
-    "forms": {
-      "submit": true,
-      "inputs": true,
-      "toggles": true
-    }
-  },
+  "ghostMode": false,
   "logLevel": "info",
   "logPrefix": "BS",
   "logConnections": false,

@@ -1,4 +1,7 @@
-@import "common";
+@import "./common";
+@import "./dropbox-sync";
+@import "./editor";
+
 /* edit config specific */
 .x-navbar {
   .back-btn {
@@ -85,7 +88,7 @@ html, body {
       }
       width: auto;
       overflow: hidden;
-      height: 25rem;
+      height: 30rem;
       border: none;
       transition: height 0.5s;
       .list-group-item {
@@ -278,4 +281,9 @@ form[name="quick-setup"] {
       }
     }
   }
+}
+
+
+.record-audio-section {
+  margin-bottom: 15px;
 }

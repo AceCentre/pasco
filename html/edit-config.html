@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta http-equiv="Content-Security-Policy" content="default-src blob: 'self' 'unsafe-eval' 'unsafe-inline' ws://localhost:3000; style-src 'self' 'unsafe-inline'; media-src blob: *; img-src 'self' data: content:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src blob: 'self' 'unsafe-eval' 'unsafe-inline' ws://localhost:3000 http://localhost:3030 http://backend.pasco.chat https://api.dropboxapi.com https://content.dropboxapi.com; style-src 'self' 'unsafe-inline'; media-src blob: *; img-src 'self' data: content:;">
     
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
@@ -33,6 +33,7 @@
           <h2 data-name="speech" class="page-head"><i class="far fa-comment"></i><span x-l10n>Speech</span></h2>
           <h2 data-name="appearance" class="page-head"><i class="far fa-eye"></i><span x-l10n>Appearance</span></h2>
           <h2 data-name="vocabulary" class="page-head"><i class="far fa-comment-dots"></i><span x-l10n>Vocabulary</span></h2>
+          <h2 data-name="sync" class="page-head"><i class="far fa-sync"></i><span x-l10n>Sync</span></h2>
         </li>
         <li class="space"></li>
         <li><a class="icon-btn" href="index.html"><span class="far fa-play-circle fa-2x"></span></a></li>
@@ -46,6 +47,7 @@
         <a href data-name="speech" class="list-group-item"><i class="far fa-comment"></i><span x-l10n>Speech</span></a>
         <a href data-name="appearance" class="list-group-item"><i class="far fa-eye"></i><span x-l10n>Appearance</span></a>
         <a href data-name="vocabulary" class="list-group-item"><i class="far fa-comment-dots"></i><span x-l10n>Vocabulary</span></a>
+        <a href data-name="sync" class="list-group-item"><i class="far fa-sync"></i><span x-l10n>Sync</span></a>
       </div>
       <div class="content">
         <form name="edit-config">
@@ -94,6 +96,11 @@
                       <input type="number" id="auto_next_delay" name="auto_next_delay" class="form-control" value="200" data-validator="number" data-dependent="#auto_next_delay_range">
                       <input type="range" id="auto_next_delay_range" class="form-control btn-lg" step="100" min="0" max="5000" data-dependent="#auto_next_delay">
                     </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <h4 x-l10n>Auto start</h4>
+                    <label class="checkbox-inline"><input type="checkbox" name="auto_scan"><span x-l10n>On</span></label><br>
+                    <small>It will automatically start scanning after an item has been selected.</small>
                   </div>
                 </div>
                 <div class="row x-collapsable x-collapse" id="switch_mode_params">
@@ -216,18 +223,40 @@
                         <label class="radio-inline"><input type="radio" name="helper_back_option" value="end"><span x-l10n>At end</span></label>
                         <label class="radio-inline"><input type="radio" name="helper_back_option" value=""><span x-l10n>None</span></label>
                       </div>
-                      <div class="col-sm-6">
+                      <div id="helper_back_option_main" class="col-sm-6">
                         <div class="form-group">
                           <label for="helper_back_option_main_text" x-l10n>Main Speech</label>
                           <input type="text" id="helper_back_option_main_text" name="helper_back_option_main_text" class="form-control" value="" placeholder="Back">
+                          <div id="helper_back_option_main_record" class="record-audio-section hide-for-non-cordova-ios">
+                            <input type="hidden" name="helper_back_option_main_audio" value="">
+                            <div class="node-record-btn-wrap">
+                              <button class="record-btn btn btn-danger" type="button" x-l10n>Record</button>
+                              <span class="record-amp-circle"></span>
+                            </div>
+                            <button type="button" class="delete-btn btn btn-default" title="Delete audio"><i class="far fa-times"></i></button>
+                          </div>
                         </div>
                       </div>
-                      <div class="col-sm-6">
+                      <div id="helper_back_option_cue" class="col-sm-6">
                         <div class="form-group">
                           <label for="helper_back_option_cue_text" x-l10n>Cue Speech</label>
                           <input type="text" id="helper_back_option_cue_text" name="helper_back_option_cue_text" class="form-control" value="" placeholder="Back">
+                          <div id="helper_back_option_cue_record" class="record-audio-section hide-for-non-cordova-ios">
+                            <input type="hidden" name="helper_back_option_cue_audio" value="">
+                            <div class="node-record-btn-wrap">
+                              <button class="record-btn btn btn-danger" type="button" x-l10n>Record</button>
+                              <span class="record-amp-circle"></span>
+                            </div>
+                            <button type="button" class="delete-btn btn btn-default" title="Delete audio"><i class="far fa-times"></i></button>
+                          </div>
                         </div>
                       </div>
+
+                      <div class="col-sm-6">
+                        <h4 x-l10n>Notify back on select</h4>
+                        <label class="checkbox-inline"><input type="checkbox" name="helper_back_option_notify"><span x-l10n>On</span></label>
+                      </div>
+
                     </div>
                     <hr>
                   </div>
@@ -563,6 +592,67 @@
             </div>
           </div>
         </form>
+        <div class="page-sect" data-name="sync" id="dropbox-sync-wrp">
+          <h3>Dropbox Sync</h3>
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="alert alert-danger main-error-alert hidden" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only"></span>
+                <span class="text"></span>
+              </div>
+              <div class="main-loading-notice hidden" x-l10n>Loading...</div>
+            </div>
+          </div>
+          <div class="row hide-when-initiating">
+            <div class="col-sm-6 col-md-3">
+              <button type="button" class="btn btn-primary auth-btn"><i class="far fa-sign-in"></i> <span x-l10n>Authorize</span></button>
+              <button type="button" class="btn btn-default hidden revoke-btn"><i class="far fa-sign-out"></i> <span x-l10n>Revoke Authorization</span></button>
+              <div class="auth-status"></div>
+            </div>
+            <div class="col-sm-6 col-md-3 hide-when-needsauth">
+              <button type="button" class="btn btn-primary select-folder-btn"><i class="far fa-folder"></i><span x-l10n>Select Folder</span></button>
+              <div class="selected-folder-status"></div>
+            </div>
+            <div class="col-sm-6 col-md-6 hide-when-needsauth hide-when-needs-setup">
+              <button type="button" class="btn btn-primary save-btn"><i class="far fa-cloud-upload"></i><span x-l10n>Save to dropbox</span></button>
+              <button type="button" class="btn btn-primary load-btn"><i class="far fa-cloud-download"></i><span x-l10n>Load from dropbox</span></button>
+            </div>
+          </div>
+          
+          <div class="select-folder-modal modal fade" tabindex="-1" role="dialog" aria-labelledby="Select a folder (dropbox)">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title" x-l10n>Select a folder (dropbox)</h4>
+                </div>
+                <div class="modal-body">
+                  <script type="text/x-template" class="select-folder-item-template">
+                    <li data-name="{%- data.name %}">
+                      <a href="#"><i class="far fa-folder"></i> {%- data.name %}</a>
+                    </li>
+                  </script>
+                  <div>Selected: <span class="current-path"></span></div>
+                  <ul class="select-folder-list">
+                  </ul>
+                  <button type="button" class="btn btn-default more-btn hidden" x-l10n>More</button>
+                  <div class="alert alert-danger error-alert hidden" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only"></span>
+                    <span class="text"></span>
+                  </div>
+                  <div class="loading-notice hidden" x-l10n>Loading...</div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal" x-l10n>Cancel</button>
+                  <button type="button" class="btn btn-success select-btn" x-l10n>Select</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
     <div class="settings-alert-wrp settings-success-alert">
@@ -686,8 +776,12 @@
             <h4 class="modal-title"></h4>
           </div>
           <div class="modal-body">
-            <button class="btn btn-primary copy-details-btn m-b-10" type="button" x-l10n>Copy</button>
-            <pre><code class="error-details"></code></pre>
+            <p class="error-message">
+            </p>
+            <div class="error-details-wrp">
+              <button class="btn btn-primary copy-details-btn m-b-10" type="button" x-l10n>Copy</button>
+              <pre><code class="error-details"></code></pre>
+            </div>
           </div>
         </div>
       </div>
