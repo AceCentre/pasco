@@ -1393,7 +1393,7 @@ proto.stop_speaking = function() {
     if(this.is_native) {
       return this.api.stop_speaking(this.synthesizer);
     } else {
-      if (speechSynthesis.speaking) {
+      if (speechSynthesis.speaking || speechSynthesis.pending) {
         speechSynthesis.cancel();
       }
       return Promise.resolve();
