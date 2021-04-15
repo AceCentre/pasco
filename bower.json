@@ -8,12 +8,12 @@
   "license": "ISC",
   "homepage": "",
   "dependencies": {
-    "underscore": "^1.8.3",
-    "showdown": "^1.7.1",
-    "bootstrap": "^3.3.7",
-    "jquery": "^3.2.1",
-    "bootstrap-rtl": "^3.4.0",
-    "bootstrap-waitingfor": "^1.2.7",
+    "underscore": "1.8.3",
+    "showdown": "1.7.1",
+    "bootstrap": "3.3.7",
+    "jquery": "3.2.1",
+    "bootstrap-rtl": "3.4.0",
+    "bootstrap-waitingfor": "1.2.7",
     "bootbox.js": "bootbox#^4.4.0"
   }
 }
