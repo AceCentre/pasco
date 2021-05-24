@@ -139,6 +139,8 @@ We would 💛 your contributions. Please feel free to fork the project and we wo
 
 * **Will Wade** - *Initial work, and Project Lead* - [WillWade - GitHub](https://github.com/willwade)
 * **Hossein Amin** - *Most of the hard programming work* - [HoseeinAmin - GitHub](https://github.com/hosseinamin)
+* **Selma Al Zarrouk** - *Adding tests*
+* **Gavin Henderson** - A little bit of coding
 
 ## License
 
