@@ -46,6 +46,7 @@
     "babel-loader": "^8.2.2",
     "browser-sync": "^2.26.7",
     "concurrently": "^3.4.0",
+    "cypress": "^7.4.0",
     "delay": "^5.0.0",
     "gulp": "^4.0.0",
     "gulp-rename": "^1.4.0",
