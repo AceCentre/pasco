@@ -2,7 +2,7 @@ name: Run Cypress
 on: [pull_request]
 jobs:
   RunCypress:
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - name: get code
         uses: actions/checkout@v2
