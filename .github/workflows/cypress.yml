@@ -9,11 +9,9 @@ jobs:
 
       - uses: actions/setup-node@v2
 
-      - run: npm install
-
       - uses: cypress-io/github-action@v2
         with:
-          install: true
+          install-command: npm install
           record: true
         env:
           # pass the Dashboard record key as an environment variable
