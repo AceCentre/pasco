@@ -1417,7 +1417,7 @@ proto.get_voices = function() {
             };
           })
         );
-      }, 0);
+      }, 2000);
     });
   }
 }
