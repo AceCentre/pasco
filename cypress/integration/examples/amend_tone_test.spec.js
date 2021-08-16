@@ -9,7 +9,7 @@ describe("Select" , () => {
 
       cy.wait(5000);
 
-      cy.get('#_cue_voice_id')
+      cy.get('#_cue_voice_id').debug()
          .select("Google UK English Male")
          .should('have.value', 'Google UK English Male')
          
