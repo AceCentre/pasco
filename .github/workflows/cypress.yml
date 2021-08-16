@@ -1,0 +1,33 @@
+name: Run Cypress 
+on: [pull_request]
+jobs:
+  RunCypress:
+    runs-on: ubuntu-latest
+    steps:
+      - name: get code
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+      - name: Sleep for 3 minutes
+        run: sleep 180s
+ 
+      - name: Waiting for 200 from the Netlify Preview
+        uses: jakepartusch/wait-for-netlify-action@v1.2
+        id: waitForDeploy
+        with:
+          site_name: "pasco-app"
+          max_timeout: 60
+
+      - uses: cypress-io/github-action@v2
+        with:
+          browser: chrome
+          config: baseUrl=${{ steps.waitForDeploy.outputs.url }}
+          install-command: npm install
+          record: true
+        env:
+          # pass the Dashboard record key as an environment variable
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          # pass GitHub token to allow accurately detecting a build vs a re-run build
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CYPRESS_PROJECT_ID: ${{ secrets.PROJECT_ID }}
+
