@@ -8,6 +8,13 @@ jobs:
         uses: actions/checkout@v2
 
       - uses: actions/setup-node@v2
+    
+      - name: Waiting for 200 from the Netlify Preview
+        uses: jakepartusch/wait-for-netlify-action@v1.2
+        id: waitFor200
+        with:
+          site_name: "pasco-app"
+          max_timeout: 60
 
       - uses: cypress-io/github-action@v2
         with:
