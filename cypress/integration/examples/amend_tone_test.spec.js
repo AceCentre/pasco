@@ -4,16 +4,20 @@
 
 describe("Select" , () => {
    it("should select an option from the select dropdown" , () => {
-      cy.visit("https://app.pasco.chat/quick-setup.html");
+      const baseUrl = Cypress.config().baseUrl
+      cy.visit(baseUrl);
+
+      cy.wait(5000);
+
       cy.get('#_cue_voice_id')
-         .select("Microsoft George - English (United Kingdom)")
-         .should('have.value', 'Microsoft George - English (United Kingdom)')
+         .select("Google UK English Male")
+         .should('have.value', 'Google UK English Male')
          
       //now press submit button (so it enters that altered cue voice in  quick set up )
       cy.get('button').contains("Start").click();
 
       //loads next page  
-      cy.url().should("include", "app.pasco.chat/index.html"); 
+      cy.url().should("include", "index.html"); 
 
       // now click setting icon
       // click ‘speech’
@@ -22,9 +26,9 @@ describe("Select" , () => {
 
       cy.wait(1000);
       cy.get("a").contains("Speech").click();
-      cy.url().should("include","app.pasco.chat/edit-config.html#!speech");
+      cy.url().should("include","edit-config.html#!speech");
       
-      cy.get("#_cue_voice_id").invoke("val").should("include","Microsoft George");   //check drop down value is george
+      cy.get("#_cue_voice_id").invoke("val").should("include","Google UK English Male");   //check drop down value is george
    });
 });
 
