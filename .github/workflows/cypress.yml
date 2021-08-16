@@ -20,6 +20,7 @@ jobs:
 
       - uses: cypress-io/github-action@v2
         with:
+          browser: chrome
           config: baseUrl=${{ steps.waitForDeploy.outputs.url }}
           install-command: npm install
           record: true
