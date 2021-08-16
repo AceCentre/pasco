@@ -13,13 +13,14 @@ jobs:
  
       - name: Waiting for 200 from the Netlify Preview
         uses: jakepartusch/wait-for-netlify-action@v1.2
-        id: waitFor200
+        id: waitForDeploy
         with:
           site_name: "pasco-app"
           max_timeout: 60
 
       - uses: cypress-io/github-action@v2
         with:
+          config: baseUrl=${{ steps.waitForDeploy.outputs.url }}
           install-command: npm install
           record: true
         env:
