@@ -5,7 +5,7 @@
 describe("Select" , () => {
    it("should select an option from the select dropdown" , () => {
       const baseUrl = Cypress.config().baseUrl
-      cy.visit(baseUrl);
+      cy.visit(baseUrl+"/quick-setup.html");
 
       cy.wait(5000);
 
