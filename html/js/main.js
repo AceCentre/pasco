@@ -2140,7 +2140,7 @@ function get_words(url) {
     .then(function(data) {
       const words = _.chain(data.words)
         // Store the lowercased word.
-        .map(w => _.defaults({ lower: w.v.toLowerCase() }, w))
+        .map(w => _.defaults({ lower: (w.v+'').toLowerCase() }, w))
         // Make sure that the words are sorted.
         .sortBy(w => w.lower)
         .value();
