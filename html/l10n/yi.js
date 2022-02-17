@@ -20,7 +20,7 @@
 	icu.getLocale = function() { return "yi" };
 	icu.getLocaleName = function() { return "Yiddish" };
 
-  icu.rtl = true;
+  icu.rtl = false;
   icu.dictionary = {
     "help_title": "הילף_טיטל",
     "Toggle navigation": "באַשטימען נאַוויגאַציע",
