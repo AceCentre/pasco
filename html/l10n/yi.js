@@ -7,20 +7,20 @@
 	window.icu = window.icu || new Object();
 	var icu = window.icu;	
 		
-	icu.getCountry = function() { return "GB" };
-	icu.getCountryName = function() { return "United Kingdom" };
+	icu.getCountry = function() { return "YI" };
+	icu.getCountryName = function() { return "Yiddish"" };
 	icu.getDateFormat = function(formatCode) { var retVal = {}; retVal.format = df[formatCode]; return retVal; };
 	icu.getDateFormats = function() { return df; };
 	icu.getDateFormatSymbols = function() { return dfs; };
 	icu.getDecimalFormat = function(places) { var retVal = {}; retVal.format = function(n) { var ns = n < 0 ? Math.abs(n).toFixed(places) : n.toFixed(places); var ns2 = ns.split('.'); s = ns2[0]; var d = ns2[1]; var rgx = /(\d+)(\d{3})/;while(rgx.test(s)){s = s.replace(rgx, '$1' + nfs["grouping_separator"] + '$2');} return (n < 0 ? nfs["minus"] : "") + s + nfs["decimal_separator"] + d;}; return retVal; };
 	icu.getDecimalFormatSymbols = function() { return nfs; };
 	icu.getIntegerFormat = function() { var retVal = {}; retVal.format = function(i) { var s = i < 0 ? Math.abs(i).toString() : i.toString(); var rgx = /(\d+)(\d{3})/;while(rgx.test(s)){s = s.replace(rgx, '$1' + nfs["grouping_separator"] + '$2');} return i < 0 ? nfs["minus"] + s : s;}; return retVal; };
-	icu.getLanguage = function() { return "en" };
-	icu.getLanguageName = function() { return "English" };
-	icu.getLocale = function() { return "en-GB" };
-	icu.getLocaleName = function() { return "English (United Kingdom)" };
+	icu.getLanguage = function() { return "yi" };
+	icu.getLanguageName = function() { return "Yiddish" };
+	icu.getLocale = function() { return "yi" };
+	icu.getLocaleName = function() { return "Yiddish" };
 
-  icu.rtl = false;
+  icu.rtl = true;
   icu.dictionary = {
     "help_title": "הילף_טיטל",
     "Toggle navigation": "באַשטימען נאַוויגאַציע",
