@@ -33,7 +33,7 @@
     "copy-html-to-clipboard": "^4.0.1",
     "jquery": "^3.4.1",
     "path-browserify": "^1.0.1",
-    "plist": "3.0.1",
+    "plist": "3.0.4",
     "rangeslider-js": "^3.2.1",
     "scrollnav": "git+https://github.com/hosseinamin/scrollnav.git",
     "sorted-array-functions": "^1.2.0"
