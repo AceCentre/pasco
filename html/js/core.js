@@ -1822,7 +1822,7 @@ function _tree_to_markdown_subrout_node(node, level, md_lines) {
     return;
   }
   var line = (text != null ? '#'.repeat(level) + ' ' + text : '') +
-      (meta_html ? ' ' + meta_html : '');
+      (meta_html ? (level == 0 ? '' : ' ') + meta_html : '');
   if(line) {
     md_lines.push(line)
     md_lines.push("") // empty line
