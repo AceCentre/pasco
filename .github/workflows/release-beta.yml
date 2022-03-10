@@ -28,7 +28,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Install dependencies
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Install cordova dependencies
+        working-directory: ./cordova
         run: npm install
 
       - name: Build web contents
