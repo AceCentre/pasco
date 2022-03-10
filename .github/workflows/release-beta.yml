@@ -52,8 +52,8 @@ jobs:
         working-directory: ./cordova
         run: npm run cordova-build
 
-      - name: Add cordova plugin
-        run: fastlane add_plugin cordova
+      - name: Copy fastlane into ios app folder
+        run: cp -r ./fastlane ./cordova/platforms/ios
 
       - name: Release beta ios
         env:
