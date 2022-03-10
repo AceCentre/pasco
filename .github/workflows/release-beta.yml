@@ -55,14 +55,14 @@ jobs:
       - name: Copy fastlane into ios app folder
         run: cp -r ./fastlane ./cordova/platforms/ios
 
-        # Super hacky
+        # This is a pretty major bodge. The reason we do this is because fastlane needs the version system
+        # in xcode to be apple-generic to do the version bump. There is probably a cleaner way to do this
+        # directly in fastlane or cordova but i couldnt find it so I went with this.
       - name: Change versioning type
-        uses: jacobtomlinson/gha-find-replace@v2
-        with:
-          include: "./cordova/platforms/ios/pasco.xcodeproj/project.pbxproj"
-          find: 'VERSIONING_SYSTEM = "";'
-          replace: 'VERSIONING_SYSTEM = "apple-generic";'
-          regex: false
+        run: |
+          sed 's/VERSIONING_SYSTEM = "";/VERSIONING_SYSTEM = "apple-generic";/g' ./cordova/platforms/ios/pasco.xcodeproj/project.pbxproj > temp &&
+          rm ./cordova/platforms/ios/pasco.xcodeproj/project.pbxproj && 
+          mv temp ./cordova/platforms/ios/pasco.xcodeproj/project.pbxproj
 
       - name: Release beta ios
         env:
