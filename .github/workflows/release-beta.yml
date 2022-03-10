@@ -35,6 +35,9 @@ jobs:
         working-directory: ./cordova
         run: npm install
 
+      - name: Install fastlane
+        run: brew install fastlane
+
       - name: Build web contents
         run: npm run build-prod
 
