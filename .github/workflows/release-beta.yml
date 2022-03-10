@@ -36,3 +36,7 @@ jobs:
 
       - name: Create cordova distribution
         run: npm run cordova-dist
+
+      - name: Run cordova build
+        working-directory: ./cordova
+        run: cordova build
