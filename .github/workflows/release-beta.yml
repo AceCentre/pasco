@@ -60,4 +60,4 @@ jobs:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           CI: true
         working-directory: ./cordova/platforms/ios
-        run: fastlane beta ios
+        run: fastlane ios beta
