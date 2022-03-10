@@ -41,6 +41,10 @@ jobs:
       - name: Create cordova distribution
         run: npm run cordova-dist
 
+      - name: Add ios to cordova build
+        working-directory: ./cordova
+        run: npm run add-ios
+
       - name: Run cordova build
         working-directory: ./cordova
         run: npm run cordova-build
