@@ -19,7 +19,8 @@ platform :ios do
   desc "Push a new beta build to TestFlight"
   lane :beta do
     setup_ci if ENV['CI']
-    match(type: 'appstore', git_basic_authorization: Base64.strict_encode64(ENV["GIT_AUTHORIZATION"]),)
+    match(type: 'appstore', git_basic_authorization: Base64.strict_encode64(ENV["GIT_AUTHORIZATION"]))
+    build_settings['VERSIONING_SYSTEM'] = "Apple Generic"
     increment_build_number(xcodeproj: "pasco.xcodeproj")
     build_app(workspace: "pasco.xcworkspace", scheme: "pasco")
     upload_to_testflight(skip_waiting_for_build_processing: true)
