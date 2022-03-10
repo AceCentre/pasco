@@ -18,6 +18,7 @@ default_platform(:ios)
 platform :ios do
   desc "Push a new beta build to TestFlight"
   lane :beta do
+    xcversion(version: "8.1")
     setup_ci if ENV['CI']
     match(type: 'appstore', git_basic_authorization: Base64.strict_encode64(ENV["GIT_AUTHORIZATION"]))
     increment_build_number(xcodeproj: "pasco.xcodeproj", build_number: ENV["BUILD_NO"])
