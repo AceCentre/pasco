@@ -1,0 +1,16 @@
+name: Release Beta
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: main
+concurrency:
+  group: deploy-${{ github.head_ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  Build:
+    runs-on: macos-latest
+    steps:
+      - name: Get Code
+        uses: actions/checkout@v3
