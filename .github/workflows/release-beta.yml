@@ -53,7 +53,7 @@ jobs:
         run: npm run cordova-build
 
       - name: Copy fastlane into ios app folder
-        run: cp ./fastlane ./cordova/platforms/ios
+        run: cp -r ./fastlane ./cordova/platforms/ios
 
       - name: Release beta ios
         env:
