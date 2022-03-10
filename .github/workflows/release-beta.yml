@@ -33,3 +33,6 @@ jobs:
 
       - name: Build web contents
         run: npm run build-prod
+
+      - name: Create cordova distribution
+        run: npm run cordova-dist
