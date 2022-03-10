@@ -43,4 +43,4 @@ jobs:
 
       - name: Run cordova build
         working-directory: ./cordova
-        run: cordova build
+        run: npm run cordova-build

@@ -5,7 +5,8 @@
   "description": "A sample Apache Cordova application that responds to the deviceready event.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "cordova-build": "cordova build"
   },
   "keywords": [
     "ecosystem:cordova"
@@ -13,6 +14,7 @@
   "author": "Apache Cordova Team",
   "license": "Apache-2.0",
   "devDependencies": {
+    "cordova": "^11.0.0",
     "cordova-icon": "^1.0.0",
     "cordova-ios": "^6.2.0",
     "cordova-plugin-customurlscheme": "^5.0.2",
