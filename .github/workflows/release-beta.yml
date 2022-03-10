@@ -51,3 +51,13 @@ jobs:
       - name: Run cordova build
         working-directory: ./cordova
         run: npm run cordova-build
+
+      - name: Copy fastlane into ios app folder
+        run: cp ./fastlane ./cordova/platforms/ios
+
+      - name: Release beta ios
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          CI: true
+        working-directory: ./cordova/platforms/ios
+        run: fastlane beta ios
