@@ -58,6 +58,7 @@ jobs:
       - name: Release beta ios
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          GIT_AUTHORIZATION: ${{ secrets.GIT_AUTHORIZATION }}
           CI: true
         working-directory: ./cordova/platforms/ios
         run: fastlane ios beta
