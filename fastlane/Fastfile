@@ -15,12 +15,12 @@
 
 default_platform(:ios)
 
-DEVELOPER_APP_ID = ENV["DEVELOPER_APP_ID"]
-TEMP_KEYCHAIN_USER = ENV["TEMP_KEYCHAIN_USER"]
-TEMP_KEYCHAIN_PASSWORD = ENV["TEMP_KEYCHAIN_PASSWORD"]
-APPLE_ISSUER_ID = ENV["APPLE_ISSUER_ID"]
-APPLE_KEY_ID = ENV["APPLE_KEY_ID"]
-APPLE_KEY_CONTENT = ENV["APPLE_KEY_CONTENT"]
+# DEVELOPER_APP_ID = ENV["DEVELOPER_APP_ID"]
+# TEMP_KEYCHAIN_USER = ENV["TEMP_KEYCHAIN_USER"]
+# TEMP_KEYCHAIN_PASSWORD = ENV["TEMP_KEYCHAIN_PASSWORD"]
+# APPLE_ISSUER_ID = ENV["APPLE_ISSUER_ID"]
+# APPLE_KEY_ID = ENV["APPLE_KEY_ID"]
+# APPLE_KEY_CONTENT = ENV["APPLE_KEY_CONTENT"]
 GIT_AUTHORIZATION = ENV["GIT_AUTHORIZATION"]
 
 def delete_temp_keychain(name)
@@ -52,32 +52,26 @@ platform :ios do
     # keychain_password = TEMP_KEYCHAIN_PASSWORD
     # ensure_temp_keychain(keychain_name, keychain_password)
 
-    api_key = app_store_connect_api_key(
-      key_id: APPLE_KEY_ID,
-      issuer_id: APPLE_ISSUER_ID,
-      key_content: APPLE_KEY_CONTENT,            
-      duration: 1200,            
-      in_house: false
-    )
+    # api_key = app_store_connect_api_key(
+    #   key_id: APPLE_KEY_ID,
+    #   issuer_id: APPLE_ISSUER_ID,
+    #   key_content: APPLE_KEY_CONTENT,            
+    #   duration: 1200,            
+    #   in_house: false
+    # )
 
     match(
       type: 'appstore',
-      app_identifier: "uk.org.acecentre.pasco",
+      # app_identifier: "uk.org.acecentre.pasco",
       git_basic_authorization: Base64.strict_encode64(GIT_AUTHORIZATION),
-      readonly: true,
+      # readonly: true,
       # keychain_name: keychain_name,
       # keychain_password: keychain_password,
-      api_key: api_key,
-      verbose: true
+      # api_key: api_key,
+      # verbose: true
     )
-
     increment_build_number(xcodeproj: "pasco.xcodeproj", build_number: ENV["BUILD_NO"])
-    
-    build_app(
-      workspace: "pasco.xcworkspace",
-      scheme: "pasco",
-    )
-    
+    build_app
     upload_to_testflight(skip_waiting_for_build_processing: false)
 
     # delete_temp_keychain(keychain_name)
