@@ -55,9 +55,6 @@ jobs:
       - name: Copy fastlane into ios app folder
         run: cp -r ./fastlane ./cordova/platforms/ios
 
-      - name: List applications
-        run: ls -la /Applications
-
       - name: Release beta ios
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
