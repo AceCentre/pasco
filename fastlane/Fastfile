@@ -64,7 +64,7 @@ platform :ios do
 
     match(
       type: 'appstore',
-      app_identifier: "#{DEVELOPER_APP_IDENTIFIER}",
+      app_identifier: "uk.org.acecentre.pasco",
       git_basic_authorization: Base64.strict_encode64(GIT_AUTHORIZATION),
       readonly: true,
       # keychain_name: keychain_name,
@@ -82,7 +82,7 @@ platform :ios do
       xcargs: "-allowProvisioningUpdates",
       export_options: {
         provisioningProfiles: { 
-            DEVELOPER_APP_ID => PROVISIONING_PROFILE_SPECIFIER
+            DEVELOPER_APP_ID => 'match AppStore uk.org.acecentre.pasco'
         }
       }
     )
