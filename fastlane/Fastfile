@@ -69,7 +69,8 @@ platform :ios do
       readonly: true,
       # keychain_name: keychain_name,
       # keychain_password: keychain_password,
-      api_key: api_key
+      api_key: api_key,
+      verbose: true
     )
 
     increment_build_number(xcodeproj: "pasco.xcodeproj", build_number: ENV["BUILD_NO"])
