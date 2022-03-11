@@ -79,6 +79,7 @@ platform :ios do
       workspace: "pasco.xcworkspace",
       scheme: "pasco",
       export_method: "app-store",
+      xcargs: "-allowProvisioningUpdates",
       export_options: {
         provisioningProfiles: { 
             DEVELOPER_APP_ID => PROVISIONING_PROFILE_SPECIFIER
