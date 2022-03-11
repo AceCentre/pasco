@@ -76,12 +76,6 @@ platform :ios do
     build_app(
       workspace: "pasco.xcworkspace",
       scheme: "pasco",
-      export_method: "app-store",
-      export_options: {
-        provisioningProfiles: { 
-            DEVELOPER_APP_ID => 'match AppStore uk.org.acecentre.pasco'
-        }
-      }
     )
     
     upload_to_testflight(skip_waiting_for_build_processing: false)
