@@ -16,8 +16,6 @@
 default_platform(:ios)
 
 DEVELOPER_APP_ID = ENV["DEVELOPER_APP_ID"]
-DEVELOPER_APP_IDENTIFIER = ENV["DEVELOPER_APP_IDENTIFIER"]
-PROVISIONING_PROFILE_SPECIFIER = ENV["PROVISIONING_PROFILE_SPECIFIER"]
 TEMP_KEYCHAIN_USER = ENV["TEMP_KEYCHAIN_USER"]
 TEMP_KEYCHAIN_PASSWORD = ENV["TEMP_KEYCHAIN_PASSWORD"]
 APPLE_ISSUER_ID = ENV["APPLE_ISSUER_ID"]
@@ -79,7 +77,6 @@ platform :ios do
       workspace: "pasco.xcworkspace",
       scheme: "pasco",
       export_method: "app-store",
-      xcargs: "-allowProvisioningUpdates",
       export_options: {
         provisioningProfiles: { 
             DEVELOPER_APP_ID => 'match AppStore uk.org.acecentre.pasco'
