@@ -12,14 +12,17 @@ jobs:
   Build:
     runs-on: macos-latest
     steps:
+      # Pull the code onto the CI machine
       - name: Get Code
         uses: actions/checkout@v3
 
+      # Install node v14, not 16 because our setup isn't up to date
       - name: Install node
         uses: actions/setup-node@v2
         with:
           node-version: "14"
 
+      # Cache the NPM dependencies for speed
       - name: Setup cache
         uses: actions/cache@v2
         with:
@@ -28,49 +31,46 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
+      # Install the root dependencies, which are the web projects dependencies
       - name: Install root dependencies
         run: npm install
 
+      # Install the cordova dependencies, this installs the cordova plugins
       - name: Install cordova dependencies
         working-directory: ./cordova
         run: npm install
 
+      # Install fastlane fom homebrew, this will pull ruby etc.
       - name: Install fastlane
         run: brew install fastlane
 
+      # Run the JS through webpack and build the SASS
       - name: Build web contents
         run: npm run build-prod
 
+      # Copy stuff into the cordova folder
       - name: Create cordova distribution
         run: npm run cordova-dist
 
+      # Add iOS to cordova
       - name: Add ios to cordova build
         working-directory: ./cordova
         run: npm run add-ios
 
+      # Build the cordova app
       - name: Run cordova build
         working-directory: ./cordova
         run: npm run cordova-build
 
+      # Copy fastlane config into the iOS folder
       - name: Copy fastlane into ios app folder
         run: cp -r ./fastlane ./cordova/platforms/ios
 
+      # Release iOS via fastlane
       - name: Release beta ios
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           GIT_AUTHORIZATION: ${{ secrets.GIT_AUTHORIZATION }}
           BUILD_NO: ${{ github.run_number }}
-          APP_STORE_CONNECT_TEAM_ID: "${{ secrets.APP_STORE_CONNECT_TEAM_ID }}"
-          DEVELOPER_APP_ID: "${{ secrets.DEVELOPER_APP_ID }}"
-          DEVELOPER_APP_IDENTIFIER: "${{ secrets.DEVELOPER_APP_IDENTIFIER }}"
-          DEVELOPER_PORTAL_TEAM_ID: "${{ secrets.DEVELOPER_PORTAL_TEAM_ID }}"
-          FASTLANE_APPLE_ID: "${{ secrets.FASTLANE_APPLE_ID }}"
-          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: "${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}"
-          PROVISIONING_PROFILE_SPECIFIER: "${{ secrets.PROVISIONING_PROFILE_SPECIFIER }}"
-          TEMP_KEYCHAIN_PASSWORD: "${{ secrets.TEMP_KEYCHAIN_PASSWORD }}"
-          TEMP_KEYCHAIN_USER: "${{ secrets.TEMP_KEYCHAIN_USER }}"
-          APPLE_KEY_ID: "${{ secrets.APPLE_KEY_ID }}"
-          APPLE_ISSUER_ID: "${{ secrets.APPLE_ISSUER_ID }}"
-          APPLE_KEY_CONTENT: "${{ secrets.APPLE_KEY_CONTENT }}"
         working-directory: ./cordova/platforms/ios
         run: fastlane ios beta
