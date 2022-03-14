@@ -57,10 +57,10 @@ jobs:
         working-directory: ./cordova
         run: npm run add-ios
 
-      # Build the cordova app
-      - name: Run cordova build
-        working-directory: ./cordova
-        run: npm run cordova-build
+      # # Build the cordova app
+      # - name: Run cordova build
+      #   working-directory: ./cordova
+      #   run: npm run cordova-build
 
       # Copy fastlane config into the iOS folder
       - name: Copy fastlane into ios app folder
