@@ -12,6 +12,10 @@ platform :ios do
       git_basic_authorization: Base64.strict_encode64(ENV["GIT_AUTHORIZATION"])
     )
     increment_build_number(xcodeproj: "pasco.xcodeproj", build_number: ENV["BUILD_NO"])
+    update_project_team(
+      path: "pasco.xcodeproj",
+      teamid: "K45HHA96ND"
+    )
     build_app
     upload_to_testflight(skip_waiting_for_build_processing: false)
   end
