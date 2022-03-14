@@ -62,6 +62,12 @@ jobs:
       #   working-directory: ./cordova
       #   run: npm run cordova-build
 
+      - name: Change versioning type
+        run: |
+          sed 's/iPhone Distribution/iPhone Developer/g' ./cordova/platforms/ios/cordova/build-release.xcconfig > temp &&
+          rm ./cordova/platforms/ios/cordova/build-release.xcconfig && 
+          mv temp ./cordova/platforms/ios/cordova/build-release.xcconfig
+
       # Copy fastlane config into the iOS folder
       - name: Copy fastlane into ios app folder
         run: cp -r ./fastlane ./cordova/platforms/ios
