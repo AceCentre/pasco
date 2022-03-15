@@ -1,6 +1,0 @@
-git_url("https://github.com/AceCentre/pasco-certs")
-git_branch("master")
-
-storage_mode("git")
-
-type("appstore") 
