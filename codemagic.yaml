@@ -53,6 +53,7 @@ workflows:
           xcode-project use-profiles
 
       - name: Build iOS
+        working_directory: ./cordova
         script: |
           package_type=$(defaults read ~/export_options.plist method)
           identity=$(defaults read ~/export_options.plist signingCertificate)
