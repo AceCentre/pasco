@@ -6,10 +6,10 @@ workflows:
       groups:
         - Pasco App Store
         - certificate_credentials
-    vars:
-      XCODE_WORKSPACE: "cordova/platforms/ios/pasco.xcworkspace"
-      XCODE_SCHEME: "pasco" # <-- Put the name of your scheme here.
-      BUNDLE_ID: "uk.org.acecentre.pasco" # <-- Put your Bundle Id here.
+      vars:
+        XCODE_WORKSPACE: "cordova/platforms/ios/pasco.xcworkspace"
+        XCODE_SCHEME: "pasco" # <-- Put the name of your scheme here.
+        BUNDLE_ID: "uk.org.acecentre.pasco" # <-- Put your Bundle Id here.
     publishing:
       app_store_connect:
         api_key: $APP_STORE_CONNECT_PRIVATE_KEY
