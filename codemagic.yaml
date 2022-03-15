@@ -1,5 +1,26 @@
 workflows:
-  hello-world:
-    name: Hello world workflow
+  release-testflight:
+    environment:
+      node: 14.19.0
+      npm: latest
     scripts:
-      - echo "Hello World!"
+      - name: Install dependencies
+        script: npm install
+
+      - name: Install cordova deps
+        working-directory: ./cordova
+        script: npm install
+
+      - name: Build web contents
+        script: npm run build-prod
+
+      - name: Build cordova distribution
+        script: npm run cordova-dist
+
+      - name: Add ios to cordova build
+        working-directory: ./cordova
+        run: npm run add-ios
+
+      - name: Build ios
+        working-directory: ./cordova
+        run: npm run cordova-build
