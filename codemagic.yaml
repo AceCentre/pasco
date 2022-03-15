@@ -4,7 +4,7 @@ workflows:
       node: 14.19.0
       npm: latest
       groups:
-        - Pasco App Store
+        - app_store_credentials
         - certificate_credentials
       vars:
         XCODE_WORKSPACE: "cordova/platforms/ios/pasco.xcworkspace"
