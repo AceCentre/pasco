@@ -3,6 +3,13 @@ workflows:
     environment:
       node: 14.19.0
       npm: latest
+      groups:
+        - Pasco App Store
+        - certificate_credentials
+    vars:
+      XCODE_WORKSPACE: "cordova/platforms/ios/pasco.xcworkspace"
+      XCODE_SCHEME: "pasco" # <-- Put the name of your scheme here.
+      BUNDLE_ID: "uk.org.acecentre.pasco" # <-- Put your Bundle Id here.
     publishing:
       app_store_connect:
         api_key: $APP_STORE_CONNECT_PRIVATE_KEY
@@ -29,6 +36,43 @@ workflows:
         working_directory: ./cordova
         script: npm run add-ios
 
-      - name: Build ios
-        working_directory: ./cordova
-        script: npm run cordova-build
+      - name: Set up keychain to be used for codesigning using Codemagic CLI 'keychain' command
+        script: |
+          keychain initialize
+
+      - name: Fetch signing files
+        script: |
+          app-store-connect fetch-signing-files $BUNDLE_ID --type IOS_APP_STORE --create
+
+      - name: Add certificates to keychain
+        script: |
+          keychain add-certificates
+
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
+
+      - name: Build iOS
+        script: |
+          package_type=$(defaults read ~/export_options.plist method)
+          identity=$(defaults read ~/export_options.plist signingCertificate)
+          team=$(defaults read ~/export_options.plist teamID)
+          profile=$(find '/Users/builder/Library/MobileDevice/Provisioning Profiles' -name "*.mobileprovision")
+          profile_uuid=$(grep UUID -A1 -a "$profile" | grep -io "[-A-F0-9]\{36\}")
+
+          cat <<EOF > build.json
+              {
+                "ios": {
+                  "release": {
+                    "codeSignIdentity": "$identity",
+                    "developmentTeam": "$team",
+                    "packageType": "$package_type",
+                    "provisioningProfile": "$profile_uuid"
+                  }
+                }
+              }
+          EOF
+          cordova build ios --release --device --buildConfig='build.json'
+    artifacts:
+      - /Users/builder/clone/platforms/ios/build/device/*.ipa
+      - /tmp/xcodebuild_logs/*.log
