@@ -8,7 +8,7 @@ workflows:
         script: npm install
 
       - name: Install cordova deps
-        working-directory: ./cordova
+        working_directory: ./cordova
         script: npm install
 
       - name: Build web contents
@@ -18,9 +18,9 @@ workflows:
         script: npm run cordova-dist
 
       - name: Add ios to cordova build
-        working-directory: ./cordova
+        working_directory: ./cordova
         run: npm run add-ios
 
       - name: Build ios
-        working-directory: ./cordova
+        working_directory: ./cordova
         run: npm run cordova-build
