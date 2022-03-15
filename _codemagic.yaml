@@ -17,7 +17,7 @@ workflows:
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
         submit_to_testflight: true
         beta_groups:
-          - Beta Testers
+          - pasco-testers
     scripts:
       - name: Install dependencies
         script: npm install
