@@ -19,8 +19,8 @@ workflows:
 
       - name: Add ios to cordova build
         working_directory: ./cordova
-        run: npm run add-ios
+        script: npm run add-ios
 
       - name: Build ios
         working_directory: ./cordova
-        run: npm run cordova-build
+        script: npm run cordova-build
