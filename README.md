@@ -12,7 +12,7 @@ pasco is a development project by the [Ace Centre](https://acecentre.org.uk) to 
 
 You can try out a limited version of pasco on the web at [app.pasco.chat](https://app.pasco.chat). Alternatively download the iOS app [here](https://itunes.apple.com/us/app/pasco/id1317265884?ls=1&mt=8).
 
-To learn more about pasco, [Read pasco documentation](https://acecentre.github.io/pasco).
+To learn more about pasco, [Read pasco documentation](https://docs.acecentre.org.uk/pasco/).
 
 ### Differences between versions
 
