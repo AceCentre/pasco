@@ -1,4 +1,4 @@
-# 🚀 Meta tags
+# Meta tags
 
 ## Overview
 
@@ -28,7 +28,7 @@ type: string
 
 Auditory main specifies what should get uttered when user selects a node.
 
-<small>It's not applicable to spelling branch</small>
+It's not applicable to spelling branch
 
 ## `back-n-branch`
 
@@ -38,27 +38,27 @@ To move up `n` levels in the tree hierarchy when the node has select.
 
 ## `back-n-branch-notify`
 
-type: [boolean](#boolean-value)
+type: [boolean](meta-tags.md#boolean-value)
 
 Back n branch attribute performs back functionality. And it does not utter (with main voice) the node itself. As selecting a node does that. When you include `back-n-branch-notify` it notifies the user by uttering with main voice.
 
 ## `audio`
 
-type: [path](#path-value)
+type: [path](meta-tags.md#path-value)
 
 The audio to play instead of utterance with speech synthesizer. It applies to cue and main voice.
 
 ## `cue-audio`
 
-type: [path](#path-value)
+type: [path](meta-tags.md#path-value)
 
 The audio to play when user scrolls through nodes. `cue-audio` overrides `audio` attribute when you specify both.
 
 ## `main-audio`
 
-type: [path](#path-value)
+type: [path](meta-tags.md#path-value)
 
-The audio to play when user selects a node. `main-audio` overrides `audio` attribute when you specify both. 
+The audio to play when user selects a node. `main-audio` overrides `audio` attribute when you specify both.
 
 ## `locale`
 
@@ -68,15 +68,15 @@ Specify locale for a node. At the moment this attribute has only effect on speec
 
 Here are possible values you can set as locale.
 
-- `"en-GB"` English (UK)
-- `"de"` German
-- `"fr-FR"` French
-- `"es-ES"` Spanish
-- `"ar"` Arabic
-- `"gu"` Gujarati
-- `"cy"` Welsh
+* `"en-GB"` English (UK)
+* `"de"` German
+* `"fr-FR"` French
+* `"es-ES"` Spanish
+* `"ar"` Arabic
+* `"gu"` Gujarati
+* `"cy"` Welsh
 
-<small>You may also use only language part of locale. For example instead of `"en-GB"` if you use `en`. pasco will match it to first locale it finds with same language.</small>
+You may also use only language part of locale. For example instead of `"en-GB"` if you use `en`. pasco will match it to first locale it finds with same language.
 
 ## `cue-locale`
 
@@ -92,7 +92,7 @@ Same as `locale`, This attribute is designed to override `locale` for main voice
 
 ## `spell-branch`
 
-type: [boolean](#boolean-value)
+type: [boolean](meta-tags.md#boolean-value)
 
 pasco enables spelling with this attribute. You have to assign it to top level node that contains spelling branch. Here's an examples.
 
@@ -113,16 +113,15 @@ B
 Finish<meta data-spell-finish>
 ```
 
-
 ## `spell-delchar`
 
-type: [boolean](#boolean-value)
+type: [boolean](meta-tags.md#boolean-value)
 
 When user selects a node with this attribute. It removes a letter from existing spelling session.
 
 ## `spell-finish`
 
-type: [boolean](#boolean-value)
+type: [boolean](meta-tags.md#boolean-value)
 
 You have to use "spell-finish" to finish the existig session. It also notifies with main voice similar to selecting a node outside `spell-branch`.
 
@@ -138,11 +137,11 @@ type: string
 
 You can use `spell-word` to complete a word in the spelling memory. Let's say you select letter `A` and then select `spell-word="apple"`. Then it will remove registered letter `A` and then adds apple.
 
-<small>Spelling process allows the user to add more than one word by adding space in between them.</small>
+Spelling process allows the user to add more than one word by adding space in between them.
 
 ## `spell-update-dyn-onchange`
 
-type: [boolean](#boolean-value)
+type: [boolean](meta-tags.md#boolean-value)
 
 When this attribute is given to `spell-branch` node. It will update all dyn nodes inside this branch.
 
@@ -150,7 +149,7 @@ This attribute is primarily used when `spell-branch` node contains dynamic nodes
 
 ## `stay-in-branch`
 
-type: [boolean](#boolean-value)
+type: [boolean](meta-tags.md#boolean-value)
 
 With stay in branch you can specify a branch to start over from when user selects a leaf node in that branch. Here's an example.
 
@@ -163,7 +162,7 @@ I'll spell it<meta data-spell-branch data-stay-in-branch>
 
 ## `change-tree`
 
-type: [path](#path-value)
+type: [path](meta-tags.md#path-value)
 
 When user selects `change-tree` pasco tries to load the given tree and open it. Then it starts from beginning in the new tree.
 
@@ -175,7 +174,7 @@ Change by tree is similar to `changetree`. Except it loads the tree from saved t
 
 ## `no-main`
 
-type: [boolean](#boolean-value)
+type: [boolean](meta-tags.md#boolean-value)
 
 When you select a node that has `no-main` it will not utter main voice.
 
@@ -183,8 +182,7 @@ When you select a node that has `no-main` it will not utter main voice.
 
 type: url (string)
 
-pasco has a set of webhook attributes that enables users to perform an http request to sites that support cross-origin xhr requests.
-It is specifically designed for use of iot webhooks like zapier.com, Here's an example.
+pasco has a set of webhook attributes that enables users to perform an http request to sites that support cross-origin xhr requests. It is specifically designed for use of iot webhooks like zapier.com, Here's an example.
 
 ```
 Add a record <meta data-webhook="https://hooks.zapier.com/hooks/catch/.../" data-webhook-method="POST" data-webhook-content-type="application/json" data-webhook-body='{"Name":"random row"}' data-webhook-success-message="Did add a record"/>
@@ -216,13 +214,13 @@ You can set the message to utter when pasco receives success response from this 
 
 ## `webhook-skip-validating-response`
 
-type: [boolean](#boolean-value)
+type: [boolean](meta-tags.md#boolean-value)
 
 With this attribute added to `webhook`. It will skip validating response when response is OK (200). This attribute was specifically designed for zapier.com webhook. By default it is false.
 
 ## `webhook-modify-headers`
 
-type: [boolean](#boolean-value)
+type: [boolean](meta-tags.md#boolean-value)
 
 When this attribute is true, Only then webhook will actually modify request headers. Default is false, It is designed for when cross-origin server does not allow for modifying headers. At the time of design zapier.com webhook does not allow changes on headers.
 
@@ -246,13 +244,13 @@ Predicts order of alphabetic letters according to current spelling status. Here 
 
 ## `words-file`
 
-type: [path](#path-value)
+type: [path](meta-tags.md#path-value)
 
-Words file used for word prediction. At the moment predictions have a simple method of sorting according to weight in words file. [Example words file](https://github.com/AceCentre/pasco/blob/master/html/trees/Spell_Prediction/bncfrequency.json)
+Words file used for word prediction. At the moment predictions have a simple method of sorting according to weight in words file. [Example words file](https://github.com/AceCentre/pasco/blob/master/html/trees/Spell\_Prediction/bncfrequency.json)
 
 This attribute is required when spell dyn has set to a node.
 
-<small>Only for spell dyns</small>
+Only for spell dyns
 
 ## `max-nodes`
 
@@ -260,7 +258,7 @@ type: integer (greater than or equal zero)
 
 Maximum number of nodes to show as predictions. Default: 3
 
-<small>Only for spell dyns</small>
+Only for spell dyns
 
 ## `predict-after-n-chars`
 
@@ -268,7 +266,7 @@ type: integer (greater than or equal zero)
 
 Start predicting after n letters has inserted when spelling. Default: null (no limit)
 
-<small>Only for spell dyns</small>
+Only for spell dyns
 
 ## `alphabet`
 
@@ -276,13 +274,11 @@ type: string
 
 String of letters to use for prediction. Default: `abcdefghijklmnopqrstuvwxyz`
 
-<small>Only for spell predict letters dyn</small>
-
+Only for spell predict letters dyn
 
 ## Path Value
 
 Path is of type string that is expected to be http(s) url or relative path in the package or relative path from base url.
-
 
 ## Boolean Value
 
