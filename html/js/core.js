@@ -1,11 +1,16 @@
-// underscore template settings use {% instead of <%
+// Override the default settings for the underscore template function
+// Uses {% instead of <% in templates
+// These templates are using in the html with the type: 'text/x-template'
 _.templateSettings.escape = /\{%-([\s\S]+?)%\}/g;
 _.templateSettings.evaluate = /\{%([\s\S]+?)%\}/g,
 _.templateSettings.interpolate = /\{%=([\s\S]+?)%\}/g;
 _.templateSettings.variable = "data";
 
-// Cordova specific
+// The 'deviceready' only fires on Cordova apps
+
 document.addEventListener('deviceready', function() {
+  // Adds to classes to the html tag
+  // Adds the platform (ie iOS) and 'cordova'
   var html = document.querySelector('html')
   if(window.device) {
     html.classList.add(window.device.platform.toLowerCase());
@@ -13,6 +18,10 @@ document.addEventListener('deviceready', function() {
   if (window.cordova) {
     html.classList.add('cordova');
   }
+
+  // Polyfill window.open to use the cordova open function instead
+  // Anytime a link is clicked with the _blank attribute it will open
+  // will use the cordova inAppBrowser
   window.open = cordova.InAppBrowser.open;
   $('body').on('click', 'a[target="_blank"]', (evt) => {
     evt.preventDefault();
@@ -20,20 +29,31 @@ document.addEventListener('deviceready', function() {
   });
 }, false);
 
+// Globally define the 'newEl' function to create HTML element in the 'document' context
 window.newEl = document.createElement.bind(document);
+
+// Globally define default values
 window.default_locale = 'en-GB';
 window.default_config = 'config.json';
 window.default_trees_info_fn = 'trees-info.json';
+
+// Set global variables to store the paths to the files
 window.host_tree_dir_prefix = 'trees/';
 window.default_tree = window.host_tree_dir_prefix + 'default/default.md';
 window.cordova_user_dir_prefix = 'cdvfile://localhost/persistent/';
+
+// Setting the default data state to null, this will be set later
 window.pasco_data_state = null
 
-
+// Converts a FS file path to a friendly name
+// https://mysite.com?demo=true -> mysite.com
+// https://mysite.com/myurl!hasSpecial/characters -> mysite.com_myurl_hasSpecial_characters
 function fs_friendly_name (s) {
-  return s.replace(/^[a-z]{1,10}\:\/\//i,"").replace(/\?.*$/,"")
-    .replace(/[ \(\)\[\]\*\#\@\!\$\%\^\&\+\=\/\\:]/g, '_')
-    .replace(/[\r\n\t]/g, '');
+  return s
+    .replace(/^[a-z]{1,10}\:\/\//i,"") // Removes the protocol, ie, http://, https:// or cdvfile://
+    .replace(/\?.*$/,"") // Removes the query string
+    .replace(/[ \(\)\[\]\*\#\@\!\$\%\^\&\+\=\/\\:]/g, '_') //Replace any special characters with a '_'
+    .replace(/[\r\n\t]/g, ''); // Removes the newline, tab, and carriage return
 }
 
 /**
