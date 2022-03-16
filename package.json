@@ -7,7 +7,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "http-server -o tests/index.html .",
     "dev": "concurrently \"npm run dev-bs\" \"gulp dev\"",
     "dev-bs": "browser-sync start -c bs-config.js",
     "build": "gulp build-dev",
@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
+    "http-server": "13.0.2",
     "@babel/plugin-transform-runtime": "^7.12.15",
     "@babel/preset-env": "^7.12.16",
     "@babel/runtime": "^7.12.13",
