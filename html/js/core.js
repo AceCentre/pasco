@@ -56,34 +56,56 @@ function fs_friendly_name (s) {
     .replace(/[\r\n\t]/g, ''); // Removes the newline, tab, and carriage return
 }
 
-/**
- * determines place of tree and prepares it if default does not exists
- */
-function prepare_tree(tree_fn) {
-  if(!tree_fn)
+// Takes a tree filename and returns a tree
+// Determines place of tree and prepares it if default does not exists
+function prepare_tree(treeFileName) {
+  if(!treeFileName) {
     throw new Error("Invalid argument");
-  if (tree_fn.indexOf('https://') != -1 ||
-      tree_fn.indexOf('http://') != -1 ||
-      tree_fn.indexOf('://') == -1) {
-    let promise = Promise.resolve(tree_fn)
-    if ((tree_fn.indexOf('://') == -1)) {
+  }
+  
+  // This will match when the tree filename is a http:// or http:// path
+  // It will also match when their is no protocol
+  // It will NOT match when there is a non-http protocol
+  if (
+    treeFileName.indexOf("https://") != -1 ||
+    treeFileName.indexOf("http://") != -1 ||
+    treeFileName.indexOf("://") == -1
+  ) {
+    let promise = Promise.resolve(treeFileName);
+
+    // This matches when there is no protocol
+    if (treeFileName.indexOf("://") == -1) {
+
+      // If there pasco_data_state has not been see if the given file name exists when
+      // we use the 'file:///' protocol. If it exists with that protocol we use that
+      // otherwise we use the original file name
       if (!window.pasco_data_state) {
-        promise = file_exists('file:///' + tree_fn)
-          .then(function (exists) {
-            return exists ? 'file:///' + tree_fn : tree_fn;
-          })
+
+        promise = file_exists("file:///" + treeFileName).then(function (exists) {
+          return exists ? "file:///" + treeFileName : treeFileName;
+        });
+
+      // If we already have the data 
       } else {
-        promise = Promise.resolve(new URL(tree_fn, location+'').href)
+        // This will be the current browser URL
+        const currentLocation = location + "";
+
+        // Create a new URL with the tree file name as the pathname and the current browser location
+        const newUrl = new URL(treeFileName, currentLocation)
+
+        promise = Promise.resolve(newUrl.href);
       }
     }
     return promise.then(function (tree_url) {
       return {
-        tree_fn: tree_url,
+        treeFileName: tree_url,
         dirpath: new URL('.', tree_url).href,
         audio_dirname: null,
-      }
+      };
     });
   }
+
+  
   let audio_dirname = window.cordova ? 'audio' : null
   let promise = Promise.resolve()
   let tree_dir = new URL('.', tree_fn).href
@@ -231,6 +253,7 @@ function overwrite_file_funcs_with_local_storage () {
   window.get_file_data = new_read
   window.set_file_data = new_write
   window.unset_file = delete_entry
+
   window.file_exists = function (key) {
     let withfileproto = key.startsWith('file:///')
     if (withfileproto) {
@@ -257,6 +280,7 @@ function overwrite_file_funcs_with_local_storage () {
       return Promise.resolve(true)
     }
   }
+  
   window.mkdir = function () { return Promise.resolve() }
   window.mkdir_rec = function () { return Promise.resolve() }
 }
@@ -1107,6 +1131,7 @@ function _cordova_fix_url(url) {
           '' : 'cdvfile://localhost/bundle/www/') + url;
 }
 
+
 function file_exists(url, options) {
   if (is_local_cordova_file(url)) {
     return cordova_file_exists(url)
@@ -1568,6 +1593,7 @@ function read_json(url, options) {
     });
 }
 
+// The path is a local cordova path if it starts with cdvfile:// or file:///
 function is_local_cordova_file (url) {
   return url.indexOf('cdvfile://') == 0 || url.indexOf('file:///') == 0 
 }
