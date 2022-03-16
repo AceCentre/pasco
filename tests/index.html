@@ -17,7 +17,55 @@
             (async () => {
                 const tests = [
                     {
-                        name: "prepare_tree",
+                        group: "fs_friendly_name",
+                        description: "Removes http://",
+                        test: function() {
+                            const result = fs_friendly_name("http://www.google.com");
+                            return result === "www.google.com";
+                        }
+                    },
+                    {
+                        group: "fs_friendly_name",
+                        description: "Removes https://",
+                        test: function() {
+                            const result = fs_friendly_name("https://www.google.com");
+                            return result === "www.google.com";
+                        }
+                    },
+                    {
+                        group: "fs_friendly_name",
+                        description: "Removes random protocol",
+                        test: function() {
+                            const result = fs_friendly_name("myproto://www.google.com");
+                            return result === "www.google.com";
+                        }
+                    },
+                    {
+                        group: "fs_friendly_name",
+                        description: "Removes query string",
+                        test: function() {
+                            const result = fs_friendly_name("www.google.com?q=test");
+                            return result === "www.google.com";
+                        }
+                    },
+                    {
+                        group: "fs_friendly_name",
+                        description: "Removes newline",
+                        test: function() {
+                            const result = fs_friendly_name("www.go\nogle.com");
+                            return result === "www.google.com";
+                        }
+                    },
+                    {
+                        group: "fs_friendly_name",
+                        description: "Removes /",
+                        test: function() {
+                            const result = fs_friendly_name("www.google.com/test");
+                            return result === "www.google.com_test";
+                        }
+                    },
+                    {
+                        group: "prepare_tree",
                         description: "Throws an error when nothing is passed",
                         test: function() {
                             try {
@@ -32,12 +80,20 @@
 
                 var testList = document.getElementById("test-list");
 
+                const uniqueGroups = [...new Set(tests.map(x => x.group))];
+
+                for(const group of uniqueGroups) {
+                    const groupItem = document.createElement("li");
+                    groupItem.innerHTML = `${group}<ul id="${group}"></ul`;
+                    testList.appendChild(groupItem);
+                }
+
                 for(const current of tests) {
+                    const currentList = document.getElementById(current.group);
                     const result = await current.test();
                     const testItem = document.createElement("li");
-                    testItem.innerHTML = `${current.name} - ${current.description} - ${result ? "Passed" : "Failed"}`;
-                    testList.appendChild(testItem);
-
+                    testItem.innerHTML = `${current.description} - ${result ? "✅" : "❌"}`;
+                    currentList.appendChild(testItem);
                 }
             })()
         </script>
