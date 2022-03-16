@@ -2,6 +2,7 @@
     <head>
         <title>Pasco Tests</title>
         <script src="../html/bower_components/underscore/underscore-min.js"></script>
+        <script src="../html/js/nodelib.js"></script>
         <script src="../html/js/core.js"></script>
     </head>
     
@@ -13,7 +14,9 @@
         </ul>
         
 
-        <script>
+        <script type="module">
+            import deepEqual from 'https://cdn.skypack.dev/deep-equal';
+
             (async () => {
                 const tests = [
                     {
@@ -76,6 +79,186 @@
                             }
                         }
                     },
+                    {
+                        group: "prepare_tree",
+                        description: "Adds the file protocol if the file exists",
+                        test: async function() {
+                            let temp = window.resolveLocalFileSystemURL;
+
+                            window.resolveLocalFileSystemURL = (_, onSuccess) => {
+                                onSuccess()
+                            }
+
+                            const promise = prepare_tree("no-protocol");
+
+                            if(!(promise instanceof Promise)) {
+                                return false
+                            }
+
+                            const result = await promise;
+
+                            window.resolveLocalFileSystemURL = temp;
+
+                            return deepEqual(result, {
+                                audio_dirname: null,
+                                dirpath: "file:///",
+                                tree_fn: "file:///no-protocol"
+                            })
+
+                        }
+                    },
+                    {
+                        group: "prepare_tree",
+                        description: "Returns the original URL when you pass a http path",
+                        test: async function() {
+                            let temp = window.resolveLocalFileSystemURL;
+
+                            window.resolveLocalFileSystemURL = (_, __, onFail) => {
+                                onFail(new NodeLib.common.NotFoundError())
+                            }
+
+                            const promise = prepare_tree("http://google.com/tree");    
+
+                            if(!(promise instanceof Promise)) {
+                                return false
+                            }
+
+                            const result = await promise
+
+                            window.resolveLocalFileSystemURL = temp;
+
+                            return deepEqual(result, {
+                                audio_dirname: null,
+                                dirpath: "http://google.com/",
+                                tree_fn: "http://google.com/tree"
+                            })
+
+                        }
+                    },
+                    {
+                        group: "prepare_tree",
+                        description: "Returns the original URL when you pass a https path",
+                        test: async function() {
+                            let temp = window.resolveLocalFileSystemURL;
+
+                            window.resolveLocalFileSystemURL = (_, __, onFail) => {
+                                onFail(new NodeLib.common.NotFoundError())
+                            }
+
+                            const promise = prepare_tree("https://google.com/tree");
+
+                            if(!(promise instanceof Promise)) {
+                                return false
+                            }
+
+                            const result = await promise
+
+                            window.resolveLocalFileSystemURL = temp;
+
+                            return deepEqual(result, {
+                                audio_dirname: null,
+                                dirpath: "https://google.com/",
+                                tree_fn: "https://google.com/tree"
+                            })
+
+                        }
+                    },
+                    {
+                        group: "prepare_tree",
+                        description: "Uses the current location if pasco_data_state is set",
+                        test: async function() {
+                            let tempResolveLocalFileSystemURL = window.resolveLocalFileSystemURL;
+                            let tempPasco_data_state = window.pasco_data_state
+
+                            window.resolveLocalFileSystemURL = (_, __, onFail) => {
+                                onFail(new NodeLib.common.NotFoundError())
+                            }
+
+                            window.pasco_data_state = true;
+
+                            const promise = prepare_tree("my_tree");
+
+                            if(!(promise instanceof Promise)) {
+                                return false
+                            }
+
+
+                            const result = await promise
+
+                            window.resolveLocalFileSystemURL = tempResolveLocalFileSystemURL;
+                            window.pasco_data_state = tempPasco_data_state
+
+                            return deepEqual(result, {
+                                audio_dirname: null,
+                                dirpath: "http://127.0.0.1:8080/tests/",
+                                tree_fn: "http://127.0.0.1:8080/tests/my_tree"
+                            })
+
+                        }
+                    },
+                    {
+                        group: "prepare_tree",
+                        description: "Use a non http protocol",
+                        test: async function() {
+                            let tempResolveLocalFileSystemURL = window.resolveLocalFileSystemURL;
+
+                            window.resolveLocalFileSystemURL = (_, __, onFail) => {
+                                onFail(new NodeLib.common.NotFoundError())
+                            }
+
+                            const promise = prepare_tree("cordova://test/tree");
+
+                            if(!(promise instanceof Promise)) {
+                                return false
+                            }
+
+                            const result = await promise
+
+                            window.resolveLocalFileSystemURL = tempResolveLocalFileSystemURL;
+
+                            return deepEqual(result, {
+                                audio_dirname: null,
+                                dirpath: "cordova://test/",
+                                tree_fn: "cordova://test/tree",
+                            })
+
+                        }
+                    },
+                    {
+                        group: "prepare_tree",
+                        description: "Use a non http protocol when cordova is set",
+                        test: async function() {
+                            const tempCordova = window.cordova;
+                            const tempResolveLocalFileSystemURL = window.resolveLocalFileSystemURL;
+                            const tempMkdir_rec = window.mkdir_rec
+
+                            window.resolveLocalFileSystemURL = (_, onSuccess) => {
+                                onSuccess()
+                            }
+
+                            window.cordova = true;
+
+                            window.mkdir_rec = () => {}
+
+                            const promise = prepare_tree("cordova://test/tree");
+
+                            if(!(promise instanceof Promise)) {
+                                return false
+                            }
+
+                            const result = await promise
+
+                            window.cordova = tempCordova;
+                            window.resolveLocalFileSystemURL = tempResolveLocalFileSystemURL;
+                            window.mkdir_rec = tempMkdir_rec
+
+                            return deepEqual(result, {
+                                tree_fn: 'cordova://test/tree',
+                                dirpath: 'cordova://test/',
+                                audio_dirname: 'audio'
+                            })
+                        }
+                    },
                 ];
 
                 var testList = document.getElementById("test-list");
@@ -90,7 +273,15 @@
 
                 for(const current of tests) {
                     const currentList = document.getElementById(current.group);
-                    const result = await current.test();
+                    
+                    let result = null;
+                    try {
+                        result = await current.test();
+                    } catch (e) {
+                        console.warn(e)
+                        result = false
+                    }
+
                     const testItem = document.createElement("li");
                     testItem.innerHTML = `${current.description} - ${result ? "✅" : "❌"}`;
                     currentList.appendChild(testItem);
