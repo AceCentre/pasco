@@ -58,71 +58,57 @@ function fs_friendly_name (s) {
 
 // Takes a tree filename and returns a tree
 // Determines place of tree and prepares it if default does not exists
-function prepare_tree(treeFileName) {
-  if(!treeFileName) {
+async function prepare_tree(treeFileName) {
+  if (!treeFileName) {
     throw new Error("Invalid argument");
   }
-  
-  // This will match when the tree filename is a http:// or http:// path
-  // It will also match when their is no protocol
-  // It will NOT match when there is a non-http protocol
-  if (
-    treeFileName.indexOf("https://") != -1 ||
-    treeFileName.indexOf("http://") != -1 ||
-    treeFileName.indexOf("://") == -1
-  ) {
-    let promise = Promise.resolve(treeFileName);
 
-    // This matches when there is no protocol
-    if (treeFileName.indexOf("://") == -1) {
+  if (!treeFileName.includes("://") && window.pasco_data_state) {
+    // This will be the current browser URL
+    const currentLocation = location + "";
 
-      // If there pasco_data_state has not been see if the given file name exists when
-      // we use the 'file:///' protocol. If it exists with that protocol we use that
-      // otherwise we use the original file name
-      if (!window.pasco_data_state) {
+    // Create a new URL with the tree file name as the pathname and the current browser location
+    const newUrl = new URL(treeFileName, currentLocation);
 
-        promise = file_exists("file:///" + treeFileName).then(function (exists) {
-          return exists ? "file:///" + treeFileName : treeFileName;
-        });
+    return {
+      tree_fn: newUrl.href,
+      dirpath: new URL(".", newUrl.href).href,
+      audio_dirname: null,
+    };
+  }
 
-      // If we already have the data 
-      } else {
-        // This will be the current browser URL
-        const currentLocation = location + "";
+  if (!treeFileName.includes("://") && !window.pasco_data_state) {
+    const exists = await file_exists("file:///" + treeFileName);
 
-        // Create a new URL with the tree file name as the pathname and the current browser location
-        const newUrl = new URL(treeFileName, currentLocation)
-
-        promise = Promise.resolve(newUrl.href);
-      }
-    }
-    return promise.then(function (tree_url) {
+    if (exists) {
       return {
-        treeFileName: tree_url,
-        dirpath: new URL('.', tree_url).href,
+        tree_fn: "file:///" + treeFileName,
+        dirpath: new URL(".", "file:///" + treeFileName).href,
         audio_dirname: null,
       };
-    });
+    } else {
+      return {
+        tree_fn: treeFileName,
+        dirpath: new URL(".", treeFileName).href,
+        audio_dirname: null,
+      };
+    }
   }
 
-  
-  let audio_dirname = window.cordova ? 'audio' : null
-  let promise = Promise.resolve()
-  let tree_dir = new URL('.', tree_fn).href
+  let audio_dirname = window.cordova ? "audio" : null;
+  let tree_dir = new URL(".", treeFileName).href;
+
   if (audio_dirname) {
-    promise = promise
-      .then(function () {
-        return mkdir_rec(new URL(audio_dirname, tree_dir).href);
-      })
+    await mkdir_rec(new URL(audio_dirname, tree_dir).href);
   }
-  return promise.then(function () {
-    return {
-      tree_fn: tree_fn,
-      dirpath: tree_dir,
-      audio_dirname: audio_dirname,
-    }
-  })
+
+  return {
+    tree_fn: treeFileName,
+    dirpath: tree_dir,
+    audio_dirname: audio_dirname,
+  };
 }
+
 
 function overwrite_file_funcs_with_local_storage () {
   function new_read(url, options) {
