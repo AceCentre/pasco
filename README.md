@@ -121,6 +121,28 @@ We would 💛 your contributions. Please feel free to fork the project and we wo
 - [**Selma Al Zarrouk** - Adding tests + Fixing bugs](https://github.com/selmaAlzarrouk)
 - **Gavin Henderson** - A little bit of coding
 
+## Releasing to App Store Gotchas
+
+> Signing for "pasco" requires a development team. Select a development team in the Signing & Capabilities editor.
+
+This is pretty straight forward. Go into the signing and capabilities tab and select Ace Centre North as the team. Make sure you do it for Debug and Release.
+
+> The app icon is the cordova icon
+
+Run `cordova-icon --icon=model/icon.png` from the cordova folder
+
+> The build and version numbers are weird
+
+You have to manually bump the version numbers
+
+> Archive is greyed out under product
+
+You have to select 'Any iOS Device' as your build target
+
+> pasco has conflicting provisioning settings. pasco is automatically signed for development, but a conflicting code signing identity iPhone Distribution has been manually specified. Set the code signing identity value to "Apple Development" in the build settings editor, or switch to manual signing in the Signing & Capabilities editor.
+
+Try untick and retick 'automatically manage signing'
+
 ## License
 
 This project is licensed under the GNU GPL v3 - see the [LICENSE.txt](https://github.com/AceCentre/pasco/blob/master/LICENCE.txt) file for details
