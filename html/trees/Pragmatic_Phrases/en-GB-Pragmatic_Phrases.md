@@ -192,7 +192,7 @@ Categories
 		cat
 		fish
 		horse
-		fam animal
+		farm animal
 		wild animal
 		bird
 		insect

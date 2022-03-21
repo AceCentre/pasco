@@ -19,99 +19,99 @@
 			אני רוצה אחד אחר
 			לֹא
 	משהו לא בסדר
-		I have an itch
-		I feel sick
-		I’m sore
-		I want to change position
-		I’ve got a pain
-			head
-			neck
-			chest
-			arm
-			hand
-			tummy
-			back
-			bottom
-			leg
-			foot
-			right
-			left
-			both
-			I’ll spell it
-		I’m tired
-		I’m angry
-		I’m upset about something
-		I’m upset about someone
-		I’m hot
-		I’m cold
-		PEG site is sore
-		PEG site is cold
-		I’ll spell it
-	I don’t like this
-		gross
-		stop it
-		scary
-		too hard
-		i can’t see it
-		I don’t want to do it
-		boring
-	I like this
-		cool
-		good
-		funny
-		fantastic
-		nice
-		great
-		yummy
-		lets do more of this
-	I want something
-		a tissue
-		toilet
-		to sit on bean bag
-		rest
-		make up
-		nails done
-		pampering
-		music
-		computer
-		TV
-		go for a walk
-		a person
-	Lets go somewhere
-		home
-		somewhere at home
-		school
-		college
-		outside
-		for a walk
-		hyrotherapy
-		shops
-		cinema
-	I’m asking a question
-		What time is it?
-		Whats happening?
-		Whats that?
-		What have we got next?
-		Where are we going?
-		Where is..?
-			Mum
-			Dad
-			Brother
-			Sister
-			Friends
-				Bob
-				Sue
-			Staff
-				Speech Therapist
-				Physiotherapist
-		I have a question about…
-		Where?
-		Who?
-		When?
-		Why?
-		Whats your name?
-		Can I have your phone number?
-	I shall spell it<meta data-spell-branch>
+		יש לי גירוד
+		אני מרגיש חולה
+		כואב לי
+		אני רוצה לשנות עמדה
+		יש לי כאב
+			גוּלגוֹלֶת
+			צַוָאר
+			בֵּית הַחָזֶה
+			זְרוֹעַ
+			יד
+			בֶּטֶן
+			גֵו
+			יַשׁבָן
+			כֶּרַע
+			כַּף הָרֶגֶל
+			ימין
+			שמאלה
+			שניהם
+			אני יאיית את זה
+		אני עייף
+		אני כועס
+		אני כועס על משהו
+		אני כועס על מישהו
+		חם לי
+		קר לי
+		אתר PEG כואב
+		אתר PEG קר
+		אני יאיית את זה
+	אני לא אוהב את זה
+		מגעיל
+		להפסיק את זה
+		מַפְחִיד
+		קשה מדי
+		אני לא יכול לראות את זה
+		אני לא רוצה לעשות את זה
+		מְשַׁעֲמֵם
+	אני אוהב את זה
+		רָגוּעַ
+		טוֹב
+		מצחיק
+		פַנטַסטִי
+		נֶחְמָד
+		אַדִיר
+		טָעִים מְאוֹד
+		בוא נעשה יותר מזה
+	אני רוצה משהו
+		רקמת נייר
+		שֵׁרוּתִים
+		לשבת על שקית שעועית
+		מנוחה
+		קוסמטיקה
+		טיפול צפורניים
+		תַפנוּק
+		מוּסִיקָה
+		מַחשֵׁב
+		טֵלֶוִיזִיָה
+		לצאת להליכה
+		אדם
+	בוא נלך לאנשהו
+		בית
+		איפשהו בבית
+		בית ספר
+		מִכלָלָה
+		בחוץ
+		להליכה
+		הידרותרפיה
+		חנויות
+		בית קולנוע
+	אני שואל שאלה
+		מה השעה?
+		מה קורה?
+		מה זה?
+		מה יש לנו אחר כך?
+		לאן אנחנו הולכים?
+		איפה..?
+			אִמָא
+			אַבָּא
+			אָח
+			אָחוֹת
+			חברים
+				יוסף
+				תמר
+			מטפלים
+				קלינאי תקשורת
+				פיזיותרפיסט
+		יש לי שאלה לגבי…
+		איפה?
+		מִי?
+		מתי?
+		למה?
+		מה שמך?
+		אפשר את מספר הנייד שלך?
+	אני יאיית את זה<meta data-spell-branch>
 		a
 		b
 		c
@@ -138,47 +138,60 @@
 		x
 		y
 		z
-		Finish<meta data-spell-finish>
-Categories
-	People
-		Mum
-		Dad
-		Brother
-		Sister
-		Friends
-			Bob
-			Sue
-		Staff
-			Speech Therapist
-			Physipotherapist
-	actions
-		a movement
-		go
-		see
-		make
-		play
-		come
-		want
-		have
-		get
-		do
-		talk
-		give
-	activities
-	special events
-		Birthday
-		prize
-		present
-		card
-		party
-		sleepover
-		christmas
-		christmas tree
-		decoration
-		easter
-		jubilee
-	health & body
-	clothes
+		סיים<meta data-spell-finish>
+קטגוריות
+	אֲנָשִׁים
+		אִמָא
+		אַבָּא
+		אָח
+		אָחוֹת
+		חברים
+			יוסף
+			תמר
+		מטפלים
+			קלינאי תקשורת
+			פיזיותרפיסט
+	פעולות
+		מהלך
+		ללכת
+		לִרְאוֹת
+		לִבנוֹת
+		לְשַׂחֵק
+		לבוא
+		רוצה
+		יש
+		לקבל
+		לַעֲשׂוֹת
+		לְדַבֵּר
+		לָתֵת
+	פעילויות
+	אירועים מיוחדים
+		יום הולדת
+		פרס
+		מַתָן
+		כרטיס ברכה
+		מְסִבָּה
+		מסיבת פיג'מות
+		חנוכה
+		חג פסח
+		קישוטים
+		פורים
+		שבת
+		ראש השנה
+		יום כיפור
+		סוכות
+		שמיני עצרת
+		שמחת תורה
+		ט"ו בשבט
+		יום השואה
+		יום הזכרון
+		יום העצמאות
+		ל"ג בעומר
+		חג השבועות
+		תשעה באב
+		ט"ו באב
+	בריאות וגוף
+	בגדים
 		trousers
 		skirt
 		jumper
