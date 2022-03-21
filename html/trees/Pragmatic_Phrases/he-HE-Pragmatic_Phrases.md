@@ -192,51 +192,54 @@
 		ט"ו באב
 	בריאות וגוף
 	בגדים
-		trousers
-		skirt
-		jumper
-		socks
-		shoes
-		coat
-		hat
-		underwear
-	animals
-		dog
-		cat
-		fish
-		horse
-		fam animal
-		wild animal
-		bird
-		insect
-		sea creature
-	time
-		day
-		month
-		morning
-		afternoon
-		night
-		clock
-	transport
-		taxi
-		bus
-		car
-		wheelchair
-		plane
-		boat
-		bike
-		lorry
-	colours
-		red
-		blue
-		orange
-		green
-		pink
-		yellow
-		purple
-		grey
-		black
-		white
-		brown
-		light
-		dark
+		מכנסיים
+		חצאית
+		סווֶדֶר 
+		גרביים
+		נעליים
+		מעיל
+		כּוֹבַע
+		בֶּגֶד תַחתוֹן
+		כיפה
+		שטריימל
+		ציצית	
+	חיות
+		כֶּלֶב
+		חתול
+		דג
+		סוּס
+		חיית משק
+		חיית פרא
+		ציפור
+		חֶרֶק
+		יצור ימי
+	זְמַן
+		יְוֹם
+		חוֹדֶשׁ
+		בוקר
+		אחרי הצהריים
+		לַיְלָה
+		שָׁעוֹן
+	תַחְבּוּרָה
+		מוֹנִית
+		אוֹטוֹבּוּס
+		מְכוֹנִית
+		כסא גלגלים
+		מָטוֹס
+		סִירָה
+		אופניים
+		מַשָׂאִית
+	צבעים
+		אָדוֹם
+		כָּחוֹל
+		תפוז
+		ירוק
+		וָרוֹד
+		צהוב
+		סָגוֹל
+		אפור
+		שָׁחוֹר
+		לבן
+		חום
+		בהיר
+		כהה
