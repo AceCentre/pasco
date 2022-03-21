@@ -84,7 +84,7 @@ I have something to say
 		college
 		outside
 		for a walk
-		hyrotherapy
+		hydrotherapy
 		shops
 		cinema
 	I’m asking a question
