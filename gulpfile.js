@@ -7,9 +7,7 @@ const sourcemaps = require('gulp-sourcemaps');
 const rename = require('gulp-rename');
 const path = require('path');
 const { spawn, fork } = require('child_process');
-const sass = require('gulp-sass');
-const packageImporter = require('node-sass-package-importer');
-sass.compiler = require('node-sass');
+const sass = require('gulp-sass')(require('sass'));
 
 let gulp_bin = path.resolve(__dirname, "./node_modules/.bin/gulp");
 
@@ -67,12 +65,7 @@ let sassfiles = ['main','edit-config', 'common'];
   gulp.task('sass-'+name, () => {
     return gulp.src(files)
       .pipe(sourcemaps.init())
-      .pipe(
-        sass({
-          importer: packageImporter(),
-        })
-          .on('error', sass.logError)
-      )
+      .pipe(sass().on('error', sass.logError))
       .pipe(sourcemaps.write('../css/'))
       .pipe(gulp.dest('html/css/'));
   });
