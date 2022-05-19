@@ -190,8 +190,7 @@ function bind_dom_event_handlers () {
     voice_by_locale_init('voice-by-locale', label, data, onchange);
     function onchange (data) {
       voice_options.locale_voices = data.voices;
-      var $form = $('form[name=edit-config]').first();
-      do_save_config($form, config, true);
+      set_needs_save_config()
     }
   }
   $('#tree-export-obz-btn').click(function ($evt) {
@@ -227,6 +226,21 @@ function bind_dom_event_handlers () {
   bind_configure_actions();
 }
 
+function on_show_page ($page) {
+  $page.find('input[type="range"]').each(function () {
+    this.__rangeslider = NodeLib.uicommon.init_range_slider(this);
+  });
+}
+
+function on_hide_page ($page) {
+  $page.find('input[type="range"]').each(function () {
+    if (this.__rangeslider) {
+      this.__rangeslider.destroy();
+      delete this.__rangeslider;
+    }
+  });
+}
+
 function submenu_set_active (name) {
   var isactive = $('.x-navbar .head .page-head[data-name="'+name+'"]').hasClass('active');
   if (isactive) {
@@ -236,9 +250,12 @@ function submenu_set_active (name) {
   $('.edit-config-container .page-sect').each(function () {
     var $this = $(this);
     if ($this.hasClass('active') && name != $this.data('name')) {
-      promises.push(new Promise(function (resolve) {
-        $this.fadeOut(300, resolve);
-      }));
+      promises.push(
+        (new Promise(function (resolve) { $this.fadeOut(300, resolve); }))
+          .then(function () {
+            on_hide_page($this)
+          })
+      );
     }
   });
   Promise.all(promises)
@@ -264,10 +281,12 @@ function submenu_set_active (name) {
         var $this = $(this);
         $this.toggleClass('active', name == $this.data('name'));
         if (name == $this.data('name')) {
-          $this.hide().fadeIn(300);
+          $this.show().css('opacity', '0')
+          on_show_page($this)
           $this.find('.x-collapsable').each(function () {
             update_collapsable(this);
           });
+          $this.css('opacity', '').hide().fadeIn(300);
         }
       });
     })
@@ -455,10 +474,6 @@ function start() {
 
   insert_config()
 
-  $('input[type="range"]').each(function () {
-    NodeLib.uicommon.init_range_slider(this);
-  });
-
   update_tree_default_select();
   $('#tree-default-select').on('change', update_tree_default_select);
 
@@ -500,7 +515,11 @@ function start() {
     });
     
     config_auto_save_init();
-    $form.on('submit', save_config)
+    $form.on('submit', () => {
+      if(evt)
+        evt.preventDefault();
+      do_save_config({ handle_errors: true })
+    })
     $('form[name=edit-tree]').on('submit', save_tree)
   } else {
     $form.on('submit', save_quick_setup)
@@ -613,9 +632,8 @@ function start() {
         reader.onload = function(e) {
           tree_data = e.target.result
           $('form[name=edit-tree] [name=tree-input]').val(tree_data)
-          save_config();
         }
-        reader.readAsText(file); 
+        reader.readAsText(file);
       } else {
         waitingDialog.show();
         return new Promise(function (resolve, reject) {
@@ -922,10 +940,9 @@ function _start_subrout_tree_selection () {
                 return _save_trees_info(trees_info)
                   .then(function () {
                     if (config.tree == tree_fn) {
-                      var _config = JSON.parse(config_data);
-                      _config.tree = '';
-                      var $form = $('form[name=edit-config]').first();
-                      return do_save_config($form, _config, false);
+                      config = JSON.parse(config_data);
+                      config.tree = '';
+                      return do_save_config({ handle_errors: false })
                     }
                   })
                   .then(function () { return update_pasco_data_state() })
@@ -1159,17 +1176,23 @@ function set_tree_data (_tree_data) {
   $form.find('[name=tree-input]').val(tree_data)
 }
 
-function save_config(evt) {
-  if(evt)
-    evt.preventDefault();
-  var $form = $('form[name=edit-config]').first()
-  return do_save_config($form, null, true);
-}
-
-function do_save_config($form, _config, hdlerr) {
-  if (!_config) { // when _config is null use config_data default behavior
-    _config = JSON.parse(config_data);
+let _needs_save_config_timeoutid = null
+function set_needs_save_config () {
+  if (_needs_save_config_timeoutid != null) {
+    return
   }
+  _needs_save_config_timeoutid = setTimeout(function () {
+    _needs_save_config_timeoutid = null
+    do_save_config({ handle_errors: true })
+  }, 500)
+}
+function do_save_config(options) {
+  options = options || {}
+  var hdlerr = typeof options.handle_errors == 'undefined' ? true : options.handle_errors
+  if (!config) { // when config is null use config_data default behavior
+    config = JSON.parse(config_data);
+  }
+  var $form = $(is_quick_setup ? 'form[name=quick-setup]' : 'form[name=edit-config]').first()
   // validate & apply input
   try {
     $form.find('input,select,textarea').each(function() {
@@ -1179,7 +1202,7 @@ function do_save_config($form, _config, hdlerr) {
         if(validator_attr && !validator)
           throw new Error("Validator not found " + validator_attr + " for " + this.name);
         var value = validator ? validator(this.value, this.name) : this.value;
-        var input_info = _input_info_parse(this.name, _config);
+        var input_info = _input_info_parse(this.name, config, true);
         _input_info_set_config_value(this, input_info, value);
       }
     });
@@ -1190,20 +1213,20 @@ function do_save_config($form, _config, hdlerr) {
         return; // skip when not exists
       var propname = (speaku.is_native ? '' : 'alt_') + 'voiceId',
           str = $inp.val();
-      if(!_config[alink[0]])
-        _config[alink[0]] = {}
+      if(!config[alink[0]])
+        config[alink[0]] = {}
       if(str)
-        _config[alink[0]][propname] = str;
+        config[alink[0]][propname] = str;
       else
-        delete _config[alink[0]][propname];
+        delete config[alink[0]][propname];
     });
     if(!is_quick_setup) {
       if(!$form.find('[name=_cue_first_active]').prop('checked')) {
-        _config._auditory_cue_first_run_voice_options =
-          _config.auditory_cue_first_run_voice_options;
-        delete _config.auditory_cue_first_run_voice_options;
+        config._auditory_cue_first_run_voice_options =
+          config.auditory_cue_first_run_voice_options;
+        delete config.auditory_cue_first_run_voice_options;
       } else {
-        delete _config._auditory_cue_first_run_voice_options;
+        delete config._auditory_cue_first_run_voice_options;
       }
     }
   } catch(err) {
@@ -1214,13 +1237,12 @@ function do_save_config($form, _config, hdlerr) {
     }
   }
   // then save
-  // console.log(_config)
-  var _config_data = JSON.stringify(_config, null, "  ");
+  // console.log(config)
+  var _config_data = JSON.stringify(config, null, "  ");
   return set_file_data(config_fn, _config_data)
     .then(function () { return update_pasco_data_state() })
     .then(function() {
       config_data = _config_data
-      config = _config
       if(hdlerr) {
         update_alert(true);
       }
@@ -1272,7 +1294,8 @@ function save_quick_setup(evt) {
       }
     })
     .then(function () {
-      return do_save_config($form, _config, false)
+      config = _config
+      return do_save_config({ handle_errors: false })
     })
     .then(function () { return update_pasco_data_state() })
     .then(function() {
@@ -1318,43 +1341,12 @@ function config_auto_save_init() {
   var $form = $('form[name=edit-config]').first()
   $form.on('input', 'input', onchange);
   $form.on('change', 'select,input[type=checkbox],input[type=radio],input[type=range]', onchange);
-  // rangeslider emits change event programmatically, Thus require capture
-  // parameter of event listener to be true
-  if ($form[0] && $form[0].addEventListener) {
-    $form[0].addEventListener("change", function (evt) {
-      if (evt.target.nodeName == "INPUT" && evt.target.type == "range") {
-        if (evt.target.type == "range") {
-          var dependent = $(evt.target).data('dependent'),
-              name = evt.target.name;
-          if (!evt.target.name && dependent) {
-            name = $(dependent)[0].name;
-          }
-          var preval = _input_info_parse(name, config).value,
-              val = parseFloat(evt.target.value);
-          if (!isNaN(val) && !isNaN(preval) && Math.abs(preval - val) < 0.001) {
-            return; // ignore small change
-          }
-        }
-        onchange();
-      }
-    }, true);
-  }
-  function onchange($evt) {
-    if ($evt && $evt.target) {
-      if (!$evt.target.name) {
-        return;
-      }
+  function onchange(evt) {
+    if (evt && evt.target && !evt.target.name) {
+      return;
     }
-    _config_autosave_start_countdown();
+    set_needs_save_config();
   }
-}
-function _config_autosave_start_countdown() {
-  if(window.__config_autosave_timeout)
-    clearTimeout(window.__config_autosave_timeout);
-  window.__config_autosave_timeout = setTimeout(function() {
-    $('form[name=edit-config]').submit();
-    delete window.__config_autosave_timeout;
-  }, 500);
 }
 
 function save_tree(evt) {
@@ -1412,7 +1404,7 @@ function input_dependent_onchange (evt) {
   var $elm = $(evt.target);
   if (evt.target.nodeName == 'INPUT' &&
       ['number','range'].indexOf(evt.target.type) != -1) {
-    if($elm.data('dependent')) {
+    if(!$elm.data('--dependent-disabled') && $elm.data('dependent')) {
       var $other = $($elm.data('dependent')),
           val = $elm.val();
       if(typeof val != 'number')
@@ -1420,7 +1412,11 @@ function input_dependent_onchange (evt) {
       if(isNaN(val)) {
         return;
       }
+      $other.each(function() { $(this).data('--dependent-disabled', true) })
       $other.each(function() {
+        if (Math.abs(parseFloat(this.value) - val) < 0.001) {
+          return; // no need to change dependent value
+        }
         var lval = val,
             max = this.max ? parseFloat(this.max) : NaN,
             min = this.min ? parseFloat(this.min) : NaN;
@@ -1429,10 +1425,13 @@ function input_dependent_onchange (evt) {
         if(!isNaN(min) && lval < min)
           lval = min;
         this.value = lval;
-        if(this.type == 'range' && this['rangeslider-js']) {
-          this['rangeslider-js'].update({ value: this.value });
+        if(this.type == 'range' && this.__rangeslider) {
+          this.__rangeslider.update({ value: this.value });
+        } else {
+          this.dispatchEvent(new Event('input', { bubbles: true }));
         }
       });
+      $other.each(function() { $(this).data('--dependent-disabled', false) })
     }
   }
   if (evt.target.nodeName == 'INPUT') {
@@ -1459,11 +1458,7 @@ function _input_set_from_config(element, value) {
   if(['text','number','range'].indexOf(element.type) != -1) {
     // element with data-dependent cannot receive the event unless
     // dispatchEvent with CustomEvent is used
-    if (element.dispatchEvent && window.CustomEvent) {
-      element.dispatchEvent(new CustomEvent("input"));
-    } else {
-      $(element).trigger('input');
-    }
+    element.dispatchEvent(new Event('input', { bubbles: true }));
   }
 }
 function _input_info_set_config_value(element, info, value) {
@@ -1485,7 +1480,7 @@ function _input_info_set_config_value(element, info, value) {
     info.target[info.name] = value;
   }
 }
-function _input_info_parse(name, config) {
+function _input_info_parse(name, config, mkobjr) {
   var path = name.split('.');
   var value, target, name;
   var tmp = config;
@@ -1496,8 +1491,16 @@ function _input_info_parse(name, config) {
       value = tmp[key];
       name = key;
     } else {
-      if(tmp[key] == null)
-        tmp[key] = {}; // make an object, simple solution
+      if(tmp[key] == null) {
+        if (mkobjr) {
+          tmp[key] = {}
+        } else {
+          target = null
+          value = undefined
+          name = path[path.length - 1]
+          break
+        }
+      }
       tmp = tmp[key]
     }
   }
@@ -1573,8 +1576,7 @@ function configure_action_init (action, label) {
       });
       var _config = JSON.parse(config_data);
       _config.keys = config_keys;
-      var $form = $('form[name=edit-config]').first()
-      do_save_config($form, _config, true);
+      do_save_config({ handle_errors: true });
       $('#' + idprefix + '-modal').modal('hide');
     });
   $('#' + idprefix + '-modal').modal('show');
