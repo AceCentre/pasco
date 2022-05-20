@@ -226,19 +226,27 @@ function bind_dom_event_handlers () {
   bind_configure_actions();
 }
 
-function on_show_page ($page) {
+function init_range_sliders_on_page ($page) {
   $page.find('input[type="range"]').each(function () {
     this.__rangeslider = NodeLib.uicommon.init_range_slider(this);
   });
 }
 
-function on_hide_page ($page) {
+function destroy_range_sliders_on_page ($page) {
   $page.find('input[type="range"]').each(function () {
     if (this.__rangeslider) {
       this.__rangeslider.destroy();
       delete this.__rangeslider;
     }
   });
+}
+
+function on_show_page ($page) {
+  init_range_sliders_on_page($page)
+}
+
+function on_hide_page ($page) {
+  destroy_range_sliders_on_page($page)
 }
 
 function submenu_set_active (name) {
@@ -522,6 +530,7 @@ function start() {
     })
     $('form[name=edit-tree]').on('submit', save_tree)
   } else {
+    init_range_sliders_on_page($form)
     $form.on('submit', save_quick_setup)
   }
 
