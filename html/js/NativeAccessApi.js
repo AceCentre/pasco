@@ -51,7 +51,6 @@
     'release_utterance',
     'speak_utterance',
     'stop_speaking',
-    'speak_finish',
     'get_voices',
     'is_software_keyboard_visible',
     'request_audio_record_permission',
