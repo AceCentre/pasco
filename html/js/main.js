@@ -32,7 +32,7 @@ Promise.all([
     config_fn = default_config;
     napi = new NativeAccessApi();
     speaku = new SpeakUnit(napi);
-    speaku.init();
+    return speaku.init();
   })
   .then(function() {
     // some hooks
