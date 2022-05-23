@@ -26,7 +26,16 @@
 
   function cordovaExecAsPromise(service, action, args) {
     return new Promise(function(resolve, reject) {
-      cordova.exec(resolve, reject, service, action, args)
+      cordova.exec(resolve, (err) => {
+        var msg = 'Error on executing cordova action: ' + action + '  ' + JSON.stringify(args, null, '  ') + '\n';
+        if (err instanceof Error) {
+          console.error(msg);
+          reject(err);
+        } else {
+          msg += typeof err == 'object' ? JSON.stringify(err, null, '  ') : err+'';
+          reject(new Error(msg));
+        }
+      }, service, action, args)
     });
   }
 
@@ -51,7 +60,6 @@
     'release_utterance',
     'speak_utterance',
     'stop_speaking',
-    'speak_finish',
     'get_voices',
     'is_software_keyboard_visible',
     'request_audio_record_permission',

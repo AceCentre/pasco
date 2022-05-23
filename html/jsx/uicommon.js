@@ -1,7 +1,11 @@
 import $ from "jquery";
 import rangeslider from "./rangesliderext";
+import CONST from 'rangeslider-js/src/const';
 
 export function init_range_slider (elm) {
+  if (elm[CONST.PLUGIN_NAME]) {
+    return elm[CONST.PLUGIN_NAME]
+  }
   let snap_threshold = 0.05;
   let default_value = elm.getAttribute('data-default');
   let has_default_value;
@@ -34,5 +38,6 @@ export function init_range_slider (elm) {
       }
     }
   });
+  return elm[CONST.PLUGIN_NAME]
 }
 

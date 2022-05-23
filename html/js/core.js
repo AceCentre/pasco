@@ -1277,6 +1277,7 @@ function SpeakUnit(api) {
   SpeakUnit._instancePromise = this;
   this._alt_finish_queue = [];
   this.api = api;
+  this._synthesizer_finish_trackers = [];
 }
 
 SpeakUnit.getInstance = function(api) {
@@ -1301,6 +1302,9 @@ proto.init = function() {
         return self.api.init_synthesizer()
           .then(function(synthesizer) {
             self.synthesizer = synthesizer;
+            document.addEventListener('x-speech-synthesizer-did-start', self.synthesizer_did_start_speech.bind(self));
+            document.addEventListener('x-speech-synthesizer-did-cancel', self.synthesizer_did_cancel_speech.bind(self));
+            document.addEventListener('x-speech-synthesizer-did-finish', self.synthesizer_did_finish_speech.bind(self));
             return self;
           })
       } else { // alternative approach
@@ -1354,10 +1358,13 @@ proto.start_speaking = function(speech, opts) {
       .then(function () {
         return self.api.init_utterance(speech, opts)
       })
-      .then(function(utterance) {
-        return self.api
-          .speak_utterance(self.synthesizer, utterance)
-          .then(function(){ return utterance; });
+      .then(function(utterance_id) {
+        return self._track_finish_speech(utterance_id)
+          .then(function (tracker) {
+            return self.api
+              .speak_utterance(self.synthesizer, utterance_id)
+              .then(function(){ return utterance_id; });
+          });
       });
   } else {
     for(var key in opts)
@@ -1394,10 +1401,57 @@ proto.utterance_release = function(utterance_hdl) {
   }
 }
 
+/// speech synthesizer event handlers START
+proto.synthesizer_did_start_speech = function (event) {
+}
+proto.synthesizer_did_cancel_speech = function (event) {
+  if (event.detail.synthesizer_id == this.synthesizer) {
+    this._did_finish_speech(event.detail.utterance_id);
+  }
+}
+proto.synthesizer_did_finish_speech = function (event) {
+  if (event.detail.synthesizer_id == this.synthesizer) {
+    this._did_finish_speech(event.detail.utterance_id);
+  }
+}
+
+proto._track_finish_speech = function (utterance_id) {
+  return unboundPromise()
+    .then((defer) => {
+      var promise = defer[0], resolve = defer[1], reject = defer[2];
+      var timeoutid = setTimeout(() => {
+        reject(new Error('Timeout!'));
+      }, 10 * 1000);
+      var tracker = {
+        utterance_id,
+        handler: () => {
+          clearTimeout(timeoutid);
+          resolve();
+        },
+        promise,
+      }
+      this._synthesizer_finish_trackers.push(tracker)
+      return tracker
+    });
+}
+proto._did_finish_speech = function (utterance_id) {
+  for (var i = 0; i < this._synthesizer_finish_trackers.length; ) {
+    var tracker = this._synthesizer_finish_trackers[i];
+    if (tracker.utterance_id == utterance_id) {
+      this._synthesizer_finish_trackers.splice(i, 1);
+      tracker.handler();
+    } else {
+      i++;
+    }
+  }
+}
+/// speech synthesizer event handlers END
+
 proto.speak_finish = function(utterance_hdl) {
   var self = this
   if(self.is_native) {
-    return self.api.speak_finish(self.synthesizer, utterance_hdl);
+    var tracker = this._synthesizer_finish_trackers.find((a) => a.utterance_id == utterance_hdl)
+    return tracker ? tracker.promise : Promise.resolve();
   } else {
     var self = this;
     return new Promise(function(resolve, reject) {
