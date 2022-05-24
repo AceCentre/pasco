@@ -1350,6 +1350,23 @@ function config_auto_save_init() {
   var $form = $('form[name=edit-config]').first()
   $form.on('input', 'input', onchange);
   $form.on('change', 'select,input[type=checkbox],input[type=radio],input[type=range]', onchange);
+  // rangeslider emits change event programmatically, Thus require capture
+  // parameter of event listener to be true
+  if ($form[0] && $form[0].addEventListener) {
+    $form[0].addEventListener("input", function (evt) {
+      if (evt.target.__rangeslider && evt.target.nodeName == "INPUT" &&
+          evt.target.type == "range" && evt.target.name) {
+        var input_info = _input_info_parse(evt.target.name, config),
+            preval = input_info.value,
+            val = parseFloat(evt.target.value);
+        if (input_info.target == null ||
+            (!isNaN(val) && !isNaN(preval) && Math.abs(preval - val) < 0.0001)) {
+          return; // ignore
+        }
+        onchange(evt);
+      }
+    }, true);
+  }
   function onchange(evt) {
     if (evt && evt.target && !evt.target.name) {
       return;
