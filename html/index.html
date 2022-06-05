@@ -51,7 +51,7 @@
     </div>
     <script type="text/x-template" id="tree-node-template">
       <p class="text">{%- data.text %}</p>
-      {% if(!data.tree.is_leaf) { %}
+      {% if(!data.node.is_leaf) { %}
       <div class="arrow-wrp"><span class="fa fa-2x fa-angle-right"></span><span class="fa fa-2x fa-angle-left"></span></div>
       {% } %}
     </script>

@@ -1,8 +1,7 @@
 // expected global variables
 //   from core.js: set_file_data, get_file_data, mkdir_rec
-import { NotFoundError, AccessDeniedError, ErrorMessage,
-         BackgroundTask, PascoState,
-         getRuntimeEnv } from './common'
+import { BackgroundTask, PascoState, getRuntimeEnv } from './common'
+import { NotFoundError, AccessDeniedError, ErrorMessage } from './exceptions'
 import * as qs from 'querystring'
 import * as path from 'path'
 import * as delay from 'delay'

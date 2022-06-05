@@ -3,7 +3,8 @@
 //     parse_tree, tree_to_markdown, mkdir_rec
 import * as path from 'path'
 import { getRuntimeEnv, arrayBufferFromFile, sha256Digest,
-         arrayBufferToHex, NotFoundError } from './common'
+         arrayBufferToHex } from './common'
+import { NotFoundError } from './exceptions'
 import { v4 as uuidv4 } from 'uuid'
 
 let CONFIG_DEPENDENCY_PARAMS = [ 'helper_back_option_main_audio', 'helper_back_option_cue_audio' ]

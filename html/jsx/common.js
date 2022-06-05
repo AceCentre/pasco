@@ -2,9 +2,6 @@
 //   cordova
 // NotFoundError, AccessDeniedError, getRuntimeEnv, sha256Digest,
 // arrayBufferFromFile, LocalStorageTokens, TokenHandler, BackgroundTask
-export class NotFoundError extends Error { }
-export class AccessDeniedError extends Error { }
-export class ErrorMessage extends Error { }
 
 export function getRuntimeEnv () {
   return window.cordova ? 'cordova' : 'web'
@@ -102,3 +99,15 @@ export class BackgroundTask {
     this._onprogress = callable
   }
 }
+
+// Converts a FS file path to a friendly name
+// https://mysite.com?demo=true -> mysite.com
+// https://mysite.com/myurl!hasSpecial/characters -> mysite.com_myurl_hasSpecial_characters
+export function fsFriendlyName (s) {
+  return s
+    .replace(/^[a-z]{1,10}\:\/\//i,"") // Removes the protocol, ie, http://, https:// or cdvfile://
+    .replace(/\?.*$/,"") // Removes the query string
+    .replace(/[ \(\)\[\]\*\#\@\!\$\%\^\&\+\=\/\\:]/g, '_') //Replace any special characters with a '_'
+    .replace(/[\r\n\t]/g, ''); // Removes the newline, tab, and carriage return
+}
+
