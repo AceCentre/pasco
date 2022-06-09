@@ -1600,8 +1600,8 @@ function configure_action_init (action, label) {
           label: key_obj.label,
         };
       });
-      var _config = JSON.parse(config_data);
-      _config.keys = config_keys;
+      config = JSON.parse(config_data);
+      config.keys = config_keys;
       do_save_config({ handle_errors: true });
       $('#' + idprefix + '-modal').modal('hide');
     });
