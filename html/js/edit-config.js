@@ -1298,8 +1298,10 @@ function save_quick_setup(evt) {
             return window.pasco_data_state.storeTree(default_tree_info.tree_fn, default_tree_url, new URL(window.host_tree_dir_prefix, location+'').href)
           })
       } else {
-        _config.tree = ptree_info.tree_fn
-        return set_file_data(ptree_info.tree_fn, data);
+        return get_file_data(default_tree_url)
+          .then(function (data) {
+            return set_file_data(ptree_info.tree_fn, data);
+          });
       }
     })
     .then(function () {
