@@ -25,7 +25,7 @@ export default class PascoTreeMDWriter {
       md_lines.push("") // empty line
     }
     if(!node.is_leaf) {
-      for (let cnode of node.static_children || node.children) {
+      for (let cnode of node.child_nodes) {
         this._insertMDLines(cnode, level + 1, md_lines)
       }
     }

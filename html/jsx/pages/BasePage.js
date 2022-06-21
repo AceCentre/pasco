@@ -1,8 +1,14 @@
 import { getRuntimeEnv } from '../common'
 import PascoNativeBridge from '../PascoNativeBridge'
 
-class Page {
+class BasePage {
   constructor () {
+
+  }
+  async init () {
+
+  }
+  async destroy () {
 
   }
   async onDocumentReady () {

@@ -111,3 +111,19 @@ export function fsFriendlyName (s) {
     .replace(/[\r\n\t]/g, ''); // Removes the newline, tab, and carriage return
 }
 
+export function loadScript (fn) {
+  return new Promise(function(resolve, reject) {
+    var s = document.createElement('script')
+    s.addEventListener('load', function() {
+      resolve(s)
+    }, false)
+    s.addEventListener('error', function() {
+      reject(new Error('Could not load script, ' + fn))
+    }, false)
+    s.async = true
+    s.defer = true
+    s.src = fn
+    s.type = 'text/javascript'
+    document.body.appendChild(s)
+  })
+}

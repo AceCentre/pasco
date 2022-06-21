@@ -119,7 +119,7 @@ export default class PascoTree {
       var ulwrp = newElm('div')
       ulwrp.classList.add('children-wrp')
       var ul = newElm('ul');
-      node.nodes_ul_dom_element = ul;
+      node.child_nodes_ul_dom_element = ul;
       ul.classList.add('children');
       for (let cnode of node.nodes) {
         let li = newElm('li');
@@ -135,6 +135,51 @@ export default class PascoTree {
       throw new Error('Tree file is not initialized!')
     }
     return this._tree_file_info
+  }
+
+  // Note: apparently tree_add_node function in core.js is duplciate of insertNodeBefore
+  insertNodeBefore (node, parent_node, other_node, content_template) {
+    if (parent_node.is_leaf) {
+      var ulwrp = newElm('div');
+      ulwrp.classList.add('children-wrp');
+      var ul = newElm('ul');
+      ul.classList.add('children');
+      ulwrp.appendChild(ul);
+      parent_node.child_nodes_ul_dom_element = ul;
+      parent_node.dom_element.appendChild(ulwrp);
+    }
+    if (!isNaN(other_node)) { // if beforenode is a number
+      if (other_node === parent_node.getChildCount()) {
+        // insert at end
+        other_node = null
+      }
+      other_node = parent_node.getChildAtIndex(other_node)
+    }
+    var li = newElm('li');
+    if (other_node) {
+      parent_node.insertChildBefore(node, other_node)
+      if (!other_node.dom_element) {
+        throw new Error('other_node has no dom_element')
+      }
+      parent_node.child_nodes_ul_dom_element.insertBefore(li, other_node.dom_element);
+    } else {
+      parent_node.appendChild(node)
+      parent_node.child_nodes_ul_dom_element.appendChild(li);
+    }
+    this.makeNodeElements(node, li, content_template);
+    return node;
+  }
+  removeNodeFromParent (node) {
+    if (!node.parent_node) {
+      throw new Error('node has no parent_node')
+    }
+    let parent_node = node.parent_node
+    parent_node.removeChild(node)
+    parent_node.child_nodes_ul_dom_element.removeChild(node.dom_element)
+    if (parent_node.child_nodes.length == 0) {
+      parent_node.child_nodes_ul_dom_element.parentNode.removeChild(parent_node.child_nodes_ul_dom_element);
+      parent_node.child_nodes_ul_dom_element = null
+    }
   }
 }
 

@@ -86,10 +86,6 @@ class PascoCore {
         await datastate.save()
       }
     }
-
-    this._native_bridge = new PascoNativeBridge();
-    this._speech_synthesizer = new PascoSpeechSynthesizer(this._native_bridge)
-    await speaku.init();
     this.initUI()
   }
   initUI () {
@@ -116,5 +112,8 @@ class PascoCore {
     } else {
       return link // legacy relative links are determined by browser
     }
+  }
+  getFileManager () {
+    return this._filemanager
   }
 }

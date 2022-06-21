@@ -97,29 +97,26 @@ export default class PascoTreeMDReader {
             var anode = new PascoTreeNode({
               txt_dom_element: txt_dom_elm,
               dom_element: elm_cnode,
-              level: level,
               text: td.text,
               meta: td.meta,
               _more_meta: td._more_meta,
-              parent: node
             })
             if(is_list) {
-              node.addChild(this._parseNode(elm_cnode, null, anode))
+              node.appendChild(this._parseNode(elm_cnode, null, anode))
             } else {
               // process inner nodes
               this._parseNode(elm_cnode, null, anode)
               continue_at.i += 1
-              node.addChild(this._parseNode(elm, continue_at, anode))
+              node.appendChild(this._parseNode(elm, continue_at, anode))
             }
-            anode.setIsLeaf(anode.children.length == 0)
           } else {
             if(continue_at.i > 0)
               continue_at.i -= 1
             break // return to parent call
           }
         } else if(elm_cnode.nodeName == 'META') {
-          var thenode = node.children.length > 0 ?
-              node.children[node.children.length - 1] : node
+          var thenode = node.child_nodes.length > 0 ?
+              node.child_nodes[node.child_nodes.length - 1] : node
           for (let attr of elm_cnode.attributes) {
             if(attr.name.indexOf('data-') == 0) {
               thenode.meta[attr.name.substr(5)] = attr.value
