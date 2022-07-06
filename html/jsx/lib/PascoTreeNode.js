@@ -1,3 +1,4 @@
+import { copyObject } from '../common'
 
 export default class PascoTreeNode {
   constructor (data) {
@@ -13,10 +14,21 @@ export default class PascoTreeNode {
         this[name] = {}
       }
     }
-    this.is_leaf = 'is_leaf' in data ? !!data.is_leaf : false
+    this.child_nodes = Array.isArray(data.child_nodes) ? data.child_nodes : null
+    this.is_leaf = this.child_nodes ? false : true
+  }
+  clone () {
+    let static_props = [
+      'level', 'text', 'meta', '_more_meta',
+    ]
+    let data = copyObject(Object.fromEntries(static_props.map((a) => [ a, this[a] ])))
+    let cloned_node = new PascoTreeNode(data)
     if (!this.is_leaf) {
-      this.child_nodes = Array.isArray(data.child_nodes) ? data.child_nodes : []
+      for (let cnode of this.child_nodes) {
+        this.appendChild(cnode.clone())
+      }
     }
+    return cloned_node
   }
   appendChild (node) {
     if (!this.child_nodes || this.is_leaf) {
@@ -56,10 +68,10 @@ export default class PascoTreeNode {
     return this.child_nodes.length
   }
   getChildAtIndex (index) {
-    if (index < 0 || index >= parent_node.child_nodes.length) {
+    if (index < 0 || index >= this.parent_node.child_nodes.length) {
       throw new Error('Index out of range')
     }
-    return parent_node.child_nodes[index]
+    return this.parent_node.child_nodes[index]
   }
   _setIsLeaf (value) {
     this.is_leaf = !!value
@@ -68,6 +80,54 @@ export default class PascoTreeNode {
     } else {
       if (!Array.isArray(this.child_nodes)) {
         this.child_nodes = []
+      }
+    }
+  }
+  getMetaFromTree (name) {
+    let getMetaFromTreeSub = (node) => {
+      var value = node.meta[name]
+      if (value !== undefined && val != 'inherit') {
+        return { value, node }
+      }
+      if (node.parent_node) {
+        return getMetaFromTreeSub(node.parent_node)
+      }
+      return { value: null, node: null }
+    }
+    return getMetaFromTreeSub(this)
+  }
+  readMetaAsInt (name, default_val) {
+    return PascoTreeNode.parseMetaValueAsInt(this.meta[name], default_val)
+  }
+  readMetaAsBoolean (name, default_val) {
+    return PascoTreeNode.parseMetaValueAsBoolean(this.meta[name], default_val)
+  }
+  static parseMetaValueAsInt (v, default_val) {
+    var i = parseInt(v)
+    if (isNaN(i)) {
+      return parseInt(default_val)
+    }
+    return i
+  }
+  static parseMetaValueAsBoolean (v, default_val) {
+    if (v == null) {
+      return default_val;
+    }
+    return v === 'true' || v === '';
+  }
+
+  async traverseAsync (callable) {
+    await this._traverseAsyncSubrout(callable, 0)
+  }
+  async _traverseAsyncSubrout (node, callable, i) {
+    while (node.child_nodes && i < node.child_nodes.length) {
+      let cnode = node.child_nodes[i]
+      let output = await callable(node, i, cnode)
+      await this._traverseAsyncSubrout(cnode, callable, 0)
+      if (output != null && (output.next_index >= 0)) {
+        i = output.next_index
+      } else {
+        i += 1
       }
     }
   }

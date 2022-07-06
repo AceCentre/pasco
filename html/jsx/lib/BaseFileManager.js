@@ -11,7 +11,7 @@ export default class BaseFileManager {
     // pass
   }
   async loadFileJson (url, options) {
-    let data await this.loadFileData(url, options)
+    let data = await this.loadFileData(url, options)
     return JSON.parse(data)
   }
   async saveFileJson (url, data, options) {
@@ -25,7 +25,7 @@ export default class BaseFileManager {
     }
     return await this._httpRequest(url, options);
   }
-  saveFileData (url, data, options) {
+  async saveFileData (url, data, options) {
     options = Object.assign({ method: 'POST' }, options)
     if (this.isLocalFile(url)) {
       throw new Error('Request not supported!')

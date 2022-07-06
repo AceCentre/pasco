@@ -127,3 +127,61 @@ export function loadScript (fn) {
     document.body.appendChild(s)
   })
 }
+
+export function deferredPromise () {
+  return new Promise(function (onready) {
+    var promise, resolve, reject
+    promise = new Promise(function(_resolve, _reject) {
+      resolve = _resolve
+      reject = _reject
+      if (promise) {
+        onready([promise,resolve,reject])
+      }
+    })
+    if (promise && resolve) {
+      onready([promise,resolve,reject])
+    }
+  })
+}
+
+export function getXScaleClassFromSizePercent (value, step, decimals) {
+  decimals = decimals == undefined ? 1 : decimals
+  var v = Math.floor(value / step) * step / 100.0
+  if(decimals > 0) {
+    return v.toFixed(decimals || 1).replace(/0+$/, "")
+      .replace(/\.$/, "").replace('.', '_')
+  } else {
+    return v+''
+  }
+}
+
+export function copyObject (obj) {
+  return JSON.parse(JSON.stringify(obj))
+}
+
+
+export function errorDetailsAsText (error) {
+  if (typeof error.message != 'string' || typeof error.stack != 'string') {
+    return JSON.stringify(error, null, '  ')
+  } else {
+    return error.constructor.name  + ": " + error.message + "\n" + error.stack
+  }
+}
+
+export function fixUrlForCordova (url) {
+  return ((/^[a-z]+:\/\//i).test(url) ?
+          '' : 'cdvfile://localhost/bundle/www/') + url;
+}
+
+export function range (end, start) {
+  if (start === undefined) {
+    start = 0
+  }
+  let list = []
+  if (end > start) {
+    for (let i = start; i < end; i++) {
+      list.push(i)
+    }
+  }
+  return list
+}

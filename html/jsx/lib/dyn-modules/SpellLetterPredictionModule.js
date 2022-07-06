@@ -1,9 +1,9 @@
 import BaseModule from './BaseModule'
 import WordsFileHelper from '../../helpers/WordsFileHelper'
 import PascoTreeNode from '../PascoTreeNode'
-import _ from 'underscore'
+import { range } from '../../common'
 
-export class SpellLetterPredictionModule extends BaseModule {
+export default class SpellLetterPredictionModule extends BaseModule {
   constructor (pascoEngine) {
     this._pengine = pascoEngine
     this._core = pascoEngine.getCore()
@@ -13,12 +13,12 @@ export class SpellLetterPredictionModule extends BaseModule {
   getName () {
     return 'spell-letter-prediction'
   }
-  generate (dynnode) {
+  async generate (dynnode) {
     let words_file
     if (dynnode.meta['words-file']) {
-      words_file = this._core.resolveFileUrl(dynnode.meta['words-file'], tree_fn)
+      words_file = this._core.resolveUrl(dynnode.meta['words-file'], tree_fn)
     } else if (config.words_file) {
-      words_file = this._core.resolveFileUrl(config.words_file, config_fn)
+      words_file = this._core.resolveUrl(config.words_file, config_fn)
     }
     if (!words_file) {
       throw new Error("No words file given for dyn=\"spell-word-prediction\"")
@@ -39,15 +39,16 @@ export class SpellLetterPredictionModule extends BaseModule {
     }
     let subwdata = await this._wordsFileHelper.getPredictionsFromWords(words_file, txt)
     if (!subwdata.alphabet_sorted) {
-      subwdata.alphabet_sorted =
-        _.map(_.range(alphabet.length), (i) => {
+      subwdata.alphabet_sorted = range(alphabet.length)
+        .map((i) => {
           let a = alphabet[i]
-          return [ a, i, _.reduce(
-            _.map(
-              _.filter(subwdata.words, (w) => w.v[txt.length] == a),
-              (a) => a.w
-            ),
-            (a, b) => a + b, 0) ]
+          return [
+            a, i,
+            subwdata.words
+              .filter((w) => w.v[txt.length] == a)
+              .map((a) => a.w)
+              .reduce((a, b) => a + b, 0)
+          ]
         })
         .sort((a, b) => { // sort desc order by weight, letter
           if (a[2] == b[2]) {
@@ -63,7 +64,7 @@ export class SpellLetterPredictionModule extends BaseModule {
         })
     }
     return {
-      nodes: _.map(subwdata.alphabet_sorted, (v) => {
+      nodes: subwdata.alphabet_sorted.map((v) => {
         return new PascoTreeNode({ text: v[0] })
       }),
     }

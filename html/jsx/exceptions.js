@@ -9,3 +9,5 @@ export class RedirectPageException extends BaseException {
     this.url = url
   }
 }
+export class MoveAbortedException extends BaseException {
+}

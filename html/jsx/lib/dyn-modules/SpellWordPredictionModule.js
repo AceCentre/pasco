@@ -1,7 +1,6 @@
 import BaseModule from './BaseModule'
 import WordsFileHelper from '../../helpers/WordsFileHelper'
 import PascoTreeNode from '../PascoTreeNode'
-import _ from 'underscore'
 
 function mk_words_weight_cmp (asc) {
   var mul = asc ? 1 : -1
@@ -10,7 +9,7 @@ function mk_words_weight_cmp (asc) {
   }
 }
 
-export class SpellWordPredictionModule extends BaseModule {
+export default class SpellWordPredictionModule extends BaseModule {
   constructor (pascoEngine) {
     this._pengine = pascoEngine
     this._core = pascoEngine.getCore()
@@ -20,12 +19,12 @@ export class SpellWordPredictionModule extends BaseModule {
   getName () {
     return 'spell-word-prediction'
   }
-  generate (dynnode) {
+  async generate (dynnode) {
     let words_file
     if (dynnode.meta['words-file']) {
-      words_file = this._core.resolveFileUrl(dynnode.meta['words-file'], tree_fn)
+      words_file = this._core.resolveUrl(dynnode.meta['words-file'], tree_fn)
     } else if (config.words_file) {
-      words_file = this._core.resolveFileUrl(config.words_file, config_fn)
+      words_file = this._core.resolveUrl(config.words_file, config_fn)
     }
     if (!words_file) {
       throw new Error("No words file given for dyn=\"spell-word-prediction\"")
@@ -42,7 +41,7 @@ export class SpellWordPredictionModule extends BaseModule {
       subwdata.words_sorted.sort(mk_words_weight_cmp(false))
     }
     return {
-      nodes: _.map(subwdata.words_sorted.slice(0, max_nodes), (word) => {
+      nodes: subwdata.words_sorted.slice(0, max_nodes).map((word) => {
         return new PascoTreeNode({
           text: word.v,
           meta: {

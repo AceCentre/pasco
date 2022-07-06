@@ -8,10 +8,11 @@ import scrollnav from 'scrollnav';
 import copy from 'copy-html-to-clipboard';
 import locales from './data/locales.json'
 
-import PascoDataState from './PascoDataState';
-import DropboxSyncConfigUI from './DropboxSyncConfigUI';
-import DropboxSync from './DropboxSync';
+import DropboxSyncConfigUI from './lib/DropboxSyncConfigUI';
+import DropboxSync from './lib/DropboxSync';
 import * as common from './common';
+
+import './pages'
 
 window.locales_info = {};
 for (let locale of locales) {
@@ -27,5 +28,5 @@ window.scrollnav = scrollnav;
 window.copy = copy;
 
 window.NodeLib = {
-  obfutil, uicommon, common, DropboxSync, DropboxSyncConfigUI, PascoDataState
+  obfutil, uicommon, common, DropboxSync, DropboxSyncConfigUI
 };

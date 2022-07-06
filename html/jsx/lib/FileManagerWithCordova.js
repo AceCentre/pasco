@@ -1,17 +1,13 @@
 import BaseFileManager from './BaseFileManager'
 import { NotFoundError } from '../exceptions'
-
-function fixCordovaUrl (url) {
-  return ((/^[a-z]+:\/\//i).test(url) ?
-          '' : 'cdvfile://localhost/bundle/www/') + url
-}
+import { fixUrlForCordova } from '../common'
 
 export default class FileManagerWithCordova extends BaseFileManager {
   async loadFileData (url, options) {
     options = options || {}
     if (this.isLocalFile(url)) {
       return await (new Promise(function(resolve, reject) {
-        url = fixCordovaUrl(url)
+        url = fixUrlForCordova(url)
         let onSuccess = (fileEntry) => {
           fileEntry.file(function(file) {
             if(options.responseType == 'blob') {
@@ -43,12 +39,12 @@ export default class FileManagerWithCordova extends BaseFileManager {
       return await super.loadFileData(url, options)
     }
   }
-  saveFileData (url, data, options) {
+  async saveFileData (url, data, options) {
     if (!this.isLocalFile(url)) {
       return await super.saveFileData(url, data, options)
     }
     return await (new Promise(function(resolve, reject) {
-      url = fixCordovaUrl(url)
+      url = fixUrlForCordova(url)
       var parts = url.split('/'),
           filename = parts[parts.length - 1],
           dirname = parts.slice(0, parts.length - 1).join("/")
@@ -85,7 +81,7 @@ export default class FileManagerWithCordova extends BaseFileManager {
   async deleteFile (url, options = {}) {
     // cordova specific
     if (this.isLocalFile(url)) {
-      url = fixCordovaUrl(url)
+      url = fixUrlForCordova(url)
       return await (new Promise(function(resolve, reject) {
         function onEntry(entry) {
           entry.remove(resolve, onFail)

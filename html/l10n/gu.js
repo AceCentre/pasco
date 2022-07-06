@@ -131,5 +131,6 @@
     "Move to Next": "આગળ પર ખસેડો",
     "Move to Previous": "પાછલા પર ખસેડો"
 };
-  
+
+  document.dispatchEvent(new CustomEvent('x-icu-changed', { detail: icu }))  
 })();

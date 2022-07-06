@@ -1,7 +1,7 @@
 // expected global variables
 //   from core.js: set_file_data, get_file_data, mkdir_rec
-import { BackgroundTask, PascoState, getRuntimeEnv } from './common'
-import { NotFoundError, AccessDeniedError, ErrorMessage } from './exceptions'
+import { BackgroundTask, PascoState, getRuntimeEnv } from '../common'
+import { NotFoundError, AccessDeniedError, ErrorMessage } from '../exceptions'
 import * as qs from 'querystring'
 import * as path from 'path'
 import * as delay from 'delay'
@@ -387,7 +387,7 @@ export default class DropboxSync {
         // perform delete actions
         if (datastate) {
           for (let { src } of delete_actions) {
-            await unset_file(datastate.get_file_url(src))
+            await unset_file(datastate.resolve_url(src))
           }
         }
         datastate = await PascoDataState.loadFromFile(new URL('pasco-state.json', target_dir_url).href)
@@ -412,7 +412,7 @@ export default class DropboxSync {
           if (dpfile && file.checksum == dpfile.checksum) {
             continue // skip
           }
-          write_actions.push({ src: file.src, src_url: datastate.get_file_url(file.src) })
+          write_actions.push({ src: file.src, src_url: datastate.resolve_url(file.src) })
         }
         write_actions.push({ src: 'pasco-state.json', src_url: datastate.getStateSrcUrl() })
         // add delete actions

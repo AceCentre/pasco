@@ -1,4 +1,4 @@
-import * as _ from 'underscore'
+import { sortedIndex } from 'lodash'
 
 const _MAX_PREDICTION_CACHE_ENTRIES = 4
 let default_instance = null
@@ -35,14 +35,14 @@ export default class WordsFileHelper {
     }
     return this._cache[url] = this._fmanager.loadFileJson(url)
       .then((data) => {
-        const words = _.chain(data.words)
+        // sort words
+        data.words = data.words
         // Store the lowercased word.
-              .map(w => _.defaults({ lower: (w.v+'').toLowerCase() }, w))
+              .map(w => Object.assign({ lower: (w.v+'').toLowerCase() }, w))
         // Make sure that the words are sorted.
-              .sortBy(w => w.lower)
-              .value()
-
-        return _.defaults({ words }, data)
+          .sort((a, b) => (a.lower < b.lower ? -1 :
+                           a.lower > b.lower ? 1 : 0))
+        return data
       })
       .catch((err) => {
         delete words_cache[url]
@@ -77,8 +77,8 @@ export default class WordsFileHelper {
     // If necessary, remove the oldest entries in the cache. Maps
     // are ordered in JavaScript, so we can simply delete the first
     // keys first.
-    _.take(
-      [...wdata._cache.keys()],
+    [...wdata._cache.keys()].slice(
+      0, 
       // The number of entries that exceed the limit. Technically
       // this should always be 1 at most.
       wdata._cache.size - _MAX_PREDICTION_CACHE_ENTRIES
@@ -98,7 +98,7 @@ export default class WordsFileHelper {
      * @returns {number} The index.
      */
     function getStartIndex() {
-      const i = _.sortedIndex(words, { lower: prefix }, sub)
+      const i = sortedIndex(words, { lower: prefix }, sub)
       return sub(words[i]) === prefix ? i : -1
     }
 

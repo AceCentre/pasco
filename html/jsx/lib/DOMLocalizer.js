@@ -1,7 +1,7 @@
 import translate from '../helpers/translate'
 import { loadScript } from '../common'
 
-default class DOMLocalizer {
+export default class DOMLocalizer {
   constructor (l10n_url, document) {
     this._document = document
     this._l10n_url = l10n_url

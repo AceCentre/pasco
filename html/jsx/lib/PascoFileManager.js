@@ -1,6 +1,6 @@
-import { getRuntimeEnv } from './common'
+import { getRuntimeEnv } from '../common'
 import FileManagerWithCordova from './FileManagerWithCordova'
-import FileManagerWithLocalStorage from './FileManagerWithCordova'
+import FileManagerWithLocalStorage from './FileManagerWithLocalStorage'
 
 /**
  * PascoFileManager is a wrapper for FileManager's used 
@@ -19,7 +19,7 @@ export default class PascoFileManager {
       'fileExists', 'isLocalFile',
     ]
     for (let name of method_names) {
-      this[name] = (...args) => this._imanager(...args)
+      this[name] = (...args) => this._imanager[name](...args)
     }
   }
 }

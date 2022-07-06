@@ -1,5 +1,5 @@
 
-export default PascoDynNodeGenerator {
+export default class PascoDynNodeGenerator {
   constructor () {
     this._modules = []
   }

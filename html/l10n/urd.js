@@ -133,4 +133,5 @@
     "Move to Previous": "پچھلے میں منتقل کریں"
 };
 
+  document.dispatchEvent(new CustomEvent('x-icu-changed', { detail: icu }))
 })();

@@ -71,18 +71,17 @@ export default class PascoTreeMDReader {
   _parseNode (elm, continue_at, node) {
     continue_at = continue_at || { i: 0 }
     node = node || new PascoTreeNode({ level: 0, meta: {}, _more_meta: {} })
-    for (var len = elm.childNodes.length; continue_at.i < len; continue_at.i++) {
-      var elm_cnode = elm.childNodes[continue_at.i],
-          match
+    for (let len = elm.childNodes.length; continue_at.i < len; continue_at.i++) {
+      let elm_cnode = elm.childNodes[continue_at.i]
       if(elm_cnode.nodeType == Node.ELEMENT_NODE) {
-        if((match = elm_cnode.nodeName.match(this._pttrn01)) ||
-           this._pttrn02.test(elm_cnode.nodeName)) { // branch
-          var level = match ? parseInt(match[1]) : node.level + 1,
-              is_list = !match
-          if(level > node.level) {
-            var txt_dom_elm = is_list ? elm_cnode.querySelector(":scope > p") : elm_cnode,
-                txt_elm_content
-            if(!txt_dom_elm) {
+        let match = elm_cnode.nodeName.match(this._pttrn01)
+        if(!!match || this._pttrn02.test(elm_cnode.nodeName)) { // branch
+          var level = match ? parseInt(match[1]) : node.level + 1
+          let is_list = !match
+          if (level > node.level) {
+            let txt_dom_elm = is_list ? elm_cnode.querySelector(":scope > p") : elm_cnode
+            let txt_elm_content
+            if (!txt_dom_elm) {
               txt_elm_content = []
               for (let second_elm_cnode of elm_cnode.childNodes) {
                 if (second_elm_cnode.nodeType == Node.TEXT_NODE) {
@@ -93,15 +92,16 @@ export default class PascoTreeMDReader {
             } else {
               txt_elm_content = txt_dom_elm.textContent
             }
-            var td = this._parseText(txt_elm_content)
-            var anode = new PascoTreeNode({
+            let td = this._parseText(txt_elm_content)
+            let anode = new PascoTreeNode({
               txt_dom_element: txt_dom_elm,
               dom_element: elm_cnode,
               text: td.text,
               meta: td.meta,
               _more_meta: td._more_meta,
+              level,
             })
-            if(is_list) {
+            if (is_list) {
               node.appendChild(this._parseNode(elm_cnode, null, anode))
             } else {
               // process inner nodes
@@ -110,12 +110,13 @@ export default class PascoTreeMDReader {
               node.appendChild(this._parseNode(elm, continue_at, anode))
             }
           } else {
-            if(continue_at.i > 0)
+            if(continue_at.i > 0) {
               continue_at.i -= 1
+            }
             break // return to parent call
           }
-        } else if(elm_cnode.nodeName == 'META') {
-          var thenode = node.child_nodes.length > 0 ?
+        } else if (elm_cnode.nodeName == 'META') {
+          let thenode = node.child_nodes && node.child_nodes.length > 0 ?
               node.child_nodes[node.child_nodes.length - 1] : node
           for (let attr of elm_cnode.attributes) {
             if(attr.name.indexOf('data-') == 0) {

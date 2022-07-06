@@ -1,8 +1,7 @@
 import BaseModule from './BaseModule'
 import PascoTreeNode from '../PascoTreeNode'
-import _ from 'underscore'
 
-export class TreeSwitcherModule extends BaseModule {
+export default class TreeSwitcherModule extends BaseModule {
   constructor (pascoEngine) {
     this._pengine = pascoEngine
     this._core = pascoEngine.getCore()
@@ -11,24 +10,23 @@ export class TreeSwitcherModule extends BaseModule {
   getName () {
     return 'trees-switcher'
   }
-  generate (dynnode) {
+  async generate (dynnode) {
     let current_tree = config.tree || window.default_tree
     let trees_info = await this._fmanager.loadFileJson(default_trees_info_fn)
     return {
-      nodes: _.filter(
-        _.map(trees_info.list, (item) => {
+      nodes: trees_info.list
+        .map((item) => {
           if (item.tree_fn == current_tree) {
             return null
           }
-          return {
+          return new PascoTreeNode({
             text: item.name,
             meta: {
               'change-tree': item.tree_fn,
             },
-          }
-        }),
-        (v) => !!v // remove null node
-      ),
+          })
+        })
+        .filter((v) => !!v), // remove null node
     }
   }
 }
