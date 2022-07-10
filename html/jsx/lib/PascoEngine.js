@@ -2,12 +2,12 @@ import * as EventEmitter from 'events'
 import { deferredPromise, copyObject } from '../common'
 import { NotFoundError } from '../exceptions'
 import PascoTreeNode from './PascoTreeNode'
-import * as dynModulesIndex from './dyn-modules' 
+import * as dynModulesIndex from './dyn-modules'
 const dynModules = dynModulesIndex.modules
 import * as delay from 'delay'
-import MoveManager from './engine-internal/MoveManager'
+import MoveManager from './internal/engine/MoveManager'
 import EventManager from '../helpers/EventManager'
-import PascoDynNodeGenerator from './PascoDynNodeGenerator'
+import DynNodeGenerator from './internal/engine/DynNodeGenerator'
 
 /** constants **/
 const MODES = ['auto', 'switch', 'wheel']
@@ -28,9 +28,9 @@ export default class PascoEngine extends EventEmitter {
     this._event_manager = new EventManager()
     this._move_manager = new MoveManager(this)
     this._t = uibridge.getLocalizer().t
-    this._dyngenerator = new PascoDynNodeGenerator()
+    this._dyngenerator = new DynNodeGenerator()
     for (let module of dynModules) {
-      this._dyngenerator.addModule(module)
+      this._dyngenerator.addModule(new module(this))
     }
     this._actions = []
     this._keyhit_handlers = []
@@ -108,13 +108,39 @@ export default class PascoEngine extends EventEmitter {
       triggeredOnPause: moveTriggeredOnPause,
     })
     this.addAction({
+      name: 'move_steps',
+      getArguments (...action_args) {
+        return action_args
+      },
+      handler: this.actionMoveSteps.bind(this),
+      shouldIgnore (node) {
+        if (!this._state.can_move || node == null) {
+          return true
+        }
+      },
+      triggeredOnPause: moveTriggeredOnPause,
+    })
+    this.addAction({
+      name: 'tree_go_in',
+      getArguments () {
+        return [ this.getCurrentNode() ]
+      },
+      handler: this.actionMoveIn.bind(this),
+      shouldIgnore (node) {
+        if (!this._state.can_move || node == null) {
+          return true
+        }
+      },
+      triggeredOnPause: moveTriggeredOnPause,
+    })
+    this.addAction({
       name: 'tree_go_out',
       handler: this.actionMoveOut.bind(this),
       getArguments () {
         return [ this.getCurrentNode() ]
       },
       shouldIgnore (node) {
-        if(!this._state.can_move || node == null) {
+        if (!this._state.can_move || node == null) {
           return true
         }
       },
@@ -127,7 +153,7 @@ export default class PascoEngine extends EventEmitter {
         return [ this.getCurrentPosition() ]
       },
       shouldIgnore () {
-        if(!this._state.can_move) {
+        if (!this._state.can_move) {
           return true
         }
       },
@@ -140,7 +166,7 @@ export default class PascoEngine extends EventEmitter {
         return [ this.getCurrentPosition() ]
       },
       shouldIgnore () {
-        if(!this._state.can_move) {
+        if  (!this._state.can_move) {
           return true
         }
       },
@@ -279,10 +305,18 @@ export default class PascoEngine extends EventEmitter {
     this.clearKeyHandlers()
   }
 
+  callAction (name, ...args) {
+    let action = this._actions.find((a) => a.name == name)
+    if (!action) {
+      throw new Error('Action not found: ' + name)
+    }
+    return action.handler(...args)
+  }
+
   addAction ({ name, handler, shouldIgnore, getArguments, triggeredOnPause }) {
     this._actions.push({
       name,
-      handler: async () => {
+      handler: async (...action_args) => {
         if (!this._started) {
           return
         }
@@ -292,7 +326,7 @@ export default class PascoEngine extends EventEmitter {
           }
           return
         }
-        let args = typeof getArguments == 'function' ? getArguments.apply(this) : []
+        let args = typeof getArguments == 'function' ? getArguments.apply(this, action_args) : action_args
         if (typeof shouldIgnore == 'function' && shouldIgnore.apply(this, args)) {
           return
         }
@@ -335,7 +369,7 @@ export default class PascoEngine extends EventEmitter {
     // diff, auto iterates through nodes <-> switch iteration is manual
     // mode controls the work flow, start handles mode
     // positions are no longer saved between start/stop
-    let state = this._state = {
+    let state = Object.assign(this._state, {
       can_move: true,
       mode: this._config.mode || 'auto',
       positions: [ {
@@ -346,7 +380,7 @@ export default class PascoEngine extends EventEmitter {
       _auto_next_rem_loops: this._config.auto_next_loops || 0,
       _wheel_delta: [ 0, 0 ],
       _paused: false,
-    }
+    })
     if (MODES.indexOf(state.mode) == -1) {
       throw new Error("Unknown mode " + state.mode)
     }
@@ -373,7 +407,7 @@ export default class PascoEngine extends EventEmitter {
         if (!this._started || state._paused) {
           return // stop the loop
         }
-        let running_move_controller = this.move_manager.getRunningMoveController()
+        let running_move_controller = this._move_manager.getRunningMoveController()
         if (running_move_controller) {
           await running_move_controller.getRunPromise()
         } else {
@@ -438,7 +472,7 @@ export default class PascoEngine extends EventEmitter {
       throw new Error('Engine is not running!')
     }
     this._started = false
-    let running_move_controller = this.move_manager.getRunningMoveController()
+    let running_move_controller = this._move_manager.getRunningMoveController()
     if (running_move_controller) {
       running_move_controller.abort()
     }
@@ -523,6 +557,18 @@ export default class PascoEngine extends EventEmitter {
   getCore () {
     return this._core
   }
+  getConfigUrl () {
+    if (!this._state || !this._state.config_url) {
+      throw new Error('config_url is not defined in the state!')
+    }
+    return this._state.config_url
+  }
+  getTreeUrl () {
+    if (!this._state || !this._state.tree_url) {
+      throw new Error('tree_url is not defined in the state!')
+    }
+    return this._state.tree_url
+  }
   isFirstAutoNextRun () {
     // check if the current cycle is the first one
     return this._state._auto_next_rem_loops == this._config.auto_next_loops
@@ -601,12 +647,12 @@ export default class PascoEngine extends EventEmitter {
     }
     await this._beforeUpdateInPositionsAsync()
     await this._beforePopFromPositionsAsync(count)
-    if (state.positions.length <= count + 1) {
-      count = state.positions.length - 1
+    if (this._state.positions.length <= count + 1) {
+      count = this._state.positions.length - 1
     }
-    state.positions.splice(state.positions.length - count, count)
+    this._state.positions.splice(this._state.positions.length - count, count)
     this._updateSelectPath()
-    if (_meta_true_check(atree.meta['back-n-branch-notify'], false)) {
+    if (node.readMetaAsBoolean('back-n-branch-notify', false)) {
       await this._move_manager.performNotifyMove(node)
     } else {
       await this._move_manager.performScanMove()
@@ -771,7 +817,7 @@ export default class PascoEngine extends EventEmitter {
     this._state._rerun_on_next_move_event = true
   }
 
-  async doMoveSteps (amount) {
+  async actionMoveSteps (amount) {
     var position = this.getCurrentPosition();
     position.index += amount;
     if (position.index >= position.node.child_nodes.length) {
@@ -797,7 +843,8 @@ export default class PascoEngine extends EventEmitter {
     }
     return positions
   }
-  async changeCurrentNode (node) {
+  async changeCurrentNode (node, options) {
+    let { silent } = options || {}
     await this._beforeUpdateInPositionsAsync()
     let positions = this.buildNodePositions(node)
     if (positions.length == 0) {
@@ -805,12 +852,17 @@ export default class PascoEngine extends EventEmitter {
     }
     this._state.positions = positions
     this._updateSelectPath()
-    await this._move_manager.performScanMove()
+    if (!silent) {
+      await this._move_manager.performScanMove()
+    } else {
+      this.emit('move', node)
+      this._uibridge.updateActivePositions()
+    }
   }
   
   /**** START SPELL IMPL ****/
   _addToSpellTextOnSelect (selected_node) {
-    let spell_positions = this._state.positions.filter((a) => a.node.meta['spell-branch'])
+    let spell_positions = this._state.positions.filter((a) => 'spell-branch' in a.node.meta)
     if (spell_positions.length == 0) {
       throw new Error("Not in a spell-branch!");
     }
@@ -842,11 +894,11 @@ export default class PascoEngine extends EventEmitter {
     if (node.meta['spell-letter'] || node.meta['spell-word']) {
       this._addToSpellTextOnSelect(node)
     }
-    let spell_text = getCurrentSpellText()
+    let spell_text = this.getCurrentSpellText()
     if (!spell_text) {
       spell_text = this._t("Nothing selected")
     }
-    this.displayPopupMessage(spell_text)
+    this._uibridge.displayPopupMessage(spell_text)
     try {
       this.onBeforeSelect()
       await this._move_manager.performSelectMove({ override_msg: spell_text })
@@ -866,14 +918,12 @@ export default class PascoEngine extends EventEmitter {
     if (spell_position == null) {
       throw new Error("Corrupt positions!");
     }
-    if (node.meta['spell-letter'] || node.meta['spell-word']) {
-      this._addToSpellTextOnSelect(node)
-    }
+    this._addToSpellTextOnSelect(node)
     if (spell_branch_node.readMetaAsBoolean('spell-update-dyn-onchange')) {
       spell_position._dyndirty = true
     }
     await this._beforeUpdateInPositionsAsync()
-    this._updatePositionForSpellBranch()
+    this._updatePositionForSpellBranch(node)
     this._updateSelectPath()
     let msg = this.getUtteranceMessageFromCurrentSpellText()
     await this._move_manager.performNotifyMove(node, {
@@ -902,7 +952,7 @@ export default class PascoEngine extends EventEmitter {
       spell_position._dyndirty = true
     }
     let msg = this.getUtteranceMessageFromCurrentSpellText()
-    this._updatePositionForSpellBranch()
+    this._updatePositionForSpellBranch(node)
     this._updateSelectPath()
     await this._move_manager.performNotifyMove(node, {
       main_override_msg: msg,
@@ -928,7 +978,7 @@ export default class PascoEngine extends EventEmitter {
   }
   getCurrentSpellText () {
     if (!this._started) {
-      throw new Error('Engine is not running!')
+      return '' //
     }
     let txt = ''
     let tmp = this._state.positions.filter((a) => !!a._spell_content)
@@ -941,7 +991,7 @@ export default class PascoEngine extends EventEmitter {
     let txt = this.getCurrentSpellText().split(' ')
     return txt[txt.length-1]
   }
-  _updatePositionForSpellBranch () {
+  _updatePositionForSpellBranch (node) {
     let { node: spell_branch_node } = node.getMetaFromTree('spell-branch')
     if (spell_branch_node == null) {
       throw new Error('The node is not in a spell-branch')
@@ -951,7 +1001,7 @@ export default class PascoEngine extends EventEmitter {
       throw new Error("Corrupt positions!");
     }
     let { node: stay_in_branch_node } = node.getMetaFromTree('stay-in-branch')
-    let spell_position_idx = this._state.positions.findIndex((a) => a.node == spell_position)
+    let spell_position_idx = this._state.positions.findIndex((a) => a == spell_position)
     let stay_in_branch_idx = this._state.positions.findIndex((a) => a.node == stay_in_branch_node)
     let keep_idx = Math.max(spell_position_idx, stay_in_branch_idx)
     if (keep_idx == -1) {
@@ -965,6 +1015,7 @@ export default class PascoEngine extends EventEmitter {
   async _beforePopFromPositionsAsync (count) {
     // At the moment there's no update on dyn nodes when positions are removed on the back event
     // This is not an ideal solution for fixign this issue
+    let positions = this._state.positions
     let first_pos_with_dyn = positions.slice(Math.max(0, positions.length - count)).find((a) => !!a.node.meta['dyn'])
     if (first_pos_with_dyn) {
       let dynnode = first_pos_with_dyn.node
@@ -1004,7 +1055,7 @@ export default class PascoEngine extends EventEmitter {
         should_hide = false
         this._uibridge.updateMessageBar({
           type: 'spell',
-          content: (this._pengine.getCurrentSpellText()||''),
+          content: (this.getCurrentSpellText()||''),
         })
       }
     }
@@ -1045,23 +1096,23 @@ export default class PascoEngine extends EventEmitter {
   didHitNavigationButton (event) {
     switch (event.name) {
       case 'nav-upbtn':
-        call = _tree_go_previous;
+        this.callAction('tree_go_previous')
         break;
       case 'nav-downbtn':
-        call = _tree_go_next;
+        this.callAction('tree_go_next')
         break;
       case 'nav-leftbtn':
         if(window.icu && icu.rtl) {
-          call = _tree_go_in;
+          this.callAction('tree_go_in')
         } else {
-          call = _tree_go_out;
+          this.callAction('tree_go_out')
         }
         break;
       case 'nav-rightbtn':
         if(window.icu && icu.rtl) {
-          call = _tree_go_out;
+          this.callAction('tree_go_out')
         } else {
-          call = _tree_go_in;
+          this.callAction('tree_go_in')
         }
         break;
     }
@@ -1079,18 +1130,19 @@ export default class PascoEngine extends EventEmitter {
     }, 3000)
     state._wheel_delta = [ state._wheel_delta[0] + deltaX,
                            state._wheel_delta[1] + deltaY ]
-    var x_threshold = this._config.wheel_x_threshold || 30
+    var x_threshold = this._config.wheel_x_threshold || 100
     if (Math.abs(state._wheel_delta[0]) > x_threshold) {
-      (state._wheel_delta[0] > 0 && !this._config.wheel_x_reverse ?
-       _tree_go_in() : _tree_go_out())
-        .catch(handle_error)
+      if (state._wheel_delta[0] > 0 && !this._config.wheel_x_reverse) {
+        this.callAction('tree_go_in')
+      } else {
+        this.callAction('tree_go_out')
+      }
       state._wheel_delta = [ 0, 0 ]
     }
-    var y_threshold = this._config.wheel_y_threshold || 30
+    var y_threshold = this._config.wheel_y_threshold || 100
     if (Math.abs(state._wheel_delta[1]) > y_threshold) {
       var n = Math[state._wheel_delta[1] < 0 ? "ceil" : "floor"](state._wheel_delta[1] / y_threshold) * (this._config.wheel_y_reverse ? -1 : 1)
-      _tree_go_n_steps(n)
-        .catch(handle_error)
+      this.callAction('move_steps', n)
       state._wheel_delta = [ 0, 0 ]
     }
   }

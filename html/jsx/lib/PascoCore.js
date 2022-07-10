@@ -119,6 +119,13 @@ export default class PascoCore {
       await this._speech_synthesizer.destroy()
     }
   }
+  async updateDataState () {
+    if (!this._datastate) {
+      return // skip
+    }
+    await this._datastate.reinit()
+    this._datastate.save()
+  }
   resolveUrl (link, base) {
     if (this._datastate) {
       return this._datastate.resolve_url(link, base)

@@ -1,5 +1,5 @@
 import * as EventEmitter from 'events'
-import { MoveAbortedException } from '../../exceptions'
+import { MoveAbortedException } from '../../../exceptions'
 
 export default class MoveController extends EventEmitter {
   constructor () {

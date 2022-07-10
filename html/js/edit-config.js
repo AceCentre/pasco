@@ -1299,7 +1299,10 @@ function save_quick_setup(evt) {
           })
       } else {
         _config.tree = ptree_info.tree_fn
-        return set_file_data(ptree_info.tree_fn, data);
+        return get_file_data(default_tree_url)
+          .then(function (data) {
+            return set_file_data(ptree_info.tree_fn, data);
+          });
       }
     })
     .then(function () {

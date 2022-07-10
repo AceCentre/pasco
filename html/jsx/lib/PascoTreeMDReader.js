@@ -6,7 +6,6 @@ export default class PascoTreeMDReader {
   constructor () {
     this._pttrn01 = /^H([0-9])$/
     this._pttrn02 = /^LI$/
-    this._pttrn03 = /\(([^\)]*)\)$/
   }
   readFromText (data) {
     // #46 \t to h1-6
@@ -51,13 +50,13 @@ export default class PascoTreeMDReader {
     tmpelm.innerHTML = html_data
     return this._parseNode(tmpelm)
   }
-  _parseText (text) {
+  static parseText (text) {
     text = text.trim()
     let meta = {}, match, _more_meta = {}
     // special format for auditory-cue meta (#8)
-    if((match = text.match(this._pttrn03)) != null) {
+    if ((match = text.match(/\(([^\)]*)\)$/)) != null) {
       text = text.substr(0, text.length - (match[1].length + 2))
-      if(match[1].length > 0) {
+      if (match[1].length > 0) {
         meta['auditory-cue'] = match[1]
         _more_meta['auditory-cue-in-text'] = true
       }
@@ -92,7 +91,7 @@ export default class PascoTreeMDReader {
             } else {
               txt_elm_content = txt_dom_elm.textContent
             }
-            let td = this._parseText(txt_elm_content)
+            let td = PascoTreeMDReader.parseText(txt_elm_content)
             let anode = new PascoTreeNode({
               txt_dom_element: txt_dom_elm,
               dom_element: elm_cnode,

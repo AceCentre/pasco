@@ -1,5 +1,5 @@
-import { MoveAbortedException } from '../../exceptions'
-import { deferredPromise, copyObject } from '../../common'
+import { MoveAbortedException } from '../../../exceptions'
+import { deferredPromise, copyObject } from '../../../common'
 import MoveController from './MoveController'
 import * as delay from 'delay'
 
@@ -131,7 +131,7 @@ export default class MoveManager {
           mincuetimeout = null;
         }, config.minimum_cue_time);
       }
-      this._engine.emit('move')
+      this._engine.emit('move', node)
       this._uibridge.updateActivePositions()
       if (opts.delay > 0) {
         await delay(opts.delay)
@@ -171,7 +171,7 @@ export default class MoveManager {
     })
     moveController.addStep(async () => {
       state.can_move = true
-      this._engine.emit('move')
+      this._engine.emit('move', node)
       this._uibridge.updateActivePositions()
       if (opts.delay > 0) {
         await delay(opts.delay)

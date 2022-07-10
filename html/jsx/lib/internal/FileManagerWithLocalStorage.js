@@ -1,5 +1,5 @@
 import BaseFileManager from './BaseFileManager'
-import { NotFoundError } from '../exceptions'
+import { NotFoundError } from '../../exceptions'
 
 function blobFromBase64 (base64, options) {
   let binary_string = window.atob(base64)

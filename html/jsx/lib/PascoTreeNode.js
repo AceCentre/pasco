@@ -25,7 +25,7 @@ export default class PascoTreeNode {
     let cloned_node = new PascoTreeNode(data)
     if (!this.is_leaf) {
       for (let cnode of this.child_nodes) {
-        this.appendChild(cnode.clone())
+        cloned_node.appendChild(cnode.clone())
       }
     }
     return cloned_node
@@ -58,20 +58,20 @@ export default class PascoTreeNode {
     if (child_node_idx == -1) {
       throw new Error('child_node is not in the child_nodes')
     }
-    this.child_nodes.splice(child_node_idx, 1)
+    let node = this.child_nodes.splice(child_node_idx, 1)[0]
     node.parent_node = null
-    if (!this.child_nodes.length == 0) {
+    if (this.child_nodes.length == 0) {
       this._setIsLeaf(true)
     }
   }
   getChildCount () {
-    return this.child_nodes.length
+    return this.child_nodes ? this.child_nodes.length : 0
   }
   getChildAtIndex (index) {
-    if (index < 0 || index >= this.parent_node.child_nodes.length) {
+    if (index < 0 || index >= this.child_nodes.length) {
       throw new Error('Index out of range')
     }
-    return this.parent_node.child_nodes[index]
+    return this.child_nodes[index]
   }
   _setIsLeaf (value) {
     this.is_leaf = !!value
@@ -86,7 +86,7 @@ export default class PascoTreeNode {
   getMetaFromTree (name) {
     let getMetaFromTreeSub = (node) => {
       var value = node.meta[name]
-      if (value !== undefined && val != 'inherit') {
+      if (value !== undefined && value != 'inherit') {
         return { value, node }
       }
       if (node.parent_node) {
@@ -119,16 +119,16 @@ export default class PascoTreeNode {
   async traverseAsync (callable) {
     await this._traverseAsyncSubrout(callable, 0)
   }
-  async _traverseAsyncSubrout (node, callable, i) {
-    while (node.child_nodes && i < node.child_nodes.length) {
-      let cnode = node.child_nodes[i]
-      let output = await callable(node, i, cnode)
-      await this._traverseAsyncSubrout(cnode, callable, 0)
+  async _traverseAsyncSubrout (callable, i) {
+    while (this.child_nodes && i < this.child_nodes.length) {
+      let cnode = this.child_nodes[i]
+      let output = await callable(cnode, i, this)
       if (output != null && (output.next_index >= 0)) {
         i = output.next_index
       } else {
         i += 1
       }
+      await cnode.traverseAsync(callable)
     }
   }
 }

@@ -1,6 +1,6 @@
 import BaseFileManager from './BaseFileManager'
-import { NotFoundError } from '../exceptions'
-import { fixUrlForCordova } from '../common'
+import { NotFoundError } from '../../exceptions'
+import { fixUrlForCordova } from '../../common'
 
 export default class FileManagerWithCordova extends BaseFileManager {
   async loadFileData (url, options) {

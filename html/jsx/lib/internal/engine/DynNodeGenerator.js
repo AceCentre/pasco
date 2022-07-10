@@ -14,8 +14,10 @@ export default class PascoDynNodeGenerator {
         if (module) {
           let { nodes } = await module.generate(node)
           for (let cnode of nodes) {
-            cnode._more_meta._isdynnode = true
-            cnode._more_meta._dynnode = node
+            cnode._isdynnode = true
+            cnode._dynnode = node
+            cnode.parent_node = parent_node
+            cnode.level = parent_node.level + 1
             parent_node.child_nodes.splice(index++, 0, cnode)
           }
           // delete node.parent

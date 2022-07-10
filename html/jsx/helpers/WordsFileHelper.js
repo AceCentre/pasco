@@ -1,12 +1,12 @@
-import { sortedIndex } from 'lodash'
+import { sortedIndexBy } from 'lodash'
 
 const _MAX_PREDICTION_CACHE_ENTRIES = 4
 let default_instance = null
 
 export default class WordsFileHelper {
-  constuctor (fileManager) {
+  constructor (file_manager) {
     this._cache = {}
-    this._fmanager = fileManager
+    this._fmanager = file_manager
   }
   /**
    * A single word.
@@ -38,10 +38,11 @@ export default class WordsFileHelper {
         // sort words
         data.words = data.words
         // Store the lowercased word.
-              .map(w => Object.assign({ lower: (w.v+'').toLowerCase() }, w))
+          .map(w => Object.assign({ lower: (w.v+'').toLowerCase() }, w))
         // Make sure that the words are sorted.
           .sort((a, b) => (a.lower < b.lower ? -1 :
                            a.lower > b.lower ? 1 : 0))
+        data.words
         return data
       })
       .catch((err) => {
@@ -98,24 +99,23 @@ export default class WordsFileHelper {
      * @returns {number} The index.
      */
     function getStartIndex() {
-      const i = sortedIndex(words, { lower: prefix }, sub)
+      const i = sortedIndexBy(words, { lower: prefix }, sub)
       return sub(words[i]) === prefix ? i : -1
     }
 
     const startIndex = getStartIndex()
-    // TODO: We could use _.takeWhile if we ever replace Underscore
-    //   with Lodash.
     let stopIndex = startIndex
     while (words[stopIndex] && sub(words[stopIndex]) === prefix) {
       stopIndex++
     }
+
     const matches = { words: words.slice(startIndex, stopIndex) }
     wdata._cache.set(prefix, matches)
     return matches
   }
-  static getInstance (fileManager) {
+  static getInstance (file_manager) {
     if (default_instance == null) {
-      default_instance = new WordsFileHelper(fileManager)
+      default_instance = new WordsFileHelper(file_manager)
     }
     return default_instance
   }

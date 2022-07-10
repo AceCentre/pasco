@@ -1,4 +1,4 @@
-import { NotFoundError } from '../exceptions'
+import { NotFoundError } from '../../exceptions'
 
 /**
  * BaseFileManager only uses http requests to perform the calls

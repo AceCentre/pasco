@@ -1,6 +1,6 @@
 import { getRuntimeEnv } from '../common'
-import FileManagerWithCordova from './FileManagerWithCordova'
-import FileManagerWithLocalStorage from './FileManagerWithLocalStorage'
+import FileManagerWithCordova from './internal/FileManagerWithCordova'
+import FileManagerWithLocalStorage from './internal/FileManagerWithLocalStorage'
 
 /**
  * PascoFileManager is a wrapper for FileManager's used 

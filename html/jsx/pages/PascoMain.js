@@ -14,6 +14,7 @@ import PascoEngine from '../lib/PascoEngine'
 import PascoNavigationButtons from '../lib/PascoNavigationButtons'
 import PascoSpeechSynthesizer from '../lib/PascoSpeechSynthesizer'
 import PascoNativeBridge from '../lib/PascoNativeBridge'
+import PascoMainEditMode from '../lib/internal/PascoMainEditMode'
 
 export default class PascoMain extends BasePage {
   constructor (document) {
@@ -63,23 +64,22 @@ export default class PascoMain extends BasePage {
     this._localizer.localize()
     this._initUI()
 
-    this._edit_mode_enabled = false
-    /*
-    // TODO:: IMPLEMENT THIS
-    if (config.can_edit) {
-      let tmp
-      tmp = document.querySelector('#edit-mode-btn')
-      this._event_manager.addDOMListenerFor(tmp, 'click', _on_edit_mode, false)
-      tmp = document.querySelector('#edit-mode-save-btn')
-      this._event_manager.addDOMListenerFor(tmp, 'click', _on_edit_save, false)
-      tmp = document.querySelector('#edit-mode-cancel-btn')
-      this._event_manager.addDOMListenerFor(tmp, 'click', _on_edit_cancel, false)
-    }
-    _edit_mode_toggle(this._edit_mode_enabled, false)
-    */
-
     this._pengine = new PascoEngine(this._core, this)
     this._event_manager.addNodeListenerFor(this._pengine, 'error', this.onError.bind(this))
+
+    this._edit_mode_enabled = false
+    if (config.can_edit) {
+      let tmp
+      tmp = this._document.querySelector('#edit-mode-btn')
+      this._event_manager.addDOMListenerFor(tmp, 'click', this.onClickEditMode.bind(this), false)
+      tmp = this._document.querySelector('#edit-mode-save-btn')
+      this._event_manager.addDOMListenerFor(tmp, 'click', this.onClickSaveEdit.bind(this), false)
+      tmp = this._document.querySelector('#edit-mode-cancel-btn')
+      this._event_manager.addDOMListenerFor(tmp, 'click', this.onClickCancelEdit.bind(this), false)
+    }
+    this._editmode = new PascoMainEditMode(this)
+    this._editmode.toggleEditButtons(this._edit_mode_enabled)
+
     await this.startEngine()
   }
   async destroy () {
@@ -99,9 +99,27 @@ export default class PascoMain extends BasePage {
       this._pengine = null
     }
     this._navbtns.destroy()
+    if (this._edit_mode_enabled) {
+      this._editmode.destroy()
+    }
+  }
+  getRootNodeElement () {
+    return this._root_node_element
+  }
+  getRootNode () {
+    return this._root_node
+  }
+  getEngine () {
+    return this._pengine
+  }
+  getDocument () {
+    return this._document
   }
   getCore () {
     return this._core
+  }
+  getConfig () {
+    return this._config
   }
   getLocalizer () {
     return this._localizer
@@ -109,16 +127,16 @@ export default class PascoMain extends BasePage {
   getLocale () {
     return this._locale
   }
+  getTreeUrl () {
+    return this._tree_url
+  }
+  getTree () {
+    return this._tree
+  }
 
   async initTreeFromFile (tree_url) {
     await this._tree.initFromFile(tree_url)
     this._tree_url = this._tree.getTreeUrl()
-    /*
-    await this._editor_helper.init({
-      tree_url: this._tree_url,
-      audio_dirname: this._tree.getAudioDir(),
-    })
-    */
     this._root_node = this._tree.initNodesFromTreeData()
   }
   renderNode (node) {
@@ -454,16 +472,6 @@ export default class PascoMain extends BasePage {
   removeNodeFromParent (node) {
     return this._tree.removeNodeFromParent(node)
   }
-  changeToEditMode () {
-    /* TODO:: IMPLEMENT
-    await this.initTreeFromFile(this._tree_url)
-    // stop current running tree
-    await this._pengine.destroy()
-    let initial_state = {}
-    await this._pengine.init(this._config, this._root_node, initial_state)
-    await this._pengine.start()
-     */
-  }
   async changeTreeByName (name) {
     let trees_info_url = this._core.resolveUrl(this._core.getEnvValue('default_trees_info_file'))
     let trees_info = await this._fmanager.loadFileJson(trees_info_url)
@@ -487,6 +495,19 @@ export default class PascoMain extends BasePage {
     this.restartEngine()
   }
   
+  async save () {
+    await this.onSave()
+    let writer = new PascoTreeMDWriter()
+    let tree_md = writer.writeToText(this._root_node)
+    this._fmanager.saveFileData(this._tree_url, tree_md)
+    await this._core.updateDataState()
+    return this._root_node
+  }
+  async restore () {
+    await this.onRestore()
+    return this._restore_root_node
+  }
+
   async restartEngine () {
     // stop current running tree
     await this._pengine.destroy()
@@ -497,6 +518,7 @@ export default class PascoMain extends BasePage {
     let initial_state = {
       config_url: this._config_url,
       tree_url: this._tree_url,
+      edit_mode: this._edit_mode_enabled,
     }
     await this._pengine.init(this._config, this._root_node, initial_state)
     await this._pengine.start()
@@ -587,7 +609,7 @@ export default class PascoMain extends BasePage {
         event.stopPropagation()
       }
       for (let event_name of [ 'click', 'touchstart', 'touchend', 'mousedown', 'mouseup' ]) {
-        this._event_manager.addDOMListenerFor(event_name, actionEventHandler, false, evtid)
+        this._event_manager.addDOMListenerFor(elm, event_name, actionEventHandler, false, evtid)
       }
     }
   }
@@ -633,7 +655,9 @@ export default class PascoMain extends BasePage {
       }, false)
     }
     this._pengine.addKeyhitHandler('80', () => { // P (restart engine)
-      this.restartEngine()
+      if (this._document.body.classList.contains('debug-mode')) {
+        this.restartEngine()
+      }
     })
     this._pengine.addKeyhitHandler('190', () => { // . dot (toggle debug buttons)
       if (this._debug_buttons_enabled) {
@@ -684,6 +708,52 @@ export default class PascoMain extends BasePage {
 
   onError (error) {
     this.displayError(error)
+  }
+
+  async onClickEditMode (evt) {
+    evt.preventDefault()
+    if (this._edit_mode_enabled) {
+      return
+    }
+    try {
+      this._edit_mode_enabled = true
+      await this.initTreeFromFile(this._tree_url)
+      this._editmode.init()
+      await this.startEngine()
+    } catch (err) {
+      this.onError(err)
+    }
+  }
+  async onClickSaveEdit (evt) {
+    evt.preventDefault()
+    if (!this._edit_mode_enabled) {
+      return
+    }
+    try {
+      this._edit_mode_enabled = false
+      this._editmode.destroy()
+      this._root_node = await this._editmode.save()
+      this._editmode.destroy()
+      await this._pengine.destroy()
+      await this.startEngine()
+    } catch (err) {
+      this.onError(err)
+    }
+  }
+  async onClickCancelEdit (evt) {
+    evt.preventDefault()
+    if (!this._edit_mode_enabled) {
+      return
+    }
+    try {
+      this._edit_mode_enabled = false
+      this._root_node = await this._editmode.restore()
+      this._editmode.destroy()
+      await this._pengine.destroy()
+      await this.startEngine()
+    } catch (err) {
+      this.onError(err)
+    }
   }
 
   onNavigationButtonsTouchStart (evt) {
@@ -789,7 +859,7 @@ export default class PascoMain extends BasePage {
     }
     let deltaX = window.scrollX - this._last_scroll_x
     let deltaY = window.scrollY - this._last_scroll_y
-    this._pengine.onWheel({ deltaX, deltaY })
+    this._pengine.didMoveWheel({ deltaX, deltaY })
     // lock-the scroll
     let scrollX = window.scrollX > 110 || window.scrollX < 10 ? 60 : window.scrollX
     let scrollY = window.scrollY > 110 || window.scrollY < 10 ? 60 : window.scrollY
@@ -811,7 +881,7 @@ export default class PascoMain extends BasePage {
     if (this._wheel_off) {
       return
     }
-    this._pengine.onWheel({ deltaX: evt.deltaX, deltaY: evt.deltaY })
+    this._pengine.didMoveWheel({ deltaX: evt.deltaX, deltaY: evt.deltaY })
   }
 
 }

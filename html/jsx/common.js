@@ -185,3 +185,13 @@ export function range (end, start) {
   }
   return list
 }
+
+var mkrand_chars = "abcdefghijklmnopqrstuvwxyz01234567890";
+export function mkRand (n) {
+  var v = ""
+  while(n > 0) {
+    v += mkrand_chars[Math.floor(Math.random() * mkrand_chars.length)]
+    n--
+  }
+  return v
+}

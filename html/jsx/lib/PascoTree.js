@@ -143,6 +143,9 @@ export default class PascoTree {
   insertNodeBefore (node, parent_node, other_node, content_template) {
     // check if node elements are initialized
     let has_elements = !!parent_node.dom_element
+    if (parent_node.is_leaf) {
+
+    }
     if (parent_node.is_leaf && has_elements) {
       var ulwrp = newElm('div')
       ulwrp.classList.add('children-wrp')
@@ -152,12 +155,13 @@ export default class PascoTree {
       parent_node.child_nodes_ul_dom_element = ul
       parent_node.dom_element.appendChild(ulwrp)
     }
-    if (!isNaN(other_node)) { // if beforenode is a number
+    if (!isNaN(other_node)) { // if other_node is a number
       if (other_node === parent_node.getChildCount()) {
         // insert at end
         other_node = null
+      } else {
+        other_node = parent_node.getChildAtIndex(other_node)
       }
-      other_node = parent_node.getChildAtIndex(other_node)
     }
     var li = newElm('li')
     if (other_node) {
@@ -186,7 +190,7 @@ export default class PascoTree {
     let parent_node = node.parent_node
     parent_node.removeChild(node)
     parent_node.child_nodes_ul_dom_element.removeChild(node.dom_element)
-    if (parent_node.child_nodes.length == 0) {
+    if (parent_node.child_nodes && parent_node.child_nodes.length == 0) {
       parent_node.child_nodes_ul_dom_element.parentNode.removeChild(parent_node.child_nodes_ul_dom_element)
       parent_node.child_nodes_ul_dom_element = null
     }
