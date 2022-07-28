@@ -1,5 +1,5 @@
 import BaseModule from './BaseModule'
-import PascoTreeNode from '../PascoTreeNode'
+import PascoNode from '../PascoNode'
 
 export default class TreeSwitcherModule extends BaseModule {
   constructor (pascoEngine) {
@@ -22,7 +22,7 @@ export default class TreeSwitcherModule extends BaseModule {
           if (tree_url == current_tree) {
             return null
           }
-          return new PascoTreeNode({
+          return new PascoNode({
             text: item.name,
             meta: {
               'change-tree': item.tree_fn,

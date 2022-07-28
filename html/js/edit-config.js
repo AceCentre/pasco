@@ -1995,7 +1995,7 @@ function _record_audio (dest, record_btn_wrap) {
 function upgrade_to_pasco_data_state () {
   waitingDialog.show()
   let state_dir_url = (window.cordova ? window.cordova_user_dir_prefix : 'file:///') + 'v1/'
-  PascoDataState.rebuildStateFromLegacy(this._state_config_fn, this._state_trees_info_fn, state_dir_url)
+  PascoDataState.rebuildStateFromLegacy(this._state_config_fn, this._state_trees_info_fn, state_dir_url, new NodeLib.PascoFileManager())
     .then(function (datastate) {
       let $message_modal = show_message({ title: _t('Update was successful'), message: '' })
       $message_modal.on('hide.bs.modal', function () {

@@ -1,7 +1,6 @@
 import { getRuntimeEnv } from '../common'
 import PascoTreeMDWriter from './PascoTreeMDWriter'
 import PascoTreeMDReader from './PascoTreeMDReader'
-import PascoTreeNode from './PascoTreeNode'
 
 let newElm = document.createElement.bind(document)
 

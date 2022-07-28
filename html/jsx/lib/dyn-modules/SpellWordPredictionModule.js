@@ -1,6 +1,6 @@
 import BaseModule from './BaseModule'
 import WordsFileHelper from '../../helpers/WordsFileHelper'
-import PascoTreeNode from '../PascoTreeNode'
+import PascoNode from '../PascoNode'
 
 function mk_words_weight_cmp (asc) {
   var mul = asc ? 1 : -1
@@ -44,7 +44,7 @@ export default class SpellWordPredictionModule extends BaseModule {
     }
     return {
       nodes: subwdata.words_sorted.slice(0, max_nodes).map((word) => {
-        return new PascoTreeNode({
+        return new PascoNode({
           text: word.v,
           meta: {
             'spell-word': word.v,

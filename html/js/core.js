@@ -293,7 +293,7 @@ function initialize_app() {
   // load pasco-state.json, v1
   let state_dir_url = (window.cordova ? window.cordova_user_dir_prefix : 'file:///') + 'v1/'
   var state_url = state_dir_url + 'pasco-state.json'
-  return NodeLib.PascoDataState.loadFromFile(state_url)
+  return NodeLib.PascoDataState.loadFromFile(state_url, new NodeLib.PascoFileManager())
     .then(function (datastate) {
       window.pasco_data_state = datastate
     })
@@ -316,7 +316,7 @@ function initialize_app() {
         .then(function (config_exists) {
           if (!config_exists) {
             // It is the first run, setup pasco-state.json
-            var datastate = new NodeLib.PascoDataState(state_url)
+            var datastate = new NodeLib.PascoDataState(state_url, new NodeLib.PascoFileManager())
             window.pasco_data_state = datastate
             let trees_info = { list: [ ] }
             let config_src = 'config.json'

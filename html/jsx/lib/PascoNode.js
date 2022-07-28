@@ -1,6 +1,6 @@
 import { copyObject } from '../common'
 
-export default class PascoTreeNode {
+export default class PascoNode {
   constructor (data) {
     data = data || {}
     let props = [
@@ -17,18 +17,18 @@ export default class PascoTreeNode {
     this.child_nodes = Array.isArray(data.child_nodes) ? data.child_nodes : null
     this.is_leaf = this.child_nodes ? false : true
   }
-  clone () {
+  copy () {
     let static_props = [
       'level', 'text', 'meta', '_more_meta',
     ]
     let data = copyObject(Object.fromEntries(static_props.map((a) => [ a, this[a] ])))
-    let cloned_node = new PascoTreeNode(data)
+    let node_copy = new PascoNode(data)
     if (!this.is_leaf) {
       for (let cnode of this.child_nodes) {
-        cloned_node.appendChild(cnode.clone())
+        node_copy.appendChild(cnode.copy())
       }
     }
-    return cloned_node
+    return copied_node
   }
   appendChild (node) {
     if (!this.child_nodes || this.is_leaf) {
@@ -97,10 +97,10 @@ export default class PascoTreeNode {
     return getMetaFromTreeSub(this)
   }
   readMetaAsInt (name, default_val) {
-    return PascoTreeNode.parseMetaValueAsInt(this.meta[name], default_val)
+    return PascoNode.parseMetaValueAsInt(this.meta[name], default_val)
   }
   readMetaAsBoolean (name, default_val) {
-    return PascoTreeNode.parseMetaValueAsBoolean(this.meta[name], default_val)
+    return PascoNode.parseMetaValueAsBoolean(this.meta[name], default_val)
   }
   static parseMetaValueAsInt (v, default_val) {
     var i = parseInt(v)

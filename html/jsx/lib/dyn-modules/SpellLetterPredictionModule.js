@@ -1,6 +1,6 @@
 import BaseModule from './BaseModule'
 import WordsFileHelper from '../../helpers/WordsFileHelper'
-import PascoTreeNode from '../PascoTreeNode'
+import PascoNode from '../PascoNode'
 import { range } from '../../common'
 
 export default class SpellLetterPredictionModule extends BaseModule {
@@ -67,7 +67,7 @@ export default class SpellLetterPredictionModule extends BaseModule {
     }
     return {
       nodes: subwdata.alphabet_sorted.map((v) => {
-        return new PascoTreeNode({ text: v[0] })
+        return new PascoNode({ text: v[0] })
       }),
     }
   }

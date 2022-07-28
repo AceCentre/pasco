@@ -67,7 +67,7 @@ export default class PascoCore {
       // should decide to use legacy version or create a data state
       // depending on existance of the config file
       let legacy_dir_url = this.getEnvValue('user_dir_prefix')
-      let config_url = legacy_dir_url + default_config
+      let config_url = legacy_dir_url + this.getEnvValue('default_config_file')
       if (await this._filemanager.fileExists(config_url)) {
         throw new Error('legacy version of pasco is not supported!')
         /*
@@ -81,17 +81,18 @@ export default class PascoCore {
         let trees_info = { list: [ ] }
         let config_src = 'config.json'
         let trees_info_src = 'trees-info.json'
-        await this._filemanager.mkdirRec(datastate.getStateDirUrl())
+        await this._filemanager.mkdirRec(this._datastate.getStateDirUrl())
         let config_data = await this._filemanager.loadFileData(this.getEnvValue('default_config_file'))
         let config = JSON.parse(config_data)
         await Promise.all([
           this._filemanager.saveFileData(this.resolveUrl(config_src), config_data),
           this._filemanager.saveFileJson(this.resolveUrl(trees_info_src), trees_info),
         ])
-        await datastate.init(config_src, trees_info_src)
+        await this._datastate.init(config_src, trees_info_src)
+        let data = this._datastate.getData()
         this.setEnvValue('default_config_file', this.resolveUrl(data.config))
         this.setEnvValue('default_trees_info_file', this.resolveUrl(data.trees_info))
-        await datastate.save()
+        await this._datastate.save()
       }
     }
     this.initUI()

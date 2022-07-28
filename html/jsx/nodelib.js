@@ -10,7 +10,16 @@ import locales from './data/locales.json'
 
 import DropboxSyncConfigUI from './lib/DropboxSyncConfigUI';
 import DropboxSync from './lib/DropboxSync';
+import PascoDataState from './lib/PascoDataState';
+import PascoFileManager from './lib/PascoFileManager';
 import * as common from './common';
+import * as exceptions from './exceptions'
+
+{
+  for (let key of Object.keys(exceptions)) {
+    common[key] = exceptions[key]
+  }
+}
 
 import './pages'
 
@@ -28,5 +37,6 @@ window.scrollnav = scrollnav;
 window.copy = copy;
 
 window.NodeLib = {
-  obfutil, uicommon, common, DropboxSync, DropboxSyncConfigUI
+  obfutil, uicommon, common, DropboxSync, DropboxSyncConfigUI,
+  PascoDataState, PascoFileManager,
 };

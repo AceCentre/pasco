@@ -1,6 +1,6 @@
 import PascoTreeMDReader from '../PascoTreeMDReader'
 import PascoTreeMDWriter from '../PascoTreeMDWriter'
-import PascoTreeNode from '../PascoTreeNode'
+import PascoNode from '../PascoNode'
 import EventManager from '../../helpers/EventManager'
 import lodashTemplate from '../../helpers/lodashTemplate'
 import $ from 'jquery'
@@ -35,7 +35,7 @@ export default class PascoMainEditMode {
     root_node_element.classList.add('edit-mode')
     this._event_manager.addDOMListenerFor(root_node_element, 'click', this.didClickOnTree.bind(this), false)
     this._event_manager.addNodeListenerFor(this._pengine, 'move', this.didSelectNode.bind(this))
-    this._restore_root_node = this._root_node.clone()
+    this._restore_root_node = this._root_node.copy()
   }
   destroy () {
     this.toggleEditButtons(false)
@@ -146,7 +146,7 @@ export default class PascoMainEditMode {
       throw new Error('Failed to parse template from #tree-node-template')
     }
     let mkNode = () => {
-      return new PascoTreeNode({
+      return new PascoNode({
         text: 'New',
         meta: {},
         _more_meta: {},

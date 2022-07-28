@@ -1,4 +1,3 @@
-import PascoTreeNode from './PascoTreeNode'
 import showdown from 'showdown'
 import sanitizeHtml from 'sanitize-html'
 

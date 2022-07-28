@@ -1,4 +1,4 @@
-import PascoTreeNode from './PascoTreeNode'
+import PascoNode from './PascoNode'
 import showdown from 'showdown'
 import sanitizeHtml from 'sanitize-html'
 
@@ -69,7 +69,7 @@ export default class PascoTreeMDReader {
   }
   _parseNode (elm, continue_at, node) {
     continue_at = continue_at || { i: 0 }
-    node = node || new PascoTreeNode({ level: 0, meta: {}, _more_meta: {} })
+    node = node || new PascoNode({ level: 0, meta: {}, _more_meta: {} })
     for (let len = elm.childNodes.length; continue_at.i < len; continue_at.i++) {
       let elm_cnode = elm.childNodes[continue_at.i]
       if(elm_cnode.nodeType == Node.ELEMENT_NODE) {
@@ -92,7 +92,7 @@ export default class PascoTreeMDReader {
               txt_elm_content = txt_dom_elm.textContent
             }
             let td = PascoTreeMDReader.parseText(txt_elm_content)
-            let anode = new PascoTreeNode({
+            let anode = new PascoNode({
               txt_dom_element: txt_dom_elm,
               dom_element: elm_cnode,
               text: td.text,

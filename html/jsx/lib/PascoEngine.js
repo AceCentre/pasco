@@ -1,7 +1,7 @@
 import * as EventEmitter from 'events'
 import { deferredPromise, copyObject } from '../common'
 import { NotFoundError } from '../exceptions'
-import PascoTreeNode from './PascoTreeNode'
+import PascoNode from './PascoNode'
 import * as dynModulesIndex from './dyn-modules'
 const dynModules = dynModulesIndex.modules
 import * as delay from 'delay'
@@ -240,7 +240,7 @@ export default class PascoEngine extends EventEmitter {
           insert_pos = 0;
         }
         // expecting the following properties in data (_more_meta, meta, text)
-        cnode._back_node = new PascoTreeNode({
+        cnode._back_node = new PascoNode({
           _more_meta: {
             istmp: true
           },
