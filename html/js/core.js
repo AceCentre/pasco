@@ -78,21 +78,12 @@ async function prepare_tree(treeFileName) {
   }
 
   if (!treeFileName.includes("://") && !window.pasco_data_state) {
-    const exists = await file_exists("file:///" + treeFileName);
-
-    if (exists) {
-      return {
-        tree_fn: "file:///" + treeFileName,
-        dirpath: new URL(".", "file:///" + treeFileName).href,
-        audio_dirname: null,
-      };
-    } else {
-      return {
-        tree_fn: treeFileName,
-        dirpath: new URL(".", treeFileName).href,
-        audio_dirname: null,
-      };
-    }
+    let treeFileUrl = 'file:///' + treeFileName
+    return {
+      tree_fn: treeFileUrl,
+      dirpath: new URL(".", treeFileUrl).href,
+      audio_dirname: null,
+    };
   }
 
   let audio_dirname = window.cordova ? "audio" : null;
@@ -375,6 +366,7 @@ function initialize_app() {
           } else {
             window.default_config = config_url
             window.default_trees_info_fn = legacy_dir_url + default_trees_info_fn
+            window.default_tree = legacy_dir_url + default_tree
           }
         })
     })

@@ -69,7 +69,10 @@ export default class PascoCore {
       let legacy_dir_url = this.getEnvValue('user_dir_prefix')
       let config_url = legacy_dir_url + this.getEnvValue('default_config_file')
       if (await this._filemanager.fileExists(config_url)) {
-        throw new Error('legacy version of pasco is not supported!')
+        // upgrade to v1
+        let state_dir_url = this.getEnvValue('user_dir_prefix') + 'v1/'
+        let trees_info_url = legacy_dir_url + this.getEnvValue('default_trees_info_file')
+        this._datastate = await PascoDataState.rebuildStateFromLegacy(config_url, trees_info_url, state_dir_url, new NodeLib.PascoFileManager())
         /*
         // run in legacy mode if config already exists
         this.setEnvValue('default_config_file', config_url)
