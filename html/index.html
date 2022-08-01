@@ -16,13 +16,15 @@
     <!-- bootstrap includes end -->
     <link rel="stylesheet" href="fonts/fontawesome/css/fontawesome-all.min.css">
     <link rel="stylesheet" href="css/main.css">
-
-    <script src="js/nodelib.js"></script>
-    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     
     <!-- <link rel="icon" href="images/favicon.png"> -->
     <!-- INJECT HEAD -->
-    
+
+    <!-- INJECT SCRIPTS -->
+    <!-- MAIN SCRIPTS -->
+    <script src="js/nodelib.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
   </head>
 
   <body class="notready">
@@ -78,7 +80,7 @@
             <h4 class="modal-title" id="myModalLabel" x-l10n>Setting</h4>
           </div>
           <div class="modal-body">
-            <div class="row">
+            <div class="row non-selectable">
               <div class="col-sm-6">
                 <h3 x-l10n>Record Audio</h3>
                 <p x-l10n="record_btn_desc">
@@ -241,8 +243,6 @@
       </div>
     </div>
 
-    <!-- INJECT SCRIPTS -->
-    <!-- MAIN SCRIPTS -->
     <!--
     <script src="bower_components/underscore/underscore-min.js"></script>
     <script src="bower_components/showdown/dist/showdown.min.js"></script>

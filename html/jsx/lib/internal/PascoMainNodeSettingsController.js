@@ -85,7 +85,7 @@ export default class PascoMainNodeSettingsController {
     }
   }
   async removeAudio (node, audio_name) {
-    let audio_meta = audio_meta_by_name(audio_name)
+    let audio_meta = this.getAudioMetaByName(audio_name)
     let src = node.meta[audio_meta.target_meta]
     let reverts = node._more_meta.audio_reverts = node._more_meta.audio_reverts || {}
     let has_revert = !!reverts[audio_meta.target_meta]
@@ -99,7 +99,7 @@ export default class PascoMainNodeSettingsController {
         console.warn('Could not delete: ' + src)
       }
     }
-    this.removeAudioRecord(audio_name);
+    this.removeAudioRecord(audio_name)
     delete node.meta[audio_meta.target_meta]
   }
   stopAudioPlayback () {
@@ -122,12 +122,12 @@ export default class PascoMainNodeSettingsController {
   }
   addAudioRecord (audio_meta) {
     this.removeAudioRecord(audio_meta.name)
-    var tmp = document.createElement('tbody');
-    tmp.innerHTML = this._audio_td_template({ audio_meta: audio_meta });
+    var tmp = document.createElement('tbody')
+    tmp.innerHTML = this._audio_td_template({ audio_meta: audio_meta })
     for (let cnode of tmp.childNodes) {
       if (cnode && cnode.nodeName == 'TR') {
         var tbody = document.getElementById('node-audio-tbody')
-        tbody.appendChild(tmp.childNodes[i])
+        tbody.appendChild(cnode)
         break
       }
     }
@@ -224,7 +224,7 @@ export default class PascoMainNodeSettingsController {
 
   /**** START RECORD AUDIO FEATURE ****/
   async startAudioRecording (dest) {
-    await this._native_bridge.request_audio_record_permission()
+    let granted = await this._native_bridge.request_audio_record_permission()
     if(!granted) {
       throw new Error("Permission not granted");
     }
@@ -232,7 +232,7 @@ export default class PascoMainNodeSettingsController {
     await this._fmanager.saveFileData(dest, '')
     return await (new Promise((resolve, reject) => {
       if (this._audio_record_media_stopped) {
-        delete thisp._audio_record_media_stopped;
+        delete this._audio_record_media_stopped;
         return resolve(false);
       }
       let wrap = document.querySelector('.node-record-btn-wrap')
@@ -245,38 +245,42 @@ export default class PascoMainNodeSettingsController {
           amp_circle.style.borderRadius = radius + 'px';
         }
       }
-      set_circle_radius(0);
-      wrap.classList.add('recording');
-      let onSuccess =  () => {
-        delete this._audio_record_media
-        wrap.classList.remove('recording')
-        clearInterval(mediaTimer)
-        resolve(true)
-      }
-      let onError = (err) => {
-        delete this._audio_record_media;
-        wrap.classList.remove('recording')
-        clearInterval(mediaTimer)
+      set_circle_radius(0)
+      wrap.classList.add('recording')
+      try {
+        let onSuccess =  () => {
+          delete this._audio_record_media
+          wrap.classList.remove('recording')
+          clearInterval(mediaTimer)
+          resolve(true)
+        }
+        let onError = (err) => {
+          delete this._audio_record_media
+          wrap.classList.remove('recording')
+          clearInterval(mediaTimer)
+          reject(err)
+        }
+        // Audio player
+        let media = this._audio_record_media = new window.Media(dest, onSuccess, onError)
+        var mediaTimer = setInterval(() => {
+          // get media amplitude
+          media.getCurrentAmplitude(
+            // success callback
+            (amp) => {
+              set_circle_radius(amp * circle_max_radius)
+            },
+            // error callback
+            (err) => {
+              console.log("Error getting amp", err)
+              clearInterval(mediaTimer)
+            }
+          )
+        }, 100)
+        // Record audio
+        media.startRecord()
+      } catch (err) {
         reject(err)
       }
-      // Audio player
-      let media = this._audio_record_media = new window.Media(dest, onSuccess, onError)
-      var mediaTimer = setInterval(() => {
-        // get media amplitude
-        media.getCurrentAmplitude(
-          // success callback
-          (amp) => {
-            set_circle_radius(amp * circle_max_radius)
-          },
-          // error callback
-          (err) => {
-            console.log("Error getting amp", err)
-            clearInterval(mediaTimer)
-          }
-        )
-      }, 100)
-      // Record audio
-      media.startRecord();
     }))
   }
   stopAudioRecording () {
@@ -301,14 +305,15 @@ export default class PascoMainNodeSettingsController {
         if (!this._audio_save_dirname || !this._tree_url) {
           throw new Error('Could not save, save directory not found!')
         }
-        let audio_dir_url = this._core.resolveUrl(this._audio_save_dirname, this._tree_url)
-        if (!audio_dir_url.endsWith('/')) {
-          audio_dir_url += '/'
+        let audio_save_dir = this._audio_save_dirname
+        if (audio_save_dir && !audio_save_dir.endsWith('/')) {
+          audio_save_dir += '/'
         }
+        let audio_dir_url = this._core.resolveUrl(audio_save_dir, this._tree_url)
         // start recording
         let filename = await this.findUniqueFilename(audio_dir_url, fsFriendlyName(node.text + '_' + audio_name), '.wav')
-        let dest_url = audio_dir_url + '/' + filename
-        let new_audio_src = this._audio_save_dirname + '/' + filename
+        let dest_url = audio_dir_url + filename
+        let new_audio_src = audio_save_dir + filename
         this._record_start_time = new Date().getTime()
         let success = await this.startAudioRecording(dest_url)
         if (!success) {
@@ -358,7 +363,7 @@ export default class PascoMainNodeSettingsController {
       }
       let prev_src = node.meta[audio_meta.target_meta] ? this._core.resolveUrl(node.meta[audio_meta.target_meta], this._tree_url) : null
       let reverts = node._more_meta.audio_reverts = node._more_meta.audio_reverts || {}
-      has_revert = !!reverts[audio_meta.target_meta]
+      let has_revert = !!reverts[audio_meta.target_meta]
       if (!has_revert) {
         reverts[audio_meta.target_meta] = prev_src || true
       }
@@ -385,7 +390,7 @@ export default class PascoMainNodeSettingsController {
     let try_len = 5
     let filename = basename + ext
     let found_path = null
-    let path = dir + '/' + filename
+    let path = dir + filename
     while (try_len-- > 0) {
       let exists = await this._fmanager.fileExists(path)
       if (!exists) {
@@ -393,12 +398,12 @@ export default class PascoMainNodeSettingsController {
         break
       }
       filename = basename + '_' + mkRand(5) + ext
-      path = dir + '/' + filename
+      path = dir + filename
     }
     if (found_path == null) {
       throw new Error("Could not find new filename!")
     }
-    return found_path
+    return filename
   }
   getAudioMetaByName (audio_name) {
     return this._audio_meta_list.find((a) => a.name == audio_name)

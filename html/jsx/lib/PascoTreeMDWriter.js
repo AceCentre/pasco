@@ -33,7 +33,7 @@ export default class PascoTreeMDWriter {
     let tmp_meta = document.createElement('meta')
     let auditory_cue_in_text = anode._more_meta['auditory-cue-in-text']
     let len = 0
-    for (let key in Object.keys(anode.meta)) {
+    for (let key of Object.keys(anode.meta)) {
       if (!auditory_cue_in_text || key != 'auditory-cue') {
         tmp_meta.setAttribute('data-' + key, anode.meta[key])
         len++

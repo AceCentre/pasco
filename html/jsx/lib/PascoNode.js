@@ -28,7 +28,7 @@ export default class PascoNode {
         node_copy.appendChild(cnode.copy())
       }
     }
-    return copied_node
+    return node_copy
   }
   appendChild (node) {
     if (!this.child_nodes || this.is_leaf) {

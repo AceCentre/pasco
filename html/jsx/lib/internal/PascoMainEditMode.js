@@ -277,7 +277,7 @@ export default class PascoMainEditMode {
     await this.onSave()
     let writer = new PascoTreeMDWriter()
     let tree_md = writer.writeToText(this._root_node)
-    this._fmanager.saveFileData(this._tree_url, tree_md)
+    await this._fmanager.saveFileData(this._tree_url, tree_md)
     await this._core.updateDataState()
     return this._root_node
   }

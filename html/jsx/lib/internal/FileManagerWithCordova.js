@@ -40,6 +40,7 @@ export default class FileManagerWithCordova extends BaseFileManager {
     }
   }
   async saveFileData (url, data, options) {
+    options = options || {}
     if (!this.isLocalFile(url)) {
       return await super.saveFileData(url, data, options)
     }
@@ -68,7 +69,7 @@ export default class FileManagerWithCordova extends BaseFileManager {
               data = new Blob([data], { type: options.contentType || 'application/octet-stream' })
             }
             fileWriter.write(data)
-          })
+          }, onFail)
         }, onFail)
       }
       let onFail = (err) => {

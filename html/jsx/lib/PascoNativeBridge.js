@@ -68,15 +68,16 @@ export default class PascoNativeBridge {
       }, 0)
     }
   }
-  _exec (action, args) {
+  _exec (action, ...args) {
     return cordovaExecAsPromise('NativeAccessApi', action, args);
   }
   static onready () {
     return new Promise((resolve, reject) => {
-      document.addEventListener('deviceready', function() {
-        document.removeEventListener('deviceready', arguments.callee)
+      let onDeviceReady = () => {
+        document.removeEventListener('deviceready', onDeviceReady)
         resolve()
-      }, true)
+      }
+      document.addEventListener('deviceready', onDeviceReady, true)
     })
   }
 }

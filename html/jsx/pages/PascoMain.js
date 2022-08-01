@@ -36,7 +36,8 @@ export default class PascoMain extends BasePage {
       throw new RedirectPageException('intro.html')
     }
     this._locale = config.locale || this._core.getEnvValue('default_locale')
-    this._localizer = new DOMLocalizer('/l10n', this._document)
+    let base_url = location+''
+    this._localizer = new DOMLocalizer(new URL('l10n', base_url).href, this._document)
     // prepare the tree
     this._tree = new PascoTree(this._core)
     this._root_node_element = this._document.querySelector('#tree')
@@ -310,7 +311,8 @@ export default class PascoMain extends BasePage {
         }
         show = true
         var idx = 0
-        for (let word of content.split(' ')) {
+        let words = content.split(' ')
+        for (let word of words) {
           if (idx + 1 == words.length) {
             for (let letter of word.split('')) {
               let elm = this._document.createElement('div')
@@ -493,19 +495,6 @@ export default class PascoMain extends BasePage {
     this._tree = new PascoTree(this._core)
     await this.initTreeFromFile(tree_url)
     this.restartEngine()
-  }
-  
-  async save () {
-    await this.onSave()
-    let writer = new PascoTreeMDWriter()
-    let tree_md = writer.writeToText(this._root_node)
-    this._fmanager.saveFileData(this._tree_url, tree_md)
-    await this._core.updateDataState()
-    return this._root_node
-  }
-  async restore () {
-    await this.onRestore()
-    return this._restore_root_node
   }
 
   async restartEngine () {
@@ -699,8 +688,8 @@ export default class PascoMain extends BasePage {
     }
   }
   async evalConfig (config) {
-    this._onscreen_navigation_enabled = config.onscreen_navigation == 'enable'
-    this._can_edit = !('can_edit' in config) ? true : !!config.can_edit
+    // NOT USED
+    // this._can_edit = !('can_edit' in config) ? true : !!config.can_edit
     this._style_list = Array.isArray(this._config.style) ? this._config.style :
       (this._config.style ? [ this._config.style ] : [])
     this.insertConfigStyles(this._style_list)
@@ -731,7 +720,6 @@ export default class PascoMain extends BasePage {
     }
     try {
       this._edit_mode_enabled = false
-      this._editmode.destroy()
       this._root_node = await this._editmode.save()
       this._editmode.destroy()
       await this._pengine.destroy()
@@ -765,7 +753,7 @@ export default class PascoMain extends BasePage {
         case 'nav-leftbtn':
         case 'nav-rightbtn': {
           evt.preventDefault()
-          this._pengine.onHitNavigationButton({ name: elem.id })
+          this._pengine.didHitNavigationButton({ name: elem.id })
           break
         }
       }

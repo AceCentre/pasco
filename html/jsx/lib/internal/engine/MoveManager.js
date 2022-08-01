@@ -10,6 +10,7 @@ export default class MoveManager {
     this._core = engine.getCore()
     this._speech_synthesizer = this._core.getSpeechSynthesizer()
     this._uibridge = engine.getUIBridge()
+    this._t = this._uibridge.getLocalizer().t
   }
   getRunningMoveController () {
     return this._running_move_controller
@@ -96,10 +97,10 @@ export default class MoveManager {
       moveController.once('abort', onAbort)
       if (audio) {
         try {
-          await this._speech_synthesizer.playAudio(this._core.resolveUrl(audio, tree_fn), opts)
+          await this._speech_synthesizer.playAudio(this._core.resolveUrl(audio, state.tree_url), opts)
         } catch (err) {
           console.error(err);
-          await this._speech_synthesizer.startUtterance(_t("Could not play the input audio"), opts);
+          await this._speech_synthesizer.startUtterance(this._t("Could not play the input audio"), opts);
         }
       } else if (text) {
         await this._speech_synthesizer.startUtterance(text, opts)

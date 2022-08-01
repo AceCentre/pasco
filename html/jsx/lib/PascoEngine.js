@@ -63,7 +63,8 @@ export default class PascoEngine extends EventEmitter {
         this._wheel_timeout = null
       }
     }
-    if ((this._config._onscreen_navigation || this._state.edit_mode)) {
+    let config_onscreen_navigation = this._config.onscreen_navigation == 'enable'
+    if ((config_onscreen_navigation || this._state.edit_mode)) {
       this._uibridge.enableNavigationButtons()
     } else {
       this._uibridge.disableNavigationButtons()
@@ -215,7 +216,7 @@ export default class PascoEngine extends EventEmitter {
     })
     // re-enable auto start on next action when auto_next_dead is true
     let shouldApplyRenableAutoNext = (node) => {
-      return this._state.mode == 'auto' && this._state.auto_next_dead
+      return !this._state.edit_mode && this._state.mode == 'auto' && this._state.auto_next_dead
     }
     let renableAutoNext = async () => {
       this._state._auto_next_rem_loops = this._config.auto_next_loops || 0
@@ -248,8 +249,8 @@ export default class PascoEngine extends EventEmitter {
             'back-n-branch': '1',
             'auditory-cue': this._config.helper_back_option_cue_text || this._t('Back'),
             'back-n-branch-notify': this._config.helper_back_option_notify ? 'true' : 'false',
-            'main-audio': this._config.helper_back_option_main_audio ? this._core.resolveUrl(this._config.helper_back_option_main_audio, this._state.this._config_url) : null,
-            'cue-audio': this._config.helper_back_option_cue_audio ? this._core.resolveUrl(this._config.helper_back_option_cue_audio, this._state.this._config_url) : null,
+            'main-audio': this._config.helper_back_option_main_audio ? this._core.resolveUrl(this._config.helper_back_option_main_audio, this._state._config_url) : null,
+            'cue-audio': this._config.helper_back_option_cue_audio ? this._core.resolveUrl(this._config.helper_back_option_cue_audio, this._state._config_url) : null,
           },
           text: this._config.helper_back_option_main_text || this._t('Back'),
         });
@@ -392,8 +393,7 @@ export default class PascoEngine extends EventEmitter {
     this._updateSelectPath()
     await this.doUpdatePositions()
     // operation starts
-    if (state.mode == 'auto') {
-      state.auto_next_start = auto_next
+    if (!state.edit_mode && state.mode == 'auto') {
       this._autoNextStep()
     }
   }
@@ -412,7 +412,7 @@ export default class PascoEngine extends EventEmitter {
           await running_move_controller.getRunPromise()
         } else {
           var position = this.getCurrentPosition()
-          if (position.index + 1 == position.tree.nodes.length) {
+          if (position.node.child_nodes && position.index + 1 == position.node.child_nodes.length) {
             // at re-cycle
             if (Math.abs(--state._auto_next_rem_loops) < 1) {
               // stop the loop
@@ -423,7 +423,10 @@ export default class PascoEngine extends EventEmitter {
               return
             }
           }
-          await this.actionMoveNext()
+          await this.actionMoveNext(position)
+        }
+        if (this._state != state) {
+          return // state has changed, exit
         }
         this._autoNextStep()
       } catch (err) {
@@ -434,32 +437,33 @@ export default class PascoEngine extends EventEmitter {
       let clearListeners = () => {
         this.removeListener('move', onMove)
         this.removeListener('stop', clearListeners)
-        if (state._auto_active_timeout != null) {
-          clearTimeout(state._auto_active_timeout)
-          delete state._auto_active_timeout
+        if (this._auto_active_timeout != null) {
+          clearTimeout(this._auto_active_timeout)
+          this._auto_active_timeout = null
         }
       }
       let onMove = () => {
+        // auto move interrupted, reset remained loop
         clearListeners()
+        this._state._auto_next_rem_loops = this._config.auto_next_loops || 0
         run()
       }
-      this._event_manager.addNodeListenerFor('move', onMove)
-      this._event_manager.addNodeListenerFor('stop', clearListeners)
-      state._auto_active_timeout = setTimeout(() => {
-        delete state._auto_active_timeout
-        clearListener()
+      this._event_manager.addNodeListenerFor(this, 'move', onMove)
+      this._event_manager.addNodeListenerFor(this, 'stop', clearListeners)
+      this._auto_active_timeout = setTimeout(() => {
+        this._auto_active_timeout = null
+        clearListeners()
         run()
       }, delay)
     }
     state.auto_next_dead = false
-    state._auto_active_timeout = setTimeout(() => {
-      delete state._auto_active_timeout
+    this._auto_active_timeout = setTimeout(() => {
+      this._auto_active_timeout = null
       let position = this.getCurrentPosition()
       if (position.index == -1 && this._config.auto_next_atfirst_delay) {
         // delay auto_next for next entry
-
         runWithDelay(this._config.auto_next_atfirst_delay)
-      } else if (position.index + 1 == position.tree.nodes.length) {
+      } else if (position.index + 1 == position.node.child_nodes.length) {
         runWithDelay(this._config.auto_next_recycle_delay || 0)
       } else {
         run()
@@ -476,9 +480,9 @@ export default class PascoEngine extends EventEmitter {
     if (running_move_controller) {
       running_move_controller.abort()
     }
-    if(this._state._auto_active_timeout) {
-      clearTimeout(this._state._auto_active_timeout);
-      delete this._state._auto_active_timeout;
+    if (this._auto_active_timeout) {
+      clearTimeout(this._auto_active_timeout)
+      this._auto_active_timeout = null
     }
     this.emit('stop')
   }
@@ -488,9 +492,9 @@ export default class PascoEngine extends EventEmitter {
     }
     let state = this._state
     state._paused = true
-    if (state._auto_active_timeout != null) {
-      clearTimeout(state._auto_active_timeout)
-      state._auto_active_timeout = null
+    if (this._auto_active_timeout != null) {
+      clearTimeout(this._auto_active_timeout)
+      this._auto_active_timeout = null
     }
   }
   async resume () {
@@ -503,7 +507,7 @@ export default class PascoEngine extends EventEmitter {
     await this._beforeUpdateInPositionsAsync()
     this._updateSelectPath()
     await this.doUpdatePositions()
-    if (this._state.mode == 'auto' && this._state._auto_active_timeout == null) {
+    if (!this._state.edit_mode && this._state.mode == 'auto' && this._auto_active_timeout == null) {
       this._autoNextStep()
     }
   }

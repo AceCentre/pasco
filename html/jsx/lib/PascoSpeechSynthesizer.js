@@ -19,7 +19,7 @@ export default class PascoSpeechSynthesizer {
       this._is_native = true
       this._nsynthesizer = await this._nbridge.init_synthesizer()
       // listen for events from native speech synthesizer
-      this._event_manager.addDOMListenerFor(document, 'x-speech-synthesizer-did-start', this.nSyntherizerDidStartSpeech.bind(this))
+      this._event_manager.addDOMListenerFor(document, 'x-speech-synthesizer-did-start', this.nSynthesizerDidStartSpeech.bind(this))
       this._event_manager.addDOMListenerFor(document, 'x-speech-synthesizer-did-cancel', this.nSynthesizerDidCancelSpeech.bind(this))
       this._event_manager.addDOMListenerFor(document, 'x-speech-synthesizer-did-finish', this.nSynthesizerDidFinishSpeech.bind(this))
     } else { // alternative approach
@@ -57,7 +57,7 @@ export default class PascoSpeechSynthesizer {
       // wait for finish
       await tracker.promise
     } finally {
-      await this._nbridge.utterance_release(utterance_id)
+      await this._nbridge.release_utterance(utterance_id)
     }
   }
   async _webStartUtterance (text, opts) {
