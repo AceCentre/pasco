@@ -249,8 +249,8 @@ export default class PascoEngine extends EventEmitter {
             'back-n-branch': '1',
             'auditory-cue': this._config.helper_back_option_cue_text || this._t('Back'),
             'back-n-branch-notify': this._config.helper_back_option_notify ? 'true' : 'false',
-            'main-audio': this._config.helper_back_option_main_audio ? this._core.resolveUrl(this._config.helper_back_option_main_audio, this._state._config_url) : null,
-            'cue-audio': this._config.helper_back_option_cue_audio ? this._core.resolveUrl(this._config.helper_back_option_cue_audio, this._state._config_url) : null,
+            'main-audio': this._config.helper_back_option_main_audio ? this._core.resolveUrl(this._config.helper_back_option_main_audio, this._state.config_url) : null,
+            'cue-audio': this._config.helper_back_option_cue_audio ? this._core.resolveUrl(this._config.helper_back_option_cue_audio, this._state.config_url) : null,
           },
           text: this._config.helper_back_option_main_text || this._t('Back'),
         });

@@ -226,7 +226,7 @@ export default class PascoMain extends BasePage {
       let topbar_offset = 50 + (html.classList.contains('ios') ? 30 : 0)
       let msgbar_wrp = this._document.querySelector('#message-bar-wrp')
       if (msgbar_wrp) {
-        msgbar_wrp.style.height = 'calc(' + config.message_bar_height + 'vh - ' + topbar_offset + 'px)'
+        msgbar_wrp.style.height = 'calc(' + this._config.message_bar_height + 'vh - ' + topbar_offset + 'px)'
       }
     }
     // set message bar font size
@@ -394,14 +394,14 @@ export default class PascoMain extends BasePage {
     // update highlight postition
     let elm;
     while ((elm = pstate.highlight_elements.pop())) {
-      elm.classList.remove('highlight' || config.highlight_class);
+      elm.classList.remove(this._config.highlight_class || 'highlight');
     }
     if (state.positions.length > 0) {
       let curpos = state.positions[state.positions.length - 1]
       if (curpos.node.child_nodes[curpos.index]) {
         let node = curpos.node.child_nodes[curpos.index]
         if (node && node.content_element) {
-          node.content_element.classList.add('highlight' || this._config.highlight_class);
+          node.content_element.classList.add(this._config.highlight_class || 'highlight');
           pstate.highlight_elements.push(node.content_element);
         }
       }
@@ -669,7 +669,7 @@ export default class PascoMain extends BasePage {
   }
   async loadConfig (config_file) {
     this._config = await this._fmanager.loadFileJson(config_file)
-    this.evalConfig(this._config)
+    this.evalConfig()
   }
   insertConfigStyles (styles) {
     let style_vars = {
@@ -687,9 +687,9 @@ export default class PascoMain extends BasePage {
       this._style_elements.push(elm)
     }
   }
-  async evalConfig (config) {
+  async evalConfig () {
     // NOT USED
-    // this._can_edit = !('can_edit' in config) ? true : !!config.can_edit
+    // this._can_edit = !('can_edit' in this._config) ? true : !!this._config.can_edit
     this._style_list = Array.isArray(this._config.style) ? this._config.style :
       (this._config.style ? [ this._config.style ] : [])
     this.insertConfigStyles(this._style_list)
@@ -774,8 +774,8 @@ export default class PascoMain extends BasePage {
   }
   onKeyCommand (evt) {
     let curtime = new Date().getTime()
-    if (config.ignore_second_hits_time > 0 && this._last_keydown_time &&
-        curtime - this._last_keydown_time < config.ignore_second_hits_time) {
+    if (this._config.ignore_second_hits_time > 0 && this._last_keydown_time &&
+        curtime - this._last_keydown_time < this._config.ignore_second_hits_time) {
       return // ignore second hit
     }
     this._last_keydown_time = curtime
