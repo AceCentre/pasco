@@ -9,7 +9,8 @@ import $ from 'jquery'
 import * as path from 'path'
 import * as qs from 'querystring'
 import PascoDataState from './PascoDataState'
-import { NotFoundError, getRuntimeEnv } from './common'
+import { getRuntimeEnv } from '../common'
+import { NotFoundError } from '../exceptions'
 
 export default class DropboxSyncConfigUI {
   constructor (dpsync, ctrelm) {

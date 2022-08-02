@@ -136,6 +136,10 @@ body.rtl #tree {
   .active > .children-wrp {
     display: block;
   }
+  &.edit-mode ul.children {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
   ul.children {
     display: flex;
     flex-direction: column;

@@ -78,21 +78,12 @@ async function prepare_tree(treeFileName) {
   }
 
   if (!treeFileName.includes("://") && !window.pasco_data_state) {
-    const exists = await file_exists("file:///" + treeFileName);
-
-    if (exists) {
-      return {
-        tree_fn: "file:///" + treeFileName,
-        dirpath: new URL(".", "file:///" + treeFileName).href,
-        audio_dirname: null,
-      };
-    } else {
-      return {
-        tree_fn: treeFileName,
-        dirpath: new URL(".", treeFileName).href,
-        audio_dirname: null,
-      };
-    }
+    let treeFileUrl = 'file:///' + treeFileName
+    return {
+      tree_fn: treeFileUrl,
+      dirpath: new URL(".", treeFileUrl).href,
+      audio_dirname: null,
+    };
   }
 
   let audio_dirname = window.cordova ? "audio" : null;
@@ -293,7 +284,7 @@ function initialize_app() {
   // load pasco-state.json, v1
   let state_dir_url = (window.cordova ? window.cordova_user_dir_prefix : 'file:///') + 'v1/'
   var state_url = state_dir_url + 'pasco-state.json'
-  return NodeLib.PascoDataState.loadFromFile(state_url)
+  return NodeLib.PascoDataState.loadFromFile(state_url, new NodeLib.PascoFileManager())
     .then(function (datastate) {
       window.pasco_data_state = datastate
     })
@@ -316,7 +307,7 @@ function initialize_app() {
         .then(function (config_exists) {
           if (!config_exists) {
             // It is the first run, setup pasco-state.json
-            var datastate = new NodeLib.PascoDataState(state_url)
+            var datastate = new NodeLib.PascoDataState(state_url, new NodeLib.PascoFileManager())
             window.pasco_data_state = datastate
             let trees_info = { list: [ ] }
             let config_src = 'config.json'
@@ -375,6 +366,7 @@ function initialize_app() {
           } else {
             window.default_config = config_url
             window.default_trees_info_fn = legacy_dir_url + default_trees_info_fn
+            window.default_tree = legacy_dir_url + default_tree
           }
         })
     })

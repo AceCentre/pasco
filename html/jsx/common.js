@@ -2,9 +2,6 @@
 //   cordova
 // NotFoundError, AccessDeniedError, getRuntimeEnv, sha256Digest,
 // arrayBufferFromFile, LocalStorageTokens, TokenHandler, BackgroundTask
-export class NotFoundError extends Error { }
-export class AccessDeniedError extends Error { }
-export class ErrorMessage extends Error { }
 
 export function getRuntimeEnv () {
   return window.cordova ? 'cordova' : 'web'
@@ -101,4 +98,100 @@ export class BackgroundTask {
   setOnProgress (callable) {
     this._onprogress = callable
   }
+}
+
+// Converts a FS file path to a friendly name
+// https://mysite.com?demo=true -> mysite.com
+// https://mysite.com/myurl!hasSpecial/characters -> mysite.com_myurl_hasSpecial_characters
+export function fsFriendlyName (s) {
+  return s
+    .replace(/^[a-z]{1,10}\:\/\//i,"") // Removes the protocol, ie, http://, https:// or cdvfile://
+    .replace(/\?.*$/,"") // Removes the query string
+    .replace(/[ \(\)\[\]\*\#\@\!\$\%\^\&\+\=\/\\:]/g, '_') //Replace any special characters with a '_'
+    .replace(/[\r\n\t]/g, ''); // Removes the newline, tab, and carriage return
+}
+
+export function loadScript (fn) {
+  return new Promise(function(resolve, reject) {
+    var s = document.createElement('script')
+    s.addEventListener('load', function() {
+      resolve(s)
+    }, false)
+    s.addEventListener('error', function() {
+      reject(new Error('Could not load script, ' + fn))
+    }, false)
+    s.async = true
+    s.defer = true
+    s.src = fn
+    s.type = 'text/javascript'
+    document.body.appendChild(s)
+  })
+}
+
+export function deferredPromise () {
+  return new Promise(function (onready) {
+    var promise, resolve, reject
+    promise = new Promise(function(_resolve, _reject) {
+      resolve = _resolve
+      reject = _reject
+      if (promise) {
+        onready([promise,resolve,reject])
+      }
+    })
+    if (promise && resolve) {
+      onready([promise,resolve,reject])
+    }
+  })
+}
+
+export function getXScaleClassFromSizePercent (value, step, decimals) {
+  decimals = decimals == undefined ? 1 : decimals
+  var v = Math.floor(value / step) * step / 100.0
+  if(decimals > 0) {
+    return v.toFixed(decimals || 1).replace(/0+$/, "")
+      .replace(/\.$/, "").replace('.', '_')
+  } else {
+    return v+''
+  }
+}
+
+export function copyObject (obj) {
+  return JSON.parse(JSON.stringify(obj))
+}
+
+
+export function errorDetailsAsText (error) {
+  if (typeof error.message != 'string' || typeof error.stack != 'string') {
+    return JSON.stringify(error, null, '  ')
+  } else {
+    return error.constructor.name  + ": " + error.message + "\n" + error.stack
+  }
+}
+
+export function fixUrlForCordova (url) {
+  return ((/^[a-z]+:\/\//i).test(url) ?
+          '' : 'cdvfile://localhost/bundle/www/') + url;
+}
+
+export function range (end, start) {
+  if (start === undefined) {
+    start = 0
+  }
+  let list = []
+  if (end > start) {
+    for (let i = start; i < end; i++) {
+      list.push(i)
+    }
+  }
+  return list
+}
+
+var mkrand_chars = "abcdefghijklmnopqrstuvwxyz01234567890";
+export function mkRand (n) {
+  var v = ""
+  while(n > 0) {
+    v += mkrand_chars[Math.floor(Math.random() * mkrand_chars.length)]
+    n--
+  }
+  return v
 }

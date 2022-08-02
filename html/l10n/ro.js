@@ -132,4 +132,5 @@
     "Move to Previous": "Treceți la Previous"
 };
 
+  document.dispatchEvent(new CustomEvent('x-icu-changed', { detail: icu }))
 })();

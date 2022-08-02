@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" x-page="PascoMain">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -19,7 +19,12 @@
     
     <!-- <link rel="icon" href="images/favicon.png"> -->
     <!-- INJECT HEAD -->
-    
+
+    <!-- INJECT SCRIPTS -->
+    <!-- MAIN SCRIPTS -->
+    <script src="js/nodelib.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
   </head>
 
   <body class="notready">
@@ -51,7 +56,7 @@
     </div>
     <script type="text/x-template" id="tree-node-template">
       <p class="text">{%- data.text %}</p>
-      {% if(!data.tree.is_leaf) { %}
+      {% if(!data.node.is_leaf) { %}
       <div class="arrow-wrp"><span class="fa fa-2x fa-angle-right"></span><span class="fa fa-2x fa-angle-left"></span></div>
       {% } %}
     </script>
@@ -75,7 +80,7 @@
             <h4 class="modal-title" id="myModalLabel" x-l10n>Setting</h4>
           </div>
           <div class="modal-body">
-            <div class="row">
+            <div class="row non-selectable">
               <div class="col-sm-6">
                 <h3 x-l10n>Record Audio</h3>
                 <p x-l10n="record_btn_desc">
@@ -219,7 +224,7 @@
         </g>
       </svg>
     </div>
-    <div id="error-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="Error dialog">
+    <div id="alert-modal" class="modal fade" tabindex="-1" role="dialog">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -227,25 +232,25 @@
             <h4 class="modal-title"></h4>
           </div>
           <div class="modal-body">
-            <p class="error-message">
+            <p class="alert-message">
             </p>
-            <div class="error-details-wrp">
+            <div class="alert-details-wrp">
               <button class="btn btn-primary copy-details-btn m-b-10" type="button" x-l10n>Copy</button>
-              <pre><code class="error-details"></code></pre>
+              <pre><code class="alert-details"></code></pre>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- INJECT SCRIPTS -->
-    <!-- MAIN SCRIPTS -->
+    <!--
     <script src="bower_components/underscore/underscore-min.js"></script>
     <script src="bower_components/showdown/dist/showdown.min.js"></script>
     <script src="js/lib/translate.js"></script>
     <script src="js/lib/sanitize-html.js"></script>
-    <script src="js/nodelib.js"></script>
+    -->
     <!-- <script src="bower_components/jquery/dist/jquery.min.js"></script> -->
+    <!--
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="js/NativeAccessApi.js"></script>
     <script src="js/core.js"></script>
@@ -253,5 +258,6 @@
     <script src="js/main-edit-mode.js"></script>
     <script src="js/main-navbtns.js"></script>
     <script src="js/main.js"></script>
+    -->
   </body>
 </html>

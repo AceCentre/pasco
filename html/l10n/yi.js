@@ -141,4 +141,5 @@
     "Sync": "סינק"
 };
 
+  document.dispatchEvent(new CustomEvent('x-icu-changed', { detail: icu }))
 })();

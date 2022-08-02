@@ -1,17 +1,18 @@
-// expected global variables
-//   from core.js: set_file_data, get_file_data,
-//     parse_tree, tree_to_markdown, mkdir_rec
 import * as path from 'path'
 import { getRuntimeEnv, arrayBufferFromFile, sha256Digest,
-         arrayBufferToHex, NotFoundError } from './common'
+         arrayBufferToHex } from '../common'
+import { NotFoundError } from '../exceptions'
 import { v4 as uuidv4 } from 'uuid'
+import PascoTreeMDWriter from './PascoTreeMDWriter'
+import PascoTreeMDReader from './PascoTreeMDReader'
 
 let CONFIG_DEPENDENCY_PARAMS = [ 'helper_back_option_main_audio', 'helper_back_option_cue_audio' ]
 export default class PascoDataState {
-  constructor (state_src_url) {
+  constructor (state_src_url, file_manager) {
     this._version = '1.0'
     this._state_src_url = state_src_url
     this._state_dir_url = new URL('.', this._state_src_url).href
+    this._fmanager = file_manager
   }
   getVersion () {
     return this._version
@@ -29,15 +30,19 @@ export default class PascoDataState {
     return this._state_dir_url
   }
   get_file_url (src, base) {
+    // TODO:: remove when edit-config.js refactoring is done
+    return this.resolve_url(src, base)
+  }
+  resolve_url (src, base) {
     if (!this._state_src_url) {
       throw new Error('state_src_url has not defined')
     }
-    return this.constructor.get_file_url(src, base || this._state_src_url)
+    return this.constructor.resolve_url(src, base || this._state_src_url)
   }
   resolve_internal_path (src, basedir) {
     return this.constructor.resolve_internal_path(src, basedir)
   }
-  static get_file_url (src, base) {
+  static resolve_url (src, base) {
     return new URL(src, base).href
   }
   static resolve_internal_path (src, basedir) {
@@ -65,8 +70,8 @@ export default class PascoDataState {
       trees_info: trees_info_src,
       tree_list: [],
     }
-    let config_json = await get_file_data(this.get_file_url(config_src))
-    let trees_info_json = await get_file_data(this.get_file_url(trees_info_src))
+    let config_json = await this._fmanager.loadFileData(this.resolve_url(config_src))
+    let trees_info_json = await this._fmanager.loadFileData(this.resolve_url(trees_info_src))
     await this._addFileWithBlob({ src: this.resolve_internal_path(trees_info_src) }, new Blob([trees_info_json]))
     await this._addFileWithBlob({ src: this.resolve_internal_path(config_src) }, new Blob([config_json]))
     let config = JSON.parse(config_json)
@@ -78,26 +83,25 @@ export default class PascoDataState {
     if (!this._state_dir_url) {
       throw new Error('state_dir_url has not defined')
     }
-    return this.constructor.storeTree(src, src_url, src_url_base, this._state_dir_url)
+    return this.constructor.storeTree(src, src_url, src_url_base, this._state_dir_url, this._fmanager)
   }
-  static async storeTree (src, src_url, src_url_base, target_dir_url) {
+  static async storeTree (src, src_url, src_url_base, target_dir_url, fmanager) {
     if (!src_url_base) {
       src_url_base = new URL('.', src_url).href
     }
     let rewrite_list = []
-    let rewrite_tree = await this.makeTreeRewriteForImport(src, src_url, src_url_base, rewrite_list)
-    await this.performRewrite(rewrite_list, target_dir_url)
+    let rewrite_tree = await this.makeTreeRewriteForImport(src, src_url, src_url_base, rewrite_list, false, fmanager)
+    await this.performRewrite(rewrite_list, target_dir_url, fmanager)
   }
   async deleteTree (src_url) {
-    let processTree = (tree) => {
+    let processTree = (root_node) => {
       let add_dep = (dep_src) => {
         if (dep_src.indexOf('://') != -1) {
           return
         }
-        delete_list.push({ src_url: this.get_file_url(dep_src, src_url) })
+        delete_list.push({ src_url: this.resolve_url(dep_src, src_url) })
       }
-      process_node_subrout(tree)
-      function process_node_subrout (node) {
+      let process_node_subrout = (node) => {
         // dyn=spell-word-prediction
         if (['spell-word-prediction','spell-letter-prediction'].indexOf(node.meta.dyn) != -1) {
           if (node.meta['words-file']) {
@@ -109,16 +113,17 @@ export default class PascoDataState {
             add_dep(node.meta[audio_metaname])
           }
         }
-        if (Array.isArray(node.nodes)) {
-          for (let cnode of node.nodes) {
+        if (Array.isArray(node.child_nodes)) {
+          for (let cnode of node.child_nodes) {
             process_node_subrout(cnode)
           }
         }
       }
+      process_node_subrout(root_node)
     }
     let tree_data
     try {
-      tree_data = await get_file_data(src_url)
+      tree_data = await this._fmanager.loadFileData(src_url)
     } catch (err) {
       if (err instanceof NotFoundError) {
         return
@@ -126,13 +131,13 @@ export default class PascoDataState {
       throw err
     }
     let delete_list = []
-    let tree_element = document.createElement('div')
-    let tree = parse_tree(tree_element, tree_data)
-    processTree(tree)
+    let tree_reader = new PascoTreeMDReader()
+    let root_node = tree_reader.readFromText(tree_data)
+    processTree(root_node)
     delete_list.push({ src_url })
     for (let delete_item of delete_list) {
       try {
-        await unset_file(delete_item.src_url)
+        await this._fmanager.deleteFile(delete_item.src_url)
       } catch (err) {
         if (!(err instanceof NotFoundError)) {
           throw err
@@ -140,8 +145,8 @@ export default class PascoDataState {
       }
     }
   }
-  static async makeTreeRewriteForImport (src, src_url, src_url_base, rewrite_list, is_legacy) {
-    let translateTree = (tree, tree_src) => {
+  static async makeTreeRewriteForImport (src, src_url, src_url_base, rewrite_list, is_legacy, fmanager) {
+    let translateTree = (root_node, tree_src) => {
       let tree_src_dir = path.dirname(src)
       let tree_src_dir_url = new URL('.', src_url).href
       let add_dep = (dep_src) => {
@@ -149,11 +154,11 @@ export default class PascoDataState {
         let dep_new_src = null
         let dep_new_rel_src = null
         if (is_legacy && dep_src.indexOf('://') == -1) {
-          dep_url = this.get_file_url(dep_src, location+'')
+          dep_url = this.resolve_url(dep_src, location+'')
           dep_new_rel_src = path.normalize(dep_src)
           dep_new_src = this.resolve_internal_path(dep_new_rel_src, tree_src_dir)
         } else {
-          dep_url = this.get_file_url(dep_src, src_url)
+          dep_url = this.resolve_url(dep_src, src_url)
           if (dep_url.startsWith(tree_src_dir_url) && dep_url.length > tree_src_dir_url.length) {
             dep_new_rel_src = path.normalize(dep_url.substring(tree_src_dir_url.length))
             dep_new_src = this.resolve_internal_path(dep_new_rel_src, tree_src_dir)
@@ -172,8 +177,7 @@ export default class PascoDataState {
         }
         return dep_new_rel_src
       }
-      node_append_files(tree)
-      function node_append_files (node) {
+      let node_append_files = (node) => {
         // dyn=spell-word-prediction
         if (['spell-word-prediction','spell-letter-prediction'].indexOf(node.meta.dyn) != -1) {
           if (node.meta['words-file']) {
@@ -185,43 +189,45 @@ export default class PascoDataState {
             node.meta[audio_metaname] = add_dep(node.meta[audio_metaname])
           }
         }
-        if (Array.isArray(node.nodes)) {
-          for (let cnode of node.nodes) {
+        if (Array.isArray(node.child_nodes)) {
+          for (let cnode of node.child_nodes) {
             node_append_files(cnode)
           }
         }
       }
+      node_append_files(root_node)
     }
-    let tree_data = await get_file_data(src_url)
-    let tree_element = document.createElement('div')
-    let tree = parse_tree(tree_element, tree_data)
-    translateTree(tree, src)
-    let new_tree_data = tree_to_markdown(tree)
+    let tree_data = await fmanager.loadFileData(src_url)
+    let tree_reader = new PascoTreeMDReader()
+    let root_node = tree_reader.readFromText(tree_data)
+    translateTree(root_node, src)
+    let tree_writer = new PascoTreeMDWriter()
+    let new_tree_data = tree_writer.writeToText(root_node)
     rewrite_list.push({ src, src_url, data: new_tree_data })
   }
-  static async performRewrite (rewrite_list, target_dir_url) {
+  static async performRewrite (rewrite_list, target_dir_url, fmanager) {
     if (!target_dir_url.endsWith('/')) {
       target_dir_url = target_dir_url + '/'
     }
     // create all sub directories
     {
       let dirs_made = {}
-      await mkdir_rec(target_dir_url)
+      await fmanager.mkdirRec(target_dir_url)
       dirs_made[target_dir_url] = true
       for (let rewrite_file of rewrite_list) {
         let subdir = path.dirname(rewrite_file.src)
         let subdir_url = new URL(subdir, target_dir_url).href
         if (!dirs_made[subdir_url]) {
-          await mkdir_rec(subdir_url)
+          await fmanager.mkdirRec(subdir_url)
           dirs_made[subdir_url] = true
         }
       }
     }
     // write files
     for (let rewrite_file of rewrite_list) {
-      let data = rewrite_file.data ? rewrite_file.data : await get_file_data(rewrite_file.src_url, { responseType: 'blob' })
+      let data = rewrite_file.data ? rewrite_file.data : await fmanager.loadFileData(rewrite_file.src_url, { responseType: 'blob' })
       let dest_url = new URL(rewrite_file.src, target_dir_url).href
-      await set_file_data(dest_url, data)
+      await fmanager.saveFileData(dest_url, data)
     }
   }
   async _addFileWithBlob (file, data_blob) {
@@ -247,7 +253,7 @@ export default class PascoDataState {
     if (config.tree && this._data.tree_list.indexOf(config.tree) == -1) {
       let tree_src = this.resolve_internal_path(config.tree, configdir)
       try {
-        await this._addTreeFromSource(tree_src, this.get_file_url(tree_src))
+        await this._addTreeFromSource(tree_src, this.resolve_url(tree_src))
       } catch (err) {
         if (!(err instanceof NotFoundError)) {
           throw err
@@ -260,7 +266,7 @@ export default class PascoDataState {
       if (!!config[name] && typeof config[name] == 'string') {
         let file = { src: this.resolve_internal_path(config[name], configdir) }
         try {
-          await this._addFileFromSource(file, this.get_file_url(file.src))
+          await this._addFileFromSource(file, this.resolve_url(file.src))
         } catch (err) {
           if (!(err instanceof NotFoundError)) {
             throw err
@@ -279,21 +285,21 @@ export default class PascoDataState {
         continue
       }
       let tree_src = this.resolve_internal_path(treeinf.tree_fn, trees_info_dir)
-      await this._addTreeFromSource(tree_src, this.get_file_url(tree_src))
+      await this._addTreeFromSource(tree_src, this.resolve_url(tree_src))
     }
   }
   async _addTreeFromSource (src, src_url) {
     let tree_file = { src }
-    let tree_data = await get_file_data(src_url)
+    let tree_data = await this._fmanager.loadFileData(src_url)
     await this._addFileWithBlob(tree_file, new Blob([tree_data]))
     if (this._data.tree_list.indexOf(tree_file.src) == -1) {
       this._data.tree_list.push(tree_file.src)
     }
-    let tree_element = document.createElement('div')
-    let tree = parse_tree(tree_element, tree_data)
-    await this.includeFromTree(tree, tree_file)
+    let tree_reader = new PascoTreeMDReader()
+    let root_node = tree_reader.readFromText(tree_data)
+    await this.includeFromTree(root_node, tree_file)
   }
-  async includeFromTree (tree, tree_file) {
+  async includeFromTree (root_node, tree_file) {
     let treedir = path.dirname(tree_file.src)
     let add_dep = async (v) => {
       if (v.indexOf('://') != -1) {
@@ -301,7 +307,7 @@ export default class PascoDataState {
       }
       let file = { src: this.resolve_internal_path(v, treedir) }
       try {
-        await this._addFileFromSource(file, this.get_file_url(file.src))
+        await this._addFileFromSource(file, this.resolve_url(file.src))
       } catch (err) {
         if (!(err instanceof NotFoundError)) {
           throw err
@@ -322,13 +328,13 @@ export default class PascoDataState {
           await add_dep(node.meta[audio_metaname])
         }
       }
-      if (Array.isArray(node.nodes)) {
-        for (let cnode of node.nodes) {
+      if (Array.isArray(node.child_nodes)) {
+        for (let cnode of node.child_nodes) {
           await node_append_files(cnode)
         }
       }
     }
-    await node_append_files(tree)
+    await node_append_files(root_node)
   }
   /* NEEDS RE-IMPL
   onFileModified (src, base
@@ -380,7 +386,7 @@ export default class PascoDataState {
     return file
   }
   async evalFileFromSource (file, src_url) {
-    let data_blob = await get_file_data(src_url, { responseType: 'blob' })
+    let data_blob = await this._fmanager.loadFileData(src_url, { responseType: 'blob' })
     let data_arraybuff = await arrayBufferFromFile(data_blob)
     file.checksum = arrayBufferToHex(await sha256Digest(data_arraybuff))
     file.filesize = data_arraybuff.byteLength
@@ -395,8 +401,8 @@ export default class PascoDataState {
     }
     return JSON.stringify(this._data, null, '  ')
   }
-  static fromJSON (jsondata) {
-    let inst = new this()
+  static fromJSON (jsondata, fmanager) {
+    let inst = new this(null, fmanager)
     let data = JSON.parse(jsondata)
     if (data.version != inst.getVersion()) {
       throw new Error('version do not match: ' + data.version + ' != ' + inst.getVersion())
@@ -432,24 +438,24 @@ export default class PascoDataState {
     if (this._state_src_url == null) {
       throw new Error('state_src_url is not defined')
     }
-    await mkdir_rec(this._state_dir_url)
-    return await set_file_data(this._state_src_url, this.toJSON())
+    await this._fmanager.mkdirRec(this._state_dir_url)
+    return await this._fmanager.saveFileData(this._state_src_url, this.toJSON())
   }
-  static async loadFromFile (src) {
-    let inst = new this(src)
-    let data = JSON.parse(await get_file_data(src))
+  static async loadFromFile (src, fmanager) {
+    let inst = new this(src, fmanager)
+    let data = JSON.parse(await inst._fmanager.loadFileData(src))
     if (data.version != inst.getVersion()) {
       throw new Error('version do not match: ' + data.version + ' != ' + inst.getVersion())
     }
     inst._data = data
     return inst
   }
-  static async rebuildStateFromLegacy (config_url, trees_info_url, target_dir_url) {
+  static async rebuildStateFromLegacy (config_url, trees_info_url, target_dir_url, fmanager) {
     if (!target_dir_url.endsWith('/')) {
       target_dir_url = target_dir_url + '/'
     }
     let rewrite_list = []
-    async function includeTreeToRewrite (src_url, base_url) {
+    let includeTreeToRewrite = async (src_url, base_url) => {
       let found_list = rewrite_list.filter((a) => a.src_url == src_url)
       if (found_list.length > 0) {
         return found_list[0].src
@@ -460,13 +466,13 @@ export default class PascoDataState {
         return null
       }
       let src = datastate.resolve_internal_path(src_url.substring(base_url_dir.length))
-      await PascoDataState.makeTreeRewriteForImport(src, src_url, base_url_dir, rewrite_list, true)
+      await PascoDataState.makeTreeRewriteForImport(src, src_url, base_url_dir, rewrite_list, true, fmanager)
       return src
     }
     let state_src = 'pasco-state.json'
-    let datastate = new PascoDataState(new URL(state_src, target_dir_url).href)
-    let config_json = await get_file_data(config_url)
-    let trees_info_json = await get_file_data(trees_info_url)
+    let datastate = new PascoDataState(new URL(state_src, target_dir_url).href, fmanager)
+    let config_json = await fmanager.loadFileData(config_url)
+    let trees_info_json = await fmanager.loadFileData(trees_info_url)
     let config = JSON.parse(config_json)
     let trees_info = JSON.parse(trees_info_json)
     if (config.tree) {
@@ -483,13 +489,13 @@ export default class PascoDataState {
         treeinf.tree_fn = new_src
       }
     }
-    await PascoDataState.performRewrite(rewrite_list, target_dir_url)
+    await PascoDataState.performRewrite(rewrite_list, target_dir_url, fmanager)
     let target_config_fn = 'config.json'
     let target_trees_info_fn = 'trees-info.json'
     let new_config_data = JSON.stringify(config, null, '  ')
     let new_trees_info_data = JSON.stringify(trees_info, null, '  ')
-    await set_file_data(new URL(target_config_fn, target_dir_url).href, new_config_data)
-    await set_file_data(new URL(target_trees_info_fn, target_dir_url).href, new_trees_info_data)
+    await fmanager.saveFileData(new URL(target_config_fn, target_dir_url).href, new_config_data)
+    await fmanager.saveFileData(new URL(target_trees_info_fn, target_dir_url).href, new_trees_info_data)
     await datastate.init(target_config_fn, target_trees_info_fn)
     await datastate.save()
     return datastate

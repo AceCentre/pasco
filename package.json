@@ -34,7 +34,9 @@
     "path-browserify": "^1.0.1",
     "plist": "3.0.1",
     "rangeslider-js": "^3.2.1",
+    "sanitize-html": "^2.7.0",
     "scrollnav": "git+https://github.com/hosseinamin/scrollnav.git",
+    "showdown": "^2.1.0",
     "sorted-array-functions": "^1.2.0"
   },
   "devDependencies": {
@@ -43,6 +45,7 @@
     "@babel/preset-env": "^7.12.16",
     "@babel/runtime": "^7.12.13",
     "babel-loader": "^8.2.2",
+    "bootstrap": "^3.4.1",
     "browser-sync": "^2.26.7",
     "concurrently": "^3.4.0",
     "delay": "^5.0.0",
