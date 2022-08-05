@@ -1128,7 +1128,7 @@ export default class PascoEngine extends EventEmitter {
     if (this._wheel_timeout != null) {
       clearTimeout(this._wheel_timeout)
     }
-    this._wheel_timeout = setTimeout(function () {
+    this._wheel_timeout = setTimeout(() => {
       state._wheel_delta = [ 0, 0 ]
       this._wheel_timeout = null
     }, 3000)

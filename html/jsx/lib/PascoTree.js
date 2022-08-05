@@ -142,9 +142,6 @@ export default class PascoTree {
   insertNodeBefore (node, parent_node, other_node, content_template) {
     // check if node elements are initialized
     let has_elements = !!parent_node.dom_element
-    if (parent_node.is_leaf) {
-
-    }
     if (parent_node.is_leaf && has_elements) {
       var ulwrp = newElm('div')
       ulwrp.classList.add('children-wrp')
@@ -165,10 +162,10 @@ export default class PascoTree {
     var li = newElm('li')
     if (other_node) {
       parent_node.insertChildBefore(node, other_node)
-      if (!other_node.dom_element) {
-        throw new Error('other_node has no dom_element')
-      }
       if (has_elements) {
+        if (!other_node.dom_element) {
+          throw new Error('other_node has no dom_element')
+        }
         parent_node.child_nodes_ul_dom_element.insertBefore(li, other_node.dom_element)
       }
     } else {
