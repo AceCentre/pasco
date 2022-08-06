@@ -203,7 +203,7 @@ export default class MoveManager {
     moveController.addStep(async () => {
       this._uibridge.selectNode(node)
       this._uibridge.emit('select', node)
-      await this._performMoveSub(moveController, node, 'cue', opts.override_msg)
+      await this._performMoveSub(moveController, node, 'main', opts.override_msg)
     })
     try {
       await this._addMoveToQueue(moveController)

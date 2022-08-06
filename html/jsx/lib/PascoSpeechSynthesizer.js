@@ -42,7 +42,7 @@ export default class PascoSpeechSynthesizer {
       audio_behavior = opts.audio_behavior
       delete opts.audio_behavior
     }
-    if (opts.voice && opts.voice.alt_voiceId) {
+    if (opts.voice && opts.voice.voiceId) {
       opts.voiceId = opts.voice.voiceId
       delete opts.voice
     }
@@ -159,8 +159,8 @@ export default class PascoSpeechSynthesizer {
     if (this._audio_tag || this._cordova_media) {
       this.stopAudio()
     } else {
-      if (this.is_native) {
-        await this._nbridge.stop_speaking(this.synthesizer)
+      if (this._is_native) {
+        await this._nbridge.stop_speaking(this._nsynthesizer)
       } else {
         if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
           window.speechSynthesis.cancel()
@@ -170,7 +170,7 @@ export default class PascoSpeechSynthesizer {
   }
 
   async getVoices () {
-    if (this.is_native) {
+    if (this._is_native) {
       return await this._nbridge.get_voices()
     } else {
       // this.responsiveVoice.getVoices()
