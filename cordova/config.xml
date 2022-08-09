@@ -47,7 +47,7 @@
     </platform>
     <platform name="ios">
         <edit-config file="*-Info.plist" mode="merge" target="NSMicrophoneUsageDescription">
-            <string>pacso records voice for future playback</string>
+            <string>pasco records voice for future playback</string>
         </edit-config>
         <edit-config file="*-Info.plist" mode="merge" target="ITSAppUsesNonExemptEncryption">
             <false />
