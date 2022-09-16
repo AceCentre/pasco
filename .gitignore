@@ -1,11 +1,9 @@
 *~
 node_modules/
 html/bower_components/
+html/webpack/
 dist/
 .DS_Store
 */.DS_Store
-html/js/nodelib.js
-html/js/nodelib.js.map
-html/js/nodelib.js.LICENSE.txt
 .envsetup
 .env

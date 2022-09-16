@@ -15,29 +15,34 @@
     "cordova-dist": "gulp cordova-dist",
     "cordova-build": "gulp build-prod",
     "watch-cordova-dist": "gulp watch-cordova-dist",
-    "build-ios": "npm run build-prod  && npm run cordova-dist  && cd cordova/ && cordova build"
+    "build-ios": "npm run build-prod  && npm run cordova-dist  && cd cordova/ && cordova build",
+    "delete-webpack-dir": "rm -rf ./html/webpack"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AceCentre/pasco.git"
   },
-  "author": "Hossein Amin <hossein@aminbros.com>",
+  "author": "AceCentre Team",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/AceCentre/pasco/issues"
   },
   "homepage": "https://github.com/AceCentre/pasco#readme",
   "dependencies": {
-    "bower": "^1.8.14",
+    "bootbox": "^5.5.3",
+    "bootstrap": "^3.4.1",
+    "bootstrap-waitingfor": "^1.2.7",
     "copy-html-to-clipboard": "^4.0.1",
+    "delay": "^5.0.0",
     "jquery": "^3.4.1",
     "path-browserify": "^1.0.1",
     "plist": "3.0.1",
     "rangeslider-js": "^3.2.1",
     "sanitize-html": "^2.7.0",
-    "scrollnav": "git+https://github.com/hosseinamin/scrollnav.git",
+    "scrollnav": "git+https://github.com/AceCentre/scrollnav.git",
     "showdown": "^2.1.0",
-    "sorted-array-functions": "^1.2.0"
+    "sorted-array-functions": "^1.2.0",
+    "uuid": "^3.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
@@ -45,19 +50,20 @@
     "@babel/preset-env": "^7.12.16",
     "@babel/runtime": "^7.12.13",
     "babel-loader": "^8.2.2",
-    "bootstrap": "^3.4.1",
     "browser-sync": "^2.26.7",
     "concurrently": "^3.4.0",
-    "delay": "^5.0.0",
+    "css-loader": "^6.7.1",
     "eslint": "^8.11.0",
     "gulp": "^4.0.2",
     "gulp-rename": "^2.0.0",
     "gulp-sass": "^5.1.0",
     "gulp-sourcemaps": "^3.0.0",
     "http-server": "13.0.2",
+    "mini-css-extract-plugin": "^2.6.1",
     "natives": "^1.1.5",
     "sass": "^1.51.0",
-    "uuid": "^3.4.0",
+    "sass-loader": "^13.0.2",
+    "style-loader": "^3.3.1",
     "webpack": "^5.22.0",
     "webpack-stream": "^6.1.2"
   }

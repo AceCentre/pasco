@@ -35,7 +35,6 @@ To learn more about pasco, [Read pasco documentation](https://docs.acecentre.org
 ### Prerequisites
 
 - [Node](https://nodejs.org)
-- [Bower](https://bower.io)
 
 If developing the iOS build you will also need:
 
@@ -46,7 +45,6 @@ If developing the iOS build you will also need:
 
 ```
 npm install
-bower install
 ```
 
 To test the web build:
@@ -59,7 +57,6 @@ To build the iOS build - First time:
 
 ```
 npm install
-bower install
 npm run build-prod
 npm run cordova-dist
 cd cordova
@@ -71,7 +68,6 @@ To build the iOS build - Additional times:
 
 ```
 npm install
-bower install
 npm run build-prod
 npm run cordova-dist
 cd cordova

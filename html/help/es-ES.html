@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" x-page="HelpPage" class="help-page">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -13,21 +13,16 @@
 
     <title x-l10n="help_title">pasco - Help</title>
 
-    <link rel="stylesheet" href="css/common.css">
-    <!-- <link rel="icon" href="images/favicon.png"> -->
-
-    <!-- bootstrap includes -->
-    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
-    <script src="bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-    <!-- bootstrap includes end -->
-    <link rel="stylesheet" href="fonts/fontawesome/css/fontawesome-all.min.css">
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="webpack/static/fontawesome/css/fontawesome-all.min.css">
     <!-- INJECT HEAD -->
+    <!-- INJECT SCRIPTS -->
+    <script src="webpack/main.js"></script>
     
   </head>
 
   <body class="notready body-navbar-fixed">
-    <nav class="navbar navbar-default navbar-fixed-top main-top-navbar">
+    <nav class="navbar navbar-default navbar-fixed-top">
       <ul class="x-navbar">
         <li class="head"><h1 x-l10n>Help</h1></li>
         <li class="space"></li>
@@ -183,7 +178,7 @@ This is the <b>Control data command - back-n-branch</b>. This means you can set 
         <li>Inspiration and reason: Clients of the <a target="_blank" href="https://acecentre.org.uk">Ace Centre</a> </li>
         <li>Fundraising: Paul Pickford</li>
         <li>Project management, Design and planning: <a target="_blank" href="https://acecentre.org.uk">Will Wade</a></li>
-        <li>Coding: <a target="_blank" href="https://aminbros.com/">Hossein Amin</a></li>
+        <li>Coding: Hossein Zoda</li>
       </ul>
       
       This software makes use of the following technologies:
@@ -196,11 +191,5 @@ This is the <b>Control data command - back-n-branch</b>. This means you can set 
      <h2 class="relative"><a class="anchor" name="licence"></a><span x-l10n>Licence</span></h2>
       <p>This software is released under the <a target="_blank" href="https://choosealicense.com/licenses/gpl-3.0/">GNU GPL v3</a>. Want something new in the app? Please consider donating to the Ace centre to help fund the development or submitting features and code directly yourself on <a target="_blank" href="http://github.com/acecentre/pasco/issues">GitHub</a></p>
     </div>
-    <!-- INJECT SCRIPTS -->
-    <script src="bower_components/underscore/underscore-min.js"></script>
-    <script src="js/lib/translate.js"></script>
-    <script src="js/NativeAccessApi.js"></script>
-    <script src="js/core.js"></script>
-    <script src="js/help.js"></script>
   </body>
 </html>
