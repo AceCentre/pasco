@@ -1,8 +1,7 @@
 import * as path from 'path'
 import { getRuntimeEnv, arrayBufferFromFile, sha256Digest,
-         arrayBufferToHex } from '../helpers/common'
+         arrayBufferToHex, uuid } from '../helpers/common'
 import { NotFoundError } from './exceptions'
-import { v4 as uuidv4 } from 'uuid'
 import PascoTreeMDWriter from './PascoTreeMDWriter'
 import PascoTreeMDReader from './PascoTreeMDReader'
 
@@ -63,7 +62,7 @@ export default class PascoDataState {
     }
     // collect all local pasco files
     this._data = {
-      id: (this._data ? this._data.id : null) || uuidv4(),
+      id: (this._data ? this._data.id : null) || uuid(),
       version: this._version,
       files: [],
       config: config_src,

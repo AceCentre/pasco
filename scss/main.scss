@@ -4,7 +4,7 @@
 @import "./edit-config";
 @import "./editor";
 @import "./themes";
-
+@import "./debug-tools";
 
 $btn-default-color:     #333;
 $btn-danger-bg:          #d9534f;
@@ -203,7 +203,7 @@ html.pasco-main.has-fake-scroll {
           display: none;// only for rtl
         }
         .fa, .far {
-          position: relative;
+          position: absolute;
           top: 50%;
           transform: translateY(-50%);
         }

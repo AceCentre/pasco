@@ -1,0 +1,24 @@
+#debug-hiconsole {
+  position: fixed;
+  bottom: 5px;
+  right: 5px;
+  background-color: lightgrey;
+  padding: 10px;
+  border-radius: 3px;
+  max-width: 90%;
+  overflow-y: hidden;
+  overflow-x: auto;
+  .entries-container {
+    font-family: monospace;
+    white-space: nowrap;
+  }
+  .active-hi-listeners-head {
+    margin-top: 10px;
+    border-top: 1px solid rgba(0, 0, 0, 0.3);
+  }
+  .active-hi-listeners-container {
+    font-size: 90%;
+    margin-bottom: 0;
+    margin-bottom: 0;
+  }
+}

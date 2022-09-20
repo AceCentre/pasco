@@ -1,22 +1,39 @@
 // expected global variables
 //   cordova
+import * as alt_sha256 from 'sha256-uint8array'
+import * as alt_uuid from 'uuid-random'
 
 export function getRuntimeEnv () {
   return window.cordova ? 'cordova' : 'web'
 }
 
-export function sha256Digest (value) {
+export function uuid () {
+  if (typeof crypto != 'undefined') {
+    return crypto.randomUUID()
+  } else {
+    return alt_uuid()
+  }
+}
+
+export async function sha256Digest (value) {
   if (typeof value == 'string') {
-    value = new Blob([value])
+    var enc = new TextEncoder() // always utf-8
+    value = enc.encode(value)
   }
-  if (value instanceof ArrayBuffer) {
-    return crypto.subtle.digest('sha-256', value)
+  if (value instanceof File || value instanceof Blob) {
+    value = await arrayBufferFromFile(value)
   }
-  if (!(value instanceof File || value instanceof Blob)) {
+  if (!(value instanceof ArrayBuffer) && !(value instanceof Uint8Array)) {
     throw new Error('Unsupported value, cannot digest')
   }
-  return arrayBufferFromFile(value)
-    .then((arraybuffer) => crypto.subtle.digest('sha-256', arraybuffer))
+  if (typeof crypto != 'undefined') {
+    return await crypto.subtle.digest('sha-256', value)
+  } else {
+    if (value instanceof ArrayBuffer) {
+      value = new Uint8Array(value)
+    }
+    return alt_sha256.createHash().update(value).digest()
+  }
 }
 
 export function arrayBufferFromFile (value) {

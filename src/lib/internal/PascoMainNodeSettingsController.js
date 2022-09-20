@@ -296,7 +296,9 @@ export default class PascoMainNodeSettingsController {
       return // skip
     }
     this._record_promise = (async () => {
+      let prev_audio_behavior = await this._speech_synthesizer.getAudioBehavior()
       try {
+        await this._speech_synthesizer.setAudioBehavior('playandrecord')
         let node = this._node
         let audio_meta = this.getAudioMetaByName(audio_name)
         if (!audio_meta) {
@@ -311,7 +313,7 @@ export default class PascoMainNodeSettingsController {
         }
         let audio_dir_url = this._core.resolveUrl(audio_save_dir, this._tree_url)
         // start recording
-        let filename = await this.findUniqueFilename(audio_dir_url, fsFriendlyName(node.text + '_' + audio_name), '.wav')
+        let filename = await this.findUniqueFilename(audio_dir_url, fsFriendlyName(node.text + '_' + audio_name), '.m4a')
         let dest_url = audio_dir_url + filename
         let new_audio_src = audio_save_dir + filename
         this._record_start_time = new Date().getTime()
@@ -324,6 +326,7 @@ export default class PascoMainNodeSettingsController {
         this._main.displayError(err)
         return [ null, null, null ]
       } finally {
+        await this._speech_synthesizer.setAudioBehavior(prev_audio_behavior)
         delete this._record_promise
       }
     })()

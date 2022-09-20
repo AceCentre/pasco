@@ -190,6 +190,9 @@ html {
   overflow: hidden;
   height: auto; /* unknown depending on content */
   transition: height 0.5s;
+  .x-collapsible-inner {
+    display: inline-block;
+  }
   &.x-collapse {
     height: 0px !important;
     display: block;

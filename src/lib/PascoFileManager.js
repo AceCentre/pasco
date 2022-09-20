@@ -7,10 +7,12 @@ import FileManagerWithLocalStorage from './internal/FileManagerWithLocalStorage'
  * based on runtime environment
  */
 export default class PascoFileManager {
-  constructor () {
+  constructor (base_url) {
+    this._base_url = base_url
     this._imanager = getRuntimeEnv() == 'cordova' ?
       new FileManagerWithCordova() :
       new FileManagerWithLocalStorage()
+    // all of these methods have url as their first argument
     let method_names = [
       'acquireFileUrl', 'releaseFileUrl',
       'loadFileJson', 'saveFileJson',
@@ -19,7 +21,13 @@ export default class PascoFileManager {
       'fileExists', 'isLocalFile',
     ]
     for (let name of method_names) {
-      this[name] = (...args) => this._imanager[name](...args)
+      this[name] = (url, ...args) => this._imanager[name](this.resolveUrl(url), ...args)
     }
+  }
+  resolveUrl (url) {
+    if (url.indexOf('://') == -1) {
+      url = new URL(url, this._base_url).href
+    }
+    return url
   }
 }

@@ -6,6 +6,9 @@
     </description>
     <author email="" href="https://github.com/AceCentre/"></author>
 
+    <!-- hooks (to generate icons should get called after_prepare) -->
+    <hook type="after_prepare" src="hooks/after_prepare.js" />
+
     <preference name="CordovaMediaIgnoreAVAudioSession" value="true" />
     <preference name="KeyboardDisplayRequiresUserAction" value="false" />
     <preference name="DisallowOverscroll" value="true" />

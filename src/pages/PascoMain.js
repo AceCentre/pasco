@@ -3,7 +3,7 @@ import {
   RedirectPageException, ErrorMessage, NotFoundError
 } from '../lib/exceptions'
 import {
-  getXScaleClassFromSizePercent,
+  getXScaleClassFromSizePercent, copyObject,
 } from '../helpers/common'
 import { findElementFromParents } from '../helpers/DOMHelpers'
 import lodashTemplate from '../helpers/lodashTemplate'
@@ -14,6 +14,7 @@ import PascoTree from '../lib/PascoTree'
 import PascoEngine from '../lib/PascoEngine'
 import PascoNavigationButtons from '../lib/internal/PascoNavigationButtons'
 import PascoMainEditMode from '../lib/internal/PascoMainEditMode'
+import MainDebugTools from '../lib/internal/MainDebugTools'
 
 export default class PascoMain extends BasePage {
   constructor (document) {
@@ -22,6 +23,9 @@ export default class PascoMain extends BasePage {
     this._state = null
     this._pengine = null
     this._event_manager = new EventManager()
+    this._$ = this._document.querySelector.bind(this._document)
+    this._$a = this._document.querySelectorAll.bind(this._document)
+    this._active_hi_listeners = []
   }
   async init () {
     let base_url = location+''
@@ -39,10 +43,10 @@ export default class PascoMain extends BasePage {
     this._localizer = this._core.getLocalizer()
     // prepare the tree
     this._tree = new PascoTree(this._core)
-    this._root_node_element = this._document.querySelector('#tree')
-    this._tree_wrp_element = this._document.querySelector('#tree-wrp')
+    this._root_node_element = this._$('#tree')
+    this._tree_wrp_element = this._$('#tree-wrp')
     {
-      let tmp = this._document.querySelector('#tree-node-template');
+      let tmp = this._$('#tree-node-template');
       if(tmp) {
         this._node_content_template = lodashTemplate(tmp.innerHTML);
       }
@@ -64,17 +68,21 @@ export default class PascoMain extends BasePage {
     this._localizer.localize()
     this._initUI()
 
+    // debug tools
+    this._main_debug_tools = new MainDebugTools(this)
+    await this._main_debug_tools.init()
+
     this._pengine = new PascoEngine(this._core, this)
     this._event_manager.addNodeListenerFor(this._pengine, 'error', this.onError.bind(this))
 
     this._edit_mode_enabled = false
     if (config.can_edit) {
       let tmp
-      tmp = this._document.querySelector('#edit-mode-btn')
+      tmp = this._$('#edit-mode-btn')
       this._event_manager.addDOMListenerFor(tmp, 'click', this.onClickEditMode.bind(this), false)
-      tmp = this._document.querySelector('#edit-mode-save-btn')
+      tmp = this._$('#edit-mode-save-btn')
       this._event_manager.addDOMListenerFor(tmp, 'click', this.onClickSaveEdit.bind(this), false)
-      tmp = this._document.querySelector('#edit-mode-cancel-btn')
+      tmp = this._$('#edit-mode-cancel-btn')
       this._event_manager.addDOMListenerFor(tmp, 'click', this.onClickCancelEdit.bind(this), false)
     }
     this._editmode = new PascoMainEditMode(this)
@@ -102,6 +110,9 @@ export default class PascoMain extends BasePage {
     if (this._edit_mode_enabled) {
       this._editmode.destroy()
     }
+    if (this._main_debug_tools) {
+      await this._main_debug_tools.destroy()
+    }
   }
 
   getRootNodeElement () {
@@ -121,6 +132,9 @@ export default class PascoMain extends BasePage {
   }
   getConfig () {
     return this._config
+  }
+  getConfigUrl () {
+    return this._config_url
   }
   getLocalizer () {
     return this._localizer
@@ -164,7 +178,7 @@ export default class PascoMain extends BasePage {
   ****/
   _initUI () {
     // ios specific
-    let html = document.querySelector('html')
+    let html = this._$('html')
     if (html.classList.contains('ios')) {
       html.classList.add('with-fake-scroll');
     }
@@ -191,7 +205,7 @@ export default class PascoMain extends BasePage {
     this._navbtns.init() // on-screen navigation
   }
   setTreeContentSize (size_percent) {
-    for (let elm of this._document.querySelectorAll(".resizable-content")) {
+    for (let elm of this._$a(".resizable-content")) {
       elm.style.fontSize = size_percent + '%'
       // re-set xscale
       var xscale = getXScaleClassFromSizePercent(size_percent, 50)
@@ -208,11 +222,11 @@ export default class PascoMain extends BasePage {
   }
   initMessageBar () {
     // message bar close handler
-    for (let btn of this._document.querySelectorAll('#message-bar-close-btn')) {
+    for (let btn of this._$a('#message-bar-close-btn')) {
       this._event_manager.addDOMListenerFor(btn, 'click', (event) => {
         event.stopPropagation()
         event.preventDefault()
-        let wrp = this._document.querySelector('#message-bar-wrp')
+        let wrp = this._$('#message-bar-wrp')
         if (wrp) {
           wrp.classList.add('hide')
         }
@@ -222,16 +236,16 @@ export default class PascoMain extends BasePage {
     if (this._config.message_bar_have_custom_height &&
         this._config.message_bar_height > 0 &&
         this._config.message_bar_height <= 100) {
-      let html = this._document.querySelector('html')
+      let html = this._$('html')
       let topbar_offset = 50 + (html.classList.contains('ios') ? 30 : 0)
-      let msgbar_wrp = this._document.querySelector('#message-bar-wrp')
+      let msgbar_wrp = this._$('#message-bar-wrp')
       if (msgbar_wrp) {
         msgbar_wrp.style.height = 'calc(' + this._config.message_bar_height + 'vh - ' + topbar_offset + 'px)'
       }
     }
     // set message bar font size
     if (this._config.message_bar_font_size_percentage > 0) {
-      let msgbar_wrp = this._document.querySelector('#message-bar-wrp')
+      let msgbar_wrp = this._$('#message-bar-wrp')
       if (msgbar_wrp) {
         msgbar_wrp.style.fontSize = this._config.message_bar_font_size_percentage + '%'
       }
@@ -240,7 +254,7 @@ export default class PascoMain extends BasePage {
   initDefaultUIEventHandlers () {
     // ios specific
     this._event_manager.addDOMListenerFor(this._document, 'touchmove', (evt) => {
-      var html = document.querySelector('html')
+      var html = this._$('html')
       if(html.classList.contains('ios') && !html.classList.contains('has-fake-scroll')) {
         // prevent scrolling
         evt.preventDefault()
@@ -252,7 +266,7 @@ export default class PascoMain extends BasePage {
   
   /**** START UI OPERATIONS ****/
   displayPopupMessage (msg) {
-    let popup = this._document.querySelector('#popup-message-wrp')
+    let popup = this._$('#popup-message-wrp')
     let popup_mtext = popup ? popup.querySelector('.main-text') : null
     if(popup && popup_mtext) {
       popup_mtext.textContent = msg
@@ -263,7 +277,7 @@ export default class PascoMain extends BasePage {
     }
   }
   hidePopupMessage () {
-    let popup = this._document.querySelector('#popup-message-wrp')
+    let popup = this._$('#popup-message-wrp')
     let popup_mtext = popup ? popup.querySelector('.main-text') : null
     if (popup && popup.classList.contains('visible')) {
       popup.classList.remove('visible')
@@ -289,8 +303,8 @@ export default class PascoMain extends BasePage {
   }
   updateMessageBar (params) {
     let { type, content } = params || {}
-    var wrp = this._document.querySelector('#message-bar-wrp');
-    let msgbar = this._document.querySelector('#message-bar')
+    var wrp = this._$('#message-bar-wrp');
+    let msgbar = this._$('#message-bar')
     if (msgbar == null || wrp == null) {
       return
     }
@@ -501,7 +515,6 @@ export default class PascoMain extends BasePage {
     // stop current running tree
     await this._pengine.destroy()
     await this.startEngine()
-    this.enableDebugTools()
   }
   async startEngine () {
     let initial_state = {
@@ -511,14 +524,28 @@ export default class PascoMain extends BasePage {
     }
     await this._pengine.init(this._config, this._root_node, initial_state)
     await this._pengine.start()
-    this.enableDebugTools()
   }
 
   /**** END TREE OPERATIONS ****/
 
+  /**** START HIEVENT HANDLERS ****/
+  getActiveHIListeners () {
+    return copyObject(this._active_hi_listeners)
+  }
+  _onToggleHIEventType (name, enabled) {
+    let idx = this._active_hi_listeners.findIndex((a) => a.name == name)
+    if (idx != -1) {
+      this._active_hi_listeners.splice(idx, 1)
+    }
+    if (enabled) {
+      this._active_hi_listeners.push({ name })
+    }
+    this.emit('active-human-input-listeners-change', copyObject(this._active_hi_listeners))
+  }
   enableWheelCapture () {
+    this._onToggleHIEventType('wheel-capture', true)
     let evtid = 'wheel-capture'
-    let html = this._document.querySelector('html')
+    let html = this._$('html')
     if (html.classList.contains('with-fake-scroll')) {
       // ios has fake-scroll adjust scroll state according to that
       html.classList.add('has-fake-scroll')
@@ -531,15 +558,16 @@ export default class PascoMain extends BasePage {
     }
   }
   disableWheelCapture () {
-    var html = this._document.querySelector('html')
+    this._onToggleHIEventType('wheel-capture', false)
+    var html = this._$('html')
     if (html.classList.contains('with-fake-scroll')) {
       html.classList.remove('has-fake-scroll')
       window.scrollTo(0, 0)
     }
     this._event_manager.removeListenersById('wheel-capture')
   }
-
   async enableKeyboardCapture () {
+    this._onToggleHIEventType('keyboard-capture', true)
     let evtid = 'keyboard-capture'
     this._event_manager.addDOMListenerFor(this._document, 'x-keycommand', this.onKeyCommand.bind(this), false, evtid)
     this._event_manager.addDOMListenerFor(window, 'keydown', this.onKeyDown.bind(this), false, evtid)
@@ -561,6 +589,7 @@ export default class PascoMain extends BasePage {
     }
   }
   async disableKeyboardCapture () {
+    this._onToggleHIEventType('keyboard-capture', false)
     this._event_manager.removeListenersById('keyboard-capture')
     if (this._nbridge.available && this._added_key_commands) {
       let promises = []
@@ -571,17 +600,19 @@ export default class PascoMain extends BasePage {
       await Promise.all(promises)
     }
   }
-
   enableMouseCapture () {
+    this._onToggleHIEventType('mouse-capture', true)
     this._event_manager.addDOMListenerFor(this._tree_wrp_element, 'click', this.onTreeClick.bind(this), false, 'mouse-capture')
   }
   disableMouseCapture () {
+    this._onToggleHIEventType('mouse-capture', false)
     this._event_manager.removeListenersById('mouse-capture')
   }
 
   enableNavigationButtons () {
-    let navbtns_wrp = this._document.querySelector('#navbtns-wrp')
-    let navbtns = this._document.querySelector('#navbtns')
+    this._onToggleHIEventType('navigation-buttons', true)
+    let navbtns_wrp = this._$('#navbtns-wrp')
+    let navbtns = this._$('#navbtns')
     if (!navbtns_wrp || !navbtns) {
       return
     }
@@ -593,7 +624,7 @@ export default class PascoMain extends BasePage {
       this._event_manager.addDOMListenerFor(navbtns, 'click', this.onClickNavigationButtons.bind(this), false, evtid)
     }
     // stop touch/mouse event propagation for these elements
-    for (let elm of document.querySelectorAll('#main-top-navbar,#navbtns-wrp')) {
+    for (let elm of this._$a('#main-top-navbar,#navbtns-wrp')) {
       let actionEventHandler = (event) => {
         event.stopPropagation()
       }
@@ -603,66 +634,16 @@ export default class PascoMain extends BasePage {
     }
   }
   disableNavigationButtons () {
-    var navbtns_wrp = this._document.querySelector('#navbtns-wrp')
-    var navbtns = this._document.querySelector('#navbtns')
+    this._onToggleHIEventType('navigation-buttons', false)
+    var navbtns_wrp = this._$('#navbtns-wrp')
+    var navbtns = this._$('#navbtns')
     if (!navbtns_wrp || !navbtns) {
       return
     }
     navbtns_wrp.classList.remove('navbtns-enable')
     this._event_manager.removeListenersById('nav-buttons-capture')
   }
-
-  enableDebugTools () {
-    // some hooks
-    let clear_storage_elm = document.querySelector('#debug-clear-storage')
-    if (clear_storage_elm) {
-      this._event_manager.addDOMListenerFor(clear_storage_elm, 'click', async () => {
-        if (!confirm('Are you sure you want to remove your pasco settings?')) {
-          return
-        }
-        // for cordova
-        if (window.cordova) {
-          await this._fmanager.deleteFile(this._config_url)
-        } else {
-          localStorage.clear()
-        }
-        location.reload()
-      }, false)
-    }
-    let fake_scroll_toggle_elm = this._document.querySelector('#debug-with-fake-scroll-toggle')
-    if (fake_scroll_toggle_elm) {
-      this._event_manager.addDOMListenerFor(fake_scroll_toggle_elm, 'click', async () => {
-        var html = document.querySelector('html')
-        var active = !html.classList.contains('with-fake-scroll')
-        if (active) {
-          html.classList.add('with-fake-scroll')
-        } else {
-          html.classList.remove('with-fake-scroll')
-        }
-        fake_scroll_toggle_elm.innerHTML = "Wheel With Fake Scroll " + (active ? '[ON]' : '[OFF]')
-        await this.restartEngine()
-      }, false)
-    }
-    this._pengine.addKeyhitHandler('80', () => { // P (restart engine)
-      if (this._document.body.classList.contains('debug-mode')) {
-        this.restartEngine()
-      }
-    })
-    this._pengine.addKeyhitHandler('190', () => { // . dot (toggle debug buttons)
-      if (this._debug_buttons_enabled) {
-        this._document.body.classList.remove('debug-mode')
-      } else {
-        this._document.body.classList.add('debug-mode')
-      }
-      this._debug_buttons_enabled = !this._debug_buttons_enabled
-    })
-    if(this._nbridge.available) {
-      return Promise.all([
-        this._nbridge.add_key_command("p"),
-        this._nbridge.add_key_command("."),
-      ])
-    }
-  }
+  /**** END HIEVENT HANDLERS ****/
 
   async saveConfig () {
     this._fmanager.saveFileJson(this._config_url, this._config)
@@ -745,39 +726,44 @@ export default class PascoMain extends BasePage {
   }
 
   onNavigationButtonsTouchStart (evt) {
-    if (evt.touches.length == 1) {
-      let elem = evt.touches[0].target
-      switch(elem.id) {
-        case 'nav-upbtn':
-        case 'nav-downbtn':
-        case 'nav-leftbtn':
-        case 'nav-rightbtn': {
-          evt.preventDefault()
-          this._pengine.didHitNavigationButton({ name: elem.id })
-          break
-        }
-      }
+    let target = evt.touches[0].target
+    let btns_name = [ 'nav-upbtn', 'nav-downbtn', 'nav-leftbtn', 'nav-rightbtn' ]
+    let navbtns = this._$('#navbtns')
+    let btn = findElementFromParents(target, (a) => btns_name.indexOf(a.id) != -1, navbtns)
+    if (btn) {
+      evt.preventDefault()
+      let name = btn.id
+      this.emit('hievent', { name: 'navbtn', summary: `<touchstart>, name = ${name}` })
+      this._pengine.didHitNavigationButton({ name })
     }
   }
   onClickNavigationButtons (evt) {
     let btns_name = [ 'nav-upbtn', 'nav-downbtn', 'nav-leftbtn', 'nav-rightbtn' ]
-    let navbtns = this._document.querySelector('#navbtns')
+    let navbtns = this._$('#navbtns')
     let btn = findElementFromParents(evt.target, (a) => btns_name.indexOf(a.id) != -1, navbtns)
     if (btn) {
       evt.preventDefault()
-      this._pengine.didHitNavigationButton({ name: btn.id })
+      let name = btn.id
+      this.emit('hievent', { name: 'navbtn', summary: `<click>, name = ${name}` })
+      this._pengine.didHitNavigationButton({ name })
     }
   }
   onKeyCommand (evt) {
+    let input = evt.detail.input
+    let code = PascoNativeBridge.keyCodeByInput.hasOwnProperty(input)
     let curtime = new Date().getTime()
     if (this._config.ignore_second_hits_time > 0 && this._last_keydown_time &&
         curtime - this._last_keydown_time < this._config.ignore_second_hits_time) {
+      this.emit('hievent', { name: 'keyhit', summary: `<keycommand>, code = ${code}, input = ${input} [IGNORED, second hit]` })
       return // ignore second hit
     }
     this._last_keydown_time = curtime
     // config.ignore_key_release_time is not applicable
-    if(evt.detail && PascoNativeBridge.keyCodeByInput.hasOwnProperty(evt.detail.input)) {
-      this._pengine.didHitKey({ code: PascoNativeBridge.keyCodeByInput[evt.detail.input] })
+    if (code) {
+      this.emit('hievent', { name: 'keyhit', summary: `<keycommand>, code = ${code}, input = ${input}` })
+      this._pengine.didHitKey({ code })
+    } else {
+      this.emit('hievent', { name: 'keyhit', summary: `<keycommand>, code = ${code}, input = ${input}, [UNKNOWN_INPUT]` })
     }
   }
   onTreeClick (evt) {
@@ -787,25 +773,28 @@ export default class PascoMain extends BasePage {
       let key_event = { code }
       if (this._pengine.willHitKeyHandle(key_event)) {
         evt.preventDefault()
+        this.emit('hievent', { name: 'keyhit', summary: `<click>, code = ${code}` })
         this._pengine.didHitKey(key_event)
       }
     }
   }
   onKeyDown (down_ev) {
+    let downcode = down_ev.charCode || down_ev.keyCode
+    let key_event = { code: downcode }
     let curtime = new Date().getTime()
     if (this._config.ignore_second_hits_time > 0 && this._last_keydown_time &&
         curtime - this._last_keydown_time < this._config.ignore_second_hits_time) {
+      this.emit('hievent', { name: 'keyhit', summary: `<keydown>, code = ${downcode} [IGNORED, second hit]` })
       return // ignore second hit
     }
     this._last_keydown_time = curtime
     this._keydown_time = curtime
-    let key_event = { code: down_ev.charCode || down_ev.keyCode }
-    let downcode = down_ev.charCode || down_ev.keyCode
     if (this._pengine.willHitKeyHandle(key_event)) {
       down_ev.preventDefault()
     }
     if (!this._config.ignore_key_release_time) {
       // no need to wait for release
+      this.emit('hievent', { name: 'keyhit', summary: `<keydown>, code = ${downcode}` })
       this._pengine.didHitKey(key_event)
     } else {
       // follow delegate rules
@@ -824,6 +813,7 @@ export default class PascoMain extends BasePage {
            }
         */
         if (upcode != 0 && upcode != downcode) {
+          this.emit('hievent', { name: 'keyhit', summary: `<keyup>, code = ${downcode} [IGNORED, multi key detected]` })
           return // LIMIT:: single key at a time
         }
         let keyup_time = new Date().getTime()
@@ -831,8 +821,10 @@ export default class PascoMain extends BasePage {
         this._event_manager.removeListenersById(keyup_evtid)
         this._keydown_time = null
         if (keyup_time - keydown_time < this._config.ignore_key_release_time) {
+          this.emit('hievent', { name: 'keyhit', summary: `<keyup>, code = ${downcode} [IGNORED, keyup was too soon]` })
           return // ignore it, release time should be more
         }
+        this.emit('hievent', { name: 'keyhit', summary: `<keyup>, code = ${downcode}` })
         this._pengine.didHitKey(key_event)
       }, false, keyup_evtid)
     }
@@ -843,6 +835,7 @@ export default class PascoMain extends BasePage {
     }
     let deltaX = window.scrollX - this._last_scroll_x
     let deltaY = window.scrollY - this._last_scroll_y
+    this.emit('hievent', { name: 'wheel-move', summary: `<scroll>, delta = [${deltaX},${deltaY}]` })
     this._pengine.didMoveWheel({ deltaX, deltaY })
     // lock-the scroll
     let scrollX = window.scrollX > 110 || window.scrollX < 10 ? 60 : window.scrollX
@@ -865,7 +858,10 @@ export default class PascoMain extends BasePage {
     if (this._wheel_off) {
       return
     }
-    this._pengine.didMoveWheel({ deltaX: evt.deltaX, deltaY: evt.deltaY })
+    let deltaX = evt.deltaX
+    let deltaY = evt.deltaY
+    this.emit('hievent', { name: 'wheel-move', summary: `<wheel>, delta = [${deltaX},${deltaY}]` })
+    this._pengine.didMoveWheel({ deltaX, deltaY })
   }
 
 }

@@ -130,14 +130,15 @@ export default class EditConfigPage extends BasePage {
     this._auto_save_enabled = !this._is_quick_setup
     this._config_form = this._quick_setup_form ? this._quick_setup_form : this._edit_config_form
 
-    this._initUI()
-    
     this._config_form_controller = new ConfigFormController(this)
     this._config_form_controller.init(this._config)
     this._event_manager.addNodeListenerFor(this._config_form_controller, 'config-change', this.onConfigChange.bind(this))
     this._event_manager.addNodeListenerFor(this._config_form_controller, 'error', (error) => {
       this.onError(error)
     })
+
+    this._initUI()
+    
     if (this._is_quick_setup) {
       this.onShowQuickSetupPage()
       this._event_manager.addDOMListenerFor(this._config_form, 'submit', (evt) => {
@@ -315,12 +316,12 @@ export default class EditConfigPage extends BasePage {
       {
         text_input_selector: '#helper_back_option_main_text',
         record_section_selector: '#helper_back_option_main_record',
-        audio_dest: 'back-main.wav',
+        audio_dest: 'back-main.m4a',
       },
       {
         text_input_selector: '#helper_back_option_cue_text',
         record_section_selector: '#helper_back_option_cue_record',
-        audio_dest: 'back-cue.wav',
+        audio_dest: 'back-cue.m4a',
       },
     ].forEach((info) => {
       let record_section = this._$(info.record_section_selector)
@@ -343,6 +344,9 @@ export default class EditConfigPage extends BasePage {
     let voice_by_id = Object.fromEntries(this._voices.map((a) => [ a.id, a ]))
     this._voice_selection_controllers = []
     for (let voice_sel of this._voice_selection_list) {
+      if (this._is_quick_setup && voice_sel.name == 'auditory_cue_first_run_voice_options') {
+        continue // does not exists on quick setup
+      }
       let controller = new VoiceSelectionController(this)
       controller.init(voice_sel)
       this._voice_selection_controllers.push(controller)
@@ -418,61 +422,82 @@ export default class EditConfigPage extends BasePage {
       }
     })
     // update dependent inputs
+    let _onInputDataDispUpdate = (elm, disp_selector) => {
+      let value = elm.value
+      for (let other of this._$a(disp_selector)) {
+        other.textContent = `[${value}]`
+      }
+    }
+    let _onDependentInputUpdate = (elm, dependent_selector) => {
+      if (!elm.__dependent_disabled && dependent_selector) {
+        let value = elm.value
+        if (typeof value != 'number') {
+          value = parseFloat(value)
+        }
+        if (isNaN(value)) {
+          return
+        }
+        let others = Array.from(this._$a(dependent_selector))
+        // prevent endless loops
+        for (let other of others) {
+          other.__dependent_disabled = true
+        }
+        // perform the change
+        for (let other of others) {
+          if (Math.abs(parseFloat(other.value) - value) < 0.001) {
+            break // no need to change dependent value
+          }
+          let lvalue = value
+          let max = other.max ? parseFloat(other.max) : NaN
+          let min = other.min ? parseFloat(other.min) : NaN
+          if (!isNaN(max) && lvalue > max) {
+            lvalue = max
+          }
+          if (!isNaN(min) && lvalue < min) {
+            lvalue = min
+          }
+          other.value = lvalue
+          if (other.type == 'range' && other.__rangeslider) {
+            other.__rangeslider.update({ value: other.value });
+          } else {
+            other.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        }
+        // remove __dependent_disabled
+        for (let other of others) {
+          other.__dependent_disabled = false
+        }
+      }
+    }
     this._event_manager.addDOMListenerFor(this._document, 'input', (evt) => {
       let elm = evt.target
       if (elm.nodeName == 'INPUT' &&
           ['number','range'].indexOf(elm.type) != -1) {
         let dependent_selector = elm.getAttribute('data-dependent')
-        if (!elm.__dependent_disabled && dependent_selector) {
-          let value = elm.value
-          if (typeof value != 'number') {
-            value = parseFloat(value)
-          }
-          if (isNaN(value)) {
-            return
-          }
-          let others = Array.from(this._$a(dependent_selector))
-          // prevent endless loops
-          for (let other of others) {
-            other.__dependent_disabled = true
-          }
-          // perform the change
-          for (let other of others) {
-            if (Math.abs(parseFloat(other.value) - value) < 0.001) {
-              break // no need to change dependent value
-            }
-            let lvalue = value
-            let max = other.max ? parseFloat(other.max) : NaN
-            let min = other.min ? parseFloat(other.min) : NaN
-            if (!isNaN(max) && lvalue > max) {
-              lvalue = max
-            }
-            if (!isNaN(min) && lvalue < min) {
-              lvalue = min
-            }
-            other.value = lvalue
-            if (other.type == 'range' && other.__rangeslider) {
-              other.__rangeslider.update({ value: other.value });
-            } else {
-              other.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-          }
-          // remove __dependent_disabled
-          for (let other of others) {
-            other.__dependent_disabled = false
-          }
-        }
+        _onDependentInputUpdate(evt.target, dependent_selector)
       }
-      if (elm.nodeName == 'INPUT') {
+      if (evt.target.nodeName == 'INPUT') {
         let disp_selector = elm.getAttribute('data-disp')
         if (disp_selector) {
-          let value = elm.value
-          for (let other of this._$a(disp_selector)) {
-            other.textContent = `[${value}]`
-          }
+          _onInputDataDispUpdate(evt.target, disp_selector)
         }
       }
     }, true)
+    // initial sync dependent data of config form inputs
+    for (let elm of this._config_form.querySelectorAll('input[type=range],input[type=number]')) {
+      let input_name = elm.getAttribute('name')
+      let dependent_selector = elm.getAttribute('data-dependent')
+      if (input_name && dependent_selector) {
+        _onDependentInputUpdate(elm, dependent_selector)
+      }
+    }
+    // initial sync inputs with data-disp attr
+    for (let elm of this._$a('input')) {
+      let disp_selector = elm.getAttribute('data-disp')
+      if (disp_selector) {
+        _onInputDataDispUpdate(elm, disp_selector)
+      }
+    }
   }
   /***** END UI IMPL  *****/
 
@@ -481,6 +506,7 @@ export default class EditConfigPage extends BasePage {
   onConfigChange (config) {
     this._config = config
     this.emit('config-change', config)
+    console.log('config-change', config)
     if (this._auto_save_enabled) {
       this.setNeedsSaveConfig()
     }
@@ -544,7 +570,7 @@ export default class EditConfigPage extends BasePage {
       let default_tree_url = await this._tree_editor.getDefaultTreeUrl(tree_name, this._locale)
       let datastate = this._core.getDataState()
       // write default_tree
-      let default_tree_info = trees_info.list.find((a) => a.name == 'default')
+      let default_tree_info = this._trees_info.list.find((a) => a.name == 'default')
       if (!default_tree_info) {
         default_tree_info = {
           name: 'default',

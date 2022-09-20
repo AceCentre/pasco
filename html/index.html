@@ -3,18 +3,17 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta http-equiv="Content-Security-Policy" content="default-src blob: https: 'self' 'unsafe-eval' 'unsafe-inline' ws://localhost:3000; style-src 'self' 'unsafe-inline'; media-src blob: *; img-src 'self' data: content:;">
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src blob: https: 'self' 'unsafe-eval' 'unsafe-inline' ws://localhost:3000; style-src 'self' 'unsafe-inline'; media-src blob: *; img-src 'self' data: content:;"> -->
     
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, viewport-fit=cover">
 
     <title x-l10n="main_title">pasco</title>
-    
+
     <link rel="icon" href="favicon.ico">
     <link rel="stylesheet" href="webpack/static/fontawesome/css/fontawesome-all.min.css">
-    <!-- INJECT HEAD -->
-    <!-- INJECT SCRIPTS -->
+    <!-- INJECT CORDOVA SCRIPTS -->
     <script src="webpack/main.js"></script>
 
   </head>
@@ -31,6 +30,7 @@
         <li><a class="icon-btn" href id="edit-mode-cancel-btn"><span class="far fa-times fa-2x"></span></a></li>
         <li class="on-debug-mode"><button class="btn btn-default" id="debug-clear-storage" type="button" x-l10n>Clear Storage</button></li>
         <li class="on-debug-mode"><button class="btn btn-default" id="debug-with-fake-scroll-toggle">Wheel With Fake Scroll</button></li>
+        <li class="on-debug-mode"><button class="btn btn-default" id="debug-hiconsole-toggle">Input Console</button></li>
       </ul>
     </nav>
     <div id="theinput-wrp">
@@ -63,7 +63,12 @@
         <textarea class="text-input" name="text"></textarea>
       </div>
     </script>
-    <!-- Modal -->
+    <!-- Start debug tools -->
+    <div id="debug-hiconsole" class="hidden">
+      <div class="content"></div>
+    </div>
+    <!-- End debug tools -->
+    <!-- Start of Modals -->
     <div id="node-setting-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="Node Setting">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -234,5 +239,6 @@
         </div>
       </div>
     </div>
+    <!-- End of Modals -->
   </body>
 </html>

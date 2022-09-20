@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" x-page="EditConfigPage" class="edit-config-page">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -11,13 +11,11 @@
 
     <title x-l10n="quick_setup_title">pasco - Quick Setup</title>
 
-    <!-- <link rel="icon" href="images/favicon.png"> -->
 
-    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/edit-config.css">
-
-    <!-- INJECT HEAD -->
-    
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="webpack/static/fontawesome/css/fontawesome-all.min.css">
+    <!-- INJECT CORDOVA SCRIPTS -->
+    <script src="webpack/main.js"></script>
   </head>
   <body class="notready quick-setup">
     <div class="container edit-config-container">
@@ -180,23 +178,5 @@
         </div>
       </div>
     </div>
-
-    <!-- INJECT SCRIPTS -->
-    <!-- MAIN SCRIPTS -->
-    <script src="js/nodelib.js"></script>
-    <script src="bower_components/underscore/underscore-min.js"></script>
-    <script src="bower_components/showdown/dist/showdown.min.js"></script>
-    <script src="js/lib/translate.js"></script>
-    <script src="js/lib/sanitize-html.js"></script>
-    <!-- bootstrap includes -->
-    <!-- <script src="bower_components/jquery/dist/jquery.min.js"></script> -->
-    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-    <script src="bower_components/bootstrap-waitingfor/build/bootstrap-waitingfor.min.js"></script>
-    <!-- bootstrap includes end -->
-    <script src="js/lib/zipjs/zip.js"></script>
-    <script>zip.workerScriptsPath = "js/lib/zipjs/";</script>
-    <script src="js/NativeAccessApi.js"></script>
-    <script src="js/core.js"></script>
-    <script src="js/edit-config.js"></script>
   </body>
 </html>

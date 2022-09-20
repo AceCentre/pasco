@@ -13,6 +13,7 @@ let pages_map = {
 async function run_page (Page) {
   await Page.onDocumentReady()
   let page = new Page(document)
+  document.__page = page
   try {
     // show loading
     await page.init()

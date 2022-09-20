@@ -1,6 +1,8 @@
+
 import BaseFileManager from './BaseFileManager'
 import { NotFoundError } from '../exceptions'
 import { fixUrlForCordova } from '../../helpers/common'
+import * as path from 'path'
 
 export default class FileManagerWithCordova extends BaseFileManager {
   async loadFileData (url, options) {
@@ -9,17 +11,25 @@ export default class FileManagerWithCordova extends BaseFileManager {
       return await (new Promise(function(resolve, reject) {
         url = fixUrlForCordova(url)
         let onSuccess = (fileEntry) => {
-          fileEntry.file(function(file) {
-            if(options.responseType == 'blob') {
-              resolve(file)
-            } else {
-              var reader = new FileReader()
-              reader.onloadend = function(e) {
-                resolve(this.result)
+          try {
+            fileEntry.file(function(file) {
+              try {
+                if(options.responseType == 'blob') {
+                  resolve(file)
+                } else {
+                  var reader = new FileReader()
+                  reader.onloadend = function(e) {
+                    resolve(this.result)
+                  }
+                  reader.readAsText(file)
+                }
+              } catch (err) {
+                reject(err)
               }
-              reader.readAsText(file)
-            }
-          })
+            })
+          } catch (err) {
+            reject(err)
+          }
         }
         let onFail = (err) => {
           if (err instanceof FileError && err.code == 1) {
@@ -45,38 +55,54 @@ export default class FileManagerWithCordova extends BaseFileManager {
       return await super.saveFileData(url, data, options)
     }
     return await (new Promise(function(resolve, reject) {
-      url = fixUrlForCordova(url)
-      var parts = url.split('/'),
-          filename = parts[parts.length - 1],
-          dirname = parts.slice(0, parts.length - 1).join("/")
-      let onEntry = (dirEntry) => {
-        dirEntry.getFile(filename, { create: true }, function (fileEntry) {
-          // Create a FileWriter object for our FileEntry
-          fileEntry.createWriter((fileWriter) => {
-            fileWriter.onwriteend = () => {
-              resolve()
-            }
-            fileWriter.onerror = (err) => {
-              var newerr = new Error("Fail to write `" + url + "` -- " + (err.message || err.code))
-              newerr.caused_by = err
-              reject(newerr)
-            }
-            if(!(data instanceof Blob || data instanceof File)) {
-              if(typeof data != 'string') {
-                reject(new Error("Unexpected input data, string or Blob/File accepted, type: " + typeof(data)))
-                return
+      try {
+        url = fixUrlForCordova(url)
+        var parts = url.split('/'),
+            filename = parts[parts.length - 1],
+            dirname = parts.slice(0, parts.length - 1).join("/")
+        let onEntry = (dirEntry) => {
+          try {
+            dirEntry.getFile(filename, { create: true }, function (fileEntry) {
+              try {
+                // Create a FileWriter object for our FileEntry
+                fileEntry.createWriter((fileWriter) => {
+                  try {
+                    fileWriter.onwriteend = () => {
+                      resolve()
+                    }
+                    fileWriter.onerror = (err) => {
+                      var newerr = new Error("Fail to write `" + url + "` -- " + (err.message || err.code))
+                      newerr.caused_by = err
+                      reject(newerr)
+                    }
+                    if(!(data instanceof Blob || data instanceof File)) {
+                      if(typeof data != 'string') {
+                        reject(new Error("Unexpected input data, string or Blob/File accepted, type: " + typeof(data)))
+                        return
+                      }
+                      data = new Blob([data], { type: options.contentType || 'application/octet-stream' })
+                    }
+                    fileWriter.write(data)
+                  } catch (err) {
+                    reject(err)
+                  }
+                }, onFail)
+              } catch (err) {
+                reject(err)
               }
-              data = new Blob([data], { type: options.contentType || 'application/octet-stream' })
-            }
-            fileWriter.write(data)
-          }, onFail)
-        }, onFail)
+            }, onFail)
+          } catch (err) {
+            reject(err)
+          }
+        }
+        let onFail = (err) => {
+          console.error(err)
+          reject(new Error("Fail to write `" + url + "` -- " + err.message))
+        }
+        window.resolveLocalFileSystemURL(dirname, onEntry, onFail)
+      } catch (err) {
+        reject(err)
       }
-      let onFail = (err) => {
-        console.error(err)
-        reject(new Error("Fail to write `" + url + "` -- " + err.message))
-      }
-      window.resolveLocalFileSystemURL(dirname, onEntry, onFail)
     }))
   }
   async deleteFile (url, options = {}) {
@@ -159,7 +185,7 @@ export default class FileManagerWithCordova extends BaseFileManager {
     if (!this.isLocalFile(dir_url)) {
       return await super.mkdir(dir_url)
     }
-    return await (new Promise(function(resolve, reject) {
+    return await (new Promise((resolve, reject) => {
       // strip slashes from left, MAY NOT BE NEEDED
       while (dir_url.length > 0 && dir_url[dir_url.length - 1] == '/') {
         dir_url = dir_url.substring(0, dir_url.length - 1)
@@ -168,14 +194,16 @@ export default class FileManagerWithCordova extends BaseFileManager {
           basename = parts[parts.length - 1],
           dirname = parts.slice(0, parts.length - 1).join("/")
       let onEntry = (dirEntry) => {
-        dirEntry.getDirectory(basename, { create: true }, function (secondDirEntry) {
-          resolve()
-        }, onFail)
+        try {
+          dirEntry.getDirectory(basename, { create: true }, function (secondDirEntry) {
+            resolve()
+          }, onFail)
+        } catch (err) {
+          reject(err)
+        }
       }
       let onFail = (err) => {
-        let err2 = new Error("Failed to mkdir `" + dir_url + "` -- " + err.code + ", " + err.message)
-        err2.caused_by = err
-        reject(err2)
+        reject(err)
       }
       window.resolveLocalFileSystemURL(dirname, onEntry, onFail)
     }))

@@ -133,8 +133,8 @@ export default class ConfigFormController extends EventEmitter {
     this._event_manager.removeListenersById(evtid)
     this._event_manager.addDOMListenerFor(form, 'input', onChange, false, evtid)
     this._event_manager.addDOMListenerFor(form, 'change', (evt) => {
-      if (evt.target.nodeName == 'select' ||
-          (evt.target.nodeName == 'input' &&
+      if (evt.target.nodeName == 'SELECT' ||
+          (evt.target.nodeName == 'INPUT' &&
            ['checkbox', 'radio', 'range'].indexOf(evt.target.type) != -1)) {
         onChange(evt)
       }
@@ -219,7 +219,7 @@ export default class ConfigFormController extends EventEmitter {
         info.target[info.name] = value
       }
     } else {
-      info.target[info.name] = value;
+      info.target[info.name] = value
     }
   }
   /***** END HELPER FUNCTIONS *****/

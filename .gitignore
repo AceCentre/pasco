@@ -1,7 +1,6 @@
 *~
 node_modules/
 html/bower_components/
-html/webpack/
 dist/
 .DS_Store
 */.DS_Store

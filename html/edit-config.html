@@ -13,8 +13,7 @@
 
     <link rel="icon" href="favicon.ico">
     <link rel="stylesheet" href="webpack/static/fontawesome/css/fontawesome-all.min.css">
-    <!-- INJECT HEAD -->
-    <!-- INJECT SCRIPTS -->
+    <!-- INJECT CORDOVA SCRIPTS -->
     <script src="webpack/main.js"></script>
   </head>
 
@@ -72,82 +71,87 @@
                   </div>
                 </div>
                 <div class="row x-collapsible x-collapse" id="auto_mode_params">
-                  <div class="col-sm-3">
-                    <div class="form-group">
-                      <label for="auto_next_loops" x-l10n>Loops</label>
-                      <input type="number" id="auto_next_loops" name="auto_next_loops" class="form-control" value="10" data-validator="number" data-dependent="#auto_next_loops_range">
-                      <input type="range" id="auto_next_loops_range" class="form-control btn-lg" step="1" min="0" max="4" data-dependent="#auto_next_loops">
+                  <div class="x-collapsible-inner">
+                    <div class="col-sm-3">
+                      <div class="form-group">
+                        <label for="auto_next_loops" x-l10n>Loops</label>
+                        <input type="number" id="auto_next_loops" name="auto_next_loops" class="form-control" value="10" data-validator="number" data-dependent="#auto_next_loops_range">
+                        <input type="range" id="auto_next_loops_range" class="form-control btn-lg" step="1" min="0" max="4" data-dependent="#auto_next_loops">
+                      </div>
                     </div>
-                  </div>
-                  <div class="col-sm-1">
-                  </div>
-                  <div class="col-sm-4">
-                    <div class="form-group">
-                      <label for="auto_next_atfirst_delay" x-l10n>Delay at first item (ms)</label>
-                      <input type="number" id="auto_next_atfirst_delay" name="auto_next_atfirst_delay" class="form-control" value="10" data-validator="number" data-dependent="#auto_next_atfirst_delay_range">
-                      <input type="range" id="auto_next_atfirst_delay_range" class="form-control btn-lg" step="100" min="0" max="2000" data-dependent="#auto_next_atfirst_delay">
+                    <div class="col-sm-1">
                     </div>
-                  </div>
-                  <div class="col-sm-4">
-                    <div class="form-group">
-                      <label for="auto_next_delay" x-l10n>Auto-scanning delay (ms)</label>
-                      <input type="number" id="auto_next_delay" name="auto_next_delay" class="form-control" value="200" data-validator="number" data-dependent="#auto_next_delay_range">
-                      <input type="range" id="auto_next_delay_range" class="form-control btn-lg" step="100" min="0" max="5000" data-dependent="#auto_next_delay">
+                    <div class="col-sm-4">
+                      <div class="form-group">
+                        <label for="auto_next_atfirst_delay" x-l10n>Delay at first item (ms)</label>
+                        <input type="number" id="auto_next_atfirst_delay" name="auto_next_atfirst_delay" class="form-control" value="10" data-validator="number" data-dependent="#auto_next_atfirst_delay_range">
+                        <input type="range" id="auto_next_atfirst_delay_range" class="form-control btn-lg" step="100" min="0" max="2000" data-dependent="#auto_next_atfirst_delay">
+                      </div>
                     </div>
-                  </div>
-                  <div class="col-sm-4">
-                    <h4 x-l10n>Auto start</h4>
-                    <label class="checkbox-inline"><input type="checkbox" name="auto_scan"><span x-l10n>On</span></label><br>
-                    <small>It will automatically start scanning after an item has been selected.</small>
+                    <div class="col-sm-4">
+                      <div class="form-group">
+                        <label for="auto_next_delay" x-l10n>Auto-scanning delay (ms)</label>
+                        <input type="number" id="auto_next_delay" name="auto_next_delay" class="form-control" value="200" data-validator="number" data-dependent="#auto_next_delay_range">
+                        <input type="range" id="auto_next_delay_range" class="form-control btn-lg" step="100" min="0" max="5000" data-dependent="#auto_next_delay">
+                      </div>
+                    </div>
+                    <div class="col-sm-4">
+                      <h4 x-l10n>Auto start</h4>
+                      <label class="checkbox-inline"><input type="checkbox" name="auto_scan"><span x-l10n>On</span></label><br>
+                      <small>It will automatically start scanning after an item has been selected.</small>
+                    </div>
                   </div>
                 </div>
                 <div class="row x-collapsible x-collapse" id="switch_mode_params">
-                  <div class="col-sm-12">
-                    <p x-l10n>Using a keyboard: Hitting 1 will go to previous and 2 to next. Also keys W/S, Up/Down arrow will work to navigate the tree.</p>
-                  </div>
-                  <!--
-                  <div class="col-sm-4">
-                    <div class="form-group">
-                      <label x-l10n>Switch key to select items</label>
-                      <div>
-                        <label class="radio-inline">
-                          <input type="radio" name="_switch_forward_key" value="space"> Space
-                        </label>
-                        <label class="radio-inline">
-                          <input type="radio" name="_switch_forward_key" value="enter"> Enter
-                        </label>
+                  <div class="x-collapsible-inner">
+                    <div class="col-sm-12">
+                      <p x-l10n>Using a keyboard: Hitting 1 will go to previous and 2 to next. Also keys W/S, Up/Down arrow will work to navigate the tree.</p>
+                    </div>
+                    <!--
+                    <div class="col-sm-4">
+                      <div class="form-group">
+                        <label x-l10n>Switch key to select items</label>
+                        <div>
+                          <label class="radio-inline">
+                            <input type="radio" name="_switch_forward_key" value="space"> Space
+                          </label>
+                          <label class="radio-inline">
+                            <input type="radio" name="_switch_forward_key" value="enter"> Enter
+                          </label>
+                        </div>
                       </div>
                     </div>
+                    <div class="col-sm-4">
+                      <label class="m-t-10 m-b-10 checkbox-inline"><input type="checkbox" name="_switch_secondary_key_move"><span x-l10n>Move with the other switch (Step scanning)</span></label>
+                    </div>
+                    -->
                   </div>
-                  <div class="col-sm-4">
-                    <label class="m-t-10 m-b-10 checkbox-inline"><input type="checkbox" name="_switch_secondary_key_move"><span x-l10n>Move with the other switch (Step scanning)</span></label>
-                  </div>
-                  -->
                 </div>
                 <div class="row x-collapsible x-collapse" id="wheel_mode_params">
-                  <div class="col-sm-12">
-                    <p x-l10n>In wheel mode you can navigate through the tree with a mouse or touch.</p>
-                    <div class="row">
-                      <div class="col-sm-3">
-                        <div class="form-group">
-                          <label for="wheel_y_threshold" x-l10n>Wheel Y-Axis Threshold</label>
-                          <input type="number" id="wheel_y_threshold" name="wheel_y_threshold" class="form-control" value="10" data-validator="number" data-dependent="#wheel_y_threshold_range">
-                          <input type="range" id="wheel_y_threshold_range" class="form-control btn-lg" step="1" min="1" max="100" data-default="30" data-dependent="#wheel_y_threshold">
+                  <div class="x-collapsible-inner">
+                    <div class="col-sm-12">
+                      <p x-l10n>In wheel mode you can navigate through the tree with a mouse or touch.</p>
+                      <div class="row">
+                        <div class="col-sm-3">
+                          <div class="form-group">
+                            <label for="wheel_y_threshold" x-l10n>Wheel Y-Axis Threshold</label>
+                            <input type="number" id="wheel_y_threshold" name="wheel_y_threshold" class="form-control" value="10" data-validator="number" data-dependent="#wheel_y_threshold_range">
+                            <input type="range" id="wheel_y_threshold_range" class="form-control btn-lg" step="1" min="1" max="100" data-default="30" data-dependent="#wheel_y_threshold">
+                          </div>
                         </div>
-                      </div>
-                      <div class="col-sm-3">
-                        <div class="form-group">
-                          <label for="wheel_x_threshold" x-l10n>Wheel X-Axis Threshold</label>
-                          <input type="number" id="wheel_x_threshold" name="wheel_x_threshold" class="form-control" value="10" data-validator="number" data-dependent="#wheel_x_threshold_range">
-                          <input type="range" id="wheel_x_threshold_range" class="form-control btn-lg" step="1" min="1" max="100" data-default="30" data-dependent="#wheel_x_threshold">
+                        <div class="col-sm-3">
+                          <div class="form-group">
+                            <label for="wheel_x_threshold" x-l10n>Wheel X-Axis Threshold</label>
+                            <input type="number" id="wheel_x_threshold" name="wheel_x_threshold" class="form-control" value="10" data-validator="number" data-dependent="#wheel_x_threshold_range">
+                            <input type="range" id="wheel_x_threshold_range" class="form-control btn-lg" step="1" min="1" max="100" data-default="30" data-dependent="#wheel_x_threshold">
+                          </div>
                         </div>
-                      </div>
-                      <div class="col-sm-6">
-                        <label class="checkbox-inline"><input type="checkbox" name="wheel_y_reverse"><span x-l10n>Reverse Y-Axis Wheel</span></label>
-                        <label class="checkbox-inline"><input type="checkbox" name="wheel_x_reverse"><span x-l10n>Reverse X-Axis Wheel</span></label>
+                        <div class="col-sm-6">
+                          <label class="checkbox-inline"><input type="checkbox" name="wheel_y_reverse"><span x-l10n>Reverse Y-Axis Wheel</span></label>
+                          <label class="checkbox-inline"><input type="checkbox" name="wheel_x_reverse"><span x-l10n>Reverse X-Axis Wheel</span></label>
+                        </div>
                       </div>
                     </div>
-
                   </div>
                 </div>
                 <hr class="tinyhr"/>
@@ -253,6 +257,10 @@
                       <div class="col-sm-6">
                         <h4 x-l10n>Notify back on select</h4>
                         <label class="checkbox-inline"><input type="checkbox" name="helper_back_option_notify"><span x-l10n>On</span></label>
+                      </div>
+                      <div class="col-sm-6">
+                        <h4 x-l10n>Debug Mode</h4>
+                        <label class="checkbox-inline"><input type="checkbox" name="debug_mode"><span x-l10n>On</span></label>
                       </div>
 
                     </div>
@@ -376,48 +384,50 @@
                   </div>
                 </div>
                 <div id="auditory-cue-first-run-params" class="row x-collapsible x-collapse">
-                  <div class="col-sm-12" >
-                    <div class="form-group">
-                      <label for="auto_next_first_run_delay" x-l10n>Auto-scanning delay (ms)</label>
-                      <input type="number" id="auto_next_first_run_delay" name="auto_next_first_run_delay" class="form-control" value="0" data-validator="number" data-dependent="#auto_next_first_run_delay_range">
-                      <input type="range" id="auto_next_first_run_delay_range" class="form-control btn-lg" step="100" min="0" max="2000" data-dependent="#auto_next_first_run_delay">
-                    </div>
-                  </div>
-                  <div class="col-sm-6">
-                    <div class="form-group">
-                      <label for="_cue_first_run_voice_id" x-l10n>Voice</label>
-                      <div class="select-btn-wrp">
-                        <select class="form-control" id="_cue_first_run_voice_id" name="_cue_first_run_voice_id">
-                        </select>
-                        <button type="button" class="btn btn-primary vbl-btn" data-vbl="auditory_cue_first_run_voice_options"><span class="glyphicon glyphicon-plus"></span></button>
+                  <div class="x-collapsible-inner">
+                    <div class="col-sm-12" >
+                      <div class="form-group">
+                        <label for="auto_next_first_run_delay" x-l10n>Auto-scanning delay (ms)</label>
+                        <input type="number" id="auto_next_first_run_delay" name="auto_next_first_run_delay" class="form-control" value="0" data-validator="number" data-dependent="#auto_next_first_run_delay_range">
+                        <input type="range" id="auto_next_first_run_delay_range" class="form-control btn-lg" step="100" min="0" max="2000" data-dependent="#auto_next_first_run_delay">
                       </div>
                     </div>
-                  </div>
-                  <div class="col-sm-6">
-                    <div class="form-group">
-                      <label for="auditory_cue_first_run_voice_options.volume"><span x-l10n>Volume</span> <span id="disp-auditory_cue_first_run_voice_options__volume" class="input-number-disp"></span></label>
-                      <input class="form-control btn-lg" type="range" step="0.01" min="0" max="1" data-default="1" id="auditory_cue_first_run_voice_options.volume" name="auditory_cue_first_run_voice_options.volume" data-validator="number" data-disp="#disp-auditory_cue_first_run_voice_options__volume">
+                    <div class="col-sm-6">
+                      <div class="form-group">
+                        <label for="_cue_first_run_voice_id" x-l10n>Voice</label>
+                        <div class="select-btn-wrp">
+                          <select class="form-control" id="_cue_first_run_voice_id" name="_cue_first_run_voice_id">
+                          </select>
+                          <button type="button" class="btn btn-primary vbl-btn" data-vbl="auditory_cue_first_run_voice_options"><span class="glyphicon glyphicon-plus"></span></button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div class="col-sm-6">
-                    <div class="form-group">
-                      <label for="auditory_cue_first_run_voice_options.pitch"><span x-l10n>Pitch</span> <span id="disp-auditory_cue_first_run_voice_options__pitch" class="input-number-disp"></span></label>
-                      <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="2" data-default="1" id="auditory_cue_first_run_voice_options.pitch" name="auditory_cue_first_run_voice_options.pitch" data-validator="number" data-disp="#disp-auditory_cue_first_run_voice_options__pitch">
+                    <div class="col-sm-6">
+                      <div class="form-group">
+                        <label for="auditory_cue_first_run_voice_options.volume"><span x-l10n>Volume</span> <span id="disp-auditory_cue_first_run_voice_options__volume" class="input-number-disp"></span></label>
+                        <input class="form-control btn-lg" type="range" step="0.01" min="0" max="1" data-default="1" id="auditory_cue_first_run_voice_options.volume" name="auditory_cue_first_run_voice_options.volume" data-validator="number" data-disp="#disp-auditory_cue_first_run_voice_options__volume">
+                      </div>
                     </div>
-                  </div>
-                  <div class="col-sm-6">
-                    <div class="form-group">
-                      <label for="auditory_cue_first_run_voice_options.rateMul"><span x-l10n>Rate</span> <span id="disp-auditory_cue_first_run_voice_options__rateMul" class="input-number-disp"></span></label>
-                      <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_cue_first_run_voice_options.rateMul" name="auditory_cue_first_run_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_cue_first_run_voice_options__rateMul">
+                    <div class="col-sm-6">
+                      <div class="form-group">
+                        <label for="auditory_cue_first_run_voice_options.pitch"><span x-l10n>Pitch</span> <span id="disp-auditory_cue_first_run_voice_options__pitch" class="input-number-disp"></span></label>
+                        <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="2" data-default="1" id="auditory_cue_first_run_voice_options.pitch" name="auditory_cue_first_run_voice_options.pitch" data-validator="number" data-disp="#disp-auditory_cue_first_run_voice_options__pitch">
+                      </div>
                     </div>
-                  </div>
-                  <div class="col-sm-12 hide-for-non-cordova-ios">
-                    <div class="form-group">
-                      <label>Override output</label>
-                      <div class="radio-group">
-                        <label class="radio-inline"><input type="radio" name="auditory_cue_first_run_voice_options.override_output" value=""><span x-l10n>None</span></label>
-                        <label class="radio-inline"><input type="radio" name="auditory_cue_first_run_voice_options.override_output" value="builtinspeaker"><span x-l10n>Builtin Speaker</span></label>
-                        <label class="radio-inline"><input type="radio" name="auditory_cue_first_run_voice_options.override_output" value="headphone"><span x-l10n>Headphone</span></label>
+                    <div class="col-sm-6">
+                      <div class="form-group">
+                        <label for="auditory_cue_first_run_voice_options.rateMul"><span x-l10n>Rate</span> <span id="disp-auditory_cue_first_run_voice_options__rateMul" class="input-number-disp"></span></label>
+                        <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_cue_first_run_voice_options.rateMul" name="auditory_cue_first_run_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_cue_first_run_voice_options__rateMul">
+                      </div>
+                    </div>
+                    <div class="col-sm-12 hide-for-non-cordova-ios">
+                      <div class="form-group">
+                        <label>Override output</label>
+                        <div class="radio-group">
+                          <label class="radio-inline"><input type="radio" name="auditory_cue_first_run_voice_options.override_output" value=""><span x-l10n>None</span></label>
+                          <label class="radio-inline"><input type="radio" name="auditory_cue_first_run_voice_options.override_output" value="builtinspeaker"><span x-l10n>Builtin Speaker</span></label>
+                          <label class="radio-inline"><input type="radio" name="auditory_cue_first_run_voice_options.override_output" value="headphone"><span x-l10n>Headphone</span></label>
+                        </div>
                       </div>
                     </div>
                   </div>

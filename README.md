@@ -41,7 +41,7 @@ If developing the iOS build you will also need:
 - A mac
 - XCode
 
-### Installing
+### How to install?
 
 ```
 npm install
@@ -53,25 +53,47 @@ To test the web build:
 npm run dev
 ```
 
-To build the iOS build - First time:
+### Start Web Development Server
 
 ```
+gulp dev
+```
+
+### Web Production Build
+
+```
+gulp build-prod
+```
+
+
+### Cordova Builds
+
+Initially create a cordova build from cordova-template. 
+```
+## You may also want to clean the previous build folder
+# gulp clean-cordova-build
+gulp init-cordova-build
+cd ./builds/cordova-main-build/
 npm install
-npm run build-prod
-npm run cordova-dist
-cd cordova
 cordova platform add ios
-cordova build
+## For ios9 build
+# gulp clean-cordova-build --build-name ios9-build
+# gulp init-cordova-build --build-name ios9-build
 ```
 
-To build the iOS build - Additional times:
-
+Build for development with live-reload.
 ```
-npm install
-npm run build-prod
-npm run cordova-dist
-cd cordova
-cordova build
+gulp dist-to-cordova-build-dev-watch
+## then open another terminal for cordova build
+cd ./builds/cordova-<build-name>/
+cordova run --live-reload
+```
+
+Build for production
+```
+gulp dist-to-cordova-build-prod
+cd ./builds/cordova-<build-name>/
+cordova build ios --release
 ```
 
 ### Having problems building?

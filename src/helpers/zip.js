@@ -28,7 +28,6 @@
 /*
   This script has been modified to support commonjs type imports
 */
-(function() {
 	"use strict";
 
 	var ERR_BAD_FORMAT = "File format is not recognized.";
@@ -964,10 +963,4 @@
 		 */
 		workerScripts : null,
 	};
-  if (typeof module == 'undefined') {
-    window.zip = zip
-  } else {
-    zip.default = zip
-    module.exports = zip
-  }
-})();
+export default zip;

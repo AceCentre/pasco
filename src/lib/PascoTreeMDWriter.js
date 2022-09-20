@@ -1,5 +1,4 @@
 import showdown from 'showdown'
-import sanitizeHtml from 'sanitize-html'
 
 export default class PascoTreeMDWriter {
   writeToText (node) {

@@ -1,6 +1,8 @@
 import PascoNode from './PascoNode'
 import showdown from 'showdown'
-import sanitizeHtml from 'sanitize-html'
+//import sanitizeHtml from 'sanitize-html'
+const sanitizeHtml = (data) => data
+sanitizeHtml.defaults = { allowedTags: [] }
 
 export default class PascoTreeMDReader {
   constructor () {

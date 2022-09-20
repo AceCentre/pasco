@@ -43,7 +43,8 @@ let BRIDGE_METHODS = [
   'is_software_keyboard_visible',
   'request_audio_record_permission',
   'add_key_command', 'remove_key_command',
-  'set_audio_behavior', 'ios_open_manage_output_audio_view'
+  'set_audio_behavior', 'ios_open_manage_output_audio_view',
+  'activate_audio_session', 'deactivate_audio_session',
 ]
 
 /**
@@ -68,8 +69,18 @@ export default class PascoNativeBridge {
       }, 0)
     }
   }
-  _exec (action, ...args) {
-    return cordovaExecAsPromise('NativeAccessApi', action, args);
+  async _exec (action, ...args) {
+    let output
+    try {
+      console.log('call NativeAccessApi', action, args)
+      output = await cordovaExecAsPromise('NativeAccessApi', action, args)
+      return output
+    } catch (err) {
+      console.warn('call did throw exc', err)
+      throw err
+    } finally {
+      console.log('response received NativeAccessApi', action, args, output)
+    }
   }
   static onready () {
     return new Promise((resolve, reject) => {

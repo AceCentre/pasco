@@ -24,7 +24,6 @@ html.edit-config-page, .edit-config-page body {
     .back-btn {
       font-size: 1.7em;
       padding: 0.4em;
-      display: none;
     }
     .head {
       .fa, .far {
@@ -75,8 +74,8 @@ html.edit-config-page, .edit-config-page body {
       padding: 16px;
     }
     & > .submenu {
+      flex: 110px 0 0;
       margin-bottom: 0px;
-      width: 110px;
       border-right: 1px solid #ddd;
       .list-group-item {
         border-right: 0px;

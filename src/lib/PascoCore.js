@@ -28,10 +28,10 @@ export default class PascoCore {
   setEnvValue (name, value) {
     this._environ[name] = value
   }
-  async init (base_url) {
+  async init () {
     this._localizer = new DOMLocalizer(new URL('l10n', this._base_url).href, this._document)
     this._native_bridge = new PascoNativeBridge();
-    this._filemanager = new PascoFileManager()
+    this._filemanager = new PascoFileManager(this._base_url)
     this._speech_synthesizer = new PascoSpeechSynthesizer(this._native_bridge, this._filemanager)
     await this._speech_synthesizer.init()
     // open url handler, pasco://
@@ -111,13 +111,15 @@ export default class PascoCore {
       }
       html.classList.add('cordova');
       // Polyfill window.open to use the cordova open function instead
-      window.open = cordova.InAppBrowser.open
-      // Anytime a link is clicked with the _blank attribute it should
-      // be opened in _system instead, So the page opens outside of the app
-      $('body').on('click', 'a[target="_blank"]', (evt) => {
-        evt.preventDefault();
-        window.open($(evt.currentTarget).attr('href'), '_system', '');
-      })
+      if (cordova.InAppBrowser != null) {
+        window.open = cordova.InAppBrowser.open
+        // Anytime a link is clicked with the _blank attribute it should
+        // be opened in _system instead, So the page opens outside of the app
+        $('body').on('click', 'a[target="_blank"]', (evt) => {
+          evt.preventDefault();
+          window.open($(evt.currentTarget).attr('href'), '_system', '');
+        })
+      }
     }
   }
   async destroy () {

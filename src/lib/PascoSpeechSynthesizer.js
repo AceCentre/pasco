@@ -17,6 +17,7 @@ export default class PascoSpeechSynthesizer {
     if (this._nbridge.available && (await this._nbridge.has_synthesizer()) &&
         (await this._nbridge.has_audio_device())) {
       this._is_native = true
+      await this._nbridge.activate_audio_session()
       this._nsynthesizer = await this._nbridge.init_synthesizer()
       // listen for events from native speech synthesizer
       this._event_manager.addDOMListenerFor(document, 'x-speech-synthesizer-did-start', this.nSynthesizerDidStartSpeech.bind(this))
@@ -36,7 +37,19 @@ export default class PascoSpeechSynthesizer {
   async destroy () {
     this._event_manager.removeAllListeners()
   }
+  async getAudioBehavior () {
+    return this._last_audio_behavior || ''
+  }
+  async setAudioBehavior (audio_behavior) {
+    if (typeof this._last_audio_behavior == 'undefined' || this._last_audio_behavior != audio_behavior) {
+      this._last_audio_behavior = audio_behavior
+      await this._nbridge.set_audio_behavior(audio_behavior)
+    }
+  }
   async _nativeStartUtterance (text, opts) {
+    if (!this._nsynthesizer) {
+      return
+    }
     opts = copyObject(opts)
     let audio_behavior = null
     if (typeof opts.audio_behavior != 'undefined') {
@@ -47,10 +60,7 @@ export default class PascoSpeechSynthesizer {
       opts.voiceId = opts.voice.voiceId
       delete opts.voice
     }
-    if (typeof this._last_audio_behavior == 'undefined' || this._last_audio_behavior != audio_behavior) {
-      this._last_audio_behavior = audio_behavior
-      await this._nbridge.set_audio_behavior(audio_behavior)
-    }
+    await this.setAudioBehavior(audio_behavior)
     let utterance_id = await this._nbridge.init_utterance(text, opts)
     try {
       let tracker = await this._trackFinishSpeech(utterance_id)

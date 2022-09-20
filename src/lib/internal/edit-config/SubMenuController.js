@@ -14,6 +14,7 @@ export default class SubMenuController extends EventEmitter {
     this._event_manager = new EventManager()
   }
   init () {
+    this.openPage('')
     // submenu buttons
     for (let elm of this._$a('.edit-config-container .submenu a')) {
       this._event_manager.addDOMListenerFor(elm, 'click', (evt) => {
@@ -28,7 +29,7 @@ export default class SubMenuController extends EventEmitter {
       this._event_manager.addDOMListenerFor(elm, 'click', async (evt) => {
         evt.preventDefault()
         history.replaceState({}, name, location.pathname)
-        this._setActiveSubMenu('')
+        this.openPage('')
       })
     }
     // update scrollnav positions on collapsible move ends
@@ -74,8 +75,11 @@ export default class SubMenuController extends EventEmitter {
     }
     if (!name) { // no page to open
       // elements to hide
-      for (let elm of this._$a('.x-navbar .head .main-head, .x-navbar .back-btn')) {
+      for (let elm of this._$a('.x-navbar .back-btn')) {
         elm.classList.add('hidden')
+      }
+      for (let elm of this._$a('.x-navbar .head .main-head')) {
+        elm.classList.remove('hidden')
       }
       // remove has-active from submenu
       for (let elm of this._$a('.edit-config-container .submenu')) {

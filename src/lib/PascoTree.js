@@ -41,7 +41,7 @@ export default class PascoTree {
     return this._requireTreeFileInfo().audio_dirname
   }
   initNodesFromTreeData () {
-    if (!this._tree_data) {
+    if (this._tree_data == null) {
       throw new Error('tree_data is not defined')
     }
     return this._root_node = this._tree_reader.readFromText(this._tree_data)

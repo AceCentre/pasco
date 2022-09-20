@@ -74,13 +74,13 @@ export default class CollapsibleContainersController {
     if(elm._collapsible_timeout != null) {
       clearTimeout(elm._collapsible_timeout)
     }
+    let inner_elm = elm.querySelector(':scope > .x-collapsible-inner')
     let pre_height = elm.offsetHeight
-    elm.style.height = ''
-    let height = elm.offsetHeight
+    let height = inner_elm.offsetHeight
     return () => {
       elm.style.height = pre_height + 'px'
-      if(height != pre_height) {
-        elm._collapsible_timeout = setTimeout(function() {
+      if (height != pre_height) {
+        elm._collapsible_timeout = setTimeout(() => {
           elm.style.height = height + 'px'
           delete elm._collapsible_timeout
         }, 10)

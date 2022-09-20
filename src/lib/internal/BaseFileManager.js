@@ -4,6 +4,8 @@ import { NotFoundError } from '../exceptions'
  * BaseFileManager only uses http requests to perform the calls
  */
 export default class BaseFileManager {
+  constructor () {
+  }
   async acquireFileUrl (url) {
     return url
   }
@@ -93,6 +95,13 @@ export default class BaseFileManager {
           xhr.responseType = options.responseType
         }
         xhr.open(options.method || 'GET', url)
+        xhr.onerror = () => {
+          reject(new Error(xhr.responseText || 'Network request failed'))
+        }
+
+        xhr.ontimeout = () => {
+          reject(new Error(xhr.responseText || 'Network request failed (timeout)'))
+        }
         xhr.onreadystatechange = () => {
           if(xhr.readyState === 4) {
             if(xhr.status >= 200 && xhr.status < 300) {
