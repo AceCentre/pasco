@@ -84,6 +84,8 @@ cordova platform add ios
 Build for development with live-reload.
 ```
 gulp dist-to-cordova-build-dev-watch
+## for iOS 9
+# gulp dist-to-cordova-build-dev-watch --build-name ios9-build --target es5
 ## then open another terminal for cordova build
 cd ./builds/cordova-<build-name>/
 cordova run --live-reload

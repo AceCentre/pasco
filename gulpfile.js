@@ -138,7 +138,7 @@ function make_build_webpack ({ build_name, env, watch }) {
             { // rules for sass/css files
               test: /\.s[ac]ss$/i,
               use: [
-                is_prod ? MiniCssExtractPlugin.loader : 'style-loader',
+                MiniCssExtractPlugin.loader,
                 'css-loader',
                 'sass-loader',
               ],
@@ -244,8 +244,10 @@ function cordova_build_copy_html (build_name) {
     .pipe(html_filter)
     // inject cordova.js
     .pipe(replace('<!-- INJECT CORDOVA SCRIPTS -->', '<script src=\"cordova.js\"></script>'))
-    // remove unwanted security policy
-    .pipe(replace('ws://localhost:3000', ''))
+     // since cordova builds only run local scripts and there's no runtime code execution fro the internet, CSP would not be necessary for it
+     // And the current CSP is not compatible with cordova build
+     // The simple solution is do remove it
+    .pipe(replace(/^\s*<meta\s+http-equiv="Content-Security-Policy".+>/gmi, ''))
     // restore the filtered files
     .pipe(html_filter.restore)
     .pipe(gulp.dest(`./builds/cordova-${build_name}/www/`))
@@ -255,7 +257,7 @@ gulp.task('cordova-build-clean-www', () => {
   let [ build_name ] = get_cordova_build_args()
   return cordova_build_clean_www(build_name)
 })
-gulp.task('cordova-build-clean-www', () => {
+gulp.task('cordova-build-copy-html', () => {
   let [ build_name ] = get_cordova_build_args()
   return cordova_build_copy_html(build_name)
 })
@@ -332,7 +334,7 @@ gulp.task('default', function (done) {
      - dist-to-cordova-build-dev --build-name <build_name (default: main-build)>
      - dist-to-cordova-build-prod --build-name <build_name (default: main-build)>
      - cordova-build-clean-www --build-name <build_name (default: main-build)>
-     - cordova-build-copy-build --build-name <build_name (default: main-build)>
+     - cordova-build-copy-html --build-name <build_name (default: main-build)>
 
    Other parameters:
      --target es5  # set the webpack target build to es5 (used for older web browsers)

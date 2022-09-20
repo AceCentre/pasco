@@ -506,7 +506,6 @@ export default class EditConfigPage extends BasePage {
   onConfigChange (config) {
     this._config = config
     this.emit('config-change', config)
-    console.log('config-change', config)
     if (this._auto_save_enabled) {
       this.setNeedsSaveConfig()
     }

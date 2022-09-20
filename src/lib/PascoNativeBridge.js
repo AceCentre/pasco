@@ -70,16 +70,11 @@ export default class PascoNativeBridge {
     }
   }
   async _exec (action, ...args) {
-    let output
     try {
-      console.log('call NativeAccessApi', action, args)
-      output = await cordovaExecAsPromise('NativeAccessApi', action, args)
-      return output
+      return await cordovaExecAsPromise('NativeAccessApi', action, args)
     } catch (err) {
       console.warn('call did throw exc', err)
       throw err
-    } finally {
-      console.log('response received NativeAccessApi', action, args, output)
     }
   }
   static onready () {

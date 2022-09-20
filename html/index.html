@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <!-- <meta http-equiv="Content-Security-Policy" content="default-src blob: https: 'self' 'unsafe-eval' 'unsafe-inline' ws://localhost:3000; style-src 'self' 'unsafe-inline'; media-src blob: *; img-src 'self' data: content:;"> -->
+    <meta http-equiv="Content-Security-Policy" content="default-src blob: https: 'self' 'unsafe-eval' 'unsafe-inline' data: gap: https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src blob: *; img-src 'self' data: content:;">
     
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
@@ -11,8 +11,35 @@
 
     <title x-l10n="main_title">pasco</title>
 
+
+    <script>
+      (function(){ // simple set of error loggers
+        window.onerror = function (msg, url, lineNo, columnNo, error) {
+          console.error('window.onerror: ', JSON.stringify({
+            message: msg,
+            url: url,
+            lineNumber: lineNo,
+            columnNumber: columnNo,
+            error: error,
+          }))
+        }
+        window.addEventListener('securitypolicyviolation', function (evt) {
+          alert('Error: securitypolicyviolation: ' + JSON.stringify({
+            blockedURI: evt.blockedURI,
+            violatedDirective: evt.violatedDirective,
+            originalPolicy: evt.originalPolicy,
+          }, null, '  '))
+          console.error('Error: securitypolicyviolation: ' + JSON.stringify({
+            blockedURI: evt.blockedURI,
+            violatedDirective: evt.violatedDirective,
+            originalPolicy: evt.originalPolicy,
+          }, null, '  '))
+        }, false)
+      })()
+    </script>
     <link rel="icon" href="favicon.ico">
     <link rel="stylesheet" href="webpack/static/fontawesome/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="webpack/main.css">
     <!-- INJECT CORDOVA SCRIPTS -->
     <script src="webpack/main.js"></script>
 
