@@ -10,21 +10,6 @@ export default class CollapsibleContainersController {
     this._$a = document.querySelectorAll.bind(document)
   }
   init () {
-    this._event_manager.addDOMListenerFor(this._document, 'click', (evt) => {
-      let elm = evt.target
-      let parent_check_len = 4
-      while (elm && elm.nodeType == 1 && --parent_check_len > 0) {
-        let toggle_sel = elm.getAttribute('data-collapse-toggle')
-        if(toggle_sel) {
-          let toggle_elm = document.querySelector(toggle_sel)
-          if(toggle_elm) {
-            evt.preventDefault()
-            this.toggleCollapsible(toggle_elm)
-          }
-        }
-        elm = elm.parentNode
-      }
-    }, false)
     this._event_manager.addDOMListenerFor(window, 'resize', this.setNeedsUpdate.bind(this), false)
     this.updateAll()
   }

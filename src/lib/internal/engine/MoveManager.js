@@ -201,8 +201,7 @@ export default class MoveManager {
     let moveController = new MoveController()
     moveController.setCanAbort(false)
     moveController.addStep(async () => {
-      this._uibridge.selectNode(node)
-      this._uibridge.emit('select', node)
+      this._engine.emit('start-select-move', node)
       await this._performMoveSub(moveController, node, 'main', opts.override_msg)
     })
     try {

@@ -11,12 +11,12 @@ export default class VoiceSelectionController {
     this._event_manager = new EventManager()
     this._speech_synthesizer = this._core.getSpeechSynthesizer()
   }
-  init (voice_selection) {
+  init (voice_selection, initial_voice_options) {
     this._form = this._editConfigPage.getConfigForm()
     this._voice_selection = voice_selection
-    let wrpelm = this._$(voice_selection.wrapper_selector)
+    let wrpelm = this._$(voice_selection.playback_wrapper_selector)
     if (!wrpelm) {
-      throw new Error(`"${voice_selection.wrapper_selector}" not found`)
+      throw new Error(`"${voice_selection.playback_wrapper_selector}" not found`)
     }
     this._options = {}
     /* voice playback */
@@ -27,6 +27,13 @@ export default class VoiceSelectionController {
       this._event_manager.addDOMListenerFor(elm, 'click', this.didClickStopPlayingSampleAudio.bind(this), false)
     }
     this._makeVoiceOptions()
+    { // set initial value for voiceId input
+      let inp = this._form.querySelector(`[name=${voice_selection.select_id}]`)
+      if (inp) {
+        let propname = (this._speech_synthesizer.isNative() ? '' : 'alt_') + 'voiceId'
+        inp.value = (initial_voice_options ? initial_voice_options[propname] : null) || ''
+      }
+    }
   }
   destroy () {
     this._event_manager.removeAllListeners()
@@ -34,8 +41,7 @@ export default class VoiceSelectionController {
   async didClickPlaySampleAudio () {
     let vsel = this._voice_selection
     let text = "Quiet people have the loudest minds. Pasco at your service."
-    let wrpelm = this._$(vsel.wrapper_selector)
-    let pbwrp = this._$('.voice-playback-wrp')
+    let pbwrp = this._$(vsel.playback_wrapper_selector)
     let opts = {}
     pbwrp.querySelector('.play-btn').classList.add('hide')
     pbwrp.querySelector('.stop-btn').classList.remove('hide')
@@ -88,6 +94,8 @@ export default class VoiceSelectionController {
     }
   }
   didClickStopPlayingSampleAudio () {
+    let vsel = this._voice_selection
+    let pbwrp = this._$(vsel.playback_wrapper_selector)
     pbwrp.querySelector('.play-btn').classList.remove('hide')
     pbwrp.querySelector('.stop-btn').classList.add('hide')
     this._speech_synthesizer.stop()

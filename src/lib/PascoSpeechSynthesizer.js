@@ -28,10 +28,6 @@ export default class PascoSpeechSynthesizer {
       if (!window.speechSynthesis) {
         throw new Error('SpeechSynthesis is not support')
       }
-      this._voices_by_uri = {}
-      for (let voice of window.speechSynthesis.getVoices()) {
-        this._voices_by_uri[voice.voiceURI] = voice
-      }
     }
   }
   async destroy () {
@@ -86,12 +82,15 @@ export default class PascoSpeechSynthesizer {
     }
     delete opts.audio_behavior
     let utterance = new SpeechSynthesisUtterance(text)
-    if (voiceId in this._voices_by_uri) {
-      utterance.voice = this._voices_by_uri[voiceId]
+    let voices_by_id = await this.getVoicesById()
+    if (voiceId in voices_by_id) {
+      utterance.voice = voices_by_id[voiceId]
     }
-    utterance.pitch = opts.pitch
-    utterance.rate = opts.rate
-    utterance.volume = opts.volume
+    for (let optname of ['pitch','rate','volume']) {
+      if (optname in opts) {
+        utterance[optname] = opts[optname]
+      }
+    }
     window.speechSynthesis.speak(utterance)
     await (new Promise((resolve, reject) => {
       if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
@@ -180,7 +179,25 @@ export default class PascoSpeechSynthesizer {
     }
   }
 
+  async getVoicesById () {
+    if (this._voices_by_uri) {
+      return this._voices_by_uri
+    }
+    let voices = await this.getVoices()
+    this._voices_by_uri = {}
+    for (let voice of voices) {
+      this._voices_by_uri[voice.id] = voice._voice
+    }
+    return this._voices_by_uri
+  }
   async getVoices () {
+    if (this._voices) {
+      return this._voices
+    }
+    return this._voices = await this._getVoices()
+  }
+
+  async _getVoices () {
     if (this._is_native) {
       return await this._nbridge.get_voices()
     } else {
@@ -188,13 +205,14 @@ export default class PascoSpeechSynthesizer {
       return await (new Promise((resolve) => {
         setTimeout(() => {
           resolve(
-            Array.from(speechSynthesis.getVoices()).map((v) => ({
+            Array.from(window.speechSynthesis.getVoices()).map((v) => ({
               id: v.voiceURI,
               label: v.name,
               locale: v.lang || '',
+              _voice: v,
             }))
           )
-        }, 0)
+        }, 100)
       }))
     }
   }

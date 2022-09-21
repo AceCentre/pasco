@@ -51,8 +51,8 @@ export default class ConfigFormController extends EventEmitter {
     // specific to voices
     for (let voice_sel of this._editConfigPage.getVoiceSelectionList()) {
       let propname = (this._speech_synthesizer.isNative() ? '' : 'alt_') + 'voiceId'
-      let part = this._config[voice_sel.name] || this._config['_' + voice_sel.name]
-      let vid = part ? part[propname] : null
+      let voice_options = this.getVoiceTypeOptions(voice_sel.name)
+      let vid = voice_options ? voice_options[propname] : null
       let input = form.querySelector(`[name=${voice_sel.select_id}]`)
       if (input) {
         input.value = vid || ''
@@ -63,6 +63,9 @@ export default class ConfigFormController extends EventEmitter {
       cue_first_active_cb.checked = !!this._config.auditory_cue_first_run_voice_options
       cue_first_active_cb.dispatchEvent(new Event('change', { bubbles: true }))
     }
+  }
+  getVoiceTypeOptions (name) {
+    return this._config[name] || this._config['_' + name]
   }
   onConfigChange () {
     try {

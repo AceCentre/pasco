@@ -39,19 +39,19 @@ export default class EditConfigPage extends BasePage {
       {
         name: 'auditory_main_voice_options',
         select_id: '_main_voice_id',
-        wrapper_selector: '#auditory-main-playback-wrp',
+        playback_wrapper_selector: '#auditory-main-playback-wrp',
         label: 'Main Voice',
       },
       {
         name: 'auditory_cue_voice_options',
         select_id: '_cue_voice_id',
-        wrapper_selector: '#auditory-cue-playback-wrp',
+        playback_wrapper_selector: '#auditory-cue-playback-wrp',
         label: 'Cue Voice',
       },
       {
         name: 'auditory_cue_first_run_voice_options',
         select_id: '_cue_first_run_voice_id',
-        wrapper_selector: '#auditory-cue-first-run-playback-wrp',
+        playback_wrapper_selector: '#auditory-cue-first-run-playback-wrp',
         label: 'Cue First Run Voice',
       },
     ]
@@ -348,7 +348,8 @@ export default class EditConfigPage extends BasePage {
         continue // does not exists on quick setup
       }
       let controller = new VoiceSelectionController(this)
-      controller.init(voice_sel)
+      let voice_options = this._config_form_controller.getVoiceTypeOptions(voice_sel.name)
+      controller.init(voice_sel, voice_options)
       this._voice_selection_controllers.push(controller)
     }
   }
@@ -394,6 +395,16 @@ export default class EditConfigPage extends BasePage {
     }
   }
   _initCustomFormResponsiveFeatures () {
+    // set the initial value for dependent elements, (data-collapse-toggle)
+    for (let elm of this._$a('input[data-inp-collapse-toggle]')) {
+      if (['checkbox','radio'].indexOf(elm.type) == -1) {
+        continue
+      }
+      let toggle_sel = elm.getAttribute('data-inp-collapse-toggle')
+      for (let toggle_elm of this._$a(toggle_sel)) {
+        this._collapsible_containers_controller.toggleCollapsible(toggle_elm, elm.checked)
+      }
+    }
     // update collapsible based on inp-collapse-toggle
     this._event_manager.addDOMListenerFor(this._document, 'change', (evt) => {
       if (evt.target.nodeName == 'INPUT' &&

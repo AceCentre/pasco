@@ -72,6 +72,7 @@ export default class PascoEngine extends EventEmitter {
     this._uibridge.enableKeyboardCapture()
     this._uibridge.enableMouseCapture()
     this._event_manager.addNodeListenerFor(this, 'select-path-change', this.onUpdateMessageBar.bind(this))
+    this._event_manager.addNodeListenerFor(this, 'start-select-move', this.onStartSelectMove.bind(this))
     this.initKeyHandlers()
     this._initialized = true
     this._initializing = false
@@ -817,8 +818,14 @@ export default class PascoEngine extends EventEmitter {
   onBeforeSelect () {
     this.pause()
   }
+  onStartSelectMove (node) {
+    this._uibridge.selectNode(node)
+  }
   onSelect (node) {
     this._state._rerun_on_next_move_event = true
+    if (this._config.auto_scan) {
+      this.onRerun() // automatically restart when auto_scan is enabled
+    }
   }
 
   async actionMoveSteps (amount) {
