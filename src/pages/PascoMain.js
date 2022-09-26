@@ -601,11 +601,12 @@ export default class PascoMain extends BasePage {
   async enableKeyboardCapture () {
     this._onToggleHIEventType('keyboard-capture', true)
     let evtid = 'keyboard-capture'
-    this._event_manager.addDOMListenerFor(this._document, 'x-keycommand', this.onKeyCommand.bind(this), false, evtid)
-    this._event_manager.addDOMListenerFor(window, 'keydown', this.onKeyDown.bind(this), false, evtid)
     this._event_manager.addNodeListenerFor(this._pengine, 'keyhit-handlers-change', this._onKeyHitHandlersChange.bind(this), evtid)
     if (this._nbridge.available) {
       this._addKeyHitHandlerKeyCommands()
+      this._event_manager.addDOMListenerFor(this._document, 'x-keycommand', this.onKeyCommand.bind(this), false, evtid)
+    } else {
+      this._event_manager.addDOMListenerFor(window, 'keydown', this.onKeyDown.bind(this), false, evtid)
     }
   }
   async disableKeyboardCapture () {

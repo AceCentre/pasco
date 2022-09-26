@@ -138,9 +138,12 @@ export default class ConfigureActionsModal extends BaseModal {
     await this.napiAddKeyCommand()
     let evtid = 'listen-to-key'
     this._event_manager.addDOMListenerFor(this._document, 'mousedown', this.onKeyMouseDown.bind(this), true, evtid)
-    this._event_manager.addDOMListenerFor(this._document, 'keydown', this.onKeyDown.bind(this), true, evtid)
-    this._event_manager.addDOMListenerFor(this._document, 'keyup', this.onKeyup.bind(this), true, evtid)
-    this._event_manager.addDOMListenerFor(this._document, 'x-keycommand', this.onKeyCommand.bind(this), true, evtid)
+    if (this._nbridge.available) {
+      this._event_manager.addDOMListenerFor(this._document, 'x-keycommand', this.onKeyCommand.bind(this), true, evtid)
+    } else {
+      this._event_manager.addDOMListenerFor(this._document, 'keydown', this.onKeyDown.bind(this), true, evtid)
+      this._event_manager.addDOMListenerFor(this._document, 'keyup', this.onKeyup.bind(this), true, evtid)
+    }
   }
   async stopListeningToKey () {
     await this.napiRemoveKeyCommand()
