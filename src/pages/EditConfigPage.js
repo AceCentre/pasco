@@ -269,7 +269,9 @@ export default class EditConfigPage extends BasePage {
     }
   }
   _initModalsUI () {
+    let modals = []
     this._voice_by_locale_modal = new VoiceByLocaleModal(this._document, 'voice-by-locale', this._core)
+    modals.push(this._voice_by_locale_modal)
     this._event_manager.addNodeListenerFor(this._voice_by_locale_modal, 'change', (change) => {
       let vbl_name = this._voice_by_locale_modal.getVoiceId()
       let id = this._voice_by_locale_modal.getVoiceId()
@@ -296,6 +298,7 @@ export default class EditConfigPage extends BasePage {
     }
 
     this._configure_actions_modal = new ConfigureActionsModal(this._document, 'configure-action', this._core)
+    modals.push(this._configure_actions_modal)
     this._event_manager.addNodeListenerFor(this._configure_actions_modal, 'change', (change) => {
       this._config.keys = change.keys
       this.setNeedsSaveConfig()
@@ -308,6 +311,11 @@ export default class EditConfigPage extends BasePage {
           await this._configure_actions_modal.init(this._config, action, text)
           this._configure_actions_modal.open()
         }
+      })
+    }
+    for (let modal of modals) {
+      this._event_manager.addNodeListenerFor(modal, 'error', (error) => {
+        this.onError(error)
       })
     }
   }

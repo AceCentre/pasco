@@ -56,19 +56,23 @@ export default class ConfigureActionsModal extends BaseModal {
     this._event_manager.addDOMListenerFor(this._key_list_elm, 'click', this.didClickKeyList.bind(this))
     for (let elm of this._$a('#' + idprefix + '-key-add-btn')) {
       this._event_manager.addDOMListenerFor(elm, 'click', (evt) => {
-        let nextid = 1
-        this._keys.forEach((a) => nextid = nextid <= a.id ? a.id+1 : nextid)
-        let key_obj = {
-          key: '',
-          label: '',
-          id: nextid+'',
-        }
-        this._keys.push(key_obj)
-        let keywrp = createElementFromHTML(this._key_tmpl(key_obj))
-        this._key_list_elm.append(keywrp)
-        let keybtn = keywrp.querySelector('.key-btn')
-        if (keybtn) {
-          this.didClickKeyBtn(keybtn)
+        try {
+          let nextid = 1
+          this._keys.forEach((a) => nextid = nextid <= a.id ? a.id+1 : nextid)
+          let key_obj = {
+            key: '',
+            label: '',
+            id: nextid+'',
+          }
+          this._keys.push(key_obj)
+          let keywrp = createElementFromHTML(this._key_tmpl(key_obj))
+          this._key_list_elm.appendChild(keywrp)
+          let keybtn = keywrp.querySelector('.key-btn')
+          if (keybtn) {
+            this.didClickKeyBtn(keybtn)
+          }
+        } catch (err) {
+          this.emit('error', err)
         }
       })
     }
@@ -146,10 +150,10 @@ export default class ConfigureActionsModal extends BaseModal {
   }
   napiAddKeyCommand () {
     if (this._nbridge.available) {
-      var promises = []
-      for (var key in PascoNativeBridge.keyInputByCode) {
+      let promises = []
+      for (let key in PascoNativeBridge.keyInputByCode) {
         if (PascoNativeBridge.keyInputByCode.hasOwnProperty(key)) {
-          var input = PascoNativeBridge.keyInputByCode[key]
+          let input = PascoNativeBridge.keyInputByCode[key]
           if(input) {
             promises.push(this._nbridge.add_key_command(input))
           }
@@ -162,10 +166,10 @@ export default class ConfigureActionsModal extends BaseModal {
   }
   napiRemoveKeyCommand () {
     if (this._nbridge.available) {
-      var promises = []
-      for(var key in PascoNativeBridge.keyInputByCode) {
+      let promises = []
+      for(let key in PascoNativeBridge.keyInputByCode) {
         if (PascoNativeBridge.keyInputByCode.hasOwnProperty(key)) {
-          var input = PascoNativeBridge.keyInputByCode[key]
+          let input = PascoNativeBridge.keyInputByCode[key]
           if(input) {
             promises.push(this._nbridge.remove_key_command(input))
           }
@@ -190,8 +194,8 @@ export default class ConfigureActionsModal extends BaseModal {
   }
   onKeyDown (evt) {
     evt.preventDefault()
-    var label = evt.key.toUpperCase()
-    var substitute_labels = {
+    let label = evt.key.toUpperCase()
+    let substitute_labels = {
       " ": "Space",
     }
     if (label in substitute_labels) {
@@ -206,7 +210,7 @@ export default class ConfigureActionsModal extends BaseModal {
     if(!PascoNativeBridge.keyCodeByInput.hasOwnProperty(evt.detail.input)) {
       return
     }
-    var code = PascoNativeBridge.keyCodeByInput[evt.detail.input]
+    let code = PascoNativeBridge.keyCodeByInput[evt.detail.input]
     this._registerKey(code, evt.detail.input)
   }
   async _registerKey (key, label) {
