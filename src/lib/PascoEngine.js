@@ -79,6 +79,7 @@ export default class PascoEngine extends EventEmitter {
   }
   clearKeyHandlers () {
     this._keyhit_handlers = []
+    this.emit('keyhit-handlers-change')
   }
   initKeyHandlers () {
     for (let [key, value] of Object.entries(this._config.keys || this._getDefaultKeys())) {
@@ -89,6 +90,7 @@ export default class PascoEngine extends EventEmitter {
       }
       this.addKeyhitHandler(key, () => action.handler())
     }
+    this.emit('keyhit-handlers-change')
   }
   initActions () {
     let moveTriggeredOnPause = () => {

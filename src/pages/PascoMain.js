@@ -113,6 +113,7 @@ export default class PascoMain extends BasePage {
     if (this._main_debug_tools) {
       await this._main_debug_tools.destroy()
     }
+    await this._removeExistingKeyCommands()
   }
 
   getRootNodeElement () {
@@ -566,38 +567,52 @@ export default class PascoMain extends BasePage {
     }
     this._event_manager.removeListenersById('wheel-capture')
   }
-  async enableKeyboardCapture () {
-    this._onToggleHIEventType('keyboard-capture', true)
-    let evtid = 'keyboard-capture'
-    this._event_manager.addDOMListenerFor(this._document, 'x-keycommand', this.onKeyCommand.bind(this), false, evtid)
-    this._event_manager.addDOMListenerFor(window, 'keydown', this.onKeyDown.bind(this), false, evtid)
-
-    if (this._nbridge.available) {
-      let handlers = this._pengine.getKeyhitHandlers()
-      let promises = []
-      this._added_key_commands = this._added_key_commands || []
-      for (let handler of handlers) {
-        let input = PascoNativeBridge.keyInputByCode[handler.code]
-        if(input && !this._added_key_commands.indexOf(input) == -1) {
-          this._added_key_commands.push(input)
-          promises.push(this._nbridge.add_key_command(input, '', {
-            repeatable: !!this._config.ios_keycommand_repeatable,
-          }))
-        }
-      }
-      await Promise.all(promises)
-    }
-  }
-  async disableKeyboardCapture () {
-    this._onToggleHIEventType('keyboard-capture', false)
-    this._event_manager.removeListenersById('keyboard-capture')
-    if (this._nbridge.available && this._added_key_commands) {
+  async _removeExistingKeyCommands () {
+    if (this._added_key_commands) {
       let promises = []
       for (let input of this._added_key_commands) {
         promises.push(this._nbridge.remove_key_command(input))
       }
       this._added_key_commands = null
       await Promise.all(promises)
+    }
+  }
+  async _addKeyHitHandlerKeyCommands () {
+    let handlers = this._pengine.getKeyhitHandlers()
+    let promises = []
+    this._added_key_commands = this._added_key_commands || []
+    for (let handler of handlers) {
+      let input = PascoNativeBridge.keyInputByCode[handler.code]
+      if(input && this._added_key_commands.indexOf(input) == -1) {
+        this._added_key_commands.push(input)
+        promises.push(this._nbridge.add_key_command(input, '', {
+          repeatable: !!this._config.ios_keycommand_repeatable,
+        }))
+      }
+    }
+    await Promise.all(promises)
+  }
+  async _onKeyHitHandlersChange () {
+    if (this._nbridge.available) {
+      await this._removeExistingKeyCommands()
+      await this._addKeyHitHandlerKeyCommands()
+    }
+  }
+  async enableKeyboardCapture () {
+    this._onToggleHIEventType('keyboard-capture', true)
+    let evtid = 'keyboard-capture'
+    this._event_manager.addDOMListenerFor(this._document, 'x-keycommand', this.onKeyCommand.bind(this), false, evtid)
+    this._event_manager.addDOMListenerFor(window, 'keydown', this.onKeyDown.bind(this), false, evtid)
+    this._event_manager.addNodeListenerFor(this._pengine, 'keyhit-handlers-change', this._onKeyHitHandlersChange.bind(this), evtid)
+    if (this._nbridge.available) {
+      this._addKeyHitHandlerKeyCommands()
+    }
+  }
+  async disableKeyboardCapture () {
+    this._onToggleHIEventType('keyboard-capture', false)
+    this._event_manager.removeListenersById('keyboard-capture')
+    if (this._nbridge.available) {
+      await this._removeExistingKeyCommands()
     }
   }
   enableMouseCapture () {
@@ -750,7 +765,8 @@ export default class PascoMain extends BasePage {
   }
   onKeyCommand (evt) {
     let input = evt.detail.input
-    let code = PascoNativeBridge.keyCodeByInput.hasOwnProperty(input)
+    let code = PascoNativeBridge.keyCodeByInput.hasOwnProperty(input) ?
+        PascoNativeBridge.keyCodeByInput[input] : null
     let curtime = new Date().getTime()
     if (this._config.ignore_second_hits_time > 0 && this._last_keydown_time &&
         curtime - this._last_keydown_time < this._config.ignore_second_hits_time) {
@@ -759,7 +775,7 @@ export default class PascoMain extends BasePage {
     }
     this._last_keydown_time = curtime
     // config.ignore_key_release_time is not applicable
-    if (code) {
+    if (code != null) {
       this.emit('hievent', { name: 'keyhit', summary: `<keycommand>, code = ${code}, input = ${input}` })
       this._pengine.didHitKey({ code })
     } else {
