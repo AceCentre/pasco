@@ -69,14 +69,17 @@ export default class MoveManager {
         }
       }
       // check for override voice
-      let locale_fallback = node.getMetaFromTree('locale')
-      if (!locale_fallback) {
-        locale_fallback = this._uibridge.getLocale()
+      let locale_fallback = this._uibridge.getLocale()
+      { // get locale from tree
+        let { value } = node.getMetaFromTree('locale')
+        if (value) {
+          locale_fallback = value
+        }
       }
       let curlocale = node.meta[type + '-locale'] || node.meta['locale'] || locale_fallback
       let locale_voice = (opts.locale_voices || []).find((a) => a.locale == curlocale)
       if (!locale_voice) {
-        locale_voice = (opts.locale_voices || []).find((a) => a.locale.split('-')[0] == curlocale.split('-')[0]) 
+        locale_voice = (opts.locale_voices || []).find((a) => a.locale.split('-')[0] == curlocale.split('-')[0])
       }
       // copy options
       opts = copyObject(opts)

@@ -1,6 +1,7 @@
-import PascoNode from './PascoNode'
+import PascoNode from './PascoNode.js'
 import showdown from 'showdown'
 import sanitizeHtml from 'sanitize-html'
+import { JSDOM } from 'jsdom'
 
 export default class PascoTreeMDReader {
   constructor () {
@@ -46,6 +47,9 @@ export default class PascoTreeMDReader {
         meta: [ 'data-*' ]
       })
     })
+    let dom = new JSDOM(`<!DOCTYPE html><html><body></body></html>`)
+    this._window_Node = dom.window.Node
+    let document = dom.window.document
     let tmpelm = document.createElement('div')
     tmpelm.innerHTML = html_data
     return this._parseNode(tmpelm)
@@ -72,7 +76,7 @@ export default class PascoTreeMDReader {
     node = node || new PascoNode({ level: 0, meta: {}, _more_meta: {} })
     for (let len = elm.childNodes.length; continue_at.i < len; continue_at.i++) {
       let elm_cnode = elm.childNodes[continue_at.i]
-      if(elm_cnode.nodeType == Node.ELEMENT_NODE) {
+      if(elm_cnode.nodeType == this._window_Node.ELEMENT_NODE) {
         let match = elm_cnode.nodeName.match(this._pttrn01)
         if(!!match || this._pttrn02.test(elm_cnode.nodeName)) { // branch
           var level = match ? parseInt(match[1]) : node.level + 1
@@ -83,7 +87,7 @@ export default class PascoTreeMDReader {
             if (!txt_dom_elm) {
               txt_elm_content = []
               for (let second_elm_cnode of elm_cnode.childNodes) {
-                if (second_elm_cnode.nodeType == Node.TEXT_NODE) {
+                if (second_elm_cnode.nodeType == this._window_Node.TEXT_NODE) {
                   txt_elm_content.push(second_elm_cnode.textContent)
                 }
               }

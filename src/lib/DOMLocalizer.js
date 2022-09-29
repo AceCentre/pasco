@@ -35,7 +35,7 @@ export default class DOMLocalizer {
         elm.id = "bootstrap-rtl"
         this._document.body.appendChild(elm)
         elm.addEventListener('load', resolve, false)
-        setTimeout(onresolve, 3000)
+        setTimeout(resolve, 3000)
       }))
     } else if(elm && !this._icu.rtl && elm.parentNode) {
       elm.parentNode.removeChild(elm)

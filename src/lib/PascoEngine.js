@@ -670,7 +670,7 @@ export default class PascoEngine extends EventEmitter {
       if (node.meta['change-tree']) {
         await this._uibridge.changeTreeFromFile(node.meta['change-tree'])
       } else if (node.meta['change-tree-by-name']) {
-        await this._uibridge.changeTreeFromFile(node.meta['change-tree-by-name'])
+        await this._uibridge.changeTreeByName(node.meta['change-tree-by-name'])
       }
     } catch (err) {
       let msg = ''

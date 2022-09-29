@@ -46,7 +46,7 @@ export default class WordsFileHelper {
         return data
       })
       .catch((err) => {
-        delete words_cache[url]
+        delete this._cache[url]
         throw err
       })
   }
