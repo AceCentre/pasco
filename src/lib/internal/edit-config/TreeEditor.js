@@ -189,6 +189,8 @@ export default class TreeEditor {
           let tmp = fsFriendlyName(name)
           let tree_fn = tmp + '/' + tmp + '.md'
           let tree_url = this._core.resolveUrl(tree_fn, trees_info_url)
+          let dir_url = this._core.resolveUrl(tmp, trees_info_url)
+          await this._fmanager.mkdirRec(dir_url)
           await this._fmanager.saveFileData(tree_url, '')
           let trees_info = this._editConfigPage.getTreesInfo()
           trees_info.list.push({ name, tree_fn })

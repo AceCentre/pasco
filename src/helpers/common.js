@@ -8,7 +8,7 @@ export function getRuntimeEnv () {
 }
 
 export function uuid () {
-  if (typeof crypto != 'undefined') {
+  if (typeof crypto != 'undefined' && typeof crypto.randomUUID == 'function') {
     return crypto.randomUUID()
   } else {
     return alt_uuid()
@@ -26,7 +26,8 @@ export async function sha256Digest (value) {
   if (!(value instanceof ArrayBuffer) && !(value instanceof Uint8Array)) {
     throw new Error('Unsupported value, cannot digest')
   }
-  if (typeof crypto != 'undefined') {
+  if (typeof crypto != 'undefined' && crypto.subtle &&
+      typeof crypto.subtle.digest == 'function') {
     return await crypto.subtle.digest('sha-256', value)
   } else {
     if (value instanceof ArrayBuffer) {

@@ -92,7 +92,6 @@ function make_build_webpack ({ build_name, env, watch }) {
           },
           fallback: {
             'path': require.resolve('path-browserify'),
-            'crypto': require.resolve('crypto-browserify'),
             'stream': require.resolve('stream-browserify'),
           },
         },
@@ -125,6 +124,7 @@ function make_build_webpack ({ build_name, env, watch }) {
                   'delay',
                   'rangeslider-js',
                   'sha256-uint8array',
+                  'sanitize-html',
                 ].map((a) => path.resolve(NODE_MODULES_DIR, a))
               ],
               use: {
