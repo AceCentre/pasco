@@ -593,7 +593,7 @@ export default class PascoMain extends BasePage {
     await Promise.all(promises)
   }
   async _onKeyHitHandlersChange () {
-    if (this._nbridge.available) {
+    if (this._nbridge.available && !this._config.use_keyboard_events_instead_of_keycommand) {
       await this._removeExistingKeyCommands()
       await this._addKeyHitHandlerKeyCommands()
     }
@@ -602,8 +602,8 @@ export default class PascoMain extends BasePage {
     this._onToggleHIEventType('keyboard-capture', true)
     let evtid = 'keyboard-capture'
     this._event_manager.addNodeListenerFor(this._pengine, 'keyhit-handlers-change', this._onKeyHitHandlersChange.bind(this), evtid)
-    if (this._nbridge.available) {
-      this._addKeyHitHandlerKeyCommands()
+    if (this._nbridge.available && !this._config.use_keyboard_events_instead_of_keycommand) {
+      await this._addKeyHitHandlerKeyCommands()
       this._event_manager.addDOMListenerFor(this._document, 'x-keycommand', this.onKeyCommand.bind(this), false, evtid)
     } else {
       this._event_manager.addDOMListenerFor(window, 'keydown', this.onKeyDown.bind(this), false, evtid)
@@ -612,7 +612,7 @@ export default class PascoMain extends BasePage {
   async disableKeyboardCapture () {
     this._onToggleHIEventType('keyboard-capture', false)
     this._event_manager.removeListenersById('keyboard-capture')
-    if (this._nbridge.available) {
+    if (this._nbridge.available && !this._config.use_keyboard_events_instead_of_keycommand) {
       await this._removeExistingKeyCommands()
     }
   }

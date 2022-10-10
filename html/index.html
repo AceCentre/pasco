@@ -24,11 +24,6 @@
           }))
         }
         window.addEventListener('securitypolicyviolation', function (evt) {
-          alert('Error: securitypolicyviolation: ' + JSON.stringify({
-            blockedURI: evt.blockedURI,
-            violatedDirective: evt.violatedDirective,
-            originalPolicy: evt.originalPolicy,
-          }, null, '  '))
           console.error('Error: securitypolicyviolation: ' + JSON.stringify({
             blockedURI: evt.blockedURI,
             violatedDirective: evt.violatedDirective,

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "http-server -o tests/index.html .",
-    "dev": "concurrently \"npm run dev-bs\" \"gulp dev\"",
+    "dev": "gulp dev",
     "dev-bs": "browser-sync start -c bs-config.js",
     "build": "gulp build-dev",
     "build-prod": "gulp build-prod",

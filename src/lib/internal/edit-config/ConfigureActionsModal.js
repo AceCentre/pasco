@@ -110,7 +110,7 @@ export default class ConfigureActionsModal extends BaseModal {
     }
   }
   didClickRemoveBtn (remove_btn) {
-    let parentElm = findElementFromParents(key_btn, (a) => !!a.getAttribute('data-id'))
+    let parentElm = findElementFromParents(remove_btn, (a) => !!a.getAttribute('data-id'))
     if (!parentElm) {
       throw new Error('No parent element with data-id')
     }
@@ -135,7 +135,9 @@ export default class ConfigureActionsModal extends BaseModal {
   }
   async startListeningToKey (id) {
     this._listening_key_id = id
-    await this.napiAddKeyCommand()
+    if (this._nbridge.available && !this._config.use_keyboard_events_instead_of_keycommand) {
+      await this.napiAddKeyCommand()
+    }
     let evtid = 'listen-to-key'
     this._event_manager.addDOMListenerFor(this._document, 'mousedown', this.onKeyMouseDown.bind(this), true, evtid)
     if (this._nbridge.available) {
@@ -146,42 +148,36 @@ export default class ConfigureActionsModal extends BaseModal {
     }
   }
   async stopListeningToKey () {
-    await this.napiRemoveKeyCommand()
+    if (this._nbridge.available && !this._config.use_keyboard_events_instead_of_keycommand) {
+      await this.napiRemoveKeyCommand()
+    }
     delete this._listening_key_id
     let evtid = 'listen-to-key'
     this._event_manager.removeListenersById(evtid)
   }
   napiAddKeyCommand () {
-    if (this._nbridge.available) {
-      let promises = []
-      for (let key in PascoNativeBridge.keyInputByCode) {
-        if (PascoNativeBridge.keyInputByCode.hasOwnProperty(key)) {
-          let input = PascoNativeBridge.keyInputByCode[key]
-          if(input) {
-            promises.push(this._nbridge.add_key_command(input))
-          }
+    let promises = []
+    for (let key in PascoNativeBridge.keyInputByCode) {
+      if (PascoNativeBridge.keyInputByCode.hasOwnProperty(key)) {
+        let input = PascoNativeBridge.keyInputByCode[key]
+        if(input) {
+          promises.push(this._nbridge.add_key_command(input))
         }
       }
-      return Promise.all(promises)
-    } else {
-      return Promise.resolve()
     }
+    return Promise.all(promises)
   }
   napiRemoveKeyCommand () {
-    if (this._nbridge.available) {
-      let promises = []
-      for(let key in PascoNativeBridge.keyInputByCode) {
-        if (PascoNativeBridge.keyInputByCode.hasOwnProperty(key)) {
-          let input = PascoNativeBridge.keyInputByCode[key]
-          if(input) {
-            promises.push(this._nbridge.remove_key_command(input))
-          }
+    let promises = []
+    for(let key in PascoNativeBridge.keyInputByCode) {
+      if (PascoNativeBridge.keyInputByCode.hasOwnProperty(key)) {
+        let input = PascoNativeBridge.keyInputByCode[key]
+        if(input) {
+          promises.push(this._nbridge.remove_key_command(input))
         }
       }
-      return Promise.all(promises)
-    } else {
-      return Promise.resolve()
     }
+    return Promise.all(promises)
   }
   onKeyMouseDown (evt) {
     evt.preventDefault()
