@@ -57,12 +57,15 @@ export default class EditConfigPage extends BasePage {
     ]
     this._locale_info_list = [
       { locale: "en-GB", label: "English (UK)" },
+      { locale: "en-US", label: "English (US)" },
       { locale: "de", label: "German" },
+      { locale: "he", label: "Hebrew" },
       { locale: "fr-FR", label: "French" },
       { locale: "es-ES", label: "Spanish" },
       { locale: "ar", label: "Arabic" },
       { locale: "gu", label: "Gujarati" },
       { locale: "cy", label: "Welsh" },
+      { locale: "hr", label: "Croatian" }
     ]
     this._custom_node_editor_list = []
   }
