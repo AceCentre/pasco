@@ -7,8 +7,8 @@
 	window.icu = window.icu || new Object();
 	var icu = window.icu;	
 		
-	icu.getCountry = function() { return "US" };
-	icu.getCountryName = function() { return "United States" };
+	icu.getCountry = function() { return "English" };
+	icu.getCountryName = function() { return "English" };
 	icu.getDateFormat = function(formatCode) { var retVal = {}; retVal.format = df[formatCode]; return retVal; };
 	icu.getDateFormats = function() { return df; };
 	icu.getDateFormatSymbols = function() { return dfs; };
@@ -17,8 +17,8 @@
 	icu.getIntegerFormat = function() { var retVal = {}; retVal.format = function(i) { var s = i < 0 ? Math.abs(i).toString() : i.toString(); var rgx = /(\d+)(\d{3})/;while(rgx.test(s)){s = s.replace(rgx, '$1' + nfs["grouping_separator"] + '$2');} return i < 0 ? nfs["minus"] + s : s;}; return retVal; };
 	icu.getLanguage = function() { return "en" };
 	icu.getLanguageName = function() { return "English" };
-	icu.getLocale = function() { return "en-US" };
-	icu.getLocaleName = function() { return "English (United States)" };
+	icu.getLocale = function() { return "en" };
+	icu.getLocaleName = function() { return "English" };
 
   icu.rtl = false;
   icu.dictionary = { };

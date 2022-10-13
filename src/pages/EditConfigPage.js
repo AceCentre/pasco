@@ -57,7 +57,7 @@ export default class EditConfigPage extends BasePage {
     ]
     this._locale_info_list = [
       { locale: "en-GB", label: "English (UK)" },
-      { locale: "en-US", label: "English (US)" },
+      { locale: "en", label: "English" },
       { locale: "de", label: "German" },
       { locale: "he", label: "Hebrew" },
       { locale: "fr-FR", label: "French" },
