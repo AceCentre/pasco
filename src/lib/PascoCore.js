@@ -60,11 +60,7 @@ export default class PascoCore {
       }
     }
     // modify config and trees_info if needed
-    if (this._datastate) {
-      let data = this._datastate.getData()
-      this.setEnvValue('default_config_file', this.resolveUrl(data.config))
-      this.setEnvValue('default_trees_info_file', this.resolveUrl(data.trees_info))
-    } else {
+    if (!this._datastate) {
       // data state is not available
       // should decide to use legacy version or create a data state
       // depending on existance of the config file
@@ -72,14 +68,8 @@ export default class PascoCore {
       let config_url = legacy_dir_url + this.getEnvValue('default_config_file')
       if (await this._filemanager.fileExists(config_url)) {
         // upgrade to v1
-        let state_dir_url = this.getEnvValue('user_dir_prefix') + 'v1/'
         let trees_info_url = legacy_dir_url + this.getEnvValue('default_trees_info_file')
-        this._datastate = await PascoDataState.rebuildStateFromLegacy(config_url, trees_info_url, state_dir_url, new NodeLib.PascoFileManager())
-        /*
-        // run in legacy mode if config already exists
-        this.setEnvValue('default_config_file', config_url)
-        this.setEnvValue('default_trees_info_file', legacy_dir_url + default_trees_info_fn)
-        */
+        this._datastate = await PascoDataState.rebuildStateFromLegacy(config_url, trees_info_url, state_dir_url, this._filemanager)
       } else {
         // It is the first run, setup pasco-state.json
         this._datastate = new PascoDataState(state_url, this._filemanager)
@@ -94,12 +84,12 @@ export default class PascoCore {
           this._filemanager.saveFileJson(this.resolveUrl(trees_info_src), trees_info),
         ])
         await this._datastate.init(config_src, trees_info_src)
-        let data = this._datastate.getData()
-        this.setEnvValue('default_config_file', this.resolveUrl(data.config))
-        this.setEnvValue('default_trees_info_file', this.resolveUrl(data.trees_info))
         await this._datastate.save()
       }
     }
+    let data = this._datastate.getData()
+    this.setEnvValue('default_config_file', this.resolveUrl(data.config))
+    this.setEnvValue('default_trees_info_file', this.resolveUrl(data.trees_info))
     this.initUI()
   }
   initUI () {
