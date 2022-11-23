@@ -9,13 +9,10 @@
   "scripts": {
     "test": "http-server -o tests/index.html .",
     "dev": "gulp dev",
-    "dev-bs": "browser-sync start -c bs-config.js",
     "build": "gulp build-dev",
     "build-prod": "gulp build-prod",
     "cordova-dist": "gulp cordova-dist",
-    "cordova-build": "gulp build-prod",
-    "build-ios": "npm run build-prod  && npm run cordova-dist  && cd cordova/ && cordova build",
-    "delete-webpack-dir": "rm -rf ./html/webpack"
+    "cordova-build": "gulp build-prod"
   },
   "repository": {
     "type": "git",

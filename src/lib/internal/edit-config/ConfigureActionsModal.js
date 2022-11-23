@@ -134,13 +134,14 @@ export default class ConfigureActionsModal extends BaseModal {
     this.startListeningToKey(id)
   }
   async startListeningToKey (id) {
+    let listen_to_keycommand = this._nbridge.available && !this._config.use_keyboard_events_instead_of_keycommand
     this._listening_key_id = id
-    if (this._nbridge.available && !this._config.use_keyboard_events_instead_of_keycommand) {
+    if (listen_to_keycommand) {
       await this.napiAddKeyCommand()
     }
     let evtid = 'listen-to-key'
     this._event_manager.addDOMListenerFor(this._document, 'mousedown', this.onKeyMouseDown.bind(this), true, evtid)
-    if (this._nbridge.available) {
+    if (listen_to_keycommand) {
       this._event_manager.addDOMListenerFor(this._document, 'x-keycommand', this.onKeyCommand.bind(this), true, evtid)
     } else {
       this._event_manager.addDOMListenerFor(this._document, 'keydown', this.onKeyDown.bind(this), true, evtid)
@@ -148,7 +149,8 @@ export default class ConfigureActionsModal extends BaseModal {
     }
   }
   async stopListeningToKey () {
-    if (this._nbridge.available && !this._config.use_keyboard_events_instead_of_keycommand) {
+    let listen_to_keycommand = this._nbridge.available && !this._config.use_keyboard_events_instead_of_keycommand
+    if (listen_to_keycommand) {
       await this.napiRemoveKeyCommand()
     }
     delete this._listening_key_id
