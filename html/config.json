@@ -8,7 +8,7 @@
   "can_edit": true,
   "onscreen_navigation": "enable",
   "ignore_second_hits_time": 100,
-  "ignore_key_release_time": 0,
+  "ignore_key_release_time": 50,
   "helper_back_option": "end",
   "auto_scan": false,
   "auto_next_delay": 200,
