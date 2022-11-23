@@ -134,7 +134,7 @@ export default class ConfigureActionsModal extends BaseModal {
     this.startListeningToKey(id)
   }
   async startListeningToKey (id) {
-    let listen_to_keycommand = this._nbridge.available && !this._config.use_keyboard_events_instead_of_keycommand
+    let listen_to_keycommand = this._nbridge.available && this._config.running_on_mac && device.platform === 'iOS'
     this._listening_key_id = id
     if (listen_to_keycommand) {
       await this.napiAddKeyCommand()
@@ -149,7 +149,7 @@ export default class ConfigureActionsModal extends BaseModal {
     }
   }
   async stopListeningToKey () {
-    let listen_to_keycommand = this._nbridge.available && !this._config.use_keyboard_events_instead_of_keycommand
+    let listen_to_keycommand = this._nbridge.available && this._config.running_on_mac && device.platform === 'iOS'
     if (listen_to_keycommand) {
       await this.napiRemoveKeyCommand()
     }
