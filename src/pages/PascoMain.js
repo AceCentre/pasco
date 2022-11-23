@@ -585,7 +585,7 @@ export default class PascoMain extends BasePage {
       let input = PascoNativeBridge.keyInputByCode[handler.code]
       if(input && this._added_key_commands.indexOf(input) == -1) {
         this._added_key_commands.push(input)
-        promises.push(this._nbridge.add_key_command(input, '', {
+        promises.push(this._nbridge.add_key_command(input, {
           repeatable: !!this._config.ios_keycommand_repeatable,
         }))
       }
