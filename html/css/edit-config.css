@@ -1,0 +1,672 @@
+.rtl .rangeslider__fill,
+.rtl .rangeslider__handle {
+  left: 0px;
+}
+
+.rangeslider {
+  position: relative;
+  display: block;
+  cursor: pointer;
+  height: 50px;
+  width: 100%;
+}
+
+.rangeslider__fill,
+.rangeslider__fill__bg {
+  display: block;
+  position: absolute;
+  top: 50%;
+  height: 2px;
+  z-index: 2;
+  background: #29e;
+  border-radius: 10px;
+  will-change: width;
+}
+
+.rangeslider__handle {
+  will-change: width, height, top;
+  width: 25px;
+  height: 25px;
+  position: absolute;
+  top: 50%;
+  background: #29e;
+  display: inline-block;
+  z-index: 3;
+  cursor: pointer;
+  border: solid 2px #ffffff;
+  border-radius: 50%;
+  -webkit-transition: width 0.1s ease-in-out, height 0.1s ease-in-out, top 0.1s ease-in-out;
+  transition: width 0.1s ease-in-out, height 0.1s ease-in-out, top 0.1s ease-in-out;
+}
+
+.rangeslider__handle:active {
+  background: #107ecd;
+}
+
+.rangeslider__fill__bg {
+  background: #ccc;
+  width: 100%;
+}
+
+.rangeslider--disabled {
+  opacity: 0.4;
+}
+
+.rangeslider__default_indicator {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 1px;
+  height: 21px;
+  background-color: rgba(130, 130, 130, 0.5);
+}
+
+body {
+  opacity: 1;
+  transition: opacity 0.5s;
+}
+body.notready {
+  opacity: 0;
+}
+
+.relative {
+  position: relative;
+}
+
+body.quick-setup {
+  padding-top: 30px;
+}
+
+.anchor,
+.scrollnav-anchor {
+  display: block;
+  position: absolute;
+  height: 0px;
+  overflow: hidden;
+}
+
+.body-navbar-fixed {
+  padding-top: 50px;
+}
+.body-navbar-fixed .anchor {
+  top: -50px;
+}
+
+/* help bootstrap */
+.alert-hidden {
+  display: none;
+}
+
+.navbar-brand-simplified {
+  height: auto;
+}
+
+.m-b-10 {
+  margin-bottom: 10px;
+}
+
+.m-t-10 {
+  margin-top: 10px;
+}
+
+.m-t-15 {
+  margin-top: 15px;
+}
+
+.nav {
+  position: relative;
+}
+@media (max-width: 767px) {
+  .nav .separate-after {
+    margin-bottom: 10px;
+  }
+  .nav .separate-after:after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    right: 5px;
+    bottom: -5px;
+    border-bottom: 1px solid #333;
+  }
+}
+@media (min-width: 768px) {
+  .nav .separate-after {
+    margin-right: 10px;
+  }
+  .nav .separate-after:after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    right: -5px;
+    border-right: 1px solid #333;
+  }
+}
+
+.navbar-nav > li button {
+  padding: 10px 15px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+@media (max-width: 767px) {
+  .navbar-nav > li button {
+    margin-left: 15px;
+    margin-right: 15px;
+  }
+}
+@media (min-width: 768px) {
+  .navbar-nav > li button {
+    margin-top: 5px;
+  }
+}
+.btn-transparent {
+  background-color: transparent;
+  background-image: none;
+}
+.btn-transparent:active, .btn-transparent.active {
+  box-shadow: none;
+}
+
+/* common */
+.main-top-navbar {
+  position: relative;
+  z-index: 100;
+}
+
+html.ios .body-navbar-fixed {
+  padding-top: 80px;
+}
+html.ios .main-top-navbar {
+  padding-top: 30px;
+}
+html.ios .modal-dialog {
+  margin-top: 30px;
+}
+html.ios .body-navbar-fixed .navbar-fixed-top {
+  padding-top: 30px;
+}
+@media (min-height: 630px) and (max-width: 400px) {
+  html.ios body.quick-setup {
+    padding-top: 70px;
+  }
+  html.ios .body-navbar-fixed {
+    padding-top: 70px;
+  }
+  html.ios .body-navbar-fixed .anchor {
+    top: -95px;
+  }
+  html.ios .main-top-navbar {
+    padding-top: 40px;
+  }
+  html.ios .modal-dialog {
+    margin-top: 100px;
+  }
+}
+html.ios .hide-for-non-ios {
+  display: block;
+}
+html.ios .hide-for-ios {
+  display: none;
+}
+
+html.cordova .hide-for-non-cordova {
+  display: block;
+}
+html.cordova .hide-for-cordova {
+  display: none;
+}
+
+html.cordova.ios .hide-for-non-cordova-ios {
+  display: block;
+}
+html.cordova.ios .hide-for-cordova-ios {
+  display: none;
+}
+
+html .hide-for-non-cordova-ios {
+  display: none;
+}
+html .hide-for-cordova-ios {
+  display: block;
+}
+html .hide-for-non-ios {
+  display: none;
+}
+html .hide-for-ios {
+  display: block;
+}
+html .hide-for-non-cordova {
+  display: none;
+}
+html .hide-for-cordova {
+  display: block;
+}
+
+.fit-td {
+  width: 20px;
+}
+
+.x-collapsable {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  height: auto;
+  /* unknown depending on content */
+  transition: height 0.5s;
+}
+.x-collapsable.x-collapse {
+  height: 0px !important;
+  display: block;
+}
+
+.x-navbar {
+  padding: 0;
+  margin: 0;
+  padding-left: 15px;
+  padding-right: 15px;
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-height: 50px;
+}
+.x-navbar .head h1, .x-navbar .head h2 {
+  color: #777;
+  margin: 0;
+  padding: 5px;
+  font-family: "Source Sans Pro", Arial, sans-serif;
+  font-weight: 700;
+  font-size: 1.9em;
+  line-height: 1.2;
+}
+.x-navbar .head h2 {
+  font-size: 1.7em;
+}
+.x-navbar .icon-btn {
+  margin-left: 8px;
+  margin-right: 8px;
+  padding-left: 6px;
+  padding-right: 6px;
+  display: inline-block;
+}
+.x-navbar .icon-btn:hover {
+  text-decoration: none;
+}
+.x-navbar .disabled {
+  color: #777;
+  cursor: default;
+}
+.x-navbar > .space {
+  flex-grow: 1;
+}
+
+@font-face {
+  font-family: "Source Sans Pro";
+  src: url("../fonts/sourcesanspro-bold-webfont.woff2") format("woff2"), url("../fonts/sourcesanspro-bold-webfont.woff") format("woff"), url("../fonts/sourcesanspro-bold-webfont.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+@media (max-width: 767px) {
+  /* bootstrap xs < */
+  .m-xs-t-10 {
+    margin-top: 10px;
+  }
+}
+.video-iframe-wrp {
+  text-align: center;
+}
+
+.video-iframe {
+  border: none;
+  max-width: 95%;
+}
+
+.select-btn-wrp {
+  display: flex;
+  flex-direction: row;
+}
+.select-btn-wrp .form-control {
+  flex: 0px 1 1;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.select-btn-wrp .btn {
+  margin-left: 5px;
+  height: 34px;
+}
+
+.x-horiz-group {
+  display: flex;
+  flex-direction: row;
+}
+.x-horiz-group > * {
+  margin-right: 10px;
+}
+
+.icon-with-text {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.icon-with-text .text {
+  margin-left: 0.3em;
+  font-size: 1.1em;
+}
+
+#move-top-link {
+  position: fixed;
+  right: 5px;
+  bottom: 5px;
+}
+
+#dropbox-sync-wrp.initiating .hide-when-initiating {
+  display: none;
+}
+#dropbox-sync-wrp.needsauth .hide-when-needsauth {
+  display: none;
+}
+#dropbox-sync-wrp.needs-setup .hide-when-needs-setup {
+  display: none;
+}
+
+html.ios .node-setting {
+  display: block;
+}
+
+.node-setting {
+  display: none;
+}
+
+.node-record-btn-wrap {
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  display: inline-block;
+  position: relative;
+}
+.node-record-btn-wrap.recording .record-amp-circle {
+  display: block;
+}
+.node-record-btn-wrap .record-amp-circle {
+  display: none;
+  z-index: 1;
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background-color: rgba(240, 40, 50, 0.65);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* edit config specific */
+.x-navbar .back-btn {
+  font-size: 1.7em;
+  padding: 0.4em;
+  display: none;
+}
+.x-navbar .head .fa, .x-navbar .head .far {
+  margin-right: 0.2em;
+}
+.x-navbar .head .page-head {
+  display: none;
+}
+.x-navbar .head .page-head.active {
+  display: block;
+}
+@media (max-width: 360px) {
+  .x-navbar .head .page-head span {
+    display: none;
+  }
+}
+@media (min-width: 768px) {
+  .x-navbar .back-btn {
+    display: none !important;
+  }
+  .x-navbar .head .main-head {
+    display: block !important;
+  }
+  .x-navbar .head .page-head {
+    display: none !important;
+  }
+}
+
+html, body {
+  height: 100%;
+}
+
+.edit-config-container {
+  min-height: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+.edit-config-container .page-sect {
+  display: none;
+}
+.edit-config-container .page-sect.active {
+  display: block;
+}
+.edit-config-container h3 {
+  margin-top: 10px;
+}
+.edit-config-container > .content {
+  flex-grow: 1;
+  padding: 16px;
+}
+.edit-config-container > .submenu {
+  margin-bottom: 0px;
+  width: 110px;
+  border-right: 1px solid #ddd;
+}
+.edit-config-container > .submenu .list-group-item {
+  border-right: 0px;
+  transition: background-color 0.5s;
+}
+.edit-config-container > .submenu > a {
+  text-align: center;
+}
+.edit-config-container > .submenu > a .far, .edit-config-container > .submenu > a .fa {
+  display: block;
+  font-size: 2.6em;
+  margin-bottom: 0.2em;
+}
+.edit-config-container > .submenu > a span {
+  font-size: 1.1em;
+}
+@media (max-width: 767px) {
+  .edit-config-container {
+    display: block;
+  }
+  .edit-config-container > .submenu {
+    width: auto;
+    overflow: hidden;
+    height: 30rem;
+    border: none;
+    transition: height 0.5s;
+  }
+  .edit-config-container > .submenu.has-active {
+    height: 0rem;
+  }
+  .edit-config-container > .submenu .list-group-item {
+    border-right: 0px;
+  }
+  .edit-config-container > .submenu > a {
+    text-align: start;
+  }
+  .edit-config-container > .submenu > a .far, .edit-config-container > .submenu > a .fa {
+    display: inline-block;
+    font-size: 1.3em;
+    margin-right: 0.4em;
+    margin-bottom: 0;
+  }
+  .edit-config-container > .submenu > a span {
+    font-size: 1.3em;
+  }
+}
+
+hr.tinyhr {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+/* bootstrap related */
+input[type=range].form-control,
+input[type=range].form-control:active {
+  box-shadow: none;
+  webkit-box-shadow: none;
+}
+
+.settings-alert-wrp {
+  position: fixed;
+  left: 50%;
+  top: 10px;
+  transform: translateX(-50%);
+  max-width: 80%;
+  z-index: 1100;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.settings-alert-wrp .alert {
+  margin-bottom: 0px;
+}
+.settings-alert-wrp.visible {
+  opacity: 1;
+}
+
+.voice-playback-wrp .btn {
+  padding: 1px 12px;
+}
+
+#tree-import-btn,
+#tree-import-obz-btn {
+  position: relative;
+  overflow: hidden;
+}
+#tree-import-btn input[type=file],
+#tree-import-obz-btn input[type=file] {
+  position: absolute;
+  left: -50%;
+  top: -50%;
+  width: 200%;
+  height: 200%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+form[name=quick-setup] .submit-btn {
+  display: block;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 350px;
+}
+
+.tree-tools-toggle-wrp {
+  float: left;
+}
+
+.configure-actions-wrp > div {
+  text-align: center;
+  margin-bottom: 1em;
+}
+.configure-actions-wrp > div .fa, .configure-actions-wrp > div .far {
+  margin-right: 0.3em;
+}
+.configure-actions-wrp > div button {
+  width: 100%;
+  max-width: 200px;
+}
+
+#configure-action-key-list .key-wrp {
+  display: flex;
+  flex-direction: row;
+  padding-bottom: 10px;
+  margin-bottom: 5px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+#configure-action-key-list .key-wrp .key-btn-wrp {
+  flex-grow: 1;
+}
+#configure-action-key-list .key-wrp .key-btn .key-text {
+  display: block;
+}
+#configure-action-key-list .key-wrp .key-btn .waiting-text {
+  display: none;
+}
+#configure-action-key-list .key-wrp .key-btn.is-waiting .key-text {
+  display: none;
+}
+#configure-action-key-list .key-wrp .key-btn.is-waiting .waiting-text {
+  display: block;
+}
+
+.save-section {
+  margin-bottom: 20px;
+}
+
+.page-sect .scroll-nav {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .body-navbar-fixed.has-nav-scroll {
+    padding-top: 124px;
+  }
+  .body-navbar-fixed .page-sect .scrollnav-anchor {
+    top: -79px;
+  }
+
+  html.ios .page-sect .scroll-nav {
+    top: 79px;
+  }
+  html.ios .body-navbar-fixed.has-nav-scroll {
+    padding-top: 124px;
+  }
+  html.ios .page-sect .scrollnav-anchor {
+    top: -139px;
+  }
+
+  .page-sect .scroll-nav {
+    display: block;
+    position: fixed;
+    left: 0px;
+    right: 0px;
+    top: 49px;
+    min-height: 44px;
+    z-index: 1001;
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #e7e7e7;
+  }
+  .page-sect .scroll-nav .scroll-nav__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+  }
+  .page-sect .scroll-nav .scroll-nav__list > li {
+    display: inline-block;
+  }
+  .page-sect .scroll-nav .scroll-nav__list .scroll-nav__link {
+    display: inline-block;
+    padding: 10px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .page-sect .scroll-nav .scroll-nav__list .scroll-nav__link:after {
+    display: block;
+    content: "";
+    width: 0%;
+    height: 4px;
+    background: #b14400;
+    transition: width 0.3s;
+  }
+  .page-sect .scroll-nav .scroll-nav__list .scroll-nav__item--active .scroll-nav__link:after {
+    width: 100%;
+  }
+}
+.record-audio-section {
+  margin-bottom: 15px;
+}
+/*# sourceMappingURL=../css/edit-config.css.map */

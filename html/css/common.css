@@ -1,0 +1,362 @@
+.rtl .rangeslider__fill,
+.rtl .rangeslider__handle {
+  left: 0px;
+}
+
+.rangeslider {
+  position: relative;
+  display: block;
+  cursor: pointer;
+  height: 50px;
+  width: 100%;
+}
+
+.rangeslider__fill,
+.rangeslider__fill__bg {
+  display: block;
+  position: absolute;
+  top: 50%;
+  height: 2px;
+  z-index: 2;
+  background: #29e;
+  border-radius: 10px;
+  will-change: width;
+}
+
+.rangeslider__handle {
+  will-change: width, height, top;
+  width: 25px;
+  height: 25px;
+  position: absolute;
+  top: 50%;
+  background: #29e;
+  display: inline-block;
+  z-index: 3;
+  cursor: pointer;
+  border: solid 2px #ffffff;
+  border-radius: 50%;
+  -webkit-transition: width 0.1s ease-in-out, height 0.1s ease-in-out, top 0.1s ease-in-out;
+  transition: width 0.1s ease-in-out, height 0.1s ease-in-out, top 0.1s ease-in-out;
+}
+
+.rangeslider__handle:active {
+  background: #107ecd;
+}
+
+.rangeslider__fill__bg {
+  background: #ccc;
+  width: 100%;
+}
+
+.rangeslider--disabled {
+  opacity: 0.4;
+}
+
+.rangeslider__default_indicator {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 1px;
+  height: 21px;
+  background-color: rgba(130, 130, 130, 0.5);
+}
+
+body {
+  opacity: 1;
+  transition: opacity 0.5s;
+}
+body.notready {
+  opacity: 0;
+}
+
+.relative {
+  position: relative;
+}
+
+body.quick-setup {
+  padding-top: 30px;
+}
+
+.anchor,
+.scrollnav-anchor {
+  display: block;
+  position: absolute;
+  height: 0px;
+  overflow: hidden;
+}
+
+.body-navbar-fixed {
+  padding-top: 50px;
+}
+.body-navbar-fixed .anchor {
+  top: -50px;
+}
+
+/* help bootstrap */
+.alert-hidden {
+  display: none;
+}
+
+.navbar-brand-simplified {
+  height: auto;
+}
+
+.m-b-10 {
+  margin-bottom: 10px;
+}
+
+.m-t-10 {
+  margin-top: 10px;
+}
+
+.m-t-15 {
+  margin-top: 15px;
+}
+
+.nav {
+  position: relative;
+}
+@media (max-width: 767px) {
+  .nav .separate-after {
+    margin-bottom: 10px;
+  }
+  .nav .separate-after:after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    right: 5px;
+    bottom: -5px;
+    border-bottom: 1px solid #333;
+  }
+}
+@media (min-width: 768px) {
+  .nav .separate-after {
+    margin-right: 10px;
+  }
+  .nav .separate-after:after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    right: -5px;
+    border-right: 1px solid #333;
+  }
+}
+
+.navbar-nav > li button {
+  padding: 10px 15px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+@media (max-width: 767px) {
+  .navbar-nav > li button {
+    margin-left: 15px;
+    margin-right: 15px;
+  }
+}
+@media (min-width: 768px) {
+  .navbar-nav > li button {
+    margin-top: 5px;
+  }
+}
+.btn-transparent {
+  background-color: transparent;
+  background-image: none;
+}
+.btn-transparent:active, .btn-transparent.active {
+  box-shadow: none;
+}
+
+/* common */
+.main-top-navbar {
+  position: relative;
+  z-index: 100;
+}
+
+html.ios .body-navbar-fixed {
+  padding-top: 80px;
+}
+html.ios .main-top-navbar {
+  padding-top: 30px;
+}
+html.ios .modal-dialog {
+  margin-top: 30px;
+}
+html.ios .body-navbar-fixed .navbar-fixed-top {
+  padding-top: 30px;
+}
+@media (min-height: 630px) and (max-width: 400px) {
+  html.ios body.quick-setup {
+    padding-top: 70px;
+  }
+  html.ios .body-navbar-fixed {
+    padding-top: 70px;
+  }
+  html.ios .body-navbar-fixed .anchor {
+    top: -95px;
+  }
+  html.ios .main-top-navbar {
+    padding-top: 40px;
+  }
+  html.ios .modal-dialog {
+    margin-top: 100px;
+  }
+}
+html.ios .hide-for-non-ios {
+  display: block;
+}
+html.ios .hide-for-ios {
+  display: none;
+}
+
+html.cordova .hide-for-non-cordova {
+  display: block;
+}
+html.cordova .hide-for-cordova {
+  display: none;
+}
+
+html.cordova.ios .hide-for-non-cordova-ios {
+  display: block;
+}
+html.cordova.ios .hide-for-cordova-ios {
+  display: none;
+}
+
+html .hide-for-non-cordova-ios {
+  display: none;
+}
+html .hide-for-cordova-ios {
+  display: block;
+}
+html .hide-for-non-ios {
+  display: none;
+}
+html .hide-for-ios {
+  display: block;
+}
+html .hide-for-non-cordova {
+  display: none;
+}
+html .hide-for-cordova {
+  display: block;
+}
+
+.fit-td {
+  width: 20px;
+}
+
+.x-collapsable {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  height: auto;
+  /* unknown depending on content */
+  transition: height 0.5s;
+}
+.x-collapsable.x-collapse {
+  height: 0px !important;
+  display: block;
+}
+
+.x-navbar {
+  padding: 0;
+  margin: 0;
+  padding-left: 15px;
+  padding-right: 15px;
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-height: 50px;
+}
+.x-navbar .head h1, .x-navbar .head h2 {
+  color: #777;
+  margin: 0;
+  padding: 5px;
+  font-family: "Source Sans Pro", Arial, sans-serif;
+  font-weight: 700;
+  font-size: 1.9em;
+  line-height: 1.2;
+}
+.x-navbar .head h2 {
+  font-size: 1.7em;
+}
+.x-navbar .icon-btn {
+  margin-left: 8px;
+  margin-right: 8px;
+  padding-left: 6px;
+  padding-right: 6px;
+  display: inline-block;
+}
+.x-navbar .icon-btn:hover {
+  text-decoration: none;
+}
+.x-navbar .disabled {
+  color: #777;
+  cursor: default;
+}
+.x-navbar > .space {
+  flex-grow: 1;
+}
+
+@font-face {
+  font-family: "Source Sans Pro";
+  src: url("../fonts/sourcesanspro-bold-webfont.woff2") format("woff2"), url("../fonts/sourcesanspro-bold-webfont.woff") format("woff"), url("../fonts/sourcesanspro-bold-webfont.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+@media (max-width: 767px) {
+  /* bootstrap xs < */
+  .m-xs-t-10 {
+    margin-top: 10px;
+  }
+}
+.video-iframe-wrp {
+  text-align: center;
+}
+
+.video-iframe {
+  border: none;
+  max-width: 95%;
+}
+
+.select-btn-wrp {
+  display: flex;
+  flex-direction: row;
+}
+.select-btn-wrp .form-control {
+  flex: 0px 1 1;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.select-btn-wrp .btn {
+  margin-left: 5px;
+  height: 34px;
+}
+
+.x-horiz-group {
+  display: flex;
+  flex-direction: row;
+}
+.x-horiz-group > * {
+  margin-right: 10px;
+}
+
+.icon-with-text {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.icon-with-text .text {
+  margin-left: 0.3em;
+  font-size: 1.1em;
+}
+
+#move-top-link {
+  position: fixed;
+  right: 5px;
+  bottom: 5px;
+}
+/*# sourceMappingURL=../css/common.css.map */

@@ -1,0 +1,26 @@
+{
+  "prepare_queue": {
+    "installed": [],
+    "uninstalled": []
+  },
+  "config_munge": {
+    "files": {}
+  },
+  "installed_plugins": {
+    "cordova-plugin-whitelist": {
+      "PACKAGE_NAME": "uk.org.acecentre.pasco"
+    },
+    "cordova-plugin-splashscreen": {
+      "PACKAGE_NAME": "uk.org.acecentre.pasco"
+    },
+    "cordova-plugin-customurlscheme": {
+      "URL_SCHEME": "pasco",
+      "PACKAGE_NAME": "uk.org.acecentre.pasco"
+    }
+  },
+  "dependent_plugins": {
+    "es6-promise-plugin": {
+      "PACKAGE_NAME": "uk.org.acecentre.pasco"
+    }
+  }
+}

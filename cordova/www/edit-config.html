@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta http-equiv="Content-Security-Policy" content="default-src blob: 'self' 'unsafe-eval' 'unsafe-inline' data: gap: https://ssl.gstatic.com http://localhost:3030 http://backend.pasco.chat https://api.dropboxapi.com https://content.dropboxapi.com; style-src 'self' 'unsafe-inline'; media-src blob: *; img-src 'self' data: content:;">
+    
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, viewport-fit=cover">
+
+    <title x-l10n="config_title">pasco - Config</title>
+
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="fonts/fontawesome/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="css/edit-config.css">
+    <!-- <link rel="icon" href="images/favicon.png"> -->
+
+    
+    
+  </head>
+
+  <body class="notready body-navbar-fixed">
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <ul class="x-navbar">
+        <li>
+          <a href class="back-btn"><i class="far fa-arrow-left"></i></a>
+        </li>
+        <li class="head">
+          <h1 class="main-head"><i class="far fa-cogs"></i><span x-10n>Settings</span></h1>
+          <h2 data-name="access" class="page-head"><i class="far fa-universal-access"></i><span x-l10n>Access</span></h2>
+          <h2 data-name="helpers" class="page-head"><i class="far fa-hands-helping"></i><span x-l10n>Helpers</span></h2>
+          <h2 data-name="speech" class="page-head"><i class="far fa-comment"></i><span x-l10n>Speech</span></h2>
+          <h2 data-name="appearance" class="page-head"><i class="far fa-eye"></i><span x-l10n>Appearance</span></h2>
+          <h2 data-name="vocabulary" class="page-head"><i class="far fa-comment-dots"></i><span x-l10n>Vocabulary</span></h2>
+          <h2 data-name="sync" class="page-head"><i class="far fa-sync"></i><span x-l10n>Sync</span></h2>
+        </li>
+        <li class="space"></li>
+        <li><a class="icon-btn" href="index.html"><span class="far fa-play-circle fa-2x"></span></a></li>
+        <li><a class="icon-btn" href="help.html"><span class="far fa-question-circle fa-2x"></span></a></li>
+      </ul>
+    </nav>
+    <div class="edit-config-container">
+      <div class="submenu list-group">
+        <a href data-name="access" class="list-group-item"><i class="far fa-universal-access"></i><span x-l10n>Access</span></a>
+        <a href data-name="helpers" class="list-group-item"><i class="far fa-hands-helping"></i><span x-l10n>Helpers</span></a>
+        <a href data-name="speech" class="list-group-item"><i class="far fa-comment"></i><span x-l10n>Speech</span></a>
+        <a href data-name="appearance" class="list-group-item"><i class="far fa-eye"></i><span x-l10n>Appearance</span></a>
+        <a href data-name="vocabulary" class="list-group-item"><i class="far fa-comment-dots"></i><span x-l10n>Vocabulary</span></a>
+        <a href data-name="sync" class="list-group-item"><i class="far fa-sync"></i><span x-l10n>Sync</span></a>
+      </div>
+      <div class="content">
+        <form name="edit-config">
+          <div class="page-sect" data-name="access">
+            <div class="row">
+              <div class="col-sm-6">
+                <h3 x-l10n id="access_screen-nav">On-Screen Navigation</h3>
+                <div class="row m-b-10">
+                  <div class="col-xs-12">
+                    <label class="radio-inline"><input type="radio" name="onscreen_navigation" value="enable"><span x-l10n>Enable</span></label>
+                    <label class="radio-inline"><input type="radio" name="onscreen_navigation" value="disable"><span x-l10n>Disable</span></label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-12">
+                <h3 x-l10n id="access_mode">Access Mode</h3>
+                <div class="row m-b-10">
+                  <div class="col-xs-12">
+                    <label class="radio-inline"><input type="radio" name="mode" value="auto" data-inp-collapse-toggle="#auto_mode_params"><span x-l10n>1 switch - Auto-Scan</span></label>
+                    <label class="radio-inline"><input type="radio" name="mode" value="switch" data-inp-collapse-toggle="#switch_mode_params"><span x-l10n>2+ Switches</span></label>
+                    <label class="radio-inline"><input type="radio" name="mode" value="wheel" data-inp-collapse-toggle="#wheel_mode_params"><span x-l10n>Wheel</span></label>
+                  </div>
+                </div>
+                <div class="row x-collapsable x-collapse" id="auto_mode_params">
+                  <div class="col-sm-3">
+                    <div class="form-group">
+                      <label for="auto_next_loops" x-l10n>Loops</label>
+                      <input type="number" id="auto_next_loops" name="auto_next_loops" class="form-control" value="10" data-validator="number" data-dependent="#auto_next_loops_range">
+                      <input type="range" id="auto_next_loops_range" class="form-control btn-lg" step="1" min="0" max="4" data-dependent="#auto_next_loops">
+                    </div>
+                  </div>
+                  <div class="col-sm-1">
+                  </div>
+                  <div class="col-sm-4">
+                    <div class="form-group">
+                      <label for="auto_next_atfirst_delay" x-l10n>Delay at first item (ms)</label>
+                      <input type="number" id="auto_next_atfirst_delay" name="auto_next_atfirst_delay" class="form-control" value="10" data-validator="number" data-dependent="#auto_next_atfirst_delay_range">
+                      <input type="range" id="auto_next_atfirst_delay_range" class="form-control btn-lg" step="100" min="0" max="2000" data-dependent="#auto_next_atfirst_delay">
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div class="form-group">
+                      <label for="auto_next_delay" x-l10n>Auto-scanning delay (ms)</label>
+                      <input type="number" id="auto_next_delay" name="auto_next_delay" class="form-control" value="200" data-validator="number" data-dependent="#auto_next_delay_range">
+                      <input type="range" id="auto_next_delay_range" class="form-control btn-lg" step="100" min="0" max="5000" data-dependent="#auto_next_delay">
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <h4 x-l10n>Auto start</h4>
+                    <label class="checkbox-inline"><input type="checkbox" name="auto_scan"><span x-l10n>On</span></label><br>
+                    <small>It will automatically start scanning after an item has been selected.</small>
+                  </div>
+                </div>
+                <div class="row x-collapsable x-collapse" id="switch_mode_params">
+                  <div class="col-sm-12">
+                    <p x-l10n>Using a keyboard: Hitting 1 will go to previous and 2 to next. Also keys W/S, Up/Down arrow will work to navigate the tree.</p>
+                  </div>
+                  <!--
+                  <div class="col-sm-4">
+                    <div class="form-group">
+                      <label x-l10n>Switch key to select items</label>
+                      <div>
+                        <label class="radio-inline">
+                          <input type="radio" name="_switch_forward_key" value="space"> Space
+                        </label>
+                        <label class="radio-inline">
+                          <input type="radio" name="_switch_forward_key" value="enter"> Enter
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <label class="m-t-10 m-b-10 checkbox-inline"><input type="checkbox" name="_switch_secondary_key_move"><span x-l10n>Move with the other switch (Step scanning)</span></label>
+                  </div>
+                  -->
+                </div>
+                <div class="row x-collapsable x-collapse" id="wheel_mode_params">
+                  <div class="col-sm-12">
+                    <p x-l10n>In wheel mode you can navigate through the tree with a mouse or touch.</p>
+                    <div class="row">
+                      <div class="col-sm-3">
+                        <div class="form-group">
+                          <label for="wheel_y_threshold" x-l10n>Wheel Y-Axis Threshold</label>
+                          <input type="number" id="wheel_y_threshold" name="wheel_y_threshold" class="form-control" value="10" data-validator="number" data-dependent="#wheel_y_threshold_range">
+                          <input type="range" id="wheel_y_threshold_range" class="form-control btn-lg" step="1" min="1" max="100" data-default="30" data-dependent="#wheel_y_threshold">
+                        </div>
+                      </div>
+                      <div class="col-sm-3">
+                        <div class="form-group">
+                          <label for="wheel_x_threshold" x-l10n>Wheel X-Axis Threshold</label>
+                          <input type="number" id="wheel_x_threshold" name="wheel_x_threshold" class="form-control" value="10" data-validator="number" data-dependent="#wheel_x_threshold_range">
+                          <input type="range" id="wheel_x_threshold_range" class="form-control btn-lg" step="1" min="1" max="100" data-default="30" data-dependent="#wheel_x_threshold">
+                        </div>
+                      </div>
+                      <div class="col-sm-6">
+                        <label class="checkbox-inline"><input type="checkbox" name="wheel_y_reverse"><span x-l10n>Reverse Y-Axis Wheel</span></label>
+                        <label class="checkbox-inline"><input type="checkbox" name="wheel_x_reverse"><span x-l10n>Reverse X-Axis Wheel</span></label>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+                <hr class="tinyhr"/>
+              </div>
+            </div> <!-- /row -->
+            <div class="row">
+              <div class="col-sm-12">
+                <div>
+                  <h3 x-l10n id="access_actions">Configure Actions</h3>
+                  <p x-l10n>Below are possible actions in pasco by clicking on them you can manage switches that triggers them.</p>
+                  <div class="row configure-actions-wrp">
+                    <div class="col-xs-6 col-sm-6 col-md-3">
+                      <button type="button" class="btn btn-primary" data-action="tree_go_in"><i class="far fa-arrow-right"></i><span x-l10n>Select Item</span></button>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-3">
+                      <button type="button" class="btn btn-primary" data-action="tree_go_out"><i class="far fa-arrow-left"></i><span x-l10n>Go Back</span></button>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-3">
+                      <button type="button" class="btn btn-primary" data-action="tree_go_next"><i class="far fa-arrow-down"></i><span x-l10n>Move to Next</span></button>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-3">
+                      <button type="button" class="btn btn-primary" data-action="tree_go_previous"><i class="far fa-arrow-up"></i><span x-l10n>Move to Previous</span></button>
+                    </div>
+                  </div>
+                 <div class="row">
+                  <div class="col-sm-6 hide-for-non-cordova-ios">
+                    <h4 x-l10n>Allow hold down of switches</h4>
+                    <p x-l10n>By pressing down on a switch it will repeat the action. <b>Warning: Do not use when single switch scanning activated</b>.</p>
+                    <label class="checkbox-inline"><input type="checkbox" name="ios_keycommand_repeatable"><span x-l10n>On</span></label>
+                  </div>
+                </div>
+
+                </div>
+                <hr class="tinyhr"/>
+              </div>
+            </div> <!-- /row -->
+            <div class="row">
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="minimum_cue_time" x-l10n>Minimum Cue Time(ms)</label>
+                  <input type="number" id="minimum_cue_time" name="minimum_cue_time" class="form-control" value="0" data-validator="number" data-dependent="#minimum_cue_time_range">
+                  <input type="range" id="minimum_cue_time_range" class="form-control btn-lg" step="100" min="0" max="3000" data-dependent="#minimum_cue_time">
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="ignore_second_hits_time" x-l10n>Ignore second hits(ms)</label>
+                  <input type="number" id="ignore_second_hits_time" name="ignore_second_hits_time" class="form-control" value="100" data-validator="number" data-dependent="#ignore_second_hits_time_range">
+                  <input type="range" id="ignore_second_hits_time_range" class="form-control btn-lg" step="100" min="0" max="2000" data-dependent="#ignore_second_hits_time">
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group hide-for-cordova-ios">
+                  <label for="ignore_key_release_time" x-l10n>Ignore key presses under n ms</label>
+                  <input class="form-control" type="number" id="ignore_key_release_time" name="ignore_key_release_time" value="0" data-validator="number" data-dependent="#ignore_key_release_time_range">
+                  <input type="range" id="ignore_key_release_time_range" class="form-control btn-lg" step="100" min="0" max="2000" data-dependent="#ignore_key_release_time">
+                </div>
+              </div>
+            </div><!-- /row -->
+          </div>
+          <div class="page-sect" data-name="helpers">
+            <div class="row">
+              <div class="col-xs-12">
+                <h3 x-l10n id="access_helpers">Helpers</h3>
+                <div class="row m-b-10">
+                  <div class="col-sm-6">
+                    <h4 x-l10n>Back option for all branches</h4>
+                    <div class="row">
+                      <div class="col-sm-12 m-b-10">
+                        <label class="radio-inline"><input type="radio" name="helper_back_option" value="start"><span x-l10n>At beginning</span></label>
+                        <label class="radio-inline"><input type="radio" name="helper_back_option" value="end"><span x-l10n>At end</span></label>
+                        <label class="radio-inline"><input type="radio" name="helper_back_option" value=""><span x-l10n>None</span></label>
+                      </div>
+                      <div id="helper_back_option_main" class="col-sm-6">
+                        <div class="form-group">
+                          <label for="helper_back_option_main_text" x-l10n>Main Speech</label>
+                          <input type="text" id="helper_back_option_main_text" name="helper_back_option_main_text" class="form-control" value="" placeholder="Back">
+                          <div id="helper_back_option_main_record" class="record-audio-section hide-for-non-cordova-ios">
+                            <input type="hidden" name="helper_back_option_main_audio" value="">
+                            <div class="node-record-btn-wrap">
+                              <button class="record-btn btn btn-danger" type="button" x-l10n>Record</button>
+                              <span class="record-amp-circle"></span>
+                            </div>
+                            <button type="button" class="delete-btn btn btn-default" title="Delete audio"><i class="far fa-times"></i></button>
+                          </div>
+                        </div>
+                      </div>
+                      <div id="helper_back_option_cue" class="col-sm-6">
+                        <div class="form-group">
+                          <label for="helper_back_option_cue_text" x-l10n>Cue Speech</label>
+                          <input type="text" id="helper_back_option_cue_text" name="helper_back_option_cue_text" class="form-control" value="" placeholder="Back">
+                          <div id="helper_back_option_cue_record" class="record-audio-section hide-for-non-cordova-ios">
+                            <input type="hidden" name="helper_back_option_cue_audio" value="">
+                            <div class="node-record-btn-wrap">
+                              <button class="record-btn btn btn-danger" type="button" x-l10n>Record</button>
+                              <span class="record-amp-circle"></span>
+                            </div>
+                            <button type="button" class="delete-btn btn btn-default" title="Delete audio"><i class="far fa-times"></i></button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="col-sm-6">
+                        <h4 x-l10n>Notify back on select</h4>
+                        <label class="checkbox-inline"><input type="checkbox" name="helper_back_option_notify"><span x-l10n>On</span></label>
+                      </div>
+
+                    </div>
+                    <hr>
+                  </div>
+                  <div class="col-sm-6">
+                    <h4 x-l10n>Stay in branch for all nodes</h4>
+                    <label class="checkbox-inline"><input type="checkbox" name="helper_stay_in_branch_for_all"><span x-l10n>On</span></label>
+                  </div>
+                </div>
+              </div>
+            </div><!-- /row -->
+          </div>
+          <div class="page-sect" data-name="speech">
+            <div class="row include-scrollnav">
+              <div class="col-sm-6">
+                <h3 class="relative">
+                  <span x-l10n>Cue Voice</span> <span id="auditory-cue-playback-wrp" class="voice-playback-wrp"><button type="button" class="btn btn-success play-btn"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="hide btn btn-default stop-btn"><span class="glyphicon glyphicon-stop"></span></button></span>
+                  <a class="scrollnav-anchor">Cue Voice</a>
+                </h3>
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="_cue_voice_id" x-l10n>Voice</label>
+                      <div class="select-btn-wrp">
+                        <select class="form-control" id="_cue_voice_id" name="_cue_voice_id">
+                        </select>
+                        <button type="button" class="btn btn-primary vbl-btn" data-vbl="auditory_cue_voice_options"><span class="glyphicon glyphicon-plus"></span></button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="auditory_cue_voice_options.volume"><span x-l10n>Volume</span> <span id="disp-auditory_cue_voice_options__volume" class="input-number-disp"></span></label>
+                      <input class="form-control btn-lg" type="range" step="0.01" min="0" max="1" data-default="0.5" id="auditory_cue_voice_options.volume" name="auditory_cue_voice_options.volume" data-validator="number" data-disp="#disp-auditory_cue_voice_options__volume">
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="auditory_cue_voice_options.pitch"><span x-l10n>Pitch</span> <span id="disp-auditory_cue_voice_options__pitch" class="input-number-disp"></span></label>
+                      <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="2" data-default="1" id="auditory_cue_voice_options.pitch" name="auditory_cue_voice_options.pitch" data-validator="number" data-disp="#disp-auditory_cue_voice_options__pitch">
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="auditory_cue_voice_options.rateMul"><span x-l10n>Rate</span> <span id="disp-auditory_cue_voice_options__rateMul" class="input-number-disp"></span></label>
+                      <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_cue_voice_options.rateMul" name="auditory_cue_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_cue_voice_options__rateMul">
+                    </div>
+                  </div>
+                  <div class="col-sm-12 hide-for-non-cordova-ios">
+                    <div class="form-group">
+                      <label>Override output</label>
+                      <div class="radio-group">
+                        <label class="radio-inline"><input type="radio" name="auditory_cue_voice_options.override_output" value=""><span x-l10n>None</span></label>
+                        <label class="radio-inline"><input type="radio" name="auditory_cue_voice_options.override_output" value="builtinspeaker"><span x-l10n>Builtin Speaker</span></label>
+                        <label class="radio-inline"><input type="radio" name="auditory_cue_voice_options.override_output" value="headphone"><span x-l10n>Headphone</span></label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <h3 class="relative">
+                  <span x-l10n>Main Voice</span> <span id="auditory-main-playback-wrp" class="voice-playback-wrp"><button type="button" class="btn btn-success play-btn"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="hide btn btn-default stop-btn"><span class="glyphicon glyphicon-stop"></span></button></span>
+                  <a class="scrollnav-anchor">Main Voice</a>
+                </h3>
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="_main_voice_id" x-l10n>Voice</label>
+                      <div class="select-btn-wrp">
+                        <select class="form-control" id="_main_voice_id" name="_main_voice_id">
+                        </select>
+                        <button type="button" class="btn btn-primary vbl-btn" data-vbl="auditory_main_voice_options"><span class="glyphicon glyphicon-plus"></span></button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="auditory_main_voice_options.volume"><span x-l10n>Volume</span> <span id="disp-auditory_main_voice_options__volume" class="input-number-disp"></span></label>
+                      <input class="form-control btn-lg" type="range" step="0.01" min="0" max="1" data-default="1" id="auditory_main_voice_options.volume" name="auditory_main_voice_options.volume" data-validator="number" data-disp="#disp-auditory_main_voice_options__volume">
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="auditory_main_voice_options.pitch"><span x-l10n>Pitch</span> <span id="disp-auditory_main_voice_options__pitch" class="input-number-disp"></span></label>
+                      <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="2" data-default="1" id="auditory_main_voice_options.pitch" name="auditory_main_voice_options.pitch" data-validator="number" data-disp="#disp-auditory_main_voice_options__pitch">
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="auditory_main_voice_options.rateMul"><span x-l10n>Rate</span> <span id="disp-auditory_main_voice_options__rateMul" class="input-number-disp"></span></label>
+                      <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_main_voice_options.rateMul" name="auditory_main_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_main_voice_options__rateMul">
+                    </div>
+                  </div>
+                  <div class="col-sm-12 hide-for-non-cordova-ios">
+                    <div class="form-group">
+                      <label>Override output</label>
+                      <div class="radio-group">
+                        <label class="radio-inline"><input type="radio" name="auditory_main_voice_options.override_output" value=""><span x-l10n>None</span></label>
+                        <label class="radio-inline"><input type="radio" name="auditory_main_voice_options.override_output" value="builtinspeaker"><span x-l10n>Builtin Speaker</span></label>
+                        <label class="radio-inline"><input type="radio" name="auditory_main_voice_options.override_output" value="headphone"><span x-l10n>Headphone</span></label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- First Time, Cue Voice -->
+              <div class="col-sm-6">
+                <div class="row m-b-10">
+                  <div class="col-sm-9">
+                    <h3 class="relative">
+                      <span x-l10n>First Time Run (Cue Voice)</span> <span id="auditory-cue-first-run-playback-wrp" class="voice-playback-wrp"><button type="button" class="btn btn-success play-btn"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="hide btn btn-default stop-btn"><span class="glyphicon glyphicon-stop"></span></button></span>
+                      <a class="scrollnav-anchor">Cue Voice(First)</a>
+                    </h3>
+                    <p x-l10n>Only for auto-scan access mode</p>
+                  </div>
+                  <div class="col-sm-3">
+                    <label class="m-t-10 m-b-10 checkbox-inline"><input type="checkbox" name="_cue_first_active" data-inp-collapse-toggle="#auditory-cue-first-run-params"><span x-l10n>On</span></label>
+                  </div>
+                </div>
+                <div id="auditory-cue-first-run-params" class="row x-collapsable x-collapse">
+                  <div class="col-sm-12" >
+                    <div class="form-group">
+                      <label for="auto_next_first_run_delay" x-l10n>Auto-scanning delay (ms)</label>
+                      <input type="number" id="auto_next_first_run_delay" name="auto_next_first_run_delay" class="form-control" value="0" data-validator="number" data-dependent="#auto_next_first_run_delay_range">
+                      <input type="range" id="auto_next_first_run_delay_range" class="form-control btn-lg" step="100" min="0" max="2000" data-dependent="#auto_next_first_run_delay">
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="_cue_first_run_voice_id" x-l10n>Voice</label>
+                      <div class="select-btn-wrp">
+                        <select class="form-control" id="_cue_first_run_voice_id" name="_cue_first_run_voice_id">
+                        </select>
+                        <button type="button" class="btn btn-primary vbl-btn" data-vbl="auditory_cue_first_run_voice_options"><span class="glyphicon glyphicon-plus"></span></button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="auditory_cue_first_run_voice_options.volume"><span x-l10n>Volume</span> <span id="disp-auditory_cue_first_run_voice_options__volume" class="input-number-disp"></span></label>
+                      <input class="form-control btn-lg" type="range" step="0.01" min="0" max="1" data-default="1" id="auditory_cue_first_run_voice_options.volume" name="auditory_cue_first_run_voice_options.volume" data-validator="number" data-disp="#disp-auditory_cue_first_run_voice_options__volume">
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="auditory_cue_first_run_voice_options.pitch"><span x-l10n>Pitch</span> <span id="disp-auditory_cue_first_run_voice_options__pitch" class="input-number-disp"></span></label>
+                      <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="2" data-default="1" id="auditory_cue_first_run_voice_options.pitch" name="auditory_cue_first_run_voice_options.pitch" data-validator="number" data-disp="#disp-auditory_cue_first_run_voice_options__pitch">
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="auditory_cue_first_run_voice_options.rateMul"><span x-l10n>Rate</span> <span id="disp-auditory_cue_first_run_voice_options__rateMul" class="input-number-disp"></span></label>
+                      <input class="form-control btn-lg" type="range" step="0.01" min="0.01" max="4" data-default="1" id="auditory_cue_first_run_voice_options.rateMul" name="auditory_cue_first_run_voice_options.rateMul" data-validator="number" data-disp="#disp-auditory_cue_first_run_voice_options__rateMul">
+                    </div>
+                  </div>
+                  <div class="col-sm-12 hide-for-non-cordova-ios">
+                    <div class="form-group">
+                      <label>Override output</label>
+                      <div class="radio-group">
+                        <label class="radio-inline"><input type="radio" name="auditory_cue_first_run_voice_options.override_output" value=""><span x-l10n>None</span></label>
+                        <label class="radio-inline"><input type="radio" name="auditory_cue_first_run_voice_options.override_output" value="builtinspeaker"><span x-l10n>Builtin Speaker</span></label>
+                        <label class="radio-inline"><input type="radio" name="auditory_cue_first_run_voice_options.override_output" value="headphone"><span x-l10n>Headphone</span></label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-sm-6">
+                <div class="hide-for-non-cordova-ios">
+                  <button id="ios-open-route-view" type="button" class="btn btn-primary m-t-10">Open output audio manager</button>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          <div class="page-sect" data-name="appearance">
+            <div class="row">
+              <div class="col-xs-12">
+                <div class="row">
+                  <div class="col-sm-4">
+                    <div class="form-group">
+                      <label for="tree_content_size_percentage" x-l10n>Font Size (%)</label>
+                      <input type="number" id="tree_content_size_percentage" name="tree_content_size_percentage" class="form-control" step="1" value="100" min="10" max="300" data-validator="number" data-dependent="#tree_content_size_percentage_range">
+                      <input type="range" id="tree_content_size_percentage_range" class="form-control btn-lg" step="1" min="10" max="300" data-default="100" data-dependent="#tree_content_size_percentage">
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div class="form-group">
+                      <label for="theme" x-l10n>Theme</label>
+                      <select class="form-control" id="theme" name="theme">
+                        <option value="default" x-l10n>Default</option>
+                        <option value="light" x-l10n>Light</option>
+                        <option value="lightbold" x-l10n>Light-Bold</option>
+                        <option value="greyred" x-l10n>Grey-Red</option>
+                        <option value="dark" x-l10n>Dark</option>
+                        <option value="yb" x-l10n>Yellow-Black</option>
+                        <option value="by" x-l10n>Black-Yellow</option>
+                        <option value="mint" x-l10n>Mint</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div class="form-group">
+                      <label for="locale-select" x-l10n>Locale</label>
+                      <select id="locale-select" name="locale" class="form-control">
+                        <option value="en-GB" x-l10n>English (UK)</option>
+                        <option value="de" x-l10n>German</option>
+                        <option value="fr-FR" x-l10n>French</option>
+                        <option value="es-ES" x-l10n>Spanish</option>
+                        <option value="ar" x-l10n>Arabic</option>
+                        <option value="gu" x-l10n>Gujarati</option>
+                        <option value="urd" x-l10n>Urdu</option>
+                        <option value="cr" x-l10n>Croatian</option>
+                        <option value="cy" x-l10n>Welsh</option>
+                        <option value="pt" x-l10n>Portugese</option>
+	                    <option value="mi" x-l10n>Maori</option>
+	                    <option value="yi" x-l10n>Yiddish</option>
+	                    <option value="he" x-l10n>Hebrew</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-sm-12">
+                    <h4 x-l10n>Display message bar when spelling</h4>
+                    <label class="checkbox-inline"><input type="checkbox" name="display_message_bar_at_spell_branch"><span x-l10n>On</span></label>
+
+                    <div class="row m-t-10">
+                      <div class="col-sm-4">
+                        <h5 x-l10n>Custom height for message bar</h5>
+                        <label class="checkbox-inline m-b-10"><input type="checkbox" name="message_bar_have_custom_height"><span x-l10n>On</span></label>
+                      </div>
+                      <div class="col-sm-4">
+                        <div class="form-group">
+                          <label for="message_bar_height" x-l10n>Message bar height (%)</label>
+                          <input type="number" id="message_bar_height" name="message_bar_height" class="form-control" step="1" value="40" min="10" max="90" data-validator="number" data-dependent="#message_bar_height_range">
+                          <input type="range" id="message_bar_height_range" class="form-control btn-lg" step="1" min="10" max="90" data-default="40" data-dependent="#message_bar_height">
+                        </div>
+                      </div>
+                      <div class="col-sm-4">
+                        <div class="form-group">
+                          <label for="message_bar_font_size_percentage" x-l10n>Message bar font size (%)</label>
+                          <input type="number" id="message_bar_font_size_percentage" name="message_bar_font_size_percentage" class="form-control" step="1" value="100" min="10" max="300" data-validator="number" data-dependent="#message_bar_font_size_percentage_range">
+                          <input type="range" id="message_bar_font_size_percentage_range" class="form-control btn-lg" step="1" min="10" max="300" data-default="100" data-dependent="#message_bar_font_size_percentage">
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="page-sect" data-name="vocabulary">
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="row">
+                  <div class="col-xs-12">
+                    <h3 x-l10n>Active Tree</h3>
+                    <select name="tree" class="form-control tree-name-selection">
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-sm-6">
+                <h3 x-l10n>Tools</h3>
+                <div class="row">
+                  <div class="col-sm-8 col-md-8">
+                    <div class="form-group">
+                      <select id="tree-default-select" class="form-control">
+                        <option value="" x-l10n>Choose an example tree</option>
+                        <option value="Jokes" x-l10n>Jokes</option>
+                        <option value="Adult_Starter" x-l10n>Adult Starter</option>
+                        <option value="Simple_Adult_Starter" x-l10n>Simple Adult Starter</option>
+                        <option value="Simple_Adult_Starter_Chinese_Main" x-l10n>Simple Adult Starter - Chinese Main</option>
+                        <option value="Pragmatic_Phrases" x-l10n>Pragmatic Phrases</option>
+                        <option value="Spell_by_blocks" x-l10n>Spell by blocks</option>
+                        <option value="Spell_by_blocks_in_frequency" x-l10n>Spell by blocks in Frequency</option>
+                        <option value="Spell_Prediction" x-l10n>Spell by Word/Letter Prediction</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-sm-4 col-md-4">
+                    <button id="tree-default-select-load-btn" type="button" class="btn btn-success" x-l10n>Load Selected</button>
+                  </div>
+                  <div class="col-xs-12 m-xs-t-10 x-horiz-group">
+                    <div class="dropdown">
+                      <button class="btn btn-primary dropdown-toggle" type="button" id="tree-export-dropdown-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span x-l10n>Export</span> <span class="caret"></span></button>
+                      <ul class="dropdown-menu" aria-labelledby="tree-export-dropdown-btn">
+                        <li><a id="tree-export-btn" class="dropdown-item" href x-l10n>Export (zip)</a></li>
+                        <li><a id="tree-export-obz-btn" class="dropdown-item" href x-l10n>Export (obz)</a></li>
+                      </ul>
+                    </div>
+                    <div class="dropdown">
+                      <button class="btn btn-primary dropdown-toggle" type="button" id="tree-import-dropdown-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span x-l10n>Import</span> <span class="caret"></span></button>
+                      <ul class="dropdown-menu" aria-labelledby="tree-export-dropdown-btn">
+                        <li><a id="tree-import-btn" class="dropdown-item"><span x-l10n>Import (zip)</span><input type="file" id="tree-import-inp" accept=".zip"></a></li>
+                        <li><a id="tree-import-obz-btn" class="dropdown-item"><span x-l10n>Import (obz)</span><input type="file" id="tree-import-obz-inp" accept=".obz"></a></li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </form>
+        <form name="edit-tree">
+          <div class="page-sect" data-name="vocabulary">
+            <div class="row">
+              <div class="col-sm-4 col-md-6">
+                <h3 x-l10n>Edit Tree</h3>
+              </div>
+            </div>
+            <div class="row m-t-10">
+              <div class="col-sm-3">
+                <div class="form-group">
+                  <select id="tree-name-input" class="form-control tree-name-selection">
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-9 save-section">
+                <button id="tree-new-btn" type="button" class="btn btn-primary" x-l10n>New</button>
+                <button id="tree-delete-btn" type="button" class="btn btn-danger" x-l10n>Delete</button>
+                <button id="tree-revert" type="button" class="btn btn-default" x-l10n>Revert</button>
+                <button type="submit" class="btn btn-success" x-l10n>Save Tree</button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-12 m-xs-t-10">
+                <div id="tree-input-wrp" class="form-group">
+                  <textarea id="tree-input" name="tree-input" class="form-control" rows="20" required></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+        <div class="page-sect" data-name="sync" id="dropbox-sync-wrp">
+          <h3 x-l10n>Dropbox Sync</h3>
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="alert alert-danger main-error-alert hidden" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only"></span>
+                <span class="text"></span>
+              </div>
+              <div class="main-loading-notice hidden" x-l10n>Loading...</div>
+            </div>
+          </div>
+          <div class="row hide-when-initiating">
+            <div class="col-sm-6 col-md-3">
+              <button type="button" class="btn btn-primary auth-btn"><i class="far fa-sign-in"></i> <span x-l10n>Authorize</span></button>
+              <button type="button" class="btn btn-default hidden revoke-btn"><i class="far fa-sign-out"></i> <span x-l10n>Revoke Authorization</span></button>
+              <div class="auth-status"></div>
+            </div>
+            <div class="col-sm-6 col-md-3 hide-when-needsauth">
+              <button type="button" class="btn btn-primary select-folder-btn"><i class="far fa-folder"></i><span x-l10n>Select Folder</span></button>
+              <div class="selected-folder-status"></div>
+            </div>
+            <div class="col-sm-6 col-md-6 hide-when-needsauth hide-when-needs-setup">
+              <button type="button" class="btn btn-primary save-btn"><i class="far fa-cloud-upload"></i><span x-l10n>Save to dropbox</span></button>
+              <button type="button" class="btn btn-primary load-btn"><i class="far fa-cloud-download"></i><span x-l10n>Load from dropbox</span></button>
+            </div>
+          </div>
+          
+          <div class="select-folder-modal modal fade" tabindex="-1" role="dialog" aria-labelledby="Select a folder (dropbox)">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title" x-l10n>Select a folder (dropbox)</h4>
+                </div>
+                <div class="modal-body">
+                  <script type="text/x-template" class="select-folder-item-template">
+                    <li data-name="{%- data.name %}">
+                      <a href="#"><i class="far fa-folder"></i> {%- data.name %}</a>
+                    </li>
+                  </script>
+                  <div>Selected: <span class="current-path"></span></div>
+                  <ul class="select-folder-list">
+                  </ul>
+                  <button type="button" class="btn btn-default more-btn hidden" x-l10n>More</button>
+                  <div class="alert alert-danger error-alert hidden" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only"></span>
+                    <span class="text"></span>
+                  </div>
+                  <div class="loading-notice hidden" x-l10n>Loading...</div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal" x-l10n>Cancel</button>
+                  <button type="button" class="btn btn-success select-btn" x-l10n>Select</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <div class="settings-alert-wrp settings-success-alert">
+      <div class="alert-hidden alert alert-success" role="alert"></div>
+    </div>
+    <div class="settings-alert-wrp settings-danger-alert">
+      <div class="settings-alert alert-hidden alert alert-danger" role="alert"></div>
+    </div>
+    <!-- Modals -->
+    <div id="save-file-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="Save file">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" x-l10n>Save</h4>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-xs-12">
+                <p class="hide-for-non-cordova" x-l10n>You can share or save the zip file.<p>
+                <p class="hide-for-cordova" x-l10n>Please click on download.<p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-12">
+                <a id="save-file--open-btn" href class="hide-for-cordova btn btn-success btn-lg">Download</a>
+                <a id="save-file--share-btn" href class="hide-for-non-cordova btn btn-primary btn-lg">Share</a>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <!--
+            <button type="button" class="btn btn-default" data-dismiss="modal" x-l10n>Close</button>
+            <button type="button" class="btn btn-primary">Apply</button>
+            -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="voice-by-locale-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="Voice by locale">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title"><span x-l10n>Voice by locale</span> <span id="voice-by-locale-title-suffix"></span></h4>
+          </div>
+          <div class="modal-body">
+            <script type="text/x-template" id="voice-by-locale-vid-template">
+              <div class="voice-by-locale-vid col-xs-12 col-sm-6">
+                <div class="form-group">
+                  <label for="vbl-voice-id-{%- data.locale %}">{%- data.label %}</label>
+                  <div class="select-btn-wrp">
+                    <select id="vbl-voice-id-{%- data.locale %}" name="voice-id-of-{%- data.locale %}" class="form-control">
+                      {% _.each(data.options, function (option) { %}
+                      <option value="{%- option.value %}" {%- option.value == data.value ? 'selected' : '' %}>{%- option.label %}</option>
+                      {% }); %}
+                    </select>
+                    <button type="button" data-locale="{%- data.locale %}" class="remove-btn btn btn-danger"><span class="glyphicon glyphicon-remove"></span></button>
+                  </div>
+                </div>
+              </div>
+            </script>
+            <div class="row" id="voice-by-locale-list">
+            </div>
+            <div id="voice-by-locale-add-wrp" class="row">
+              <div class="col-xs-12 col-sm-6">
+                <div class="form-group">
+                  <label for="voice-by-locale-add" x-l10n>Add Locale</label>
+                  <div class="select-btn-wrp">
+                    <select id="voice-by-locale-add" name="locale" class="form-control"></select>
+                    <button id="voice-by-locale-add-btn" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" x-l10n>Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="configure-action-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="Configure Action">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title"><span x-l10n>Configure Action</span> <span id="configure-action-title-suffix"></span></h4>
+          </div>
+          <div class="modal-body">
+            <script type="text/x-template" id="configure-action-key-template">
+              <div class="key-wrp" data-key="{%- data.key %}" data-id="{%- data.id %}">
+                <div class="key-btn-wrp">
+                  <button type="button" class="key-btn btn btn-default" oncontextmenu="return false"><span class="key-text">{%- data.label %}</span><span class="waiting-text" x-l10n>Waiting for key event</span></button>
+                </div>
+                <div>
+                  <button type="button" class="remove-btn btn btn-danger"><span class="glyphicon glyphicon-remove"></span></button>
+                </div>
+              </div>
+            </script>
+            <div id="configure-action-key-list">
+            </div>
+            <div class="row">
+              <div class="col-sm-12">
+                <button id="configure-action-key-add-btn" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> <span x-l10n>Add Key</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" x-l10n>Cancel</button>
+            <button type="button" id="configure-action-save-btn" class="btn btn-success" x-l10n>Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="alert-modal" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title"></h4>
+          </div>
+          <div class="modal-body">
+            <p class="alert-message">
+            </p>
+            <div class="alert-details-wrp">
+              <button class="btn btn-primary copy-details-btn m-b-10" type="button" x-l10n>Copy</button>
+              <pre><code class="alert-details"></code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="cordova.js"></script>
+    <!-- MAIN SCRIPTS -->
+    <script src="js/nodelib.js"></script>
+    <script src="bower_components/underscore/underscore-min.js"></script>
+    <script src="bower_components/showdown/dist/showdown.min.js"></script>
+    <script src="js/lib/zipjs/zip.js"></script>
+    <script>zip.workerScriptsPath = "js/lib/zipjs/";</script>
+    <script src="js/lib/translate.js"></script>
+    <script src="js/lib/sanitize-html.js"></script>
+    <!-- bootstrap includes -->
+    <!-- <script src="bower_components/jquery/dist/jquery.min.js"></script> -->
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="bower_components/bootstrap-waitingfor/build/bootstrap-waitingfor.min.js"></script>
+    <script src="bower_components/bootbox.js/bootbox.js"></script>
+    <!-- bootstrap includes end -->
+    <script src="js/NativeAccessApi.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/edit-config.js"></script>
+  </body>
+</html>

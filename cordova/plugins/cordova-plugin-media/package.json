@@ -1,0 +1,79 @@
+{
+  "_from": "github:AceCentre/cordova-plugin-media",
+  "_id": "cordova-plugin-media@5.0.3-dev",
+  "_inBundle": false,
+  "_integrity": "",
+  "_location": "/cordova-plugin-media",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "git",
+    "raw": "github:AceCentre/cordova-plugin-media",
+    "rawSpec": "github:AceCentre/cordova-plugin-media",
+    "saveSpec": "github:AceCentre/cordova-plugin-media",
+    "fetchSpec": null,
+    "gitCommittish": null
+  },
+  "_requiredBy": [
+    "#DEV:/",
+    "#USER"
+  ],
+  "_resolved": "github:AceCentre/cordova-plugin-media#57b95e58698947509a27a946f3184e7f10ba11db",
+  "_spec": "github:AceCentre/cordova-plugin-media",
+  "_where": "/Users/gavinhenderson/Code/pasco/cordova",
+  "author": {
+    "name": "Apache Software Foundation"
+  },
+  "bugs": {
+    "url": "https://issues.apache.org/jira/browse/CB"
+  },
+  "bundleDependencies": false,
+  "cordova": {
+    "id": "cordova-plugin-media",
+    "platforms": [
+      "android",
+      "browser",
+      "ios",
+      "windows"
+    ]
+  },
+  "deprecated": false,
+  "description": "Cordova Media Plugin",
+  "devDependencies": {
+    "jshint": "^2.6.0"
+  },
+  "engines": {
+    "cordovaDependencies": {
+      "3.0.0": {
+        "cordova-android": ">=6.1.0"
+      },
+      "4.0.0": {
+        "cordova-android": ">=6.3.0"
+      },
+      "6.0.0": {
+        "cordova": ">100"
+      }
+    }
+  },
+  "homepage": "https://github.com/apache/cordova-plugin-media#readme",
+  "keywords": [
+    "cordova",
+    "media",
+    "ecosystem:cordova",
+    "cordova-android",
+    "cordova-browser",
+    "cordova-ios",
+    "cordova-windows"
+  ],
+  "license": "Apache-2.0",
+  "name": "cordova-plugin-media",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apache/cordova-plugin-media.git"
+  },
+  "scripts": {
+    "jshint": "jshint www && jshint src && jshint tests",
+    "test": "npm run jshint"
+  },
+  "types": "./types/index.d.ts",
+  "version": "5.0.3-dev"
+}

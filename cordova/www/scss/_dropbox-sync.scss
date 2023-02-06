@@ -1,0 +1,11 @@
+#dropbox-sync-wrp {
+  &.initiating .hide-when-initiating {
+    display: none;
+  }
+  &.needsauth .hide-when-needsauth {
+    display: none;
+  }
+  &.needs-setup .hide-when-needs-setup {
+    display: none;
+  }
+}
