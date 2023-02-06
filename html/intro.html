@@ -11,14 +11,11 @@
 
     <title x-l10n="main_title">pasco</title>
 
-    <!-- bootstrap includes -->
-    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
-    <!-- bootstrap includes end -->
-    <link rel="stylesheet" href="fonts/fontawesome/css/fontawesome-all.min.css">
-    <link rel="stylesheet" href="css/main.css">
-    
-    <!-- <link rel="icon" href="images/favicon.png"> -->
-    <!-- INJECT HEAD -->
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="webpack/static/fontawesome/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="webpack/main.css">
+    <!-- INJECT CORDOVA SCRIPTS -->
+    <script src="webpack/main.js"></script>
     <style>
       html, body {
         height: 100%;
@@ -57,7 +54,7 @@
           <track label="English" kind="subtitles" srclang="en" src="intro-data/intro.vtt" default>
         </video>
       </div>
-      <div id="error-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="Error dialog">
+      <div id="alert-modal" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
@@ -65,11 +62,11 @@
               <h4 class="modal-title"></h4>
             </div>
             <div class="modal-body">
-              <p class="error-message">
+              <p class="alert-message">
               </p>
-              <div class="error-details-wrp">
+              <div class="alert-details-wrp">
                 <button class="btn btn-primary copy-details-btn m-b-10" type="button" x-l10n>Copy</button>
-                <pre><code class="error-details"></code></pre>
+                <pre><code class="alert-details"></code></pre>
               </div>
             </div>
           </div>

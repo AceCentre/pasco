@@ -132,4 +132,5 @@
     "Move to Previous": "Mover para o anterior"
 };
 
+  document.dispatchEvent(new CustomEvent('x-icu-changed', { detail: icu }))
 })();

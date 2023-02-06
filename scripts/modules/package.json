@@ -1,0 +1,18 @@
+{
+  "name": "pasco-script-modules",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@vitalets/google-translate-api": "^8.0.0",
+    "gettext-parser": "^6.0.0",
+    "jsdom": "^20.0.0",
+    "sanitize-html": "^2.7.2",
+    "showdown": "^2.1.0"
+  }
+}

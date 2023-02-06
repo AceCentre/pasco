@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" x-page="EditConfigPage" class="edit-config-page">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -11,13 +11,12 @@
 
     <title x-l10n="quick_setup_title">pasco - Quick Setup</title>
 
-    <!-- <link rel="icon" href="images/favicon.png"> -->
 
-    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/edit-config.css">
-
-    <!-- INJECT HEAD -->
-    
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="webpack/static/fontawesome/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="webpack/main.css">
+    <!-- INJECT CORDOVA SCRIPTS -->
+    <script src="webpack/main.js"></script>
   </head>
   <body class="notready quick-setup">
     <div class="container edit-config-container">
@@ -33,13 +32,14 @@
               <label for="locale-select" x-l10n>Locale</label>
               <select id="locale-select" name="locale" class="form-control">
                   <option value="en-GB" x-l10n>English (UK)</option>
+				  <option value="en" x-l10n>English</option>
                   <option value="de" x-l10n>German</option>
                   <option value="fr-FR" x-l10n>French</option>
                   <option value="es-ES" x-l10n>Spanish</option>
                   <option value="ar" x-l10n>Arabic</option>
                   <option value="gu" x-l10n>Gujarati</option>
                   <option value="urd" x-l10n>Urdu</option>
-                  <option value="cr" x-l10n>Croatian</option>
+                  <option value="hr" x-l10n>Croatian</option>
                   <option value="cy" x-l10n>Welsh</option>
                   <option value="pt" x-l10n>Portugese</option>
                   <option value="mi" x-l10n>Maori</option>
@@ -162,7 +162,7 @@
         </div>
       </form>
     </div>
-    <div id="error-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="Error dialog">
+    <div id="alert-modal" class="modal fade" tabindex="-1" role="dialog">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -170,33 +170,15 @@
             <h4 class="modal-title"></h4>
           </div>
           <div class="modal-body">
-            <p class="error-message">
+            <p class="alert-message">
             </p>
-            <div class="error-details-wrp">
+            <div class="alert-details-wrp">
               <button class="btn btn-primary copy-details-btn m-b-10" type="button" x-l10n>Copy</button>
-              <pre><code class="error-details"></code></pre>
+              <pre><code class="alert-details"></code></pre>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- INJECT SCRIPTS -->
-    <!-- MAIN SCRIPTS -->
-    <script src="bower_components/underscore/underscore-min.js"></script>
-    <script src="bower_components/showdown/dist/showdown.min.js"></script>
-    <script src="js/nodelib.js"></script>
-    <script src="js/lib/translate.js"></script>
-    <script src="js/lib/sanitize-html.js"></script>
-    <!-- bootstrap includes -->
-    <!-- <script src="bower_components/jquery/dist/jquery.min.js"></script> -->
-    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-    <script src="bower_components/bootstrap-waitingfor/build/bootstrap-waitingfor.min.js"></script>
-    <!-- bootstrap includes end -->
-    <script src="js/lib/zipjs/zip.js"></script>
-    <script>zip.workerScriptsPath = "js/lib/zipjs/";</script>
-    <script src="js/NativeAccessApi.js"></script>
-    <script src="js/core.js"></script>
-    <script src="js/edit-config.js"></script>
   </body>
 </html>

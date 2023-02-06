@@ -23,4 +23,5 @@
   icu.rtl = false;
   icu.dictionary = { };
 
+  document.dispatchEvent(new CustomEvent('x-icu-changed', { detail: icu }))
 })();
