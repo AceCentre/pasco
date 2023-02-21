@@ -778,7 +778,7 @@ export default class EditConfigPage extends BasePage {
             entry.file((file) => {
               var reader = new FileReader()
               reader.onloadend = () => {
-                var blob = new Blob([this.result], { type: 'application/javascript' })
+                var blob = new Blob([reader.result], { type: 'application/javascript' })
                 resolve(URL.createObjectURL(blob))
               }
               reader.readAsText(file)
