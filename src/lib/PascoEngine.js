@@ -422,7 +422,8 @@ export default class PascoEngine extends EventEmitter {
               state.auto_next_dead = true
               // start at begining next time
               var pos = state.positions[state.positions.length - 1]
-              // pos.index = -1
+              pos.index = -1
+              await this.actionMoveNext(pos)
               return
             }
           }
