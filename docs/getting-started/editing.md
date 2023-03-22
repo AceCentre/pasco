@@ -1,7 +1,5 @@
 # Editing the tree
 
-\[\[toc]]
-
 ## Quick Edit method
 
 ### Editing

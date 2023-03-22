@@ -2,7 +2,9 @@
 
 > Below are solutions to some common issues that you may experience when working with pasco.
 
-::: warning Premium Support AceCentre is a charity and we are providing this as-is. If you need something urgently and can pay we ask you to donate to us - or another developer to help fix your problem :::
+{% hint style="warning" %}
+Premium Support AceCentre is a charity, and we are providing this as-is. If you need something urgently and can pay, we ask you to donate to us - or another developer to help fix your problem
+{% endhint %}
 
 ## Sound issues
 
@@ -25,5 +27,3 @@ Yes. Annoyingly there is no tab key on iPads/iPhones etc. So what to do? Follow 
 {% embed url="https://codepen.io/gavinhenderson/pen/yLpNPEj" %}
 
 {% embed url="https://www.youtube.com/watch?v=y1KTKlPA7sI" %}
-
-&#x20;
